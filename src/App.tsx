@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import { assetFor } from "./assets";
-import { money, signal, wealth, type Listing } from "./game";
+import { HOME_GOAL, money, signal, wealth, type Listing } from "./game";
 import { useGameStore } from "./stores/gameStore";
 type Tab = "market" | "inventory" | "wealth";
 const sellerLabel = {
@@ -52,10 +52,12 @@ export default function App() {
         </div>
         <div className="goal">
           <small>
-            Ev hedefi · {Math.min(100, Math.floor((total / 30000) * 100))}%
+            Ev hedefi · {Math.min(100, Math.floor((total / HOME_GOAL) * 100))}%
           </small>
           <span>
-            <i style={{ width: `${Math.min(100, (total / 30000) * 100)}%` }} />
+            <i
+              style={{ width: `${Math.min(100, (total / HOME_GOAL) * 100)}%` }}
+            />
           </span>
         </div>
       </section>
@@ -186,7 +188,7 @@ export default function App() {
               </div>
               <div>
                 <span>Ev hedefi</span>
-                <b>{money(30000)}</b>
+                <b>{money(HOME_GOAL)}</b>
               </div>
             </div>
             <div className="timeline">
