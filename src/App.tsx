@@ -3,7 +3,7 @@ import "./App.css";
 import { assetFor } from "./assets";
 import { HOME_GOAL, money, signal, wealth, type Listing } from "./game";
 import { useGameStore } from "./stores/gameStore";
-type Tab = "market" | "inventory" | "wealth";
+type Tab = "market" | "inventory" | "listings" | "wealth";
 const sellerLabel = {
   urgent: "Acilci",
   expert: "Piyasacı",
@@ -15,8 +15,19 @@ const sellerLabel = {
 export default function App() {
   const [tab, setTab] = useState<Tab>("market");
   const [selected, setSelected] = useState<Listing | null>(null);
-  const { game, notice, hydrate, refresh, buy, offer, sell, reset } =
-    useGameStore();
+  const {
+    game,
+    notice,
+    hydrate,
+    refresh,
+    buy,
+    offer,
+    sell,
+    list,
+    acceptBuyer,
+    advanceWorld,
+    reset,
+  } = useGameStore();
   useEffect(() => {
     void hydrate();
   }, [hydrate]);
@@ -149,7 +160,9 @@ export default function App() {
                     </button>
                     <button
                       className="primary"
-                      onClick={() => sell(item, false)}
+                      onClick={() =>
+                        list(item, Math.round((item.fair * 1.05) / 10) * 10)
+                      }
                     >
                       Piyasaya koy <b>{money(item.fair * 1.05)}</b>
                     </button>
@@ -157,6 +170,65 @@ export default function App() {
                 </article>
               ))}
             </div>
+          </>
+        ) : null}
+        {tab === "listings" ? (
+          <>
+            <div className="section-title">
+              <div>
+                <small>BENİM PAZARIM</small>
+                <h2>İlanlarım</h2>
+              </div>
+              <span>{game.playerListings.length} aktif</span>
+            </div>
+            {!game.playerListings.length && !game.buyerOffers.length ? (
+              <div className="empty">
+                <span>🧾</span>
+                <h3>Henüz ilan yok</h3>
+                <p>
+                  Envanterden bir ürün seçip piyasaya koy. Piyasa ilerledikçe
+                  alıcılar teklif verir.
+                </p>
+              </div>
+            ) : null}
+            <div className="inventory-grid">
+              {game.playerListings.map((item) => (
+                <article className="owned" key={item.id}>
+                  <div className="owned-icon">
+                    <img src={assetFor(item.family.assetKey)} alt="" />
+                  </div>
+                  <div>
+                    <h3>{item.family.name}</h3>
+                    <p>
+                      İlan fiyatı {money(item.price)} · İlgi %{item.interest}
+                    </p>
+                  </div>
+                  <div className="sell-actions">
+                    <button onClick={advanceWorld}>Piyasayı ilerlet</button>
+                    <button className="primary" onClick={advanceWorld}>
+                      Alıcı ara
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+            {game.buyerOffers.map((offer) => (
+              <article className="owned" key={offer.id}>
+                <div className="owned-icon">🤝</div>
+                <div>
+                  <h3>{offer.buyer} teklif verdi</h3>
+                  <p>{money(offer.amount)} · Teklif süresi sınırlı</p>
+                </div>
+                <div className="sell-actions">
+                  <button
+                    className="primary"
+                    onClick={() => acceptBuyer(offer.id)}
+                  >
+                    Teklifi kabul et
+                  </button>
+                </div>
+              </article>
+            ))}
           </>
         ) : null}
         {tab === "wealth" ? (
@@ -225,6 +297,12 @@ export default function App() {
           onClick={() => setTab("inventory")}
         >
           <span>▣</span>Envanter
+        </button>
+        <button
+          className={tab === "listings" ? "active" : ""}
+          onClick={() => setTab("listings")}
+        >
+          <span>♢</span>İlanlarım
         </button>
         <button
           className={tab === "wealth" ? "active" : ""}

@@ -359,7 +359,7 @@ nav {
   width: min(100%, 480px);
   height: 72px;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   background: rgba(7, 15, 11, 0.94);
   backdrop-filter: blur(18px);
   border-top: 1px solid #243d32;

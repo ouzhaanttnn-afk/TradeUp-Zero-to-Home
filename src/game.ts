@@ -60,6 +60,14 @@ export type GameState = {
   seed: number;
   marketCycle: number;
   listings: Listing[];
+  playerListings: Listing[];
+  buyerOffers: {
+    id: string;
+    listingId: string;
+    amount: number;
+    buyer: string;
+    expiresAt: number;
+  }[];
   negotiation?: Negotiation;
   expertise: Record<string, number>;
   career: CareerEvent[];
@@ -410,6 +418,8 @@ const stateSchema = z.object({
   career: z.array(z.any()),
   lastSeenAt: z.number(),
   negotiation: z.any().optional(),
+  playerListings: z.array(z.any()).default([]),
+  buyerOffers: z.array(z.any()).default([]),
 });
 export const validateState = (value: unknown) =>
   stateSchema.parse(value) as GameState;
@@ -531,6 +541,8 @@ export const initialState = (): GameState => {
     seed: 90421,
     marketCycle: 0,
     listings: [],
+    playerListings: [],
+    buyerOffers: [],
     expertise: {},
     career: [],
     lastSeenAt: Date.now(),

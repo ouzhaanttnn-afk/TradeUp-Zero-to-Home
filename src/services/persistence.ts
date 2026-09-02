@@ -26,6 +26,8 @@ export async function loadGame(): Promise<GameState> {
       career: raw.career ?? [],
       expertise: raw.expertise ?? {},
       marketCycle: raw.marketCycle ?? 0,
+      playerListings: raw.playerListings ?? [],
+      buyerOffers: raw.buyerOffers ?? [],
     };
     return applyOffline(validateState(migrated));
   } catch {
