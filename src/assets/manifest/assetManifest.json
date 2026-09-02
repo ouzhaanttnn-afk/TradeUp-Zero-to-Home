@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "fallbackKey": "prd_notebook",
+  "assets": [
+    {
+      "assetKey": "prd_notebook",
+      "familyId": "notebook",
+      "source": "../products/prd_notebook.png"
+    },
+    {
+      "assetKey": "prd_headset",
+      "familyId": "headset",
+      "source": "../products/prd_headset.png"
+    },
+    {
+      "assetKey": "prd_watch",
+      "familyId": "watch",
+      "source": "../products/prd_watch.png"
+    },
+    {
+      "assetKey": "prd_console",
+      "familyId": "console",
+      "source": "../products/prd_console.png"
+    },
+    {
+      "assetKey": "prd_guitar",
+      "familyId": "guitar",
+      "source": "../products/prd_guitar.png"
+    },
+    {
+      "assetKey": "prd_phone",
+      "familyId": "phone",
+      "source": "../products/prd_phone.png"
+    },
+    {
+      "assetKey": "prd_laptop",
+      "familyId": "laptop",
+      "source": "../products/prd_laptop.png"
+    },
+    {
+      "assetKey": "prd_camera",
+      "familyId": "camera",
+      "source": "../products/prd_camera.png"
+    },
+    {
+      "assetKey": "prd_scooter",
+      "familyId": "scooter",
+      "source": "../products/prd_scooter.png"
+    }
+  ]
+}
