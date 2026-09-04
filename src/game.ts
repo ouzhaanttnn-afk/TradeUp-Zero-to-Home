@@ -15,7 +15,7 @@ export type {
   TransactionJournalEntry,
 } from "./domain/models";
 
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
 export const families: Family[] = [
   {
     id: "notebook",
@@ -378,16 +378,20 @@ const listingSchema = z.object({
   seller: sellerKindSchema,
   urgency: z.number(),
   interest: z.number(),
-  createdAt: z.number(),
-  expiresAt: z.number(),
   state: z.enum([
     "ACTIVE",
+    "WATCHED",
     "NEGOTIATING",
     "SOLD_TO_PLAYER",
     "SOLD_TO_NPC",
     "EXPIRED",
+    "WITHDRAWN",
   ]),
   seed: z.number().int(),
+  createdAtGameMin: z.number().int().nonnegative(),
+  expiresAtGameMin: z.number().int().nonnegative(),
+  closedAtGameMin: z.number().int().nonnegative().optional(),
+  exitReason: z.enum(["NPC_PURCHASE", "EXPIRED"]).optional(),
 });
 const ownedAssetSchema = z
   .object({
@@ -413,7 +417,7 @@ const ownedAssetSchema = z
     inspectionCostMinor: z.number().int().nonnegative(),
     transparentFeesMinor: z.number().int().nonnegative(),
     bookCostMinor: z.number().int().nonnegative(),
-    acquiredAtGameMin: z.number().nonnegative(),
+    acquiredAtGameMin: z.number().int().nonnegative(),
     currentListingId: z.string().optional(),
   })
   .refine(
@@ -430,7 +434,8 @@ const playerListingSchema = z.object({
   ownedAssetId: z.string(),
   askingPriceMinor: z.number().int().nonnegative(),
   interest: z.number(),
-  createdAtGameMin: z.number().nonnegative(),
+  createdAtGameMin: z.number().int().nonnegative(),
+  expiresAtGameMin: z.number().int().nonnegative(),
   state: z.enum([
     "ACTIVE",
     "RESERVED",
@@ -445,7 +450,7 @@ const buyerOfferSchema = z.object({
   listingId: z.string(),
   amountMinor: z.number().int().nonnegative(),
   buyer: z.string(),
-  expiresAt: z.number(),
+  expiresAtGameMin: z.number().int().nonnegative(),
 });
 const journalEntrySchema = z.object({
   id: z.string(),
@@ -462,7 +467,7 @@ const journalEntrySchema = z.object({
     "REFUND",
     "REWARD",
   ]),
-  gameTime: z.number(),
+  gameTime: z.number().int().nonnegative(),
   assetId: z.string().optional(),
   cashDeltaMinor: z.number().int(),
   costBasisDeltaMinor: z.number().int(),
@@ -472,7 +477,7 @@ const journalEntrySchema = z.object({
 const careerEventSchema = z.object({
   id: z.string(),
   type: z.enum(["BUY", "SALE", "PROFIT", "MILESTONE", "MISSED"]),
-  at: z.number(),
+  atGameMin: z.number().int().nonnegative(),
   label: z.string(),
   amountMinor: z.number().int().optional(),
 });
@@ -490,17 +495,30 @@ const stateSchema = z
     ownedAssets: z.array(ownedAssetSchema),
     realizedProfitMinor: z.number().int(),
     transactionJournal: z.array(journalEntrySchema),
+    gameTimeMin: z.number().int().nonnegative(),
     seed: z.number().int(),
     marketCycle: z.number().int().nonnegative(),
     listings: z.array(listingSchema),
     expertise: z.record(z.string(), z.number()),
     career: z.array(careerEventSchema),
-    lastSeenAt: z.number(),
+    lastWallClockMs: z.number().nonnegative(),
     negotiation: negotiationSchema.optional(),
     playerListings: z.array(playerListingSchema),
     buyerOffers: z.array(buyerOfferSchema),
   })
   .superRefine((state, context) => {
+    const marketListingIds = new Set<string>();
+    for (const listing of state.listings) {
+      if (marketListingIds.has(listing.id)) {
+        context.addIssue({
+          code: "custom",
+          message: `Market listing id must be unique: ${listing.id}`,
+          path: ["listings"],
+        });
+      }
+      marketListingIds.add(listing.id);
+    }
+
     const assetIds = new Set<string>();
     for (const asset of state.ownedAssets) {
       if (assetIds.has(asset.id)) {
@@ -598,13 +616,14 @@ export function market(
   seed: number,
   totalWealthMinor: number,
   cycle = 0,
+  gameTimeMin = 0,
+  count = 24,
 ): Listing[] {
   const r = rng(seed + cycle * 7919);
   const tier =
     totalWealthMinor < 1_000_000 ? 1 : totalWealthMinor < 7_500_000 ? 2 : 3;
   const pool = families.filter((f) => f.tier <= tier);
-  const now = Date.now();
-  return Array.from({ length: 24 }, (_, i) => {
+  return Array.from({ length: count }, (_, i) => {
     const family = pool[Math.floor(r() * pool.length)];
     const condition = Math.round(48 + r() * 51);
     const fairValueMinor = Math.round(
@@ -614,9 +633,7 @@ export function market(
       2_000,
       Math.round((fairValueMinor * (0.72 + r() * 0.56)) / 1_000) * 1_000,
     );
-    const life = Math.round(
-      (2 + (1 - family.liquidity) * 30 + r() * 25) * 60000,
-    );
+    const lifeMin = Math.round(2 + (1 - family.liquidity) * 30 + r() * 25);
     return {
       id: `${seed}-${cycle}-${i}`,
       family,
@@ -635,8 +652,8 @@ export function market(
       )[Math.floor(r() * 6)],
       urgency: r(),
       interest: Math.round(r() * 98),
-      createdAt: now,
-      expiresAt: now + life,
+      createdAtGameMin: gameTimeMin,
+      expiresAtGameMin: gameTimeMin + lifeMin,
       state: "ACTIVE" as const,
       seed: Math.floor(r() * 1e9),
     };
@@ -677,27 +694,6 @@ export function resolveOffer(item: Listing, offer: number, index: number) {
     };
   return { result: "rejected" as const, floorMinor };
 }
-export function applyOffline(state: GameState, now = Date.now()): GameState {
-  const elapsed = Math.max(
-    0,
-    Math.min(now - state.lastSeenAt, 4 * 60 * 60 * 1000),
-  );
-  if (elapsed < 60000) return { ...state, lastSeenAt: now };
-  const kept = state.listings.filter(
-    (l) =>
-      l.expiresAt + elapsed * 0.35 > now ||
-      rng(l.seed + Math.floor(elapsed / 60000))() > 0.55,
-  );
-  return {
-    ...state,
-    listings:
-      kept.length >= 8
-        ? kept
-        : market(state.seed, wealth(state), state.marketCycle + 1),
-    marketCycle: kept.length >= 8 ? state.marketCycle : state.marketCycle + 1,
-    lastSeenAt: now,
-  };
-}
 const tryFormatter = new Intl.NumberFormat("tr-TR", {
   style: "currency",
   currency: "TRY",
@@ -705,7 +701,7 @@ const tryFormatter = new Intl.NumberFormat("tr-TR", {
   maximumFractionDigits: 2,
 });
 export const money = (minor: number) => tryFormatter.format(minor / 100);
-export const initialState = (): GameState => {
+export const initialState = (lastWallClockMs = 0): GameState => {
   const initialCashMinor = 42_000;
   const base: GameState = {
     version: SAVE_VERSION,
@@ -714,7 +710,7 @@ export const initialState = (): GameState => {
     realizedProfitMinor: 0,
     transactionJournal: [
       {
-        id: "opening-balance:v3",
+        id: "opening-balance:v4",
         kind: "OPENING_BALANCE",
         gameTime: 0,
         cashDeltaMinor: initialCashMinor,
@@ -723,6 +719,7 @@ export const initialState = (): GameState => {
         metadata: { reason: "prototype-starting-balance" },
       },
     ],
+    gameTimeMin: 0,
     seed: 90421,
     marketCycle: 0,
     listings: [],
@@ -730,7 +727,10 @@ export const initialState = (): GameState => {
     buyerOffers: [],
     expertise: {},
     career: [],
-    lastSeenAt: Date.now(),
+    lastWallClockMs,
   };
-  return { ...base, listings: market(base.seed, base.cashMinor) };
+  return {
+    ...base,
+    listings: market(base.seed, base.cashMinor, 0, base.gameTimeMin),
+  };
 };

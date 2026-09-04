@@ -1,0 +1,16 @@
+export const WORLD_CONFIG = {
+  activeTickMin: 1,
+  scanAdvanceMin: 2,
+  scanArrivalCount: 4,
+  minActiveListings: 16,
+  maxActiveListings: 28,
+  terminalHistoryLimit: 24,
+  firstSessionProtectionMin: 5,
+  minimumNpcAgeMin: 2,
+  buyerOfferLifetimeMin: 60,
+  playerListingLifetimeMin: 1_440,
+  offlineFullRateMin: 15,
+  offlineCapWallMin: 240,
+  offlineDiminishingRate: 0.35,
+  offlineClosureRatio: 0.5,
+} as const;

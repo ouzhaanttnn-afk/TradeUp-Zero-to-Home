@@ -1,30 +1,42 @@
 import { openDB } from "idb";
-import { migrateStateToV3 } from "../domain/migrations";
-import {
-  applyOffline,
-  initialState,
-  validateState,
-  type GameState,
-} from "../game";
+import { migrateStateToCurrent } from "../domain/migrations";
+import { advanceOffline } from "../domain/world";
+import { initialState, validateState, type GameState } from "../game";
+import { systemTimeProvider, type TimeProvider } from "../infrastructure/time";
 const dbPromise = openDB("tradeup", 1, {
   upgrade(db) {
     if (!db.objectStoreNames.contains("game")) db.createObjectStore("game");
   },
 });
-export async function saveGame(state: GameState) {
+export async function saveGame(
+  state: GameState,
+  timeProvider: TimeProvider = systemTimeProvider,
+) {
   const db = await dbPromise;
   const validated = validateState(state);
-  await db.put("game", { ...validated, lastSeenAt: Date.now() }, "main");
+  const lastWallClockMs = Math.max(
+    validated.lastWallClockMs,
+    timeProvider.nowWallMs(),
+  );
+  await db.put("game", { ...validated, lastWallClockMs }, "main");
 }
-export async function loadGame(): Promise<GameState> {
+export async function loadGame(
+  timeProvider: TimeProvider = systemTimeProvider,
+): Promise<GameState> {
   try {
     const db = await dbPromise;
     const raw = await db.get("game", "main");
-    if (!raw) return initialState();
-    const migrated = migrateStateToV3(raw);
-    return applyOffline(validateState(migrated));
+    const wallClockMs = timeProvider.nowWallMs();
+    if (!raw) return initialState(wallClockMs);
+    if (raw.version !== 4) {
+      await db.put("game", raw, `backup:pre-v4:${raw.version ?? "unknown"}`);
+    }
+    const migrated = validateState(migrateStateToCurrent(raw));
+    const progressed = advanceOffline(migrated, wallClockMs).state;
+    await db.put("game", validateState(progressed), "main");
+    return progressed;
   } catch {
-    return initialState();
+    return initialState(timeProvider.nowWallMs());
   }
 }
 export async function clearGame() {

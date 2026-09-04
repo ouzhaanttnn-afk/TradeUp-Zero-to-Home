@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  applyOffline,
   initialState,
   market,
   resolveOffer,
@@ -51,13 +50,5 @@ describe("deterministic economy", () => {
     const floor = sellerFloor(item);
     resolveOffer(item, 2_000, 1);
     expect(sellerFloor(item)).toBe(floor);
-  });
-
-  it("clamps offline time and preserves a usable market", () => {
-    const state = initialState();
-    state.lastSeenAt = 0;
-    expect(
-      applyOffline(state, 10 * 60 * 60 * 1_000).listings.length,
-    ).toBeGreaterThanOrEqual(8);
   });
 });

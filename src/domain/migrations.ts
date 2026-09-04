@@ -1,3 +1,4 @@
+import { WORLD_CONFIG } from "./config";
 import type {
   BuyerOffer,
   CareerEvent,
@@ -7,6 +8,7 @@ import type {
   Negotiation,
   OwnedAsset,
   PlayerListing,
+  TransactionJournalEntry,
 } from "./models";
 
 type UnknownRecord = Record<string, unknown>;
@@ -41,7 +43,7 @@ function migrateFamily(value: unknown): Family {
   };
 }
 
-function migrateMarketListing(value: unknown): Listing {
+function legacyMarketListing(value: unknown) {
   const source = record(value);
   return {
     id: string(source.id),
@@ -55,23 +57,21 @@ function migrateMarketListing(value: unknown): Listing {
         ? minor(source.fair)
         : Math.max(0, integer(source.fairValueMinor)),
     condition: number(source.condition),
-    seller: (string(source.seller, "merchant") ||
-      "merchant") as Listing["seller"],
+    seller: string(source.seller, "merchant"),
     urgency: number(source.urgency, 0.5),
     interest: number(source.interest),
     createdAt: number(source.createdAt),
     expiresAt: number(source.expiresAt),
-    state: (string(source.state, "ACTIVE") || "ACTIVE") as Listing["state"],
+    state: string(source.state, "ACTIVE"),
     seed: integer(source.seed),
   };
 }
 
-function migrateCareer(value: unknown): CareerEvent {
+function legacyCareer(value: unknown) {
   const source = record(value);
   return {
     id: string(source.id, `legacy-career:${number(source.at)}`),
-    type: (string(source.type, "MILESTONE") ||
-      "MILESTONE") as CareerEvent["type"],
+    type: string(source.type, "MILESTONE"),
     at: number(source.at),
     label: string(source.label),
     ...(source.amount === undefined && source.amountMinor === undefined
@@ -85,21 +85,20 @@ function migrateCareer(value: unknown): CareerEvent {
   };
 }
 
-function legacyBuyCosts(career: CareerEvent[]) {
+function legacyBuyCosts(career: UnknownRecord[]) {
   const costs = new Map<string, number[]>();
   for (const event of career) {
     if (event.type !== "BUY" || event.amountMinor === undefined) continue;
-    const familyName = event.label.replace(/ alındı$/, "");
+    const familyName = string(event.label).replace(/ alındı$/, "");
     const values = costs.get(familyName) ?? [];
-    values.push(event.amountMinor);
+    values.push(integer(event.amountMinor));
     costs.set(familyName, values);
   }
   return costs;
 }
 
 function takeLegacyCost(costs: Map<string, number[]>, familyName: string) {
-  const values = costs.get(familyName);
-  return values?.pop();
+  return costs.get(familyName)?.pop();
 }
 
 function removeLegacyCost(
@@ -113,7 +112,7 @@ function removeLegacyCost(
   if (index >= 0) values.splice(index, 1);
 }
 
-function migrateInventoryAsset(value: unknown): OwnedAsset {
+function legacyInventoryAsset(value: unknown) {
   const source = record(value);
   const family = migrateFamily(source.family);
   const purchasePriceMinor = minor(source.paid);
@@ -137,10 +136,7 @@ function migrateInventoryAsset(value: unknown): OwnedAsset {
   };
 }
 
-function migrateLegacyPlayerListing(
-  value: unknown,
-  buyCosts: Map<string, number[]>,
-): { asset: OwnedAsset; listing: PlayerListing } {
+function legacyPlayerListing(value: unknown, buyCosts: Map<string, number[]>) {
   const source = record(value);
   const family = migrateFamily(source.family);
   const listingId = string(source.id, `legacy-player:${family.id}`);
@@ -149,9 +145,9 @@ function migrateLegacyPlayerListing(
     : `asset:${listingId}`;
   const askingPriceMinor = minor(source.price);
   const fairValueMinor = minor(source.fair);
-  const matchedPurchaseMinor = takeLegacyCost(buyCosts, family.name);
   const purchasePriceMinor =
-    matchedPurchaseMinor ?? Math.min(askingPriceMinor, fairValueMinor);
+    takeLegacyCost(buyCosts, family.name) ??
+    Math.min(askingPriceMinor, fairValueMinor);
   return {
     asset: {
       id: assetId,
@@ -182,21 +178,178 @@ function migrateLegacyPlayerListing(
   };
 }
 
-function migrateBuyerOffer(value: unknown): BuyerOffer {
+export function migrateStateToV3(value: unknown): unknown {
   const source = record(value);
+  if (integer(source.version) >= 3) return value;
+
+  const career = array(source.career).map((event) =>
+    record(legacyCareer(event)),
+  );
+  const buyCosts = legacyBuyCosts(career);
+  const inventoryAssets = array(source.inventory).map(legacyInventoryAsset);
+  for (const asset of inventoryAssets) {
+    removeLegacyCost(
+      buyCosts,
+      asset.instance.family.name,
+      asset.purchasePriceMinor,
+    );
+  }
+  const migratedListings = array(source.playerListings).map((item) =>
+    legacyPlayerListing(item, buyCosts),
+  );
+  const ownedAssets = [
+    ...inventoryAssets,
+    ...migratedListings.map((item) => item.asset),
+  ];
+  const cashMinor = minor(source.cash);
+  const realizedProfitMinor = Math.round(number(source.realizedProfit) * 100);
+  const activeBookCostMinor = ownedAssets.reduce(
+    (total, asset) => total + asset.bookCostMinor,
+    0,
+  );
+
   return {
-    id: string(source.id),
-    listingId: string(source.listingId),
-    amountMinor:
-      source.amountMinor === undefined
-        ? minor(source.amount)
-        : Math.max(0, integer(source.amountMinor)),
-    buyer: string(source.buyer),
-    expiresAt: number(source.expiresAt),
+    version: 3,
+    cashMinor,
+    ownedAssets,
+    realizedProfitMinor,
+    transactionJournal: [
+      {
+        id: `migration:v${integer(source.version)}:v3`,
+        kind: "MIGRATION",
+        gameTime: 0,
+        cashDeltaMinor: cashMinor,
+        costBasisDeltaMinor: activeBookCostMinor,
+        realizedProfitDeltaMinor: realizedProfitMinor,
+        metadata: {
+          fromVersion: integer(source.version),
+          listedAssetsRecovered: migratedListings.length,
+          unmatchedListedCostsUseConservativeEstimate: true,
+        },
+      },
+    ],
+    seed: integer(source.seed, 90421),
+    marketCycle: Math.max(0, integer(source.marketCycle)),
+    listings: array(source.listings).map(legacyMarketListing),
+    playerListings: migratedListings.map((item) => item.listing),
+    buyerOffers: array(source.buyerOffers).map((value) => {
+      const offer = record(value);
+      return {
+        id: string(offer.id),
+        listingId: string(offer.listingId),
+        amountMinor: minor(offer.amount),
+        buyer: string(offer.buyer),
+        expiresAt: number(offer.expiresAt),
+      };
+    }),
+    ...(source.negotiation ? { negotiation: record(source.negotiation) } : {}),
+    expertise: record(source.expertise),
+    career,
+    lastSeenAt: number(source.lastSeenAt),
   };
 }
 
-function migrateNegotiation(value: unknown): Negotiation | undefined {
+const normalizedGameMinute = (value: unknown, gameTimeMin: number) => {
+  const candidate = Math.max(0, integer(value));
+  return candidate <= gameTimeMin ? candidate : gameTimeMin;
+};
+
+function currentMarketListing(value: unknown, gameTimeMin: number): Listing {
+  const source = record(value);
+  const legacyCreatedAt = number(source.createdAt);
+  const legacyExpiresAt = number(source.expiresAt);
+  const lifetimeMin = Math.max(
+    1,
+    Math.ceil((legacyExpiresAt - legacyCreatedAt) / 60_000),
+  );
+  const createdAtGameMin =
+    source.createdAtGameMin === undefined
+      ? gameTimeMin
+      : normalizedGameMinute(source.createdAtGameMin, gameTimeMin);
+  return {
+    id: string(source.id),
+    family: migrateFamily(source.family),
+    priceMinor: Math.max(0, integer(source.priceMinor)),
+    fairValueMinor: Math.max(0, integer(source.fairValueMinor)),
+    condition: number(source.condition),
+    seller: (string(source.seller, "merchant") ||
+      "merchant") as Listing["seller"],
+    urgency: number(source.urgency, 0.5),
+    interest: number(source.interest),
+    createdAtGameMin,
+    expiresAtGameMin:
+      source.expiresAtGameMin === undefined
+        ? createdAtGameMin + lifetimeMin
+        : Math.max(createdAtGameMin + 1, integer(source.expiresAtGameMin)),
+    ...(source.closedAtGameMin === undefined
+      ? {}
+      : { closedAtGameMin: integer(source.closedAtGameMin) }),
+    ...(source.exitReason === undefined
+      ? {}
+      : { exitReason: string(source.exitReason) as Listing["exitReason"] }),
+    state: (string(source.state, "ACTIVE") || "ACTIVE") as Listing["state"],
+    seed: integer(source.seed),
+  };
+}
+
+function currentOwnedAsset(value: unknown, gameTimeMin: number): OwnedAsset {
+  const source = record(value);
+  return {
+    ...(source as OwnedAsset),
+    acquiredAtGameMin: normalizedGameMinute(
+      source.acquiredAtGameMin,
+      gameTimeMin,
+    ),
+  };
+}
+
+function currentPlayerListing(
+  value: unknown,
+  gameTimeMin: number,
+): PlayerListing {
+  const source = record(value);
+  const createdAtGameMin = normalizedGameMinute(
+    source.createdAtGameMin,
+    gameTimeMin,
+  );
+  return {
+    id: string(source.id),
+    ownedAssetId: string(source.ownedAssetId),
+    askingPriceMinor: Math.max(0, integer(source.askingPriceMinor)),
+    interest: number(source.interest),
+    createdAtGameMin,
+    expiresAtGameMin:
+      source.expiresAtGameMin === undefined
+        ? createdAtGameMin + WORLD_CONFIG.playerListingLifetimeMin
+        : Math.max(createdAtGameMin + 1, integer(source.expiresAtGameMin)),
+    state: (string(source.state, "ACTIVE") ||
+      "ACTIVE") as PlayerListing["state"],
+  };
+}
+
+function currentBuyerOffer(
+  value: unknown,
+  gameTimeMin: number,
+  lastWallClockMs: number,
+): BuyerOffer {
+  const source = record(value);
+  const remainingLegacyMin = Math.max(
+    1,
+    Math.ceil((number(source.expiresAt) - lastWallClockMs) / 60_000),
+  );
+  return {
+    id: string(source.id),
+    listingId: string(source.listingId),
+    amountMinor: Math.max(0, integer(source.amountMinor)),
+    buyer: string(source.buyer),
+    expiresAtGameMin:
+      source.expiresAtGameMin === undefined
+        ? gameTimeMin + remainingLegacyMin
+        : Math.max(gameTimeMin + 1, integer(source.expiresAtGameMin)),
+  };
+}
+
+function currentNegotiation(value: unknown): Negotiation | undefined {
   if (value === undefined) return undefined;
   const source = record(value);
   const remaining = Math.max(
@@ -222,60 +375,63 @@ function migrateNegotiation(value: unknown): Negotiation | undefined {
   };
 }
 
-export function migrateStateToV3(value: unknown): unknown {
+function currentCareer(value: unknown, gameTimeMin: number): CareerEvent {
   const source = record(value);
-  if (source.version === 3) return value;
+  return {
+    id: string(source.id),
+    type: (string(source.type, "MILESTONE") ||
+      "MILESTONE") as CareerEvent["type"],
+    atGameMin: normalizedGameMinute(source.atGameMin ?? source.at, gameTimeMin),
+    label: string(source.label),
+    ...(source.amountMinor === undefined
+      ? {}
+      : { amountMinor: integer(source.amountMinor) }),
+  };
+}
 
-  const career = array(source.career).map(migrateCareer);
-  const buyCosts = legacyBuyCosts(career);
-  const inventoryAssets = array(source.inventory).map(migrateInventoryAsset);
-  for (const asset of inventoryAssets) {
-    removeLegacyCost(
-      buyCosts,
-      asset.instance.family.name,
-      asset.purchasePriceMinor,
-    );
-  }
-  const migratedListings = array(source.playerListings).map((item) =>
-    migrateLegacyPlayerListing(item, buyCosts),
-  );
-  const ownedAssets = [
-    ...inventoryAssets,
-    ...migratedListings.map((item) => item.asset),
-  ];
-  const cashMinor = minor(source.cash);
-  const realizedProfitMinor = Math.round(number(source.realizedProfit) * 100);
-  const activeBookCostMinor = ownedAssets.reduce(
-    (total, asset) => total + asset.bookCostMinor,
+function currentJournal(
+  value: unknown,
+  gameTimeMin: number,
+): TransactionJournalEntry {
+  const source = record(value);
+  return {
+    ...(source as TransactionJournalEntry),
+    gameTime: normalizedGameMinute(source.gameTime, gameTimeMin),
+  };
+}
+
+export function migrateStateToV4(value: unknown): unknown {
+  const source = record(value);
+  if (integer(source.version) >= 4) return value;
+  const gameTimeMin = Math.max(0, integer(source.gameTimeMin));
+  const lastWallClockMs = Math.max(
     0,
+    number(source.lastWallClockMs, number(source.lastSeenAt)),
   );
-  const negotiation = migrateNegotiation(source.negotiation);
+  const negotiation = currentNegotiation(source.negotiation);
 
   const migrated: GameState = {
-    version: 3,
-    cashMinor,
-    ownedAssets,
-    realizedProfitMinor,
-    transactionJournal: [
-      {
-        id: `migration:v${integer(source.version)}:v3`,
-        kind: "MIGRATION",
-        gameTime: number(source.lastSeenAt),
-        cashDeltaMinor: cashMinor,
-        costBasisDeltaMinor: activeBookCostMinor,
-        realizedProfitDeltaMinor: realizedProfitMinor,
-        metadata: {
-          fromVersion: integer(source.version),
-          listedAssetsRecovered: migratedListings.length,
-          unmatchedListedCostsUseConservativeEstimate: true,
-        },
-      },
-    ],
+    version: 4,
+    cashMinor: Math.max(0, integer(source.cashMinor)),
+    ownedAssets: array(source.ownedAssets).map((asset) =>
+      currentOwnedAsset(asset, gameTimeMin),
+    ),
+    realizedProfitMinor: integer(source.realizedProfitMinor),
+    transactionJournal: array(source.transactionJournal).map((entry) =>
+      currentJournal(entry, gameTimeMin),
+    ),
+    gameTimeMin,
     seed: integer(source.seed, 90421),
     marketCycle: Math.max(0, integer(source.marketCycle)),
-    listings: array(source.listings).map(migrateMarketListing),
-    playerListings: migratedListings.map((item) => item.listing),
-    buyerOffers: array(source.buyerOffers).map(migrateBuyerOffer),
+    listings: array(source.listings).map((listing) =>
+      currentMarketListing(listing, gameTimeMin),
+    ),
+    playerListings: array(source.playerListings).map((listing) =>
+      currentPlayerListing(listing, gameTimeMin),
+    ),
+    buyerOffers: array(source.buyerOffers).map((offer) =>
+      currentBuyerOffer(offer, gameTimeMin, lastWallClockMs),
+    ),
     ...(negotiation ? { negotiation } : {}),
     expertise: Object.fromEntries(
       Object.entries(record(source.expertise)).map(([key, entry]) => [
@@ -283,8 +439,14 @@ export function migrateStateToV3(value: unknown): unknown {
         number(entry),
       ]),
     ),
-    career,
-    lastSeenAt: number(source.lastSeenAt, Date.now()),
+    career: array(source.career).map((event) =>
+      currentCareer(event, gameTimeMin),
+    ),
+    lastWallClockMs,
   };
   return migrated;
+}
+
+export function migrateStateToCurrent(value: unknown): unknown {
+  return migrateStateToV4(migrateStateToV3(value));
 }

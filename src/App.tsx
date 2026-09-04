@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { App as CapacitorApp } from "@capacitor/app";
 import "./App.css";
 import { assetFor } from "./assets";
 import {
@@ -7,7 +8,9 @@ import {
   listingEstimateBand,
   quoteAssetExit,
 } from "./domain/economy";
-import { HOME_GOAL_MINOR, money, signal, wealth, type Listing } from "./game";
+import { WORLD_CONFIG } from "./domain/config";
+import { activeMarketListings, npcRiskSignal } from "./domain/world";
+import { HOME_GOAL_MINOR, money, signal, wealth } from "./game";
 import { useGameStore } from "./stores/gameStore";
 
 type Tab = "market" | "inventory" | "listings" | "wealth";
@@ -22,26 +25,51 @@ const sellerLabel = {
 
 export default function App() {
   const [tab, setTab] = useState<Tab>("market");
-  const [selected, setSelected] = useState<Listing | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const {
     game,
+    ready,
     notice,
     hydrate,
-    refresh,
+    flush,
+    scan,
+    tick,
     buy,
     offer,
     sell,
     list,
     withdrawListing,
     acceptBuyer,
-    advanceWorld,
     reset,
   } = useGameStore();
   useEffect(() => {
     void hydrate();
   }, [hydrate]);
+  useEffect(() => {
+    if (!ready) return undefined;
+    const timer = window.setInterval(tick, WORLD_CONFIG.activeTickMin * 60_000);
+    return () => window.clearInterval(timer);
+  }, [ready, tick]);
+  useEffect(() => {
+    let disposed = false;
+    let removeListener: (() => Promise<void>) | undefined;
+    void CapacitorApp.addListener("appStateChange", ({ isActive }) => {
+      if (isActive) void hydrate();
+      else void flush();
+    }).then((handle) => {
+      if (disposed) void handle.remove();
+      else removeListener = () => handle.remove();
+    });
+    return () => {
+      disposed = true;
+      if (removeListener) void removeListener();
+    };
+  }, [flush, hydrate]);
 
   const total = wealth(game);
+  const marketListings = activeMarketListings(game);
+  const selected =
+    marketListings.find((listing) => listing.id === selectedId) ?? null;
   const inventory = inventoryAssets(game);
   const playerListings = activePlayerListings(game).flatMap((listing) => {
     const asset = game.ownedAssets.find(
@@ -62,11 +90,7 @@ export default function App() {
           <span className="eyebrow">TRADEUP</span>
           <h1>Zero to Home</h1>
         </div>
-        <button
-          className="icon-button"
-          onClick={refresh}
-          aria-label="Pazarı yenile"
-        >
+        <button className="icon-button" onClick={scan} aria-label="Pazarı tara">
           ↻
         </button>
       </header>
@@ -104,16 +128,17 @@ export default function App() {
                 <small>CANLI PAZAR</small>
                 <h2>Fırsat akışı</h2>
               </div>
-              <span>{game.listings.length} ilan</span>
+              <span>{marketListings.length} ilan</span>
             </div>
             <div className="feed">
-              {game.listings.map((item) => {
+              {marketListings.map((item) => {
                 const itemSignal = signal(item);
+                const risk = npcRiskSignal(item, game.gameTimeMin);
                 return (
                   <button
                     className="listing"
                     key={item.id}
-                    onClick={() => setSelected(item)}
+                    onClick={() => setSelectedId(item.id)}
                   >
                     <div className="product-art">
                       <img src={assetFor(item.family.assetKey)} alt="" />
@@ -121,7 +146,7 @@ export default function App() {
                     <div className="listing-copy">
                       <div className="meta">
                         <span>{item.family.category}</span>
-                        <span>canlı</span>
+                        <span>{risk.text}</span>
                       </div>
                       <h3>{item.family.name}</h3>
                       <div className="tags">
@@ -229,7 +254,6 @@ export default function App() {
                     </p>
                   </div>
                   <div className="sell-actions">
-                    <button onClick={advanceWorld}>Piyasayı ilerlet</button>
                     <button
                       className="primary"
                       onClick={() => withdrawListing(listing.id)}
@@ -297,9 +321,7 @@ export default function App() {
                 .reverse()
                 .map((event) => (
                   <div key={event.id}>
-                    <span>
-                      {new Date(event.at).toLocaleDateString("tr-TR")}
-                    </span>
+                    <span>{event.atGameMin}. oyun dk.</span>
                     <b>{event.label}</b>
                     <em>
                       {event.amountMinor !== undefined
@@ -342,7 +364,7 @@ export default function App() {
         </button>
       </nav>
       {selected ? (
-        <div className="scrim" onClick={() => setSelected(null)}>
+        <div className="scrim" onClick={() => setSelectedId(null)}>
           <section
             className="sheet"
             onClick={(event) => event.stopPropagation()}
@@ -350,7 +372,7 @@ export default function App() {
             <div className="grab" />
             <button
               className="close"
-              onClick={() => setSelected(null)}
+              onClick={() => setSelectedId(null)}
               aria-label="Kapat"
             >
               ×
@@ -409,7 +431,7 @@ export default function App() {
                 className="counter-offer"
                 onClick={() => {
                   if (buy(selected, negotiation.counterMinor))
-                    setSelected(null);
+                    setSelectedId(null);
                 }}
               >
                 Karşı teklifi kabul et · {money(negotiation.counterMinor)}
@@ -425,7 +447,7 @@ export default function App() {
               <button
                 className="primary"
                 onClick={() => {
-                  if (buy(selected)) setSelected(null);
+                  if (buy(selected)) setSelectedId(null);
                 }}
               >
                 Hemen al <small>{money(selected.priceMinor)}</small>

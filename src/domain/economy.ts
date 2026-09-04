@@ -8,6 +8,7 @@ import type {
   TransactionJournalEntry,
   TransactionKind,
 } from "./models";
+import { WORLD_CONFIG } from "./config";
 
 type EconomyFailureReason =
   | "INSUFFICIENT_CASH"
@@ -146,7 +147,15 @@ export function purchaseListing(
       ...state,
       cashMinor: state.cashMinor - purchasePriceMinor,
       ownedAssets: [...state.ownedAssets, asset],
-      listings: state.listings.filter((item) => item.id !== currentListing.id),
+      listings: state.listings.map((item) =>
+        item.id === currentListing.id
+          ? {
+              ...item,
+              state: "SOLD_TO_PLAYER" as const,
+              closedAtGameMin: gameTime,
+            }
+          : item,
+      ),
       negotiation: undefined,
       transactionJournal: [
         ...state.transactionJournal,
@@ -169,7 +178,7 @@ export function purchaseListing(
         {
           id: `career:${transactionId}`,
           type: "BUY",
-          at: gameTime,
+          atGameMin: gameTime,
           label: `${currentListing.family.name} alındı`,
           amountMinor: purchasePriceMinor,
         },
@@ -264,6 +273,7 @@ export function createPlayerListing(
     askingPriceMinor,
     interest: 0,
     createdAtGameMin: gameTime,
+    expiresAtGameMin: gameTime + WORLD_CONFIG.playerListingLifetimeMin,
     state: "ACTIVE",
   };
 
@@ -413,7 +423,7 @@ export function settleAssetSale(
         {
           id: `career:${transactionId}`,
           type: "SALE",
-          at: gameTime,
+          atGameMin: gameTime,
           label: `${asset.instance.family.name} satıldı`,
           amountMinor: profitMinor,
         },

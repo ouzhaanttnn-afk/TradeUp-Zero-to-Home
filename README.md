@@ -8,13 +8,17 @@ The binding product specification is
 ## Implemented foundation
 
 - Seeded, replayable listing generation with many same-family listings
+- Injected wall-clock adapter and monotonic integer game-time clock
+- Incremental market scans that preserve existing listing identities
+- Deterministic listing aging, expiry, signaled NPC competition, and buyer offers
 - Unified `OwnedAsset` lifecycle across inventory, listings, reservations, and settlement
 - Integer minor-unit money, full book cost, and append-only transaction journal
 - Cash, active owned-asset valuation, and realized profit as separate accounting values
 - Two-player-offer negotiation with stable seller floor and counteroffers
 - Buy → inventory → listing/withdrawal → settlement loop with idempotent transactions
-- NPC/offline listing aging with capped elapsed time
-- Versioned IndexedDB persistence with v2 → v3 ownership/accounting migration
+- Diminishing, capped offline progress with a protected opportunity sample
+- Versioned IndexedDB persistence with explicit v2 → v3 → v4 migrations and backup
+- Ordered critical-save queue plus Capacitor background/resume synchronization
 - Career event history produced by canonical economic transactions
 - Data-driven fictional product families and `assetKey` manifest
 - Original app icon and nine product assets with deterministic fallback

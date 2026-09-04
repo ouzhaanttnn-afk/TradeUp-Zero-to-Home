@@ -6,7 +6,15 @@ export type SellerKind =
   "urgent" | "expert" | "uninformed" | "emotional" | "merchant" | "risky";
 
 export type MarketListingState =
-  "ACTIVE" | "NEGOTIATING" | "SOLD_TO_PLAYER" | "SOLD_TO_NPC" | "EXPIRED";
+  | "ACTIVE"
+  | "WATCHED"
+  | "NEGOTIATING"
+  | "SOLD_TO_PLAYER"
+  | "SOLD_TO_NPC"
+  | "EXPIRED"
+  | "WITHDRAWN";
+
+export type MarketExitReason = "NPC_PURCHASE" | "EXPIRED";
 
 export type Family = {
   id: string;
@@ -29,8 +37,10 @@ export type Listing = {
   seller: SellerKind;
   urgency: number;
   interest: number;
-  createdAt: number;
-  expiresAt: number;
+  createdAtGameMin: number;
+  expiresAtGameMin: number;
+  closedAtGameMin?: number;
+  exitReason?: MarketExitReason;
   state: MarketListingState;
   seed: number;
 };
@@ -79,6 +89,7 @@ export type PlayerListing = {
   askingPriceMinor: number;
   interest: number;
   createdAtGameMin: number;
+  expiresAtGameMin: number;
   state: PlayerListingState;
 };
 
@@ -87,7 +98,7 @@ export type BuyerOffer = {
   listingId: ListingId;
   amountMinor: number;
   buyer: string;
-  expiresAt: number;
+  expiresAtGameMin: number;
 };
 
 export type TransactionKind =
@@ -117,7 +128,7 @@ export type TransactionJournalEntry = {
 export type CareerEvent = {
   id: string;
   type: "BUY" | "SALE" | "PROFIT" | "MILESTONE" | "MISSED";
-  at: number;
+  atGameMin: number;
   label: string;
   amountMinor?: number;
 };
@@ -136,6 +147,7 @@ export type GameState = {
   ownedAssets: OwnedAsset[];
   realizedProfitMinor: number;
   transactionJournal: TransactionJournalEntry[];
+  gameTimeMin: number;
   seed: number;
   marketCycle: number;
   listings: Listing[];
@@ -144,5 +156,5 @@ export type GameState = {
   negotiation?: Negotiation;
   expertise: Record<string, number>;
   career: CareerEvent[];
-  lastSeenAt: number;
+  lastWallClockMs: number;
 };

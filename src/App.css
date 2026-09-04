@@ -300,6 +300,9 @@ main {
   flex-direction: column;
   gap: 3px;
 }
+.sell-actions button:only-child {
+  grid-column: 1 / -1;
+}
 .primary {
   background: #5ee6a0 !important;
   color: #082116 !important;

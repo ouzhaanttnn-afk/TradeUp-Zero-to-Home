@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { validateState } from "../game";
 import { reconcileJournal } from "./economy";
-import { migrateStateToV3 } from "./migrations";
+import { migrateStateToCurrent } from "./migrations";
 
 describe("save migration", () => {
   it("recovers a v2 listed asset and preserves reconciled totals", () => {
@@ -62,8 +62,8 @@ describe("save migration", () => {
       lastSeenAt: 150,
     };
 
-    const state = validateState(migrateStateToV3(legacy));
-    expect(state.version).toBe(3);
+    const state = validateState(migrateStateToCurrent(legacy));
+    expect(state.version).toBe(4);
     expect(state.cashMinor).toBe(150_000);
     expect(state.ownedAssets[0]).toMatchObject({
       id: "owned-1",
@@ -73,6 +73,48 @@ describe("save migration", () => {
     });
     expect(state.playerListings[0].ownedAssetId).toBe("owned-1");
     expect(state.buyerOffers[0].amountMinor).toBe(970_000);
+    expect(state.buyerOffers[0].expiresAtGameMin).toBe(1);
+    expect(reconcileJournal(state)).toEqual({
+      cash: true,
+      activeBookCost: true,
+      realizedProfit: true,
+    });
+  });
+
+  it("adds the injected game clock to a v3 save without changing totals", () => {
+    const v3 = {
+      version: 3,
+      cashMinor: 42_000,
+      ownedAssets: [],
+      realizedProfitMinor: 0,
+      transactionJournal: [
+        {
+          id: "opening-balance:v3",
+          kind: "OPENING_BALANCE",
+          gameTime: 0,
+          cashDeltaMinor: 42_000,
+          costBasisDeltaMinor: 0,
+          realizedProfitDeltaMinor: 0,
+          metadata: {},
+        },
+      ],
+      seed: 1,
+      marketCycle: 0,
+      listings: [],
+      playerListings: [],
+      buyerOffers: [],
+      expertise: {},
+      career: [],
+      lastSeenAt: 123_000,
+    };
+
+    const state = validateState(migrateStateToCurrent(v3));
+    expect(state).toMatchObject({
+      version: 4,
+      gameTimeMin: 0,
+      lastWallClockMs: 123_000,
+      cashMinor: 42_000,
+    });
     expect(reconcileJournal(state)).toEqual({
       cash: true,
       activeBookCost: true,
