@@ -66,11 +66,6 @@ export const quoteAssetExit = (asset: OwnedAsset) => ({
     Math.round((asset.instance.fairValueMinor * 1.05) / 1_000) * 1_000,
 });
 
-export const listingEstimateBand = (listing: Listing) => ({
-  lowMinor: Math.round(listing.fairValueMinor * 0.9),
-  highMinor: Math.round(listing.fairValueMinor * 1.1),
-});
-
 const hasJournalEntry = (
   state: Pick<GameState, "transactionJournal">,
   id: string,
@@ -124,13 +119,9 @@ export function purchaseListing(
   const assetId = `asset:${listing.id}`;
   const asset: OwnedAsset = {
     id: assetId,
-    familyId: currentListing.family.id,
+    familyId: currentListing.familyId,
     sourceListingId: currentListing.id,
-    instance: {
-      family: currentListing.family,
-      fairValueMinor: currentListing.fairValueMinor,
-      condition: currentListing.condition,
-    },
+    instance: currentListing.instance,
     state: "IN_INVENTORY",
     purchasePriceMinor,
     preparationCostMinor: 0,
@@ -169,7 +160,7 @@ export function purchaseListing(
           0,
           {
             sourceListingId: currentListing.id,
-            familyId: currentListing.family.id,
+            familyId: currentListing.familyId,
           },
         ),
       ],
@@ -179,7 +170,7 @@ export function purchaseListing(
           id: `career:${transactionId}`,
           type: "BUY",
           atGameMin: gameTime,
-          label: `${currentListing.family.name} alındı`,
+          label: `${currentListing.instance.family.name} alındı`,
           amountMinor: purchasePriceMinor,
         },
       ],

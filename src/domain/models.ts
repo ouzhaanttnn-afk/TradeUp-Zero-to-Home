@@ -16,6 +16,77 @@ export type MarketListingState =
 
 export type MarketExitReason = "NPC_PURCHASE" | "EXPIRED";
 
+export type AttributeValue = number | string | boolean;
+export type AttributeDefinition = {
+  id: string;
+  label: string;
+  type: "NUMBER" | "CATEGORY" | "BOOLEAN" | "YEAR" | "RANGE";
+  unit?: string;
+  min?: number;
+  max?: number;
+  step?: number;
+  options?: string[];
+  comparePriority: number;
+};
+
+export type EvidenceStatus =
+  "VISIBLE" | "CLAIMED" | "SUSPICIOUS" | "CHECKED" | "VERIFIED" | "UNKNOWN";
+export type InspectionKind = "PHOTO" | "ASK_SELLER" | "QUICK_TEST";
+export type EvidenceDefinition = {
+  id: string;
+  label: string;
+  claim: string;
+  checkedCopy: string;
+  inspectionKinds: InspectionKind[];
+  critical: boolean;
+};
+export type EvidenceRecord = {
+  definitionId: string;
+  status: EvidenceStatus;
+};
+
+export type DefectDefinition = {
+  id: string;
+  label: string;
+  severity: "LOW" | "MEDIUM" | "HIGH";
+  valuePenaltyBps: number;
+  riskSignal: number;
+  evidenceId: string;
+  overlayKey: string;
+};
+export type DefectInstance = {
+  definitionId: string;
+  present: boolean;
+  revealed: boolean;
+};
+
+export type VariantDefinition = {
+  id: string;
+  label: string;
+  valueFactorBps: number;
+};
+
+export type PreparationKind = "CLEAN" | "TEST" | "COMPLETE";
+export type PreparationDefinition = {
+  kind: PreparationKind;
+  label: string;
+  costMinor: number;
+  durationMin: number;
+  conditionGain: number;
+  confidenceGain: number;
+  valueGainBps: number;
+  liquidityGainBps: number;
+  maxUses: number;
+};
+export type PreparationRecord = {
+  id: string;
+  kind: PreparationKind;
+  state: "IN_PROGRESS" | "COMPLETE";
+  startedAtGameMin: number;
+  completesAtGameMin: number;
+  costMinor: number;
+};
+
 export type Family = {
   id: string;
   name: string;
@@ -25,15 +96,39 @@ export type Family = {
   liquidity: number;
   category: string;
   tier: number;
-  attributes: string[];
+  rarity: number;
+  conditionCap: number;
+  attributes: AttributeDefinition[];
+  evidence: EvidenceDefinition[];
+  defects: DefectDefinition[];
+  variants: VariantDefinition[];
+  preparation: PreparationDefinition[];
+};
+
+export type ItemAttribute = {
+  definitionId: string;
+  value: AttributeValue;
+};
+
+export type ItemInstance = {
+  family: Family;
+  variantId: string;
+  fairValueMinor: number;
+  condition: number;
+  attributes: ItemAttribute[];
+  evidence: EvidenceRecord[];
+  defects: DefectInstance[];
+  evidenceConfidence: number;
+  liquidityBonusBps: number;
+  accessoryComplete: boolean;
+  preparationHistory: PreparationRecord[];
 };
 
 export type Listing = {
   id: ListingId;
-  family: Family;
+  familyId: string;
+  instance: ItemInstance;
   priceMinor: number;
-  fairValueMinor: number;
-  condition: number;
   seller: SellerKind;
   urgency: number;
   interest: number;
@@ -53,12 +148,6 @@ export type OwnershipState =
   | "RESERVED"
   | "SOLD_PENDING"
   | "SOLD_COMPLETE";
-
-export type ItemInstance = {
-  family: Family;
-  fairValueMinor: number;
-  condition: number;
-};
 
 export type OwnedAsset = {
   id: AssetId;

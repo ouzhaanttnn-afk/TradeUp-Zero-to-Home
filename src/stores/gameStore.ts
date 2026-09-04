@@ -8,6 +8,9 @@ import {
   withdrawPlayerListing,
 } from "../domain/economy";
 import { WORLD_CONFIG } from "../domain/config";
+import { inspectListing } from "../domain/decision";
+import { startPreparation } from "../domain/preparation";
+import type { InspectionKind, PreparationKind } from "../domain/models";
 import {
   advanceWorldTo,
   scanMarket,
@@ -39,6 +42,8 @@ type Store = {
   list: (item: OwnedAsset, askingPriceMinor: number) => void;
   withdrawListing: (listingId: string) => void;
   acceptBuyer: (offerId: string) => void;
+  inspect: (listingId: string, kind: InspectionKind) => void;
+  prepare: (assetId: string, kind: PreparationKind) => void;
   reset: () => Promise<void>;
 };
 
@@ -156,7 +161,7 @@ export const useGameStore = create<Store>((set, get) => ({
       game: stampAndPersist(progressed.state),
       notice: worldNotice(
         progressed,
-        `${item.family.name} envanterine eklendi.`,
+        `${item.instance.family.name} envanterine eklendi.`,
       ),
     });
     buzz(true);
@@ -323,6 +328,46 @@ export const useGameStore = create<Store>((set, get) => ({
       ),
     });
     buzz(true);
+  },
+  inspect: (listingId, kind) => {
+    const result = inspectListing(get().game, listingId, kind);
+    if (!result.ok) {
+      set({ notice: "Bu ilan artık incelenemiyor." });
+      return;
+    }
+    const progressed = progressBy(result.state, result.durationMin);
+    set({
+      game: stampAndPersist(progressed.state),
+      notice: worldNotice(
+        progressed,
+        result.idempotent
+          ? "Bu kontrol zaten yapıldı."
+          : "Yeni kanıtlar tahmin aralığını daralttı.",
+      ),
+    });
+  },
+  prepare: (assetId, kind) => {
+    const result = startPreparation(get().game, assetId, kind);
+    if (!result.ok) {
+      set({
+        notice:
+          result.reason === "INSUFFICIENT_CASH"
+            ? "Bu hazırlık için yeterli nakit yok."
+            : "Bu hazırlık şu anda yapılamıyor.",
+      });
+      return;
+    }
+    const progressed = progressBy(
+      result.state,
+      Math.max(1, result.durationMin),
+    );
+    set({
+      game: stampAndPersist(progressed.state),
+      notice: worldNotice(
+        progressed,
+        "Hazırlık tamamlandı; maliyet defter değerine işlendi.",
+      ),
+    });
   },
   reset: async () => {
     await clearGame();

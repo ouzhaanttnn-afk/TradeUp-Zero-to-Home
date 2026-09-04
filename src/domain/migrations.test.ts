@@ -63,7 +63,7 @@ describe("save migration", () => {
     };
 
     const state = validateState(migrateStateToCurrent(legacy));
-    expect(state.version).toBe(4);
+    expect(state.version).toBe(5);
     expect(state.cashMinor).toBe(150_000);
     expect(state.ownedAssets[0]).toMatchObject({
       id: "owned-1",
@@ -110,7 +110,7 @@ describe("save migration", () => {
 
     const state = validateState(migrateStateToCurrent(v3));
     expect(state).toMatchObject({
-      version: 4,
+      version: 5,
       gameTimeMin: 0,
       lastWallClockMs: 123_000,
       cashMinor: 42_000,

@@ -10,28 +10,29 @@ import {
 describe("deterministic economy", () => {
   it("replays the same market values for the same seed and cycle", () => {
     const a = market(42, 500_000, 3).map((item) => [
-      item.family.id,
+      item.familyId,
       item.priceMinor,
-      item.condition,
+      item.instance.condition,
     ]);
     const b = market(42, 500_000, 3).map((item) => [
-      item.family.id,
+      item.familyId,
       item.priceMinor,
-      item.condition,
+      item.instance.condition,
     ]);
     expect(a).toEqual(b);
   });
 
   it("keeps cash separate from active owned-asset wealth", () => {
     const state = initialState();
-    const family = state.listings[0].family;
+    const instance = state.listings[0].instance;
+    const family = instance.family;
     state.cashMinor = 1_000;
     state.ownedAssets = [
       {
         id: "asset:x",
         familyId: family.id,
         sourceListingId: "x",
-        instance: { family, fairValueMinor: 50_000, condition: 80 },
+        instance: { ...instance, fairValueMinor: 50_000, condition: 80 },
         state: "IN_INVENTORY",
         purchasePriceMinor: 10_000,
         preparationCostMinor: 0,

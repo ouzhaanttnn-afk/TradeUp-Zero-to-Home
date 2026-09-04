@@ -1,6 +1,14 @@
 import { z } from "zod";
+import { families } from "./content/families";
 import { netWorthMinor } from "./domain/economy";
-import type { Family, GameState, Listing, SellerKind } from "./domain/models";
+import type {
+  AttributeDefinition,
+  GameState,
+  ItemAttribute,
+  ItemInstance,
+  Listing,
+  SellerKind,
+} from "./domain/models";
 
 export type {
   BuyerOffer,
@@ -14,350 +22,40 @@ export type {
   SellerKind,
   TransactionJournalEntry,
 } from "./domain/models";
-
-export const SAVE_VERSION = 4;
-export const families: Family[] = [
-  {
-    id: "notebook",
-    name: "Kuzey Defteri",
-    assetKey: "prd_notebook",
-    baseValueMinor: 18_000,
-    demand: 0.82,
-    liquidity: 0.9,
-    category: "Küçük Eşya",
-    tier: 0,
-    attributes: ["Kapak", "Sayfa"],
-  },
-  {
-    id: "headset",
-    name: "Echo Mini Kulaklık",
-    assetKey: "prd_headset",
-    baseValueMinor: 64_000,
-    demand: 0.76,
-    liquidity: 0.82,
-    category: "Ses",
-    tier: 0,
-    attributes: ["Pil", "Bağlantı"],
-  },
-  {
-    id: "watch",
-    name: "Mira Classic Saat",
-    assetKey: "prd_watch",
-    baseValueMinor: 145_000,
-    demand: 0.66,
-    liquidity: 0.7,
-    category: "Saat",
-    tier: 1,
-    attributes: ["Mekanizma", "Kordon"],
-  },
-  {
-    id: "console",
-    name: "PixelGo Konsol",
-    assetKey: "prd_console",
-    baseValueMinor: 320_000,
-    demand: 0.79,
-    liquidity: 0.78,
-    category: "Oyun",
-    tier: 1,
-    attributes: ["Depolama", "Kontrolcü"],
-  },
-  {
-    id: "guitar",
-    name: "Arda S1 Gitar",
-    assetKey: "prd_guitar",
-    baseValueMinor: 510_000,
-    demand: 0.58,
-    liquidity: 0.55,
-    category: "Müzik",
-    tier: 1,
-    attributes: ["Gövde", "Aksesuar"],
-  },
-  {
-    id: "phone",
-    name: "Nova X1 Telefon",
-    assetKey: "prd_phone",
-    baseValueMinor: 820_000,
-    demand: 0.88,
-    liquidity: 0.88,
-    category: "Telefon",
-    tier: 2,
-    attributes: ["Pil sağlığı", "Depolama"],
-  },
-  {
-    id: "laptop",
-    name: "Atlas Air Bilgisayar",
-    assetKey: "prd_laptop",
-    baseValueMinor: 1_450_000,
-    demand: 0.75,
-    liquidity: 0.72,
-    category: "Bilgisayar",
-    tier: 2,
-    attributes: ["Bellek", "Pil"],
-  },
-  {
-    id: "camera",
-    name: "Luma C2 Kamera",
-    assetKey: "prd_camera",
-    baseValueMinor: 2_200_000,
-    demand: 0.59,
-    liquidity: 0.56,
-    category: "Kamera",
-    tier: 3,
-    attributes: ["Perde sayısı", "Lens"],
-  },
-  {
-    id: "scooter",
-    name: "Vela Şehir Scooter",
-    assetKey: "prd_scooter",
-    baseValueMinor: 3_600_000,
-    demand: 0.62,
-    liquidity: 0.53,
-    category: "Ulaşım",
-    tier: 3,
-    attributes: ["Menzil", "Batarya"],
-  },
-  {
-    id: "turntable",
-    name: "Orion Pikap",
-    assetKey: "prd_turntable",
-    baseValueMinor: 280_000,
-    demand: 0.68,
-    liquidity: 0.62,
-    category: "Plak & Ses",
-    tier: 1,
-    attributes: ["İğne", "Kayış", "Toz kapağı"],
-  },
-  {
-    id: "vinyl",
-    name: "Klasik Plak Koleksiyonu",
-    assetKey: "prd_vinyl",
-    baseValueMinor: 42_000,
-    demand: 0.72,
-    liquidity: 0.75,
-    category: "Plak & Ses",
-    tier: 0,
-    attributes: ["Baskı", "Çizik", "Kapak"],
-  },
-  {
-    id: "speaker",
-    name: "Sera Raf Hoparlörü",
-    assetKey: "prd_speaker",
-    baseValueMinor: 185_000,
-    demand: 0.66,
-    liquidity: 0.64,
-    category: "Plak & Ses",
-    tier: 1,
-    attributes: ["Sürücü", "Kabin", "Kablo"],
-  },
-  {
-    id: "desk",
-    name: "Atölye Çalışma Masası",
-    assetKey: "prd_desk",
-    baseValueMinor: 360_000,
-    demand: 0.7,
-    liquidity: 0.64,
-    category: "Mobilya",
-    tier: 1,
-    attributes: ["Malzeme", "Ölçü", "Çekmece"],
-  },
-  {
-    id: "chair",
-    name: "Kavak Ahşap Sandalye",
-    assetKey: "prd_chair",
-    baseValueMinor: 76_000,
-    demand: 0.74,
-    liquidity: 0.8,
-    category: "Mobilya",
-    tier: 0,
-    attributes: ["Kumaş", "Ayak", "Renk"],
-  },
-  {
-    id: "sofa",
-    name: "Liman Üçlü Koltuk",
-    assetKey: "prd_sofa",
-    baseValueMinor: 720_000,
-    demand: 0.6,
-    liquidity: 0.48,
-    category: "Mobilya",
-    tier: 2,
-    attributes: ["Kumaş", "Sünger", "Leke"],
-  },
-  {
-    id: "wardrobe",
-    name: "Mimoza Gardırop",
-    assetKey: "prd_wardrobe",
-    baseValueMinor: 580_000,
-    demand: 0.54,
-    liquidity: 0.45,
-    category: "Mobilya",
-    tier: 2,
-    attributes: ["Kapak", "Ray", "Malzeme"],
-  },
-  {
-    id: "tv",
-    name: "Vista 4K Televizyon",
-    assetKey: "prd_tv",
-    baseValueMinor: 1_280_000,
-    demand: 0.82,
-    liquidity: 0.8,
-    category: "Elektronik",
-    tier: 2,
-    attributes: ["Panel", "HDR", "Kumanda"],
-  },
-  {
-    id: "monitor",
-    name: "Frame 27 Monitör",
-    assetKey: "prd_monitor",
-    baseValueMinor: 620_000,
-    demand: 0.78,
-    liquidity: 0.75,
-    category: "Elektronik",
-    tier: 2,
-    attributes: ["Ölü piksel", "Yenileme", "Stand"],
-  },
-  {
-    id: "printer",
-    name: "Inkjet Ofis Yazıcı",
-    assetKey: "prd_printer",
-    baseValueMinor: 210_000,
-    demand: 0.55,
-    liquidity: 0.52,
-    category: "Elektronik",
-    tier: 1,
-    attributes: ["Kartuş", "Baskı", "Wi-Fi"],
-  },
-  {
-    id: "fridge",
-    name: "Frost Mini Buzdolabı",
-    assetKey: "prd_fridge",
-    baseValueMinor: 940_000,
-    demand: 0.58,
-    liquidity: 0.44,
-    category: "Beyaz Eşya",
-    tier: 2,
-    attributes: ["Soğutma", "Conta", "Çizik"],
-  },
-  {
-    id: "washer",
-    name: "Aqua Çamaşır Makinesi",
-    assetKey: "prd_washer",
-    baseValueMinor: 1_120_000,
-    demand: 0.57,
-    liquidity: 0.42,
-    category: "Beyaz Eşya",
-    tier: 2,
-    attributes: ["Tambur", "Program", "Pas"],
-  },
-  {
-    id: "bicycle",
-    name: "Rota Şehir Bisikleti",
-    assetKey: "prd_bicycle",
-    baseValueMinor: 480_000,
-    demand: 0.7,
-    liquidity: 0.68,
-    category: "Ulaşım",
-    tier: 1,
-    attributes: ["Kadro", "Vites", "Fren"],
-  },
-  {
-    id: "motorcycle",
-    name: "Kanyon 250 Motosiklet",
-    assetKey: "prd_motorcycle",
-    baseValueMinor: 8_800_000,
-    demand: 0.51,
-    liquidity: 0.35,
-    category: "Araç",
-    tier: 3,
-    attributes: ["Kilometre", "Boya", "Servis"],
-  },
-  {
-    id: "car",
-    name: "Mira Hatchback",
-    assetKey: "prd_car",
-    baseValueMinor: 36_000_000,
-    demand: 0.5,
-    liquidity: 0.25,
-    category: "Araç",
-    tier: 3,
-    attributes: ["Kilometre", "Tramer", "Muayene"],
-  },
-  {
-    id: "book",
-    name: "İmzalı İlk Baskı Kitap",
-    assetKey: "prd_book",
-    baseValueMinor: 98_000,
-    demand: 0.64,
-    liquidity: 0.7,
-    category: "Koleksiyon",
-    tier: 0,
-    attributes: ["Baskı", "İmza", "Kapak"],
-  },
-  {
-    id: "camera_lens",
-    name: "Vela 50mm Lens",
-    assetKey: "prd_camera_lens",
-    baseValueMinor: 760_000,
-    demand: 0.61,
-    liquidity: 0.58,
-    category: "Kamera",
-    tier: 2,
-    attributes: ["Cam", "Mantar", "Kapak"],
-  },
-  {
-    id: "sneaker",
-    name: "Kanvas Koleksiyon Ayakkabı",
-    assetKey: "prd_sneaker",
-    baseValueMinor: 240_000,
-    demand: 0.8,
-    liquidity: 0.86,
-    category: "Moda",
-    tier: 1,
-    attributes: ["Numara", "Taban", "Kutu"],
-  },
-  {
-    id: "coffee",
-    name: "Barista Espresso Makinesi",
-    assetKey: "prd_coffee",
-    baseValueMinor: 690_000,
-    demand: 0.68,
-    liquidity: 0.6,
-    category: "Ev",
-    tier: 2,
-    attributes: ["Pompa", "Kireç", "Aksesuar"],
-  },
-  {
-    id: "lamp",
-    name: "Lumen Masa Lambası",
-    assetKey: "prd_lamp",
-    baseValueMinor: 52_000,
-    demand: 0.78,
-    liquidity: 0.88,
-    category: "Ev",
-    tier: 0,
-    attributes: ["Ampul", "Kablo", "Gövde"],
-  },
-  {
-    id: "record_player",
-    name: "Mono Taşınabilir Plak Çalar",
-    assetKey: "prd_record_player",
-    baseValueMinor: 175_000,
-    demand: 0.7,
-    liquidity: 0.65,
-    category: "Plak & Ses",
-    tier: 1,
-    attributes: ["İğne", "Hoparlör", "Kasa"],
-  },
-];
+export { families } from "./content/families";
+export const SAVE_VERSION = 5;
 export const HOME_GOAL_MINOR = 350_000_000;
 
-const sellerKindSchema = z.enum([
-  "urgent",
-  "expert",
-  "uninformed",
-  "emotional",
-  "merchant",
-  "risky",
-]);
+const attributeDefinitionSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  type: z.enum(["NUMBER", "CATEGORY", "BOOLEAN", "YEAR", "RANGE"]),
+  unit: z.string().optional(),
+  min: z.number().optional(),
+  max: z.number().optional(),
+  step: z.number().optional(),
+  options: z.array(z.string()).optional(),
+  comparePriority: z.number(),
+});
+const evidenceDefinitionSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  claim: z.string(),
+  checkedCopy: z.string(),
+  inspectionKinds: z.array(z.enum(["PHOTO", "ASK_SELLER", "QUICK_TEST"])),
+  critical: z.boolean(),
+});
+const preparationDefinitionSchema = z.object({
+  kind: z.enum(["CLEAN", "TEST", "COMPLETE"]),
+  label: z.string(),
+  costMinor: z.number().int().nonnegative(),
+  durationMin: z.number().int().nonnegative(),
+  conditionGain: z.number(),
+  confidenceGain: z.number(),
+  valueGainBps: z.number(),
+  liquidityGainBps: z.number(),
+  maxUses: z.number().int().positive(),
+});
 const familySchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -367,17 +65,90 @@ const familySchema = z.object({
   liquidity: z.number(),
   category: z.string(),
   tier: z.number().int().nonnegative(),
-  attributes: z.array(z.string()),
+  rarity: z.number(),
+  conditionCap: z.number(),
+  attributes: z.array(attributeDefinitionSchema),
+  evidence: z.array(evidenceDefinitionSchema),
+  defects: z.array(
+    z.object({
+      id: z.string(),
+      label: z.string(),
+      severity: z.enum(["LOW", "MEDIUM", "HIGH"]),
+      valuePenaltyBps: z.number(),
+      riskSignal: z.number(),
+      evidenceId: z.string(),
+      overlayKey: z.string(),
+    }),
+  ),
+  variants: z.array(
+    z.object({ id: z.string(), label: z.string(), valueFactorBps: z.number() }),
+  ),
+  preparation: z.array(preparationDefinitionSchema),
+});
+const itemInstanceSchema = z.object({
+  family: familySchema,
+  variantId: z.string(),
+  fairValueMinor: z.number().int().nonnegative(),
+  condition: z.number(),
+  attributes: z.array(
+    z.object({
+      definitionId: z.string(),
+      value: z.union([z.number(), z.string(), z.boolean()]),
+    }),
+  ),
+  evidence: z.array(
+    z.object({
+      definitionId: z.string(),
+      status: z.enum([
+        "VISIBLE",
+        "CLAIMED",
+        "SUSPICIOUS",
+        "CHECKED",
+        "VERIFIED",
+        "UNKNOWN",
+      ]),
+    }),
+  ),
+  defects: z.array(
+    z.object({
+      definitionId: z.string(),
+      present: z.boolean(),
+      revealed: z.boolean(),
+    }),
+  ),
+  evidenceConfidence: z.number().min(0).max(1),
+  liquidityBonusBps: z.number().int().nonnegative(),
+  accessoryComplete: z.boolean(),
+  preparationHistory: z.array(
+    z.object({
+      id: z.string(),
+      kind: z.enum(["CLEAN", "TEST", "COMPLETE"]),
+      state: z.enum(["IN_PROGRESS", "COMPLETE"]),
+      startedAtGameMin: z.number().int().nonnegative(),
+      completesAtGameMin: z.number().int().nonnegative(),
+      costMinor: z.number().int().nonnegative(),
+    }),
+  ),
 });
 const listingSchema = z.object({
   id: z.string(),
-  family: familySchema,
+  familyId: z.string(),
+  instance: itemInstanceSchema,
   priceMinor: z.number().int().nonnegative(),
-  fairValueMinor: z.number().int().nonnegative(),
-  condition: z.number(),
-  seller: sellerKindSchema,
+  seller: z.enum([
+    "urgent",
+    "expert",
+    "uninformed",
+    "emotional",
+    "merchant",
+    "risky",
+  ]),
   urgency: z.number(),
   interest: z.number(),
+  createdAtGameMin: z.number().int().nonnegative(),
+  expiresAtGameMin: z.number().int().nonnegative(),
+  closedAtGameMin: z.number().int().nonnegative().optional(),
+  exitReason: z.enum(["NPC_PURCHASE", "EXPIRED"]).optional(),
   state: z.enum([
     "ACTIVE",
     "WATCHED",
@@ -388,21 +159,13 @@ const listingSchema = z.object({
     "WITHDRAWN",
   ]),
   seed: z.number().int(),
-  createdAtGameMin: z.number().int().nonnegative(),
-  expiresAtGameMin: z.number().int().nonnegative(),
-  closedAtGameMin: z.number().int().nonnegative().optional(),
-  exitReason: z.enum(["NPC_PURCHASE", "EXPIRED"]).optional(),
 });
 const ownedAssetSchema = z
   .object({
     id: z.string(),
     familyId: z.string(),
     sourceListingId: z.string(),
-    instance: z.object({
-      family: familySchema,
-      fairValueMinor: z.number().int().nonnegative(),
-      condition: z.number(),
-    }),
+    instance: itemInstanceSchema,
     state: z.enum([
       "IN_INVENTORY",
       "PREPARING",
@@ -488,6 +251,7 @@ const negotiationSchema = z.object({
   counterMinor: z.number().int().nonnegative().optional(),
   closed: z.boolean(),
 });
+
 const stateSchema = z
   .object({
     version: z.literal(SAVE_VERSION),
@@ -499,119 +263,134 @@ const stateSchema = z
     seed: z.number().int(),
     marketCycle: z.number().int().nonnegative(),
     listings: z.array(listingSchema),
+    playerListings: z.array(playerListingSchema),
+    buyerOffers: z.array(buyerOfferSchema),
+    negotiation: negotiationSchema.optional(),
     expertise: z.record(z.string(), z.number()),
     career: z.array(careerEventSchema),
     lastWallClockMs: z.number().nonnegative(),
-    negotiation: negotiationSchema.optional(),
-    playerListings: z.array(playerListingSchema),
-    buyerOffers: z.array(buyerOfferSchema),
   })
   .superRefine((state, context) => {
-    const marketListingIds = new Set<string>();
-    for (const listing of state.listings) {
-      if (marketListingIds.has(listing.id)) {
-        context.addIssue({
-          code: "custom",
-          message: `Market listing id must be unique: ${listing.id}`,
-          path: ["listings"],
-        });
-      }
-      marketListingIds.add(listing.id);
-    }
-
-    const assetIds = new Set<string>();
-    for (const asset of state.ownedAssets) {
-      if (assetIds.has(asset.id)) {
-        context.addIssue({
-          code: "custom",
-          message: `OwnedAsset id must be unique: ${asset.id}`,
-          path: ["ownedAssets"],
-        });
-      }
-      assetIds.add(asset.id);
-      if (asset.state === "SOLD_COMPLETE" && asset.currentListingId) {
-        context.addIssue({
-          code: "custom",
-          message: `SoldComplete asset cannot have an active listing: ${asset.id}`,
-          path: ["ownedAssets"],
-        });
-      }
-    }
-
-    const activeAssetListings = new Set<string>();
-    for (const listing of state.playerListings) {
-      if (
-        listing.state !== "ACTIVE" &&
-        listing.state !== "RESERVED" &&
-        listing.state !== "SOLD_PENDING"
-      ) {
-        continue;
-      }
-      const asset = state.ownedAssets.find(
-        (item) => item.id === listing.ownedAssetId,
-      );
-      if (!asset || asset.currentListingId !== listing.id) {
-        context.addIssue({
-          code: "custom",
-          message: `Active player listing must reference its current OwnedAsset: ${listing.id}`,
-          path: ["playerListings"],
-        });
-      }
-      if (activeAssetListings.has(listing.ownedAssetId)) {
-        context.addIssue({
-          code: "custom",
-          message: `OwnedAsset cannot have two active listings: ${listing.ownedAssetId}`,
-          path: ["playerListings"],
-        });
-      }
-      activeAssetListings.add(listing.ownedAssetId);
-    }
-
-    const transactionIds = new Set<string>();
-    for (const entry of state.transactionJournal) {
-      if (transactionIds.has(entry.id)) {
-        context.addIssue({
-          code: "custom",
-          message: `Transaction id must be unique: ${entry.id}`,
-          path: ["transactionJournal"],
-        });
-      }
-      transactionIds.add(entry.id);
-    }
-
-    const journalTotals = state.transactionJournal.reduce(
-      (totals, entry) => ({
-        cashMinor: totals.cashMinor + entry.cashDeltaMinor,
-        activeBookCostMinor:
-          totals.activeBookCostMinor + entry.costBasisDeltaMinor,
-        realizedProfitMinor:
-          totals.realizedProfitMinor + entry.realizedProfitDeltaMinor,
-      }),
-      { cashMinor: 0, activeBookCostMinor: 0, realizedProfitMinor: 0 },
+    const unique = (values: string[], path: string, message: string) => {
+      if (new Set(values).size !== values.length)
+        context.addIssue({ code: "custom", message, path: [path] });
+    };
+    unique(
+      state.listings.map((item) => item.id),
+      "listings",
+      "Market listing id must be unique",
     );
-    const activeBookCostMinor = state.ownedAssets
-      .filter((asset) => asset.state !== "SOLD_COMPLETE")
-      .reduce((total, asset) => total + asset.bookCostMinor, 0);
+    unique(
+      state.ownedAssets.map((item) => item.id),
+      "ownedAssets",
+      "OwnedAsset id must be unique",
+    );
+    unique(
+      state.transactionJournal.map((item) => item.id),
+      "transactionJournal",
+      "Transaction id must be unique",
+    );
+    const journal = state.transactionJournal.reduce(
+      (sum, item) => ({
+        cash: sum.cash + item.cashDeltaMinor,
+        book: sum.book + item.costBasisDeltaMinor,
+        profit: sum.profit + item.realizedProfitDeltaMinor,
+      }),
+      { cash: 0, book: 0, profit: 0 },
+    );
+    const book = state.ownedAssets
+      .filter((item) => item.state !== "SOLD_COMPLETE")
+      .reduce((sum, item) => sum + item.bookCostMinor, 0);
     if (
-      journalTotals.cashMinor !== state.cashMinor ||
-      journalTotals.activeBookCostMinor !== activeBookCostMinor ||
-      journalTotals.realizedProfitMinor !== state.realizedProfitMinor
-    ) {
+      journal.cash !== state.cashMinor ||
+      journal.book !== book ||
+      journal.profit !== state.realizedProfitMinor
+    )
       context.addIssue({
         code: "custom",
         message: "Transaction journal does not reconcile with account totals",
         path: ["transactionJournal"],
       });
-    }
   });
 export const validateState = (value: unknown) =>
   stateSchema.parse(value) as GameState;
 export function rng(seed: number) {
   let value = seed >>> 0;
   return () =>
-    (value = (Math.imul(1664525, value) + 1013904223) >>> 0) / 4294967296;
+    (value = (Math.imul(1_664_525, value) + 1_013_904_223) >>> 0) /
+    4_294_967_296;
 }
 export const wealth = netWorthMinor;
+
+function attributeValue(
+  definition: AttributeDefinition,
+  roll: number,
+): ItemAttribute {
+  if (definition.type === "BOOLEAN")
+    return { definitionId: definition.id, value: roll > 0.42 };
+  if (definition.type === "CATEGORY") {
+    const options = definition.options ?? ["Standart"];
+    return {
+      definitionId: definition.id,
+      value:
+        options[
+          Math.min(options.length - 1, Math.floor(roll * options.length))
+        ],
+    };
+  }
+  const min = definition.min ?? 0;
+  const max = definition.max ?? 100;
+  return {
+    definitionId: definition.id,
+    value: Math.round(min + roll * (max - min)),
+  };
+}
+function instanceFor(
+  family: (typeof families)[number],
+  r: () => number,
+): ItemInstance {
+  const condition = Math.round(48 + r() * 48);
+  const variant = family.variants[Math.floor(r() * family.variants.length)];
+  const defects = family.defects.map((definition) => ({
+    definitionId: definition.id,
+    present: r() < 0.18 + (100 - condition) / 250,
+    revealed: false,
+  }));
+  const penaltyBps = defects.reduce(
+    (sum, defect) =>
+      sum +
+      (defect.present
+        ? (family.defects.find((item) => item.id === defect.definitionId)
+            ?.valuePenaltyBps ?? 0)
+        : 0),
+    0,
+  );
+  return {
+    family,
+    variantId: variant.id,
+    fairValueMinor: Math.max(
+      1_000,
+      Math.round(
+        ((family.baseValueMinor * variant.valueFactorBps) / 10_000) *
+          (0.58 + condition / 230) *
+          (1 - penaltyBps / 10_000),
+      ),
+    ),
+    condition,
+    attributes: family.attributes.map((definition) =>
+      attributeValue(definition, r()),
+    ),
+    evidence: family.evidence.map((definition, index) => ({
+      definitionId: definition.id,
+      status: index === 0 ? "VISIBLE" : "UNKNOWN",
+    })),
+    defects,
+    evidenceConfidence: 0.22 + r() * 0.16,
+    liquidityBonusBps: 0,
+    accessoryComplete: r() > 0.35,
+    preparationHistory: [],
+  };
+}
 export function market(
   seed: number,
   totalWealthMinor: number,
@@ -619,27 +398,30 @@ export function market(
   gameTimeMin = 0,
   count = 24,
 ): Listing[] {
-  const r = rng(seed + cycle * 7919);
+  const r = rng(seed + cycle * 7_919);
   const tier =
     totalWealthMinor < 1_000_000 ? 1 : totalWealthMinor < 7_500_000 ? 2 : 3;
-  const pool = families.filter((f) => f.tier <= tier);
-  return Array.from({ length: count }, (_, i) => {
-    const family = pool[Math.floor(r() * pool.length)];
-    const condition = Math.round(48 + r() * 51);
-    const fairValueMinor = Math.round(
-      family.baseValueMinor * (0.55 + condition / 190) * (0.94 + r() * 0.13),
-    );
+  const pool = families.filter((family) => family.tier <= tier);
+  const focusIndex = Math.floor(r() * pool.length);
+  const focus = pool[focusIndex];
+  const cohort = Array.from(
+    { length: Math.min(4, pool.length) },
+    (_, index) => pool[(focusIndex + index) % pool.length],
+  );
+  return Array.from({ length: count }, (_, index) => {
+    const family =
+      index < Math.ceil(count / 2) ? focus : cohort[index % cohort.length];
+    const instance = instanceFor(family, r);
     const priceMinor = Math.max(
       2_000,
-      Math.round((fairValueMinor * (0.72 + r() * 0.56)) / 1_000) * 1_000,
+      Math.round((instance.fairValueMinor * (0.72 + r() * 0.56)) / 1_000) *
+        1_000,
     );
-    const lifeMin = Math.round(2 + (1 - family.liquidity) * 30 + r() * 25);
     return {
-      id: `${seed}-${cycle}-${i}`,
-      family,
-      fairValueMinor,
+      id: `${seed}-${cycle}-${index}`,
+      familyId: family.id,
+      instance,
       priceMinor,
-      condition,
       seller: (
         [
           "urgent",
@@ -653,16 +435,19 @@ export function market(
       urgency: r(),
       interest: Math.round(r() * 98),
       createdAtGameMin: gameTimeMin,
-      expiresAtGameMin: gameTimeMin + lifeMin,
+      expiresAtGameMin:
+        gameTimeMin + Math.round(2 + (1 - family.liquidity) * 30 + r() * 25),
       state: "ACTIVE" as const,
       seed: Math.floor(r() * 1e9),
     };
   }).sort(
-    (a, b) => a.priceMinor / a.fairValueMinor - b.priceMinor / b.fairValueMinor,
+    (a, b) =>
+      a.priceMinor / a.instance.fairValueMinor -
+      b.priceMinor / b.instance.fairValueMinor,
   );
 }
 export function signal(item: Listing) {
-  const ratio = item.priceMinor / item.fairValueMinor;
+  const ratio = item.priceMinor / item.instance.fairValueMinor;
   if (ratio < 0.78) return { text: "Sıcak fırsat", cls: "hot" };
   if (ratio < 0.88) return { text: "İyi fiyat", cls: "good" };
   if (ratio > 1.15) return { text: "Pahalı", cls: "bad" };
@@ -678,8 +463,9 @@ export function sellerFloor(item: Listing) {
     risky: 0.7,
   }[item.seller];
   return (
-    Math.round((item.fairValueMinor * (factor + item.urgency * 0.06)) / 1_000) *
-    1_000
+    Math.round(
+      (item.instance.fairValueMinor * (factor + item.urgency * 0.06)) / 1_000,
+    ) * 1_000
   );
 }
 export function resolveOffer(item: Listing, offer: number, index: number) {
@@ -694,33 +480,33 @@ export function resolveOffer(item: Listing, offer: number, index: number) {
     };
   return { result: "rejected" as const, floorMinor };
 }
-const tryFormatter = new Intl.NumberFormat("tr-TR", {
+const formatter = new Intl.NumberFormat("tr-TR", {
   style: "currency",
   currency: "TRY",
   minimumFractionDigits: 0,
   maximumFractionDigits: 2,
 });
-export const money = (minor: number) => tryFormatter.format(minor / 100);
+export const money = (minor: number) => formatter.format(minor / 100);
 export const initialState = (lastWallClockMs = 0): GameState => {
-  const initialCashMinor = 42_000;
+  const cashMinor = 42_000;
   const base: GameState = {
     version: SAVE_VERSION,
-    cashMinor: initialCashMinor,
+    cashMinor,
     ownedAssets: [],
     realizedProfitMinor: 0,
     transactionJournal: [
       {
-        id: "opening-balance:v4",
+        id: "opening-balance:v5",
         kind: "OPENING_BALANCE",
         gameTime: 0,
-        cashDeltaMinor: initialCashMinor,
+        cashDeltaMinor: cashMinor,
         costBasisDeltaMinor: 0,
         realizedProfitDeltaMinor: 0,
         metadata: { reason: "prototype-starting-balance" },
       },
     ],
     gameTimeMin: 0,
-    seed: 90421,
+    seed: 90_421,
     marketCycle: 0,
     listings: [],
     playerListings: [],
@@ -729,8 +515,5 @@ export const initialState = (lastWallClockMs = 0): GameState => {
     career: [],
     lastWallClockMs,
   };
-  return {
-    ...base,
-    listings: market(base.seed, base.cashMinor, 0, base.gameTimeMin),
-  };
+  return { ...base, listings: market(base.seed, base.cashMinor, 0, 0) };
 };

@@ -1,9 +1,9 @@
 import { WORLD_CONFIG } from "./config";
+import { familyById, families } from "../content/families";
 import type {
   BuyerOffer,
   CareerEvent,
   Family,
-  GameState,
   Listing,
   Negotiation,
   OwnedAsset,
@@ -27,6 +27,8 @@ const minor = (value: unknown) => Math.max(0, Math.round(number(value) * 100));
 
 function migrateFamily(value: unknown): Family {
   const source = record(value);
+  const configured = familyById(string(source.id));
+  if (configured) return configured;
   return {
     id: string(source.id, "legacy-family"),
     name: string(source.name, "Bilinmeyen ürün"),
@@ -39,7 +41,38 @@ function migrateFamily(value: unknown): Family {
     liquidity: number(source.liquidity, 0.5),
     category: string(source.category, "Diğer"),
     tier: Math.max(0, integer(source.tier)),
-    attributes: array(source.attributes).map((item) => string(item)),
+    rarity: 1,
+    conditionCap: 96,
+    attributes: array(source.attributes).map((item, index) => ({
+      id: `attribute-${index}`,
+      label: string(item),
+      type: "CATEGORY" as const,
+      options: ["Standart"],
+      comparePriority: index + 1,
+    })),
+    evidence: [
+      {
+        id: "evidence-0",
+        label: "Genel durum",
+        claim: "Satıcı beyanı",
+        checkedCopy: "Kontrol edildi",
+        inspectionKinds: ["PHOTO", "ASK_SELLER", "QUICK_TEST"],
+        critical: true,
+      },
+    ],
+    defects: [
+      {
+        id: "defect-0",
+        label: "Gizli sorun",
+        severity: "HIGH",
+        valuePenaltyBps: 1_200,
+        riskSignal: 0.6,
+        evidenceId: "evidence-0",
+        overlayKey: "warning",
+      },
+    ],
+    variants: [{ id: "standard", label: "Standart", valueFactorBps: 10_000 }],
+    preparation: families[0].preparation,
   };
 }
 
@@ -254,7 +287,7 @@ const normalizedGameMinute = (value: unknown, gameTimeMin: number) => {
   return candidate <= gameTimeMin ? candidate : gameTimeMin;
 };
 
-function currentMarketListing(value: unknown, gameTimeMin: number): Listing {
+function currentMarketListing(value: unknown, gameTimeMin: number): unknown {
   const source = record(value);
   const legacyCreatedAt = number(source.createdAt);
   const legacyExpiresAt = number(source.expiresAt);
@@ -410,7 +443,7 @@ export function migrateStateToV4(value: unknown): unknown {
   );
   const negotiation = currentNegotiation(source.negotiation);
 
-  const migrated: GameState = {
+  const migrated = {
     version: 4,
     cashMinor: Math.max(0, integer(source.cashMinor)),
     ownedAssets: array(source.ownedAssets).map((asset) =>
@@ -448,5 +481,77 @@ export function migrateStateToV4(value: unknown): unknown {
 }
 
 export function migrateStateToCurrent(value: unknown): unknown {
-  return migrateStateToV4(migrateStateToV3(value));
+  return migrateStateToV5(migrateStateToV4(migrateStateToV3(value)));
+}
+
+function migrateInstance(source: UnknownRecord, fallbackFamily: unknown) {
+  const family = migrateFamily(
+    record(source.family).id ? source.family : fallbackFamily,
+  );
+  const rawAttributes = array(source.attributes);
+  return {
+    family,
+    variantId: string(source.variantId, family.variants[0].id),
+    fairValueMinor: Math.max(
+      0,
+      integer(source.fairValueMinor, family.baseValueMinor),
+    ),
+    condition: number(source.condition, 70),
+    attributes: family.attributes.map((definition, index) => ({
+      definitionId: definition.id,
+      value:
+        record(rawAttributes[index]).value ??
+        definition.options?.[0] ??
+        definition.min ??
+        false,
+    })),
+    evidence: family.evidence.map((definition) => ({
+      definitionId: definition.id,
+      status: "UNKNOWN" as const,
+    })),
+    defects: family.defects.map((definition) => ({
+      definitionId: definition.id,
+      present: false,
+      revealed: false,
+    })),
+    evidenceConfidence: number(source.evidenceConfidence, 0.25),
+    liquidityBonusBps: Math.max(0, integer(source.liquidityBonusBps)),
+    accessoryComplete: Boolean(source.accessoryComplete),
+    preparationHistory: array(source.preparationHistory),
+  };
+}
+
+export function migrateStateToV5(value: unknown): unknown {
+  const source = record(value);
+  if (integer(source.version) >= 5) return value;
+  const listings = array(source.listings).map((value) => {
+    const listing = record(value);
+    const family = migrateFamily(listing.family);
+    return {
+      ...listing,
+      familyId: family.id,
+      instance: migrateInstance(
+        {
+          family,
+          fairValueMinor: listing.fairValueMinor,
+          condition: listing.condition,
+        },
+        family,
+      ),
+      family: undefined,
+      fairValueMinor: undefined,
+      condition: undefined,
+    };
+  });
+  const ownedAssets = array(source.ownedAssets).map((value) => {
+    const asset = record(value);
+    const instance = record(asset.instance);
+    const family = migrateFamily(instance.family);
+    return {
+      ...asset,
+      familyId: string(asset.familyId, family.id),
+      instance: migrateInstance(instance, family),
+    };
+  });
+  return { ...source, version: 5, listings, ownedAssets };
 }

@@ -1,6 +1,7 @@
 import { market, rng } from "../game";
 import { WORLD_CONFIG } from "./config";
 import { netWorthMinor } from "./economy";
+import { completeDuePreparations } from "./preparation";
 import type {
   BuyerOffer,
   GameState,
@@ -55,7 +56,8 @@ const hashString = (value: string) => {
 };
 
 export function npcHazardScore(listing: Listing, gameTimeMin: number) {
-  const priceRatio = listing.priceMinor / Math.max(1, listing.fairValueMinor);
+  const priceRatio =
+    listing.priceMinor / Math.max(1, listing.instance.fairValueMinor);
   const opportunity = clamp01((1.18 - priceRatio) / 0.58);
   const lifetime = Math.max(
     1,
@@ -65,8 +67,8 @@ export function npcHazardScore(listing: Listing, gameTimeMin: number) {
   const competition = clamp01(listing.interest / 100);
   return clamp01(
     opportunity * 0.3 +
-      listing.family.liquidity * 0.2 +
-      listing.family.demand * 0.18 +
+      listing.instance.family.liquidity * 0.2 +
+      listing.instance.family.demand * 0.18 +
       listing.urgency * 0.12 +
       age * 0.1 +
       competition * 0.1,
@@ -106,12 +108,12 @@ const nextInterest = (
   gameTimeMin: number,
 ) => {
   const roll = rng(state.seed + listing.seed + gameTimeMin * 7_919)();
-  const increase = roll < listing.family.demand * 0.55 ? 1 : 0;
+  const increase = roll < listing.instance.family.demand * 0.55 ? 1 : 0;
   return Math.min(100, listing.interest + increase);
 };
 
 const meaningfulMiss = (listing: Listing) =>
-  listing.priceMinor / listing.fairValueMinor <= 0.88;
+  listing.priceMinor / listing.instance.fairValueMinor <= 0.88;
 
 function advanceMarketMinute(
   state: GameState,
@@ -162,8 +164,8 @@ function advanceMarketMinute(
       atGameMin: gameTimeMin,
       label:
         listing.state === "SOLD_TO_NPC"
-          ? `${listing.family.name} başka alıcıya gitti`
-          : `${listing.family.name} ilanının süresi doldu`,
+          ? `${listing.instance.family.name} başka alıcıya gitti`
+          : `${listing.instance.family.name} ilanının süresi doldu`,
     });
   }
 
@@ -204,6 +206,7 @@ const offerForMinute = (
     0.006 +
     asset.instance.family.demand * 0.018 +
     asset.instance.family.liquidity * 0.014 +
+    (asset.instance.liquidityBonusBps / 10_000) * 0.014 +
     priceFit * 0.02;
   const roll = rng(
     state.seed + hashString(listing.id) * 65_537 + gameTimeMin * 131_071,
@@ -368,7 +371,7 @@ export function advanceWorldTo(
     gameTimeMin <= targetGameTimeMin;
     gameTimeMin += 1
   ) {
-    state = { ...state, gameTimeMin };
+    state = completeDuePreparations({ ...state, gameTimeMin }, gameTimeMin);
     const marketResult = advanceMarketMinute(
       state,
       gameTimeMin,
@@ -453,8 +456,8 @@ export function advanceOffline(
   const active = activeMarketListings(state);
   const protectedListing = [...active].sort(
     (left, right) =>
-      left.priceMinor / left.fairValueMinor -
-      right.priceMinor / right.fairValueMinor,
+      left.priceMinor / left.instance.fairValueMinor -
+      right.priceMinor / right.instance.fairValueMinor,
   )[0];
   const result = advanceWorldTo(state, state.gameTimeMin + elapsedGameMin, {
     maxMarketClosures: Math.floor(

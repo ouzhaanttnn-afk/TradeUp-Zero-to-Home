@@ -4,6 +4,61 @@
   background: #07100d;
   font-synthesis: none;
 }
+
+.evidence-panel {
+  margin: 14px 0;
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.055);
+}
+.evidence-panel p {
+  margin: 8px 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.inspection-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+  margin: 12px 0;
+}
+.inspection-actions button {
+  min-height: 48px;
+  font-size: 0.72rem;
+  border: 1px solid rgba(125, 255, 185, 0.2);
+  border-radius: 10px;
+  background: rgba(8, 28, 20, 0.9);
+  color: #edf4ef;
+}
+.inspection-actions small {
+  display: block;
+  opacity: 0.65;
+  margin-top: 3px;
+}
+.compare-stack {
+  margin: 12px 0;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+}
+.compare-row {
+  padding: 9px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+.compare-row > span {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(54px, 1fr));
+  gap: 5px;
+  margin-top: 5px;
+}
+.compare-row em {
+  font-style: normal;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+.compare-row.different b {
+  color: var(--accent);
+}
 * {
   box-sizing: border-box;
 }

@@ -5,9 +5,14 @@ import { assetFor } from "./assets";
 import {
   activePlayerListings,
   inventoryAssets,
-  listingEstimateBand,
   quoteAssetExit,
 } from "./domain/economy";
+import {
+  comparableListings,
+  comparisonRows,
+  inspectionOptions,
+  listingEstimateBand,
+} from "./domain/decision";
 import { WORLD_CONFIG } from "./domain/config";
 import { activeMarketListings, npcRiskSignal } from "./domain/world";
 import { HOME_GOAL_MINOR, money, signal, wealth } from "./game";
@@ -26,6 +31,7 @@ const sellerLabel = {
 export default function App() {
   const [tab, setTab] = useState<Tab>("market");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [comparing, setComparing] = useState(false);
   const {
     game,
     ready,
@@ -40,6 +46,8 @@ export default function App() {
     list,
     withdrawListing,
     acceptBuyer,
+    inspect,
+    prepare,
     reset,
   } = useGameStore();
   useEffect(() => {
@@ -141,17 +149,20 @@ export default function App() {
                     onClick={() => setSelectedId(item.id)}
                   >
                     <div className="product-art">
-                      <img src={assetFor(item.family.assetKey)} alt="" />
+                      <img
+                        src={assetFor(item.instance.family.assetKey)}
+                        alt=""
+                      />
                     </div>
                     <div className="listing-copy">
                       <div className="meta">
-                        <span>{item.family.category}</span>
+                        <span>{item.instance.family.category}</span>
                         <span>{risk.text}</span>
                       </div>
-                      <h3>{item.family.name}</h3>
+                      <h3>{item.instance.family.name}</h3>
                       <div className="tags">
                         <b className={itemSignal.cls}>{itemSignal.text}</b>
-                        <span>%{item.condition} kondisyon</span>
+                        <span>%{item.instance.condition} kondisyon</span>
                       </div>
                     </div>
                     <div className="price">
@@ -202,6 +213,29 @@ export default function App() {
                       </p>
                     </div>
                     <div className="sell-actions">
+                      {item.instance.family.preparation
+                        .filter(
+                          (action) =>
+                            item.instance.preparationHistory.filter(
+                              (record) => record.kind === action.kind,
+                            ).length < action.maxUses,
+                        )
+                        .map((action) => (
+                          <button
+                            key={action.kind}
+                            onClick={() => prepare(item.id, action.kind)}
+                          >
+                            {action.label} <b>{money(action.costMinor)}</b>
+                            <small>
+                              {action.durationMin} dk ·{" "}
+                              {action.kind === "CLEAN"
+                                ? `+${action.conditionGain} kondisyon`
+                                : action.kind === "TEST"
+                                  ? `+%${Math.round(action.confidenceGain * 100)} güven`
+                                  : `+%${Math.round(action.liquidityGainBps / 100)} likidite`}
+                            </small>
+                          </button>
+                        ))}
                       <button onClick={() => sell(item, true)}>
                         Hızlı sat <b>{money(quote.quickSaleMinor)}</b>
                       </button>
@@ -379,14 +413,15 @@ export default function App() {
             </button>
             <div className="hero-art">
               <img
-                src={assetFor(selected.family.assetKey)}
-                alt={selected.family.name}
+                src={assetFor(selected.instance.family.assetKey)}
+                alt={selected.instance.family.name}
               />
             </div>
             <small>
-              {selected.family.category} · {sellerLabel[selected.seller]} satıcı
+              {selected.instance.family.category} ·{" "}
+              {sellerLabel[selected.seller]} satıcı
             </small>
-            <h2>{selected.family.name}</h2>
+            <h2>{selected.instance.family.name}</h2>
             <div className="detail-price">
               <strong>{money(selected.priceMinor)}</strong>
               <span className={signal(selected).cls}>
@@ -404,7 +439,7 @@ export default function App() {
               <i>
                 <em
                   style={{
-                    left: `${Math.max(4, Math.min(94, (selected.priceMinor / (selected.fairValueMinor * 1.2)) * 100))}%`,
+                    left: `${Math.max(4, Math.min(94, (selected.priceMinor / (listingEstimateBand(selected).highMinor || 1)) * 100))}%`,
                   }}
                 />
               </i>
@@ -412,7 +447,7 @@ export default function App() {
             <div className="details">
               <div>
                 <span>Kondisyon</span>
-                <b>%{selected.condition}</b>
+                <b>%{selected.instance.condition}</b>
               </div>
               <div>
                 <span>İlgi</span>
@@ -426,6 +461,79 @@ export default function App() {
                 </b>
               </div>
             </div>
+            <div className="evidence-panel">
+              <small>
+                KANIT DOSYASI · GÜVEN %
+                {Math.round(selected.instance.evidenceConfidence * 100)}
+              </small>
+              {selected.instance.evidence.map((record) => {
+                const definition = selected.instance.family.evidence.find(
+                  (item) => item.id === record.definitionId,
+                );
+                return (
+                  <p key={record.definitionId}>
+                    <b>{definition?.label}</b> · {record.status}
+                  </p>
+                );
+              })}
+              <div className="inspection-actions">
+                {Object.entries(inspectionOptions).map(([kind, option]) => (
+                  <button
+                    key={kind}
+                    onClick={() =>
+                      inspect(
+                        selected.id,
+                        kind as keyof typeof inspectionOptions,
+                      )
+                    }
+                  >
+                    {option.label}
+                    <small>
+                      {option.durationMin
+                        ? `${option.durationMin} dk · pazar ilerler`
+                        : "anında"}
+                    </small>
+                  </button>
+                ))}
+              </div>
+              <button
+                className="primary"
+                onClick={() => setComparing((value) => !value)}
+              >
+                {comparing
+                  ? "Karşılaştırmayı kapat"
+                  : "Benzer ilanlarla karşılaştır"}
+              </button>
+            </div>
+            {comparing ? (
+              <div className="compare-stack">
+                <h3>
+                  Aynı aile · {comparableListings(game, selected.id).length}{" "}
+                  ilan
+                </h3>
+                {comparisonRows(comparableListings(game, selected.id)).map(
+                  (row) => (
+                    <div
+                      className={
+                        row.different ? "compare-row different" : "compare-row"
+                      }
+                      key={row.label}
+                    >
+                      <b>{row.label}</b>
+                      <span>
+                        {row.values.map((value, index) => (
+                          <em key={`${value}-${index}`}>
+                            {row.label === "Fiyat"
+                              ? money(Number(value))
+                              : value}
+                          </em>
+                        ))}
+                      </span>
+                    </div>
+                  ),
+                )}
+              </div>
+            ) : null}
             {negotiation?.counterMinor ? (
               <button
                 className="counter-offer"

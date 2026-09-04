@@ -67,7 +67,7 @@ describe("deterministic market world", () => {
       ...state.listings[0],
       createdAtGameMin: 0,
       expiresAtGameMin: 1_000,
-      priceMinor: Math.round(state.listings[0].fairValueMinor * 0.7),
+      priceMinor: Math.round(state.listings[0].instance.fairValueMinor * 0.7),
       interest: 100,
       urgency: 1,
     };
@@ -106,8 +106,8 @@ describe("deterministic market world", () => {
     const state = initialState(1_000);
     const best = [...activeMarketListings(state)].sort(
       (left, right) =>
-        left.priceMinor / left.fairValueMinor -
-        right.priceMinor / right.fairValueMinor,
+        left.priceMinor / left.instance.fairValueMinor -
+        right.priceMinor / right.instance.fairValueMinor,
     )[0];
     const result = advanceOffline(state, 24 * 60 * 60_000 + 1_000);
 
