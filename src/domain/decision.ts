@@ -6,9 +6,12 @@ import type {
 } from "./models";
 
 const clamp01 = (value: number) => Math.max(0, Math.min(1, value));
-export function listingEstimateBand(listing: Listing) {
+export function listingEstimateBand(listing: Listing, expertiseLevel = 0) {
+  const expertiseNarrowing = Math.min(0.08, expertiseLevel * 0.008);
   const uncertainty =
-    0.24 - clamp01(listing.instance.evidenceConfidence) * 0.14;
+    0.3 -
+    clamp01(listing.instance.evidenceConfidence) * 0.14 -
+    expertiseNarrowing;
   return {
     lowMinor:
       Math.round(

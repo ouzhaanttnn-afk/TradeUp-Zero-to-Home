@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { validateState } from "../game";
+import { initialState, validateState } from "../game";
 import { reconcileJournal } from "./economy";
 import { migrateStateToCurrent } from "./migrations";
 
@@ -63,7 +63,7 @@ describe("save migration", () => {
     };
 
     const state = validateState(migrateStateToCurrent(legacy));
-    expect(state.version).toBe(6);
+    expect(state.version).toBe(7);
     expect(state.cashMinor).toBe(150_000);
     expect(state.ownedAssets[0]).toMatchObject({
       id: "owned-1",
@@ -111,11 +111,62 @@ describe("save migration", () => {
 
     const state = validateState(migrateStateToCurrent(v3));
     expect(state).toMatchObject({
-      version: 6,
+      version: 7,
       gameTimeMin: 0,
       lastWallClockMs: 123_000,
       cashMinor: 42_000,
     });
+    expect(reconcileJournal(state)).toEqual({
+      cash: true,
+      activeBookCost: true,
+      realizedProfit: true,
+    });
+  });
+
+  it("adds P2 meta state to a v6 save without rewriting its ledger", () => {
+    const current = initialState(1_000, "SANDBOX");
+    current.realizedProfitMinor = 12_000;
+    current.transactionJournal[0] = {
+      ...current.transactionJournal[0],
+      realizedProfitDeltaMinor: 12_000,
+    };
+    const v6: Record<string, unknown> = {
+      ...current,
+      version: 6,
+      expertise: { Elektronik: 90 },
+      career: [
+        {
+          id: "old-sale",
+          type: "SALE",
+          atGameMin: 0,
+          label: "Önceki satış",
+          amountMinor: 12_000,
+        },
+      ],
+    };
+    delete v6.follow;
+    delete v6.home;
+    delete v6.analytics;
+    const state = validateState(migrateStateToCurrent(v6));
+
+    expect(state.version).toBe(7);
+    expect(state.expertise).toMatchObject({
+      marketXp: 90,
+      categoryXp: { Elektronik: 90 },
+      familyActionCounts: {},
+      seenActions: [],
+    });
+    expect(state.career[0]).toMatchObject({
+      id: "old-sale",
+      type: "LEGACY",
+      label: "Önceki satış",
+    });
+    expect(state.follow).toEqual({
+      watchedListingIds: [],
+      savedSearches: [],
+      missedOpportunities: [],
+    });
+    expect(state.home.unlocked).toBe(true);
     expect(reconcileJournal(state)).toEqual({
       cash: true,
       activeBookCost: true,

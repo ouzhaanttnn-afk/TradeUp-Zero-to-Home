@@ -414,6 +414,7 @@ function currentCareer(value: unknown, gameTimeMin: number): CareerEvent {
     id: string(source.id),
     type: (string(source.type, "MILESTONE") ||
       "MILESTONE") as CareerEvent["type"],
+    group: "MILESTONES",
     atGameMin: normalizedGameMinute(source.atGameMin ?? source.at, gameTimeMin),
     label: string(source.label),
     ...(source.amountMinor === undefined
@@ -481,9 +482,70 @@ export function migrateStateToV4(value: unknown): unknown {
 }
 
 export function migrateStateToCurrent(value: unknown): unknown {
-  return migrateStateToV6(
-    migrateStateToV5(migrateStateToV4(migrateStateToV3(value))),
+  return migrateStateToV7(
+    migrateStateToV6(
+      migrateStateToV5(migrateStateToV4(migrateStateToV3(value))),
+    ),
   );
+}
+
+export function migrateStateToV7(value: unknown): unknown {
+  const source = record(value);
+  if (integer(source.version) >= 7) return value;
+  const rawExpertise = record(source.expertise);
+  const categoryXp = Object.fromEntries(
+    Object.entries(rawExpertise)
+      .filter((entry) => typeof entry[1] === "number")
+      .map(([key, entry]) => [key, Math.max(0, integer(entry))]),
+  );
+  const career = array(source.career).map((value, index) => {
+    const event = record(value);
+    return {
+      id: string(event.id, `legacy-career:${index}`),
+      type: "LEGACY",
+      group: "MILESTONES",
+      atGameMin: Math.max(0, integer(event.atGameMin ?? event.at)),
+      label: string(event.label, "Önceki kariyer kaydı"),
+      ...(event.amountMinor === undefined
+        ? {}
+        : { amountMinor: integer(event.amountMinor) }),
+    };
+  });
+  const ftue = record(source.ftue);
+  const homeUnlocked =
+    string(ftue.stage) === "COMPLETE" &&
+    integer(source.realizedProfitMinor) > 0;
+  return {
+    ...source,
+    version: 7,
+    expertise: {
+      marketXp: Object.values(categoryXp).reduce(
+        (sum, entry) => sum + number(entry),
+        0,
+      ),
+      categoryXp,
+      familyActionCounts: {},
+      seenActions: [],
+    },
+    career,
+    follow: {
+      watchedListingIds: array(source.listings)
+        .map(record)
+        .filter((listing) => string(listing.state) === "WATCHED")
+        .map((listing) => string(listing.id)),
+      savedSearches: [],
+      missedOpportunities: [],
+    },
+    home: {
+      unlocked: homeUnlocked,
+      ...(homeUnlocked
+        ? { revealedAtGameMin: Math.max(0, integer(source.gameTimeMin)) }
+        : {}),
+      purchased: false,
+      progressMilestones: [],
+    },
+    analytics: { enabled: true, events: [] },
+  };
 }
 
 export function migrateStateToV6(value: unknown): unknown {

@@ -105,6 +105,7 @@ export function purchaseListing(
   if (
     !currentListing ||
     (currentListing.state !== "ACTIVE" &&
+      currentListing.state !== "WATCHED" &&
       currentListing.state !== "NEGOTIATING")
   ) {
     return { ok: false, state, reason: "LISTING_NOT_ACTIVE" };
@@ -148,6 +149,12 @@ export function purchaseListing(
           : item,
       ),
       negotiation: undefined,
+      follow: {
+        ...state.follow,
+        watchedListingIds: state.follow.watchedListingIds.filter(
+          (id) => id !== currentListing.id,
+        ),
+      },
       transactionJournal: [
         ...state.transactionJournal,
         journalEntry(
@@ -163,16 +170,6 @@ export function purchaseListing(
             familyId: currentListing.familyId,
           },
         ),
-      ],
-      career: [
-        ...state.career,
-        {
-          id: `career:${transactionId}`,
-          type: "BUY",
-          atGameMin: gameTime,
-          label: `${currentListing.instance.family.name} alındı`,
-          amountMinor: purchasePriceMinor,
-        },
       ],
     },
   };
@@ -408,16 +405,6 @@ export function settleAssetSale(
             profitMinor,
           },
         ),
-      ],
-      career: [
-        ...state.career,
-        {
-          id: `career:${transactionId}`,
-          type: "SALE",
-          atGameMin: gameTime,
-          label: `${asset.instance.family.name} satıldı`,
-          amountMinor: profitMinor,
-        },
       ],
     },
   };

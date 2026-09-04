@@ -88,6 +88,18 @@ describe("FTUE store integration", () => {
     useGameStore.getState().acceptBuyer(offer.id);
     game = useGameStore.getState().game;
     expect(game.ftue.stage).toBe("COMPLETE");
+    expect(game.analytics.events.map((event) => event.name)).toEqual(
+      expect.arrayContaining([
+        "compare_started",
+        "evidence_action",
+        "offer_submitted",
+        "purchase_complete",
+        "preparation_started",
+        "listing_created",
+        "buyer_offer",
+        "sale_complete",
+      ]),
+    );
     expect(reconcileJournal(game)).toEqual({
       cash: true,
       activeBookCost: true,

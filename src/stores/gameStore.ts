@@ -11,6 +11,17 @@ import { WORLD_CONFIG } from "../domain/config";
 import { inspectListing } from "../domain/decision";
 import { startPreparation } from "../domain/preparation";
 import {
+  addSavedSearch,
+  gainExpertise,
+  recordCompletedSaleMeta,
+  removeSavedSearch,
+  toggleWatch,
+} from "../domain/meta";
+import {
+  setAnalyticsEnabled,
+  trackAnalytics,
+} from "../infrastructure/analytics";
+import {
   dismissFtueStage,
   isFtueActive,
   recordFtueBuyerSale,
@@ -22,7 +33,11 @@ import {
   recordFtueWithdrawal,
   revealFirstMarket,
 } from "../domain/ftue";
-import type { InspectionKind, PreparationKind } from "../domain/models";
+import type {
+  InspectionKind,
+  PreparationKind,
+  SavedSearch,
+} from "../domain/models";
 import {
   advanceWorldTo,
   scanMarket,
@@ -56,7 +71,19 @@ type Store = {
   acceptBuyer: (offerId: string) => void;
   inspect: (listingId: string, kind: InspectionKind) => void;
   prepare: (assetId: string, kind: PreparationKind) => void;
-  markCompared: () => void;
+  openListing: (listingId: string) => void;
+  markCompared: (listingId?: string) => void;
+  toggleWatch: (listingId: string) => void;
+  saveSearch: (
+    familyId: string,
+    maxPriceMinor: number,
+    minCondition: number,
+    evidencePreference?: SavedSearch["evidencePreference"],
+  ) => void;
+  removeSearch: (searchId: string) => void;
+  recordImpressions: (listingIds: string[]) => void;
+  openJourney: () => void;
+  setAnalytics: (enabled: boolean) => void;
   dismissCoach: () => void;
   reset: () => Promise<void>;
 };
@@ -108,8 +135,26 @@ const worldNotice = (result: WorldAdvanceResult, fallback: string): string => {
   return event ? `${fallback} ${event}` : fallback;
 };
 
-const progressBy = (state: GameState, minutes = 1) =>
-  advanceWorldTo(state, state.gameTimeMin + minutes);
+const withBuyerOfferAnalytics = (previous: GameState, state: GameState) => {
+  const previousIds = new Set(previous.buyerOffers.map((offer) => offer.id));
+  return state.buyerOffers
+    .filter((offer) => !previousIds.has(offer.id))
+    .reduce(
+      (next, offer) =>
+        trackAnalytics(
+          next,
+          "buyer_offer",
+          { listingId: offer.listingId, amountMinor: offer.amountMinor },
+          offer.id,
+        ),
+      state,
+    );
+};
+
+const progressBy = (state: GameState, minutes = 1) => {
+  const result = advanceWorldTo(state, state.gameTimeMin + minutes);
+  return { ...result, state: withBuyerOfferAnalytics(state, result.state) };
+};
 
 export const useGameStore = create<Store>((set, get) => ({
   game: initialState(systemTimeProvider.nowWallMs()),
@@ -133,7 +178,12 @@ export const useGameStore = create<Store>((set, get) => ({
     );
   },
   scan: () => {
-    const result = scanMarket(get().game);
+    const previous = get().game;
+    const scanned = scanMarket(previous);
+    const result = {
+      ...scanned,
+      state: withBuyerOfferAnalytics(previous, scanned.state),
+    };
     set({
       game: stampAndPersist(result.state),
       notice: worldNotice(
@@ -177,9 +227,20 @@ export const useGameStore = create<Store>((set, get) => ({
       return false;
     }
     const purchasedAssetId = `asset:${item.id}`;
-    const progressed = progressBy(
-      recordFtuePurchase(result.state, purchasedAssetId),
+    let next = gainExpertise(
+      result.state,
+      "purchase",
+      item.familyId,
+      `purchase:${item.id}`,
     );
+    next = recordFtuePurchase(next, purchasedAssetId);
+    next = trackAnalytics(
+      next,
+      "purchase_complete",
+      { familyId: item.familyId, priceMinor },
+      item.id,
+    );
+    const progressed = progressBy(next);
     set({
       game: stampAndPersist(progressed.state),
       notice: worldNotice(
@@ -202,6 +263,7 @@ export const useGameStore = create<Store>((set, get) => ({
     if (
       !currentListing ||
       (currentListing.state !== "ACTIVE" &&
+        currentListing.state !== "WATCHED" &&
         currentListing.state !== "NEGOTIATING")
     ) {
       set({ notice: "Bu ilan artık pazarda değil." });
@@ -225,7 +287,14 @@ export const useGameStore = create<Store>((set, get) => ({
       Math.round((item.priceMinor * (index === 1 ? 0.82 : 0.91)) / 1_000) *
       1_000;
     const result = resolveOffer(item, offerMinor, index);
+    const offeredGame = trackAnalytics(
+      game,
+      "offer_submitted",
+      { familyId: item.familyId, offerMinor, offerIndex: index },
+      `${item.id}:${index}`,
+    );
     if (result.result === "accepted") {
+      if (offeredGame !== game) set({ game: offeredGame });
       get().buy(item, offerMinor);
       return;
     }
@@ -237,7 +306,7 @@ export const useGameStore = create<Store>((set, get) => ({
       closed: remaining === 0,
     };
     const negotiatingState: GameState = {
-      ...game,
+      ...offeredGame,
       negotiation,
       listings: game.listings.map((listing) =>
         listing.id === item.id ? { ...listing, state: "NEGOTIATING" } : listing,
@@ -264,11 +333,12 @@ export const useGameStore = create<Store>((set, get) => ({
     }
     const quote = quoteAssetExit(item);
     const saleMinor = quick ? quote.quickSaleMinor : quote.balancedAskingMinor;
+    const transactionId = `sale:direct:${item.id}`;
     const result = settleAssetSale(
       game,
       item.id,
       saleMinor,
-      `sale:direct:${item.id}`,
+      transactionId,
       game.gameTimeMin,
       item.currentListingId,
     );
@@ -277,7 +347,13 @@ export const useGameStore = create<Store>((set, get) => ({
       buzz();
       return;
     }
-    const progressed = progressBy(result.state);
+    const withMeta = recordCompletedSaleMeta(
+      game,
+      result.state,
+      item.id,
+      transactionId,
+    );
+    const progressed = progressBy(withMeta);
     set({
       game: stampAndPersist(progressed.state),
       notice: worldNotice(
@@ -304,7 +380,18 @@ export const useGameStore = create<Store>((set, get) => ({
       buzz();
       return;
     }
-    const progressed = progressBy(recordFtueListing(result.state, item.id));
+    let next = recordFtueListing(result.state, item.id);
+    next = withBuyerOfferAnalytics(result.state, next);
+    next = trackAnalytics(
+      next,
+      "listing_created",
+      { familyId: item.familyId, askingPriceMinor },
+      next.playerListings.find(
+        (listing) =>
+          listing.ownedAssetId === item.id && listing.state === "ACTIVE",
+      )?.id,
+    );
+    const progressed = progressBy(next);
     set({
       game: stampAndPersist(progressed.state),
       notice: worldNotice(
@@ -343,11 +430,12 @@ export const useGameStore = create<Store>((set, get) => ({
       ? game.playerListings.find((item) => item.id === buyerOffer.listingId)
       : undefined;
     if (!buyerOffer || !listing) return;
+    const transactionId = `sale:buyer:${buyerOffer.id}`;
     const result = settleAssetSale(
       game,
       listing.ownedAssetId,
       buyerOffer.amountMinor,
-      `sale:buyer:${buyerOffer.id}`,
+      transactionId,
       game.gameTimeMin,
       listing.id,
     );
@@ -360,7 +448,13 @@ export const useGameStore = create<Store>((set, get) => ({
       game.ftue.stage === "STARTING_SALE"
         ? revealFirstMarket(result.state)
         : recordFtueBuyerSale(result.state, listing.id);
-    const progressed = progressBy(ftueProgressed);
+    const withMeta = recordCompletedSaleMeta(
+      game,
+      ftueProgressed,
+      listing.ownedAssetId,
+      transactionId,
+    );
+    const progressed = progressBy(withMeta);
     set({
       game: stampAndPersist(progressed.state),
       notice: worldNotice(
@@ -381,10 +475,21 @@ export const useGameStore = create<Store>((set, get) => ({
       set({ notice: "Bu ilan artık incelenemiyor." });
       return;
     }
-    const progressed = progressBy(
-      recordFtueEvidence(result.state),
-      result.durationMin,
+    const listing = result.state.listings.find((item) => item.id === listingId);
+    let next = gainExpertise(
+      result.state,
+      "inspection",
+      listing?.familyId,
+      `${listingId}:${kind}`,
     );
+    next = recordFtueEvidence(next);
+    next = trackAnalytics(
+      next,
+      "evidence_action",
+      { listingId, kind, familyId: listing?.familyId },
+      `${listingId}:${kind}`,
+    );
+    const progressed = progressBy(next, result.durationMin);
     set({
       game: stampAndPersist(progressed.state),
       notice: worldNotice(
@@ -411,10 +516,19 @@ export const useGameStore = create<Store>((set, get) => ({
       });
       return;
     }
-    const progressed = progressBy(
+    const tracked = trackAnalytics(
       result.state,
-      Math.max(1, result.durationMin),
+      "preparation_started",
+      {
+        assetId,
+        kind,
+        costMinor: Math.abs(
+          result.state.transactionJournal.at(-1)?.cashDeltaMinor ?? 0,
+        ),
+      },
+      `${assetId}:${kind}:${result.state.gameTimeMin}`,
     );
+    const progressed = progressBy(tracked, Math.max(1, result.durationMin));
     set({
       game: stampAndPersist(recordFtuePreparation(progressed.state, assetId)),
       notice: worldNotice(
@@ -423,13 +537,103 @@ export const useGameStore = create<Store>((set, get) => ({
       ),
     });
   },
-  markCompared: () => {
+  openListing: (listingId) => {
     const game = get().game;
-    const next = recordFtueCompare(game);
+    const listing = game.listings.find((item) => item.id === listingId);
+    if (!listing) return;
+    let next = gainExpertise(game, "listingOpen", listing.familyId, listing.id);
+    next = trackAnalytics(
+      next,
+      "listing_open",
+      { listingId, familyId: listing.familyId },
+      listingId,
+    );
+    set({ game: stampAndPersist(next) });
+  },
+  markCompared: (listingId = "ftue-compare") => {
+    const game = get().game;
+    const listing = game.listings.find((item) => item.id === listingId);
+    let next = gainExpertise(game, "compare", listing?.familyId, listingId);
+    next = recordFtueCompare(next);
+    next = trackAnalytics(
+      next,
+      "compare_started",
+      { listingId, familyId: listing?.familyId },
+      listingId,
+    );
     if (next === game) return;
     set({
       game: stampAndPersist(next),
       notice: "Farkları gördün. Şimdi seçtiğin ilandaki kanıtı kontrol et.",
+    });
+  },
+  toggleWatch: (listingId) => {
+    const game = get().game;
+    const next = toggleWatch(game, listingId);
+    if (next === game) return;
+    const watched = next.follow.watchedListingIds.includes(listingId);
+    set({
+      game: stampAndPersist(next),
+      notice: watched
+        ? "İlan Takip listene eklendi."
+        : "İlan Takip listesinden çıkarıldı.",
+    });
+  },
+  saveSearch: (
+    familyId,
+    maxPriceMinor,
+    minCondition,
+    evidencePreference = "ANY",
+  ) => {
+    const game = get().game;
+    const next = addSavedSearch(
+      game,
+      familyId,
+      maxPriceMinor,
+      minCondition,
+      evidencePreference,
+    );
+    set({
+      game: stampAndPersist(next),
+      notice:
+        next === game ? "Bu arama zaten kayıtlı." : "Family alarmı kaydedildi.",
+    });
+  },
+  removeSearch: (searchId) => {
+    const next = removeSavedSearch(get().game, searchId);
+    set({ game: stampAndPersist(next), notice: "Kayıtlı arama kaldırıldı." });
+  },
+  recordImpressions: (listingIds) => {
+    let next = get().game;
+    for (const listingId of listingIds) {
+      const listing = next.listings.find((item) => item.id === listingId);
+      if (!listing) continue;
+      next = trackAnalytics(
+        next,
+        "listing_impression",
+        { listingId, familyId: listing.familyId },
+        listingId,
+      );
+    }
+    if (next !== get().game) set({ game: stampAndPersist(next) });
+  },
+  openJourney: () => {
+    const game = get().game;
+    const next = trackAnalytics(
+      game,
+      "career_timeline_opened",
+      { eventCount: game.career.length },
+      `open:${game.gameTimeMin}:${game.career.length}`,
+    );
+    if (next !== game) set({ game: stampAndPersist(next) });
+  },
+  setAnalytics: (enabled) => {
+    const next = setAnalyticsEnabled(get().game, enabled);
+    set({
+      game: stampAndPersist(next),
+      notice: enabled
+        ? "İsteğe bağlı analitik açıldı."
+        : "Analitik kapatıldı ve yerel olay kuyruğu temizlendi.",
     });
   },
   dismissCoach: () => {

@@ -17,7 +17,7 @@
 - Listing an asset cannot remove it from net worth; withdrawal returns it losslessly; a transaction ID can apply only once; an atomic purchase cannot make cash negative.
 - Production UI never reveals exact fair value. It may show the GDD-defined estimate range and evidence-dependent confidence.
 - Negotiation has exactly two player offer rights. Do not add extra offers, retries, guaranteed deals, premium currency, cash packs, forced ads, a second sight, or invisible major defects.
-- Keep the four-tab portrait shell: Pazar, Envanter, İlanlarım, Servet. Respect safe areas, 320–430 px widths, text scaling, reduced motion, haptics-off, and missing-asset fallback.
+- Keep the four-tab portrait shell: Pazar, Takip, Portföy, Yolculuk. Envanter, Hazırlık, and İlanlarım are Portföy segments. Respect safe areas, 320–430 px widths, text scaling, reduced motion, haptics-off, and missing-asset fallback.
 - Assets are not a gameplay blocker. Follow: manifest and placeholder, 24 hero families, condition/evidence overlays, then measured expansion.
 
 ## Scope freeze

@@ -2,6 +2,7 @@ import { market, rng } from "../game";
 import { WORLD_CONFIG } from "./config";
 import { netWorthMinor } from "./economy";
 import { completeDuePreparations } from "./preparation";
+import { recordMarketExits } from "./meta";
 import type {
   BuyerOffer,
   GameState,
@@ -112,9 +113,6 @@ const nextInterest = (
   return Math.min(100, listing.interest + increase);
 };
 
-const meaningfulMiss = (listing: Listing) =>
-  listing.priceMinor / listing.instance.fairValueMinor <= 0.88;
-
 function advanceMarketMinute(
   state: GameState,
   gameTimeMin: number,
@@ -154,27 +152,15 @@ function advanceMarketMinute(
     };
   });
 
-  const career = [...state.career];
-  for (const listing of exits.filter(meaningfulMiss)) {
-    const id = `missed:${listing.id}`;
-    if (career.some((event) => event.id === id)) continue;
-    career.push({
-      id,
-      type: "MISSED",
-      atGameMin: gameTimeMin,
-      label:
-        listing.state === "SOLD_TO_NPC"
-          ? `${listing.instance.family.name} başka alıcıya gitti`
-          : `${listing.instance.family.name} ilanının süresi doldu`,
-    });
-  }
-
   const exitedIds = new Set(exits.map((listing) => listing.id));
   const negotiation =
     state.negotiation && exitedIds.has(state.negotiation.listingId)
       ? { ...state.negotiation, closed: true }
       : state.negotiation;
-  return { state: { ...state, listings, career, negotiation }, exits };
+  return {
+    state: recordMarketExits({ ...state, listings, negotiation }, exits),
+    exits,
+  };
 }
 
 const activePlayerListing = (listing: PlayerListing) =>

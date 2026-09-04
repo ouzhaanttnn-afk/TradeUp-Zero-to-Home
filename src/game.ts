@@ -23,7 +23,7 @@ export type {
   TransactionJournalEntry,
 } from "./domain/models";
 export { families } from "./content/families";
-export const SAVE_VERSION = 6;
+export const SAVE_VERSION = 7;
 export const HOME_GOAL_MINOR = 350_000_000;
 
 const attributeDefinitionSchema = z.object({
@@ -239,10 +239,97 @@ const journalEntrySchema = z.object({
 });
 const careerEventSchema = z.object({
   id: z.string(),
-  type: z.enum(["BUY", "SALE", "PROFIT", "MILESTONE", "MISSED"]),
+  type: z.enum([
+    "FIRST_SALE",
+    "FIRST_PROFITABLE_SALE",
+    "BEST_FLIP_UPDATED",
+    "VALUE_ADDED_RECORD",
+    "WEALTH_MILESTONE",
+    "EXPERTISE_MILESTONE",
+    "FIRST_HIGH_TICKET_TRADE",
+    "DOMINANT_CATEGORY_CHANGED",
+    "HOME_PROGRESS",
+    "HOME_PURCHASE",
+    "LEGACY",
+  ]),
+  group: z.enum(["FIRSTS", "RECORDS", "MILESTONES", "HOME"]),
   atGameMin: z.number().int().nonnegative(),
   label: z.string(),
   amountMinor: z.number().int().optional(),
+  familyId: z.string().optional(),
+  assetKey: z.string().optional(),
+  buyPriceMinor: z.number().int().nonnegative().optional(),
+  sellPriceMinor: z.number().int().nonnegative().optional(),
+  realizedProfitMinor: z.number().int().optional(),
+  preparationValueMinor: z.number().int().nonnegative().optional(),
+  wealthAtEventMinor: z.number().int().nonnegative().optional(),
+});
+const expertiseSchema = z.object({
+  marketXp: z.number().int().nonnegative(),
+  categoryXp: z.record(z.string(), z.number().int().nonnegative()),
+  familyActionCounts: z.record(z.string(), z.number().int().nonnegative()),
+  seenActions: z.array(z.string()),
+});
+const followSchema = z.object({
+  watchedListingIds: z.array(z.string()),
+  savedSearches: z.array(
+    z.object({
+      id: z.string(),
+      familyId: z.string(),
+      maxPriceMinor: z.number().int().nonnegative(),
+      minCondition: z.number().min(0).max(100),
+      evidencePreference: z.enum(["ANY", "CHECKED"]),
+      createdAtGameMin: z.number().int().nonnegative(),
+    }),
+  ),
+  missedOpportunities: z.array(
+    z.object({
+      id: z.string(),
+      listingId: z.string(),
+      familyId: z.string(),
+      familyName: z.string(),
+      assetKey: z.string(),
+      priceMinor: z.number().int().nonnegative(),
+      condition: z.number().min(0).max(100),
+      reason: z.enum(["NPC_PURCHASE", "EXPIRED"]),
+      atGameMin: z.number().int().nonnegative(),
+    }),
+  ),
+});
+const homeSchema = z.object({
+  unlocked: z.boolean(),
+  revealedAtGameMin: z.number().int().nonnegative().optional(),
+  purchased: z.boolean(),
+  progressMilestones: z.array(
+    z.union([z.literal(25), z.literal(50), z.literal(75), z.literal(90)]),
+  ),
+});
+const analyticsSchema = z.object({
+  enabled: z.boolean(),
+  events: z.array(
+    z.object({
+      id: z.string(),
+      name: z.enum([
+        "listing_impression",
+        "listing_open",
+        "compare_started",
+        "evidence_action",
+        "offer_submitted",
+        "purchase_complete",
+        "preparation_started",
+        "listing_created",
+        "buyer_offer",
+        "sale_complete",
+        "opportunity_lost",
+        "career_timeline_opened",
+      ]),
+      atGameMin: z.number().int().nonnegative(),
+      properties: z.record(
+        z.string(),
+        z.union([z.string(), z.number(), z.boolean()]),
+      ),
+    }),
+  ),
 });
 const negotiationSchema = z.object({
   listingId: z.string(),
@@ -282,8 +369,11 @@ const stateSchema = z
     playerListings: z.array(playerListingSchema),
     buyerOffers: z.array(buyerOfferSchema),
     negotiation: negotiationSchema.optional(),
-    expertise: z.record(z.string(), z.number()),
+    expertise: expertiseSchema,
     career: z.array(careerEventSchema),
+    follow: followSchema,
+    home: homeSchema,
+    analytics: analyticsSchema,
     ftue: ftueSchema,
     lastWallClockMs: z.number().nonnegative(),
   })
@@ -306,6 +396,41 @@ const stateSchema = z
       state.transactionJournal.map((item) => item.id),
       "transactionJournal",
       "Transaction id must be unique",
+    );
+    unique(
+      state.playerListings.map((item) => item.id),
+      "playerListings",
+      "Player listing id must be unique",
+    );
+    unique(
+      state.buyerOffers.map((item) => item.id),
+      "buyerOffers",
+      "Buyer offer id must be unique",
+    );
+    unique(
+      state.career.map((item) => item.id),
+      "career",
+      "Career event id must be unique",
+    );
+    unique(
+      state.follow.watchedListingIds,
+      "follow",
+      "Watched listing id must be unique",
+    );
+    unique(
+      state.follow.savedSearches.map((item) => item.id),
+      "follow",
+      "Saved search id must be unique",
+    );
+    unique(
+      state.follow.missedOpportunities.map((item) => item.id),
+      "follow",
+      "Missed opportunity id must be unique",
+    );
+    unique(
+      state.analytics.events.map((item) => item.id),
+      "analytics",
+      "Analytics event id must be unique",
     );
     const activeAssetListings = new Set<string>();
     for (const listing of state.playerListings) {
@@ -497,7 +622,8 @@ export function market(
       b.priceMinor / b.instance.fairValueMinor,
   );
 }
-export function signal(item: Listing) {
+export function signal(item: Listing, expertiseLevel = 10) {
+  if (expertiseLevel === 0) return { text: "Belirsiz", cls: "neutral" };
   const ratio = item.priceMinor / item.instance.fairValueMinor;
   if (ratio < 0.78) return { text: "Sıcak fırsat", cls: "hot" };
   if (ratio < 0.88) return { text: "İyi fiyat", cls: "good" };
@@ -551,7 +677,7 @@ export const initialState = (
     realizedProfitMinor: 0,
     transactionJournal: [
       {
-        id: "opening-balance:v6",
+        id: "opening-balance:v7",
         kind: "OPENING_BALANCE",
         gameTime: 0,
         cashDeltaMinor: mode === "SANDBOX" ? sandboxCashMinor : 0,
@@ -568,8 +694,20 @@ export const initialState = (
     listings: [],
     playerListings: [],
     buyerOffers: [],
-    expertise: {},
+    expertise: {
+      marketXp: 0,
+      categoryXp: {},
+      familyActionCounts: {},
+      seenActions: [],
+    },
     career: [],
+    follow: {
+      watchedListingIds: [],
+      savedSearches: [],
+      missedOpportunities: [],
+    },
+    home: { unlocked: false, purchased: false, progressMilestones: [] },
+    analytics: { enabled: true, events: [] },
     ftue: {
       stage: mode === "FTUE" ? "STARTING_SALE" : "COMPLETE",
       dismissedStages: [],

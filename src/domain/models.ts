@@ -214,12 +214,102 @@ export type TransactionJournalEntry = {
   metadata: Record<string, unknown>;
 };
 
+export type CareerEventType =
+  | "FIRST_SALE"
+  | "FIRST_PROFITABLE_SALE"
+  | "BEST_FLIP_UPDATED"
+  | "VALUE_ADDED_RECORD"
+  | "WEALTH_MILESTONE"
+  | "EXPERTISE_MILESTONE"
+  | "FIRST_HIGH_TICKET_TRADE"
+  | "DOMINANT_CATEGORY_CHANGED"
+  | "HOME_PROGRESS"
+  | "HOME_PURCHASE"
+  | "LEGACY";
+
+export type CareerEventGroup = "FIRSTS" | "RECORDS" | "MILESTONES" | "HOME";
+
 export type CareerEvent = {
   id: string;
-  type: "BUY" | "SALE" | "PROFIT" | "MILESTONE" | "MISSED";
+  type: CareerEventType;
+  group: CareerEventGroup;
   atGameMin: number;
   label: string;
   amountMinor?: number;
+  familyId?: string;
+  assetKey?: string;
+  buyPriceMinor?: number;
+  sellPriceMinor?: number;
+  realizedProfitMinor?: number;
+  preparationValueMinor?: number;
+  wealthAtEventMinor?: number;
+};
+
+export type ExpertiseState = {
+  marketXp: number;
+  categoryXp: Record<string, number>;
+  familyActionCounts: Record<string, number>;
+  seenActions: string[];
+};
+
+export type SavedSearch = {
+  id: string;
+  familyId: string;
+  maxPriceMinor: number;
+  minCondition: number;
+  evidencePreference: "ANY" | "CHECKED";
+  createdAtGameMin: number;
+};
+
+export type MissedOpportunity = {
+  id: string;
+  listingId: string;
+  familyId: string;
+  familyName: string;
+  assetKey: string;
+  priceMinor: number;
+  condition: number;
+  reason: MarketExitReason;
+  atGameMin: number;
+};
+
+export type FollowState = {
+  watchedListingIds: string[];
+  savedSearches: SavedSearch[];
+  missedOpportunities: MissedOpportunity[];
+};
+
+export type HomeState = {
+  unlocked: boolean;
+  revealedAtGameMin?: number;
+  purchased: boolean;
+  progressMilestones: number[];
+};
+
+export type AnalyticsEventName =
+  | "listing_impression"
+  | "listing_open"
+  | "compare_started"
+  | "evidence_action"
+  | "offer_submitted"
+  | "purchase_complete"
+  | "preparation_started"
+  | "listing_created"
+  | "buyer_offer"
+  | "sale_complete"
+  | "opportunity_lost"
+  | "career_timeline_opened";
+
+export type AnalyticsEvent = {
+  id: string;
+  name: AnalyticsEventName;
+  atGameMin: number;
+  properties: Record<string, string | number | boolean>;
+};
+
+export type AnalyticsState = {
+  enabled: boolean;
+  events: AnalyticsEvent[];
 };
 
 export type Negotiation = {
@@ -260,8 +350,11 @@ export type GameState = {
   playerListings: PlayerListing[];
   buyerOffers: BuyerOffer[];
   negotiation?: Negotiation;
-  expertise: Record<string, number>;
+  expertise: ExpertiseState;
   career: CareerEvent[];
+  follow: FollowState;
+  home: HomeState;
+  analytics: AnalyticsState;
   ftue: FtueState;
   lastWallClockMs: number;
 };
