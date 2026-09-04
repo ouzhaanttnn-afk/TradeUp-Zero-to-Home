@@ -1,8 +1,8 @@
 import { openDB } from "idb";
+import { migrateStateToV3 } from "../domain/migrations";
 import {
   applyOffline,
   initialState,
-  SAVE_VERSION,
   validateState,
   type GameState,
 } from "../game";
@@ -13,22 +13,15 @@ const dbPromise = openDB("tradeup", 1, {
 });
 export async function saveGame(state: GameState) {
   const db = await dbPromise;
-  await db.put("game", { ...state, lastSeenAt: Date.now() }, "main");
+  const validated = validateState(state);
+  await db.put("game", { ...validated, lastSeenAt: Date.now() }, "main");
 }
 export async function loadGame(): Promise<GameState> {
   try {
     const db = await dbPromise;
     const raw = await db.get("game", "main");
     if (!raw) return initialState();
-    const migrated = {
-      ...raw,
-      version: SAVE_VERSION,
-      career: raw.career ?? [],
-      expertise: raw.expertise ?? {},
-      marketCycle: raw.marketCycle ?? 0,
-      playerListings: raw.playerListings ?? [],
-      buyerOffers: raw.buyerOffers ?? [],
-    };
+    const migrated = migrateStateToV3(raw);
     return applyOffline(validateState(migrated));
   } catch {
     return initialState();

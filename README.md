@@ -2,15 +2,20 @@
 
 Portrait-first marketplace / flipping simulation built from the unified production GDD.
 
+The binding product specification is
+[`docs/TRADEUP_MASTER_GDD_v2.1.md`](docs/TRADEUP_MASTER_GDD_v2.1.md).
+
 ## Implemented foundation
 
 - Seeded, replayable listing generation with many same-family listings
-- Cash and estimated wealth as separate state
+- Unified `OwnedAsset` lifecycle across inventory, listings, reservations, and settlement
+- Integer minor-unit money, full book cost, and append-only transaction journal
+- Cash, active owned-asset valuation, and realized profit as separate accounting values
 - Two-player-offer negotiation with stable seller floor and counteroffers
-- Buy → inventory → sell → realized-profit loop
+- Buy → inventory → listing/withdrawal → settlement loop with idempotent transactions
 - NPC/offline listing aging with capped elapsed time
-- Versioned IndexedDB persistence and migration defaults
-- Career event history derived from actual transactions
+- Versioned IndexedDB persistence with v2 → v3 ownership/accounting migration
+- Career event history produced by canonical economic transactions
 - Data-driven fictional product families and `assetKey` manifest
 - Original app icon and nine product assets with deterministic fallback
 - PWA manifest/service worker and Capacitor Android wrapper

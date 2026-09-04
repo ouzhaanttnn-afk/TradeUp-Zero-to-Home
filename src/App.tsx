@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import { assetFor } from "./assets";
-import { HOME_GOAL, money, signal, wealth, type Listing } from "./game";
+import {
+  activePlayerListings,
+  inventoryAssets,
+  listingEstimateBand,
+  quoteAssetExit,
+} from "./domain/economy";
+import { HOME_GOAL_MINOR, money, signal, wealth, type Listing } from "./game";
 import { useGameStore } from "./stores/gameStore";
+
 type Tab = "market" | "inventory" | "listings" | "wealth";
 const sellerLabel = {
   urgent: "Acilci",
@@ -12,6 +19,7 @@ const sellerLabel = {
   merchant: "Tüccar",
   risky: "Riskli",
 };
+
 export default function App() {
   const [tab, setTab] = useState<Tab>("market");
   const [selected, setSelected] = useState<Listing | null>(null);
@@ -24,6 +32,7 @@ export default function App() {
     offer,
     sell,
     list,
+    withdrawListing,
     acceptBuyer,
     advanceWorld,
     reset,
@@ -31,12 +40,21 @@ export default function App() {
   useEffect(() => {
     void hydrate();
   }, [hydrate]);
+
   const total = wealth(game);
+  const inventory = inventoryAssets(game);
+  const playerListings = activePlayerListings(game).flatMap((listing) => {
+    const asset = game.ownedAssets.find(
+      (item) => item.id === listing.ownedAssetId,
+    );
+    return asset ? [{ listing, asset }] : [];
+  });
   const negotiation =
     selected && game.negotiation?.listingId === selected.id
       ? game.negotiation
       : undefined;
   const offers = negotiation?.offersRemaining ?? 2;
+
   return (
     <div className="app-shell">
       <header>
@@ -55,7 +73,7 @@ export default function App() {
       <section className="wallet">
         <div>
           <small>Nakit</small>
-          <strong>{money(game.cash)}</strong>
+          <strong>{money(game.cashMinor)}</strong>
         </div>
         <div>
           <small>Tahmini servet</small>
@@ -63,11 +81,14 @@ export default function App() {
         </div>
         <div className="goal">
           <small>
-            Ev hedefi · {Math.min(100, Math.floor((total / HOME_GOAL) * 100))}%
+            Ev hedefi ·{" "}
+            {Math.min(100, Math.floor((total / HOME_GOAL_MINOR) * 100))}%
           </small>
           <span>
             <i
-              style={{ width: `${Math.min(100, (total / HOME_GOAL) * 100)}%` }}
+              style={{
+                width: `${Math.min(100, (total / HOME_GOAL_MINOR) * 100)}%`,
+              }}
             />
           </span>
         </div>
@@ -85,14 +106,9 @@ export default function App() {
               </div>
               <span>{game.listings.length} ilan</span>
             </div>
-            <div className="chips">
-              <button className="active">Tümü</button>
-              <button>İyi fiyat</button>
-              <button>Hızlı satıcı</button>
-            </div>
             <div className="feed">
               {game.listings.map((item) => {
-                const s = signal(item);
+                const itemSignal = signal(item);
                 return (
                   <button
                     className="listing"
@@ -109,12 +125,12 @@ export default function App() {
                       </div>
                       <h3>{item.family.name}</h3>
                       <div className="tags">
-                        <b className={s.cls}>{s.text}</b>
+                        <b className={itemSignal.cls}>{itemSignal.text}</b>
                         <span>%{item.condition} kondisyon</span>
                       </div>
                     </div>
                     <div className="price">
-                      <strong>{money(item.price)}</strong>
+                      <strong>{money(item.priceMinor)}</strong>
                       <small>ilgi %{item.interest}</small>
                     </div>
                   </button>
@@ -130,9 +146,9 @@ export default function App() {
                 <small>STOK</small>
                 <h2>Envanterim</h2>
               </div>
-              <span>{game.inventory.length} ürün</span>
+              <span>{inventory.length} ürün</span>
             </div>
-            {!game.inventory.length ? (
+            {!inventory.length ? (
               <div className="empty">
                 <span>📦</span>
                 <h3>Envanterin boş</h3>
@@ -143,32 +159,37 @@ export default function App() {
               </div>
             ) : null}
             <div className="inventory-grid">
-              {game.inventory.map((item) => (
-                <article className="owned" key={item.id}>
-                  <div className="owned-icon">
-                    <img src={assetFor(item.family.assetKey)} alt="" />
-                  </div>
-                  <div>
-                    <h3>{item.family.name}</h3>
-                    <p>
-                      Alış {money(item.paid)} · Değer {money(item.fair)}
-                    </p>
-                  </div>
-                  <div className="sell-actions">
-                    <button onClick={() => sell(item, true)}>
-                      Hızlı sat <b>{money(item.fair * 0.82)}</b>
-                    </button>
-                    <button
-                      className="primary"
-                      onClick={() =>
-                        list(item, Math.round((item.fair * 1.05) / 10) * 10)
-                      }
-                    >
-                      Piyasaya koy <b>{money(item.fair * 1.05)}</b>
-                    </button>
-                  </div>
-                </article>
-              ))}
+              {inventory.map((item) => {
+                const quote = quoteAssetExit(item);
+                return (
+                  <article className="owned" key={item.id}>
+                    <div className="owned-icon">
+                      <img
+                        src={assetFor(item.instance.family.assetKey)}
+                        alt=""
+                      />
+                    </div>
+                    <div>
+                      <h3>{item.instance.family.name}</h3>
+                      <p>
+                        Maliyet {money(item.bookCostMinor)} · Kondisyon %
+                        {item.instance.condition}
+                      </p>
+                    </div>
+                    <div className="sell-actions">
+                      <button onClick={() => sell(item, true)}>
+                        Hızlı sat <b>{money(quote.quickSaleMinor)}</b>
+                      </button>
+                      <button
+                        className="primary"
+                        onClick={() => list(item, quote.balancedAskingMinor)}
+                      >
+                        Piyasaya koy <b>{money(quote.balancedAskingMinor)}</b>
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           </>
         ) : null}
@@ -179,9 +200,9 @@ export default function App() {
                 <small>BENİM PAZARIM</small>
                 <h2>İlanlarım</h2>
               </div>
-              <span>{game.playerListings.length} aktif</span>
+              <span>{playerListings.length} aktif</span>
             </div>
-            {!game.playerListings.length && !game.buyerOffers.length ? (
+            {!playerListings.length && !game.buyerOffers.length ? (
               <div className="empty">
                 <span>🧾</span>
                 <h3>Henüz ilan yok</h3>
@@ -192,37 +213,44 @@ export default function App() {
               </div>
             ) : null}
             <div className="inventory-grid">
-              {game.playerListings.map((item) => (
-                <article className="owned" key={item.id}>
+              {playerListings.map(({ listing, asset }) => (
+                <article className="owned" key={listing.id}>
                   <div className="owned-icon">
-                    <img src={assetFor(item.family.assetKey)} alt="" />
+                    <img
+                      src={assetFor(asset.instance.family.assetKey)}
+                      alt=""
+                    />
                   </div>
                   <div>
-                    <h3>{item.family.name}</h3>
+                    <h3>{asset.instance.family.name}</h3>
                     <p>
-                      İlan fiyatı {money(item.price)} · İlgi %{item.interest}
+                      İlan fiyatı {money(listing.askingPriceMinor)} · İlgi %
+                      {listing.interest}
                     </p>
                   </div>
                   <div className="sell-actions">
                     <button onClick={advanceWorld}>Piyasayı ilerlet</button>
-                    <button className="primary" onClick={advanceWorld}>
-                      Alıcı ara
+                    <button
+                      className="primary"
+                      onClick={() => withdrawListing(listing.id)}
+                    >
+                      İlanı geri çek
                     </button>
                   </div>
                 </article>
               ))}
             </div>
-            {game.buyerOffers.map((offer) => (
-              <article className="owned" key={offer.id}>
+            {game.buyerOffers.map((buyerOffer) => (
+              <article className="owned" key={buyerOffer.id}>
                 <div className="owned-icon">🤝</div>
                 <div>
-                  <h3>{offer.buyer} teklif verdi</h3>
-                  <p>{money(offer.amount)} · Teklif süresi sınırlı</p>
+                  <h3>{buyerOffer.buyer} teklif verdi</h3>
+                  <p>{money(buyerOffer.amountMinor)} · Teklif süresi sınırlı</p>
                 </div>
                 <div className="sell-actions">
                   <button
                     className="primary"
-                    onClick={() => acceptBuyer(offer.id)}
+                    onClick={() => acceptBuyer(buyerOffer.id)}
                   >
                     Teklifi kabul et
                   </button>
@@ -241,18 +269,18 @@ export default function App() {
             </div>
             <section className="score-card">
               <small>GERÇEKLEŞEN KÂR</small>
-              <strong className={game.realizedProfit < 0 ? "loss" : ""}>
-                {money(game.realizedProfit)}
+              <strong className={game.realizedProfitMinor < 0 ? "loss" : ""}>
+                {money(game.realizedProfitMinor)}
               </strong>
               <p>
-                Nakit ve envanter değeri ayrı tutulur. Gerçek kâr satış
+                Nakit ve aktif varlık değeri ayrı tutulur. Gerçek kâr satış
                 tamamlandığında yazılır.
               </p>
             </section>
             <div className="stats">
               <div>
                 <span>Likidite oranı</span>
-                <b>%{total ? Math.round((game.cash / total) * 100) : 0}</b>
+                <b>%{total ? Math.round((game.cashMinor / total) * 100) : 0}</b>
               </div>
               <div>
                 <span>Kariyer olayı</span>
@@ -260,7 +288,7 @@ export default function App() {
               </div>
               <div>
                 <span>Ev hedefi</span>
-                <b>{money(HOME_GOAL)}</b>
+                <b>{money(HOME_GOAL_MINOR)}</b>
               </div>
             </div>
             <div className="timeline">
@@ -274,7 +302,9 @@ export default function App() {
                     </span>
                     <b>{event.label}</b>
                     <em>
-                      {event.amount !== undefined ? money(event.amount) : ""}
+                      {event.amountMinor !== undefined
+                        ? money(event.amountMinor)
+                        : ""}
                     </em>
                   </div>
                 ))}
@@ -313,7 +343,10 @@ export default function App() {
       </nav>
       {selected ? (
         <div className="scrim" onClick={() => setSelected(null)}>
-          <section className="sheet" onClick={(e) => e.stopPropagation()}>
+          <section
+            className="sheet"
+            onClick={(event) => event.stopPropagation()}
+          >
             <div className="grab" />
             <button
               className="close"
@@ -333,7 +366,7 @@ export default function App() {
             </small>
             <h2>{selected.family.name}</h2>
             <div className="detail-price">
-              <strong>{money(selected.price)}</strong>
+              <strong>{money(selected.priceMinor)}</strong>
               <span className={signal(selected).cls}>
                 {signal(selected).text}
               </span>
@@ -342,13 +375,14 @@ export default function App() {
               <div>
                 <span>Tahmini piyasa bandı</span>
                 <b>
-                  {money(selected.fair * 0.9)} – {money(selected.fair * 1.1)}
+                  {money(listingEstimateBand(selected).lowMinor)} –{" "}
+                  {money(listingEstimateBand(selected).highMinor)}
                 </b>
               </div>
               <i>
                 <em
                   style={{
-                    left: `${Math.max(4, Math.min(94, (selected.price / (selected.fair * 1.2)) * 100))}%`,
+                    left: `${Math.max(4, Math.min(94, (selected.priceMinor / (selected.fairValueMinor * 1.2)) * 100))}%`,
                   }}
                 />
               </i>
@@ -370,14 +404,15 @@ export default function App() {
                 </b>
               </div>
             </div>
-            {negotiation?.counter ? (
+            {negotiation?.counterMinor ? (
               <button
                 className="counter-offer"
                 onClick={() => {
-                  if (buy(selected, negotiation.counter)) setSelected(null);
+                  if (buy(selected, negotiation.counterMinor))
+                    setSelected(null);
                 }}
               >
-                Karşı teklifi kabul et · {money(negotiation.counter)}
+                Karşı teklifi kabul et · {money(negotiation.counterMinor)}
               </button>
             ) : null}
             <div className="sheet-actions">
@@ -393,7 +428,7 @@ export default function App() {
                   if (buy(selected)) setSelected(null);
                 }}
               >
-                Hemen al <small>{money(selected.price)}</small>
+                Hemen al <small>{money(selected.priceMinor)}</small>
               </button>
             </div>
           </section>

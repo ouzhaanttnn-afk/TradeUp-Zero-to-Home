@@ -7,47 +7,57 @@ import {
   sellerFloor,
   wealth,
 } from "./game";
+
 describe("deterministic economy", () => {
-  it("replays the same market for the same seed and cycle", () => {
-    const a = market(42, 5000, 3).map((x) => [
-      x.family.id,
-      x.price,
-      x.condition,
+  it("replays the same market values for the same seed and cycle", () => {
+    const a = market(42, 500_000, 3).map((item) => [
+      item.family.id,
+      item.priceMinor,
+      item.condition,
     ]);
-    const b = market(42, 5000, 3).map((x) => [
-      x.family.id,
-      x.price,
-      x.condition,
+    const b = market(42, 500_000, 3).map((item) => [
+      item.family.id,
+      item.priceMinor,
+      item.condition,
     ]);
     expect(a).toEqual(b);
   });
-  it("keeps cash separate from inventory wealth", () => {
-    const s = initialState();
-    s.cash = 10;
-    s.inventory = [
+
+  it("keeps cash separate from active owned-asset wealth", () => {
+    const state = initialState();
+    const family = state.listings[0].family;
+    state.cashMinor = 1_000;
+    state.ownedAssets = [
       {
-        id: "x",
-        family: s.listings[0].family,
-        paid: 100,
-        fair: 500,
-        condition: 80,
-        acquiredAt: 0,
+        id: "asset:x",
+        familyId: family.id,
+        sourceListingId: "x",
+        instance: { family, fairValueMinor: 50_000, condition: 80 },
+        state: "IN_INVENTORY",
+        purchasePriceMinor: 10_000,
+        preparationCostMinor: 0,
+        inspectionCostMinor: 0,
+        transparentFeesMinor: 0,
+        bookCostMinor: 10_000,
+        acquiredAtGameMin: 0,
       },
     ];
-    expect(wealth(s)).toBe(510);
-    expect(s.cash).toBe(10);
+    expect(wealth(state)).toBe(51_000);
+    expect(state.cashMinor).toBe(1_000);
   });
+
   it("keeps negotiation floor stable", () => {
-    const item = market(8, 1000)[0];
+    const item = market(8, 100_000)[0];
     const floor = sellerFloor(item);
-    resolveOffer(item, 20, 1);
+    resolveOffer(item, 2_000, 1);
     expect(sellerFloor(item)).toBe(floor);
   });
+
   it("clamps offline time and preserves a usable market", () => {
-    const s = initialState();
-    s.lastSeenAt = 0;
+    const state = initialState();
+    state.lastSeenAt = 0;
     expect(
-      applyOffline(s, 10 * 60 * 60 * 1000).listings.length,
+      applyOffline(state, 10 * 60 * 60 * 1_000).listings.length,
     ).toBeGreaterThanOrEqual(8);
   });
 });

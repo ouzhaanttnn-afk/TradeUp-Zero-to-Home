@@ -1,84 +1,27 @@
 import { z } from "zod";
-export const SAVE_VERSION = 2;
-export type SellerKind =
-  "urgent" | "expert" | "uninformed" | "emotional" | "merchant" | "risky";
-export type ListingState =
-  "ACTIVE" | "NEGOTIATING" | "SOLD_TO_PLAYER" | "SOLD_TO_NPC" | "EXPIRED";
-export type Family = {
-  id: string;
-  name: string;
-  assetKey: string;
-  base: number;
-  demand: number;
-  liquidity: number;
-  category: string;
-  tier: number;
-  attributes: string[];
-};
-export type Listing = {
-  id: string;
-  family: Family;
-  price: number;
-  fair: number;
-  condition: number;
-  seller: SellerKind;
-  urgency: number;
-  interest: number;
-  createdAt: number;
-  expiresAt: number;
-  state: ListingState;
-  seed: number;
-};
-export type Owned = {
-  id: string;
-  family: Family;
-  paid: number;
-  fair: number;
-  condition: number;
-  acquiredAt: number;
-};
-export type CareerEvent = {
-  id: string;
-  type: "BUY" | "SALE" | "PROFIT" | "MILESTONE" | "MISSED";
-  at: number;
-  label: string;
-  amount?: number;
-};
-export type Negotiation = {
-  listingId: string;
-  offersRemaining: 0 | 1 | 2 | 3;
-  sellerFloor: number;
-  counter?: number;
-  closed: boolean;
-  retryGranted: boolean;
-};
-export type GameState = {
-  version: number;
-  cash: number;
-  inventory: Owned[];
-  realizedProfit: number;
-  seed: number;
-  marketCycle: number;
-  listings: Listing[];
-  playerListings: Listing[];
-  buyerOffers: {
-    id: string;
-    listingId: string;
-    amount: number;
-    buyer: string;
-    expiresAt: number;
-  }[];
-  negotiation?: Negotiation;
-  expertise: Record<string, number>;
-  career: CareerEvent[];
-  lastSeenAt: number;
-};
+import { netWorthMinor } from "./domain/economy";
+import type { Family, GameState, Listing, SellerKind } from "./domain/models";
+
+export type {
+  BuyerOffer,
+  CareerEvent,
+  Family,
+  GameState,
+  Listing,
+  Negotiation,
+  OwnedAsset,
+  PlayerListing,
+  SellerKind,
+  TransactionJournalEntry,
+} from "./domain/models";
+
+export const SAVE_VERSION = 3;
 export const families: Family[] = [
   {
     id: "notebook",
     name: "Kuzey Defteri",
     assetKey: "prd_notebook",
-    base: 180,
+    baseValueMinor: 18_000,
     demand: 0.82,
     liquidity: 0.9,
     category: "Küçük Eşya",
@@ -89,7 +32,7 @@ export const families: Family[] = [
     id: "headset",
     name: "Echo Mini Kulaklık",
     assetKey: "prd_headset",
-    base: 640,
+    baseValueMinor: 64_000,
     demand: 0.76,
     liquidity: 0.82,
     category: "Ses",
@@ -100,7 +43,7 @@ export const families: Family[] = [
     id: "watch",
     name: "Mira Classic Saat",
     assetKey: "prd_watch",
-    base: 1450,
+    baseValueMinor: 145_000,
     demand: 0.66,
     liquidity: 0.7,
     category: "Saat",
@@ -111,7 +54,7 @@ export const families: Family[] = [
     id: "console",
     name: "PixelGo Konsol",
     assetKey: "prd_console",
-    base: 3200,
+    baseValueMinor: 320_000,
     demand: 0.79,
     liquidity: 0.78,
     category: "Oyun",
@@ -122,7 +65,7 @@ export const families: Family[] = [
     id: "guitar",
     name: "Arda S1 Gitar",
     assetKey: "prd_guitar",
-    base: 5100,
+    baseValueMinor: 510_000,
     demand: 0.58,
     liquidity: 0.55,
     category: "Müzik",
@@ -133,7 +76,7 @@ export const families: Family[] = [
     id: "phone",
     name: "Nova X1 Telefon",
     assetKey: "prd_phone",
-    base: 8200,
+    baseValueMinor: 820_000,
     demand: 0.88,
     liquidity: 0.88,
     category: "Telefon",
@@ -144,7 +87,7 @@ export const families: Family[] = [
     id: "laptop",
     name: "Atlas Air Bilgisayar",
     assetKey: "prd_laptop",
-    base: 14500,
+    baseValueMinor: 1_450_000,
     demand: 0.75,
     liquidity: 0.72,
     category: "Bilgisayar",
@@ -155,7 +98,7 @@ export const families: Family[] = [
     id: "camera",
     name: "Luma C2 Kamera",
     assetKey: "prd_camera",
-    base: 22000,
+    baseValueMinor: 2_200_000,
     demand: 0.59,
     liquidity: 0.56,
     category: "Kamera",
@@ -166,7 +109,7 @@ export const families: Family[] = [
     id: "scooter",
     name: "Vela Şehir Scooter",
     assetKey: "prd_scooter",
-    base: 36000,
+    baseValueMinor: 3_600_000,
     demand: 0.62,
     liquidity: 0.53,
     category: "Ulaşım",
@@ -177,7 +120,7 @@ export const families: Family[] = [
     id: "turntable",
     name: "Orion Pikap",
     assetKey: "prd_turntable",
-    base: 2800,
+    baseValueMinor: 280_000,
     demand: 0.68,
     liquidity: 0.62,
     category: "Plak & Ses",
@@ -188,7 +131,7 @@ export const families: Family[] = [
     id: "vinyl",
     name: "Klasik Plak Koleksiyonu",
     assetKey: "prd_vinyl",
-    base: 420,
+    baseValueMinor: 42_000,
     demand: 0.72,
     liquidity: 0.75,
     category: "Plak & Ses",
@@ -199,7 +142,7 @@ export const families: Family[] = [
     id: "speaker",
     name: "Sera Raf Hoparlörü",
     assetKey: "prd_speaker",
-    base: 1850,
+    baseValueMinor: 185_000,
     demand: 0.66,
     liquidity: 0.64,
     category: "Plak & Ses",
@@ -210,7 +153,7 @@ export const families: Family[] = [
     id: "desk",
     name: "Atölye Çalışma Masası",
     assetKey: "prd_desk",
-    base: 3600,
+    baseValueMinor: 360_000,
     demand: 0.7,
     liquidity: 0.64,
     category: "Mobilya",
@@ -221,7 +164,7 @@ export const families: Family[] = [
     id: "chair",
     name: "Kavak Ahşap Sandalye",
     assetKey: "prd_chair",
-    base: 760,
+    baseValueMinor: 76_000,
     demand: 0.74,
     liquidity: 0.8,
     category: "Mobilya",
@@ -232,7 +175,7 @@ export const families: Family[] = [
     id: "sofa",
     name: "Liman Üçlü Koltuk",
     assetKey: "prd_sofa",
-    base: 7200,
+    baseValueMinor: 720_000,
     demand: 0.6,
     liquidity: 0.48,
     category: "Mobilya",
@@ -243,7 +186,7 @@ export const families: Family[] = [
     id: "wardrobe",
     name: "Mimoza Gardırop",
     assetKey: "prd_wardrobe",
-    base: 5800,
+    baseValueMinor: 580_000,
     demand: 0.54,
     liquidity: 0.45,
     category: "Mobilya",
@@ -254,7 +197,7 @@ export const families: Family[] = [
     id: "tv",
     name: "Vista 4K Televizyon",
     assetKey: "prd_tv",
-    base: 12800,
+    baseValueMinor: 1_280_000,
     demand: 0.82,
     liquidity: 0.8,
     category: "Elektronik",
@@ -265,7 +208,7 @@ export const families: Family[] = [
     id: "monitor",
     name: "Frame 27 Monitör",
     assetKey: "prd_monitor",
-    base: 6200,
+    baseValueMinor: 620_000,
     demand: 0.78,
     liquidity: 0.75,
     category: "Elektronik",
@@ -276,7 +219,7 @@ export const families: Family[] = [
     id: "printer",
     name: "Inkjet Ofis Yazıcı",
     assetKey: "prd_printer",
-    base: 2100,
+    baseValueMinor: 210_000,
     demand: 0.55,
     liquidity: 0.52,
     category: "Elektronik",
@@ -287,7 +230,7 @@ export const families: Family[] = [
     id: "fridge",
     name: "Frost Mini Buzdolabı",
     assetKey: "prd_fridge",
-    base: 9400,
+    baseValueMinor: 940_000,
     demand: 0.58,
     liquidity: 0.44,
     category: "Beyaz Eşya",
@@ -298,7 +241,7 @@ export const families: Family[] = [
     id: "washer",
     name: "Aqua Çamaşır Makinesi",
     assetKey: "prd_washer",
-    base: 11200,
+    baseValueMinor: 1_120_000,
     demand: 0.57,
     liquidity: 0.42,
     category: "Beyaz Eşya",
@@ -309,7 +252,7 @@ export const families: Family[] = [
     id: "bicycle",
     name: "Rota Şehir Bisikleti",
     assetKey: "prd_bicycle",
-    base: 4800,
+    baseValueMinor: 480_000,
     demand: 0.7,
     liquidity: 0.68,
     category: "Ulaşım",
@@ -320,7 +263,7 @@ export const families: Family[] = [
     id: "motorcycle",
     name: "Kanyon 250 Motosiklet",
     assetKey: "prd_motorcycle",
-    base: 88000,
+    baseValueMinor: 8_800_000,
     demand: 0.51,
     liquidity: 0.35,
     category: "Araç",
@@ -331,7 +274,7 @@ export const families: Family[] = [
     id: "car",
     name: "Mira Hatchback",
     assetKey: "prd_car",
-    base: 360000,
+    baseValueMinor: 36_000_000,
     demand: 0.5,
     liquidity: 0.25,
     category: "Araç",
@@ -342,7 +285,7 @@ export const families: Family[] = [
     id: "book",
     name: "İmzalı İlk Baskı Kitap",
     assetKey: "prd_book",
-    base: 980,
+    baseValueMinor: 98_000,
     demand: 0.64,
     liquidity: 0.7,
     category: "Koleksiyon",
@@ -353,7 +296,7 @@ export const families: Family[] = [
     id: "camera_lens",
     name: "Vela 50mm Lens",
     assetKey: "prd_camera_lens",
-    base: 7600,
+    baseValueMinor: 760_000,
     demand: 0.61,
     liquidity: 0.58,
     category: "Kamera",
@@ -364,7 +307,7 @@ export const families: Family[] = [
     id: "sneaker",
     name: "Kanvas Koleksiyon Ayakkabı",
     assetKey: "prd_sneaker",
-    base: 2400,
+    baseValueMinor: 240_000,
     demand: 0.8,
     liquidity: 0.86,
     category: "Moda",
@@ -375,7 +318,7 @@ export const families: Family[] = [
     id: "coffee",
     name: "Barista Espresso Makinesi",
     assetKey: "prd_coffee",
-    base: 6900,
+    baseValueMinor: 690_000,
     demand: 0.68,
     liquidity: 0.6,
     category: "Ev",
@@ -386,7 +329,7 @@ export const families: Family[] = [
     id: "lamp",
     name: "Lumen Masa Lambası",
     assetKey: "prd_lamp",
-    base: 520,
+    baseValueMinor: 52_000,
     demand: 0.78,
     liquidity: 0.88,
     category: "Ev",
@@ -397,7 +340,7 @@ export const families: Family[] = [
     id: "record_player",
     name: "Mono Taşınabilir Plak Çalar",
     assetKey: "prd_record_player",
-    base: 1750,
+    baseValueMinor: 175_000,
     demand: 0.7,
     liquidity: 0.65,
     category: "Plak & Ses",
@@ -405,22 +348,244 @@ export const families: Family[] = [
     attributes: ["İğne", "Hoparlör", "Kasa"],
   },
 ];
-export const HOME_GOAL = 3_500_000;
-const stateSchema = z.object({
-  version: z.number(),
-  cash: z.number(),
-  inventory: z.array(z.any()),
-  realizedProfit: z.number(),
-  seed: z.number(),
-  marketCycle: z.number(),
-  listings: z.array(z.any()),
-  expertise: z.record(z.string(), z.number()),
-  career: z.array(z.any()),
-  lastSeenAt: z.number(),
-  negotiation: z.any().optional(),
-  playerListings: z.array(z.any()).default([]),
-  buyerOffers: z.array(z.any()).default([]),
+export const HOME_GOAL_MINOR = 350_000_000;
+
+const sellerKindSchema = z.enum([
+  "urgent",
+  "expert",
+  "uninformed",
+  "emotional",
+  "merchant",
+  "risky",
+]);
+const familySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  assetKey: z.string(),
+  baseValueMinor: z.number().int().nonnegative(),
+  demand: z.number(),
+  liquidity: z.number(),
+  category: z.string(),
+  tier: z.number().int().nonnegative(),
+  attributes: z.array(z.string()),
 });
+const listingSchema = z.object({
+  id: z.string(),
+  family: familySchema,
+  priceMinor: z.number().int().nonnegative(),
+  fairValueMinor: z.number().int().nonnegative(),
+  condition: z.number(),
+  seller: sellerKindSchema,
+  urgency: z.number(),
+  interest: z.number(),
+  createdAt: z.number(),
+  expiresAt: z.number(),
+  state: z.enum([
+    "ACTIVE",
+    "NEGOTIATING",
+    "SOLD_TO_PLAYER",
+    "SOLD_TO_NPC",
+    "EXPIRED",
+  ]),
+  seed: z.number().int(),
+});
+const ownedAssetSchema = z
+  .object({
+    id: z.string(),
+    familyId: z.string(),
+    sourceListingId: z.string(),
+    instance: z.object({
+      family: familySchema,
+      fairValueMinor: z.number().int().nonnegative(),
+      condition: z.number(),
+    }),
+    state: z.enum([
+      "IN_INVENTORY",
+      "PREPARING",
+      "READY",
+      "LISTED",
+      "RESERVED",
+      "SOLD_PENDING",
+      "SOLD_COMPLETE",
+    ]),
+    purchasePriceMinor: z.number().int().nonnegative(),
+    preparationCostMinor: z.number().int().nonnegative(),
+    inspectionCostMinor: z.number().int().nonnegative(),
+    transparentFeesMinor: z.number().int().nonnegative(),
+    bookCostMinor: z.number().int().nonnegative(),
+    acquiredAtGameMin: z.number().nonnegative(),
+    currentListingId: z.string().optional(),
+  })
+  .refine(
+    (asset) =>
+      asset.bookCostMinor ===
+      asset.purchasePriceMinor +
+        asset.preparationCostMinor +
+        asset.inspectionCostMinor +
+        asset.transparentFeesMinor,
+    { message: "bookCostMinor must equal every capitalized asset cost" },
+  );
+const playerListingSchema = z.object({
+  id: z.string(),
+  ownedAssetId: z.string(),
+  askingPriceMinor: z.number().int().nonnegative(),
+  interest: z.number(),
+  createdAtGameMin: z.number().nonnegative(),
+  state: z.enum([
+    "ACTIVE",
+    "RESERVED",
+    "SOLD_PENDING",
+    "SOLD_COMPLETE",
+    "WITHDRAWN",
+    "EXPIRED",
+  ]),
+});
+const buyerOfferSchema = z.object({
+  id: z.string(),
+  listingId: z.string(),
+  amountMinor: z.number().int().nonnegative(),
+  buyer: z.string(),
+  expiresAt: z.number(),
+});
+const journalEntrySchema = z.object({
+  id: z.string(),
+  kind: z.enum([
+    "OPENING_BALANCE",
+    "MIGRATION",
+    "PURCHASE",
+    "PREPARATION",
+    "INSPECTION",
+    "FEE",
+    "LISTING",
+    "RESERVATION",
+    "SALE",
+    "REFUND",
+    "REWARD",
+  ]),
+  gameTime: z.number(),
+  assetId: z.string().optional(),
+  cashDeltaMinor: z.number().int(),
+  costBasisDeltaMinor: z.number().int(),
+  realizedProfitDeltaMinor: z.number().int(),
+  metadata: z.record(z.string(), z.unknown()),
+});
+const careerEventSchema = z.object({
+  id: z.string(),
+  type: z.enum(["BUY", "SALE", "PROFIT", "MILESTONE", "MISSED"]),
+  at: z.number(),
+  label: z.string(),
+  amountMinor: z.number().int().optional(),
+});
+const negotiationSchema = z.object({
+  listingId: z.string(),
+  offersRemaining: z.union([z.literal(0), z.literal(1), z.literal(2)]),
+  sellerFloorMinor: z.number().int().nonnegative(),
+  counterMinor: z.number().int().nonnegative().optional(),
+  closed: z.boolean(),
+});
+const stateSchema = z
+  .object({
+    version: z.literal(SAVE_VERSION),
+    cashMinor: z.number().int().nonnegative(),
+    ownedAssets: z.array(ownedAssetSchema),
+    realizedProfitMinor: z.number().int(),
+    transactionJournal: z.array(journalEntrySchema),
+    seed: z.number().int(),
+    marketCycle: z.number().int().nonnegative(),
+    listings: z.array(listingSchema),
+    expertise: z.record(z.string(), z.number()),
+    career: z.array(careerEventSchema),
+    lastSeenAt: z.number(),
+    negotiation: negotiationSchema.optional(),
+    playerListings: z.array(playerListingSchema),
+    buyerOffers: z.array(buyerOfferSchema),
+  })
+  .superRefine((state, context) => {
+    const assetIds = new Set<string>();
+    for (const asset of state.ownedAssets) {
+      if (assetIds.has(asset.id)) {
+        context.addIssue({
+          code: "custom",
+          message: `OwnedAsset id must be unique: ${asset.id}`,
+          path: ["ownedAssets"],
+        });
+      }
+      assetIds.add(asset.id);
+      if (asset.state === "SOLD_COMPLETE" && asset.currentListingId) {
+        context.addIssue({
+          code: "custom",
+          message: `SoldComplete asset cannot have an active listing: ${asset.id}`,
+          path: ["ownedAssets"],
+        });
+      }
+    }
+
+    const activeAssetListings = new Set<string>();
+    for (const listing of state.playerListings) {
+      if (
+        listing.state !== "ACTIVE" &&
+        listing.state !== "RESERVED" &&
+        listing.state !== "SOLD_PENDING"
+      ) {
+        continue;
+      }
+      const asset = state.ownedAssets.find(
+        (item) => item.id === listing.ownedAssetId,
+      );
+      if (!asset || asset.currentListingId !== listing.id) {
+        context.addIssue({
+          code: "custom",
+          message: `Active player listing must reference its current OwnedAsset: ${listing.id}`,
+          path: ["playerListings"],
+        });
+      }
+      if (activeAssetListings.has(listing.ownedAssetId)) {
+        context.addIssue({
+          code: "custom",
+          message: `OwnedAsset cannot have two active listings: ${listing.ownedAssetId}`,
+          path: ["playerListings"],
+        });
+      }
+      activeAssetListings.add(listing.ownedAssetId);
+    }
+
+    const transactionIds = new Set<string>();
+    for (const entry of state.transactionJournal) {
+      if (transactionIds.has(entry.id)) {
+        context.addIssue({
+          code: "custom",
+          message: `Transaction id must be unique: ${entry.id}`,
+          path: ["transactionJournal"],
+        });
+      }
+      transactionIds.add(entry.id);
+    }
+
+    const journalTotals = state.transactionJournal.reduce(
+      (totals, entry) => ({
+        cashMinor: totals.cashMinor + entry.cashDeltaMinor,
+        activeBookCostMinor:
+          totals.activeBookCostMinor + entry.costBasisDeltaMinor,
+        realizedProfitMinor:
+          totals.realizedProfitMinor + entry.realizedProfitDeltaMinor,
+      }),
+      { cashMinor: 0, activeBookCostMinor: 0, realizedProfitMinor: 0 },
+    );
+    const activeBookCostMinor = state.ownedAssets
+      .filter((asset) => asset.state !== "SOLD_COMPLETE")
+      .reduce((total, asset) => total + asset.bookCostMinor, 0);
+    if (
+      journalTotals.cashMinor !== state.cashMinor ||
+      journalTotals.activeBookCostMinor !== activeBookCostMinor ||
+      journalTotals.realizedProfitMinor !== state.realizedProfitMinor
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "Transaction journal does not reconcile with account totals",
+        path: ["transactionJournal"],
+      });
+    }
+  });
 export const validateState = (value: unknown) =>
   stateSchema.parse(value) as GameState;
 export function rng(seed: number) {
@@ -428,29 +593,26 @@ export function rng(seed: number) {
   return () =>
     (value = (Math.imul(1664525, value) + 1013904223) >>> 0) / 4294967296;
 }
-export function wealth(state: Pick<GameState, "cash" | "inventory">) {
-  return Math.round(
-    state.cash + state.inventory.reduce((sum, item) => sum + item.fair, 0),
-  );
-}
+export const wealth = netWorthMinor;
 export function market(
   seed: number,
-  totalWealth: number,
+  totalWealthMinor: number,
   cycle = 0,
 ): Listing[] {
   const r = rng(seed + cycle * 7919);
-  const tier = totalWealth < 10000 ? 1 : totalWealth < 75000 ? 2 : 3;
+  const tier =
+    totalWealthMinor < 1_000_000 ? 1 : totalWealthMinor < 7_500_000 ? 2 : 3;
   const pool = families.filter((f) => f.tier <= tier);
   const now = Date.now();
   return Array.from({ length: 24 }, (_, i) => {
     const family = pool[Math.floor(r() * pool.length)];
     const condition = Math.round(48 + r() * 51);
-    const fair = Math.round(
-      family.base * (0.55 + condition / 190) * (0.94 + r() * 0.13),
+    const fairValueMinor = Math.round(
+      family.baseValueMinor * (0.55 + condition / 190) * (0.94 + r() * 0.13),
     );
-    const price = Math.max(
-      20,
-      Math.round((fair * (0.72 + r() * 0.56)) / 10) * 10,
+    const priceMinor = Math.max(
+      2_000,
+      Math.round((fairValueMinor * (0.72 + r() * 0.56)) / 1_000) * 1_000,
     );
     const life = Math.round(
       (2 + (1 - family.liquidity) * 30 + r() * 25) * 60000,
@@ -458,8 +620,8 @@ export function market(
     return {
       id: `${seed}-${cycle}-${i}`,
       family,
-      fair,
-      price,
+      fairValueMinor,
+      priceMinor,
       condition,
       seller: (
         [
@@ -478,10 +640,12 @@ export function market(
       state: "ACTIVE" as const,
       seed: Math.floor(r() * 1e9),
     };
-  }).sort((a, b) => a.price / a.fair - b.price / b.fair);
+  }).sort(
+    (a, b) => a.priceMinor / a.fairValueMinor - b.priceMinor / b.fairValueMinor,
+  );
 }
 export function signal(item: Listing) {
-  const ratio = item.price / item.fair;
+  const ratio = item.priceMinor / item.fairValueMinor;
   if (ratio < 0.78) return { text: "Sıcak fırsat", cls: "hot" };
   if (ratio < 0.88) return { text: "İyi fiyat", cls: "good" };
   if (ratio > 1.15) return { text: "Pahalı", cls: "bad" };
@@ -496,19 +660,22 @@ export function sellerFloor(item: Listing) {
     merchant: 0.96,
     risky: 0.7,
   }[item.seller];
-  return Math.round((item.fair * (factor + item.urgency * 0.06)) / 10) * 10;
+  return (
+    Math.round((item.fairValueMinor * (factor + item.urgency * 0.06)) / 1_000) *
+    1_000
+  );
 }
 export function resolveOffer(item: Listing, offer: number, index: number) {
-  const floor = sellerFloor(item);
+  const floorMinor = sellerFloor(item);
   const roll = rng(item.seed + offer * 17 + index * 101)();
-  if (offer >= floor) return { result: "accepted" as const, floor };
-  if (offer >= floor * (0.88 + roll * 0.08))
+  if (offer >= floorMinor) return { result: "accepted" as const, floorMinor };
+  if (offer >= floorMinor * (0.88 + roll * 0.08))
     return {
       result: "counter" as const,
-      floor,
-      counter: Math.round((offer + floor) / 20) * 10,
+      floorMinor,
+      counterMinor: Math.round((offer + floorMinor) / 2_000) * 1_000,
     };
-  return { result: "rejected" as const, floor };
+  return { result: "rejected" as const, floorMinor };
 }
 export function applyOffline(state: GameState, now = Date.now()): GameState {
   const elapsed = Math.max(
@@ -531,13 +698,31 @@ export function applyOffline(state: GameState, now = Date.now()): GameState {
     lastSeenAt: now,
   };
 }
-export const money = (n: number) => `₺${Math.round(n).toLocaleString("tr-TR")}`;
+const tryFormatter = new Intl.NumberFormat("tr-TR", {
+  style: "currency",
+  currency: "TRY",
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2,
+});
+export const money = (minor: number) => tryFormatter.format(minor / 100);
 export const initialState = (): GameState => {
+  const initialCashMinor = 42_000;
   const base: GameState = {
     version: SAVE_VERSION,
-    cash: 420,
-    inventory: [],
-    realizedProfit: 0,
+    cashMinor: initialCashMinor,
+    ownedAssets: [],
+    realizedProfitMinor: 0,
+    transactionJournal: [
+      {
+        id: "opening-balance:v3",
+        kind: "OPENING_BALANCE",
+        gameTime: 0,
+        cashDeltaMinor: initialCashMinor,
+        costBasisDeltaMinor: 0,
+        realizedProfitDeltaMinor: 0,
+        metadata: { reason: "prototype-starting-balance" },
+      },
+    ],
     seed: 90421,
     marketCycle: 0,
     listings: [],
@@ -547,5 +732,5 @@ export const initialState = (): GameState => {
     career: [],
     lastSeenAt: Date.now(),
   };
-  return { ...base, listings: market(base.seed, base.cash) };
+  return { ...base, listings: market(base.seed, base.cashMinor) };
 };
