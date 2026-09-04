@@ -37,7 +37,7 @@ describe("decision vertical slice", () => {
       ),
     );
     expect(Math.max(...counts)).toBeGreaterThanOrEqual(10);
-    const state = { ...initialState(), listings };
+    const state = { ...initialState(0, "SANDBOX"), listings };
     const comparable = comparableListings(state, listings[0].id);
     expect(comparable.length).toBeGreaterThanOrEqual(2);
     expect(comparable.length).toBeLessThanOrEqual(5);
@@ -49,7 +49,7 @@ describe("decision vertical slice", () => {
   });
 
   it("narrows estimates deterministically as evidence is checked", () => {
-    const state = initialState();
+    const state = initialState(0, "SANDBOX");
     const listing = state.listings[0];
     const before = listingEstimateBand(listing);
     const left = inspectListing(
@@ -74,7 +74,7 @@ describe("decision vertical slice", () => {
   });
 
   it("capitalizes preparation cost and applies a capped deterministic result", () => {
-    let state = initialState();
+    let state = initialState(0, "SANDBOX");
     state.cashMinor = 1_000_000;
     state.transactionJournal[0] = {
       ...state.transactionJournal[0],

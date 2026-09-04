@@ -28,8 +28,8 @@ export async function loadGame(
     const raw = await db.get("game", "main");
     const wallClockMs = timeProvider.nowWallMs();
     if (!raw) return initialState(wallClockMs);
-    if (raw.version !== 4) {
-      await db.put("game", raw, `backup:pre-v4:${raw.version ?? "unknown"}`);
+    if (raw.version !== 6) {
+      await db.put("game", raw, `backup:pre-v6:${raw.version ?? "unknown"}`);
     }
     const migrated = validateState(migrateStateToCurrent(raw));
     const progressed = advanceOffline(migrated, wallClockMs).state;

@@ -481,7 +481,19 @@ export function migrateStateToV4(value: unknown): unknown {
 }
 
 export function migrateStateToCurrent(value: unknown): unknown {
-  return migrateStateToV5(migrateStateToV4(migrateStateToV3(value)));
+  return migrateStateToV6(
+    migrateStateToV5(migrateStateToV4(migrateStateToV3(value))),
+  );
+}
+
+export function migrateStateToV6(value: unknown): unknown {
+  const source = record(value);
+  if (integer(source.version) >= 6) return value;
+  return {
+    ...source,
+    version: 6,
+    ftue: { stage: "COMPLETE", dismissedStages: [] },
+  };
 }
 
 function migrateInstance(source: UnknownRecord, fallbackFamily: unknown) {

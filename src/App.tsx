@@ -14,6 +14,7 @@ import {
   listingEstimateBand,
 } from "./domain/decision";
 import { WORLD_CONFIG } from "./domain/config";
+import { ftueCopy, ftueStageLabel, isFtueActive } from "./domain/ftue";
 import { activeMarketListings, npcRiskSignal } from "./domain/world";
 import { HOME_GOAL_MINOR, money, signal, wealth } from "./game";
 import { useGameStore } from "./stores/gameStore";
@@ -48,6 +49,8 @@ export default function App() {
     acceptBuyer,
     inspect,
     prepare,
+    markCompared,
+    dismissCoach,
     reset,
   } = useGameStore();
   useEffect(() => {
@@ -90,6 +93,16 @@ export default function App() {
       ? game.negotiation
       : undefined;
   const offers = negotiation?.offersRemaining ?? 2;
+  const ftueActive = isFtueActive(game);
+  const coach = ftueCopy[game.ftue.stage];
+  const showCoach =
+    ftueActive && !game.ftue.dismissedStages.includes(game.ftue.stage);
+  const startingOffer =
+    game.ftue.stage === "STARTING_SALE"
+      ? game.buyerOffers.find(
+          (item) => item.id === "offer:ftue-starting-notebook",
+        )
+      : undefined;
 
   return (
     <div className="app-shell">
@@ -98,9 +111,15 @@ export default function App() {
           <span className="eyebrow">TRADEUP</span>
           <h1>Zero to Home</h1>
         </div>
-        <button className="icon-button" onClick={scan} aria-label="Pazarı tara">
-          ↻
-        </button>
+        {!ftueActive ? (
+          <button
+            className="icon-button"
+            onClick={scan}
+            aria-label="Pazarı tara"
+          >
+            ↻
+          </button>
+        ) : null}
       </header>
       <section className="wallet">
         <div>
@@ -111,23 +130,35 @@ export default function App() {
           <small>Tahmini servet</small>
           <strong>{money(total)}</strong>
         </div>
-        <div className="goal">
-          <small>
-            Ev hedefi ·{" "}
-            {Math.min(100, Math.floor((total / HOME_GOAL_MINOR) * 100))}%
-          </small>
-          <span>
-            <i
-              style={{
-                width: `${Math.min(100, (total / HOME_GOAL_MINOR) * 100)}%`,
-              }}
-            />
-          </span>
-        </div>
+        {game.ftue.stage === "COMPLETE" ? (
+          <div className="goal">
+            <small>
+              Ev hedefi ·{" "}
+              {Math.min(100, Math.floor((total / HOME_GOAL_MINOR) * 100))}%
+            </small>
+            <span>
+              <i
+                style={{
+                  width: `${Math.min(100, (total / HOME_GOAL_MINOR) * 100)}%`,
+                }}
+              />
+            </span>
+          </div>
+        ) : null}
       </section>
       <div className="notice" role="status">
         {notice}
       </div>
+      {showCoach ? (
+        <aside className="coach" aria-label="İlk oturum rehberi">
+          <button onClick={dismissCoach} aria-label="Rehberi kapat">
+            ×
+          </button>
+          <small>İLK İŞLEM · {ftueStageLabel[game.ftue.stage]}</small>
+          <h2>{coach.title}</h2>
+          <p>{coach.body}</p>
+        </aside>
+      ) : null}
       <main>
         {tab === "market" ? (
           <>
@@ -139,6 +170,25 @@ export default function App() {
               <span>{marketListings.length} ilan</span>
             </div>
             <div className="feed">
+              {startingOffer ? (
+                <article className="starting-sale">
+                  <img src={assetFor("prd_notebook")} alt="Eski defter" />
+                  <div>
+                    <small>ECE'NİN TEKLİFİ</small>
+                    <h3>Eski defter</h3>
+                    <p>
+                      Nakit 0 · Defter maliyeti 0 · Satış kârı{" "}
+                      {money(startingOffer.amountMinor)}
+                    </p>
+                    <button
+                      className="primary"
+                      onClick={() => acceptBuyer(startingOffer.id)}
+                    >
+                      Teklifi kabul et · {money(startingOffer.amountMinor)}
+                    </button>
+                  </div>
+                </article>
+              ) : null}
               {marketListings.map((item) => {
                 const itemSignal = signal(item);
                 const risk = npcRiskSignal(item, game.gameTimeMin);
@@ -213,38 +263,44 @@ export default function App() {
                       </p>
                     </div>
                     <div className="sell-actions">
-                      {item.instance.family.preparation
-                        .filter(
-                          (action) =>
-                            item.instance.preparationHistory.filter(
-                              (record) => record.kind === action.kind,
-                            ).length < action.maxUses,
-                        )
-                        .map((action) => (
-                          <button
-                            key={action.kind}
-                            onClick={() => prepare(item.id, action.kind)}
-                          >
-                            {action.label} <b>{money(action.costMinor)}</b>
-                            <small>
-                              {action.durationMin} dk ·{" "}
-                              {action.kind === "CLEAN"
-                                ? `+${action.conditionGain} kondisyon`
-                                : action.kind === "TEST"
-                                  ? `+%${Math.round(action.confidenceGain * 100)} güven`
-                                  : `+%${Math.round(action.liquidityGainBps / 100)} likidite`}
-                            </small>
-                          </button>
-                        ))}
-                      <button onClick={() => sell(item, true)}>
-                        Hızlı sat <b>{money(quote.quickSaleMinor)}</b>
-                      </button>
-                      <button
-                        className="primary"
-                        onClick={() => list(item, quote.balancedAskingMinor)}
-                      >
-                        Piyasaya koy <b>{money(quote.balancedAskingMinor)}</b>
-                      </button>
+                      {!ftueActive || game.ftue.stage === "PREPARATION"
+                        ? item.instance.family.preparation
+                            .filter(
+                              (action) =>
+                                item.instance.preparationHistory.filter(
+                                  (record) => record.kind === action.kind,
+                                ).length < action.maxUses,
+                            )
+                            .map((action) => (
+                              <button
+                                key={action.kind}
+                                onClick={() => prepare(item.id, action.kind)}
+                              >
+                                {action.label} <b>{money(action.costMinor)}</b>
+                                <small>
+                                  {action.durationMin} dk ·{" "}
+                                  {action.kind === "CLEAN"
+                                    ? `+${action.conditionGain} kondisyon`
+                                    : action.kind === "TEST"
+                                      ? `+%${Math.round(action.confidenceGain * 100)} güven`
+                                      : `+%${Math.round(action.liquidityGainBps / 100)} likidite`}
+                                </small>
+                              </button>
+                            ))
+                        : null}
+                      {!ftueActive ? (
+                        <button onClick={() => sell(item, true)}>
+                          Hızlı sat <b>{money(quote.quickSaleMinor)}</b>
+                        </button>
+                      ) : null}
+                      {!ftueActive || game.ftue.stage === "LISTING" ? (
+                        <button
+                          className="primary"
+                          onClick={() => list(item, quote.balancedAskingMinor)}
+                        >
+                          Piyasaya koy <b>{money(quote.balancedAskingMinor)}</b>
+                        </button>
+                      ) : null}
                     </div>
                   </article>
                 );
@@ -344,10 +400,12 @@ export default function App() {
                 <span>Kariyer olayı</span>
                 <b>{game.career.length}</b>
               </div>
-              <div>
-                <span>Ev hedefi</span>
-                <b>{money(HOME_GOAL_MINOR)}</b>
-              </div>
+              {game.ftue.stage === "COMPLETE" ? (
+                <div>
+                  <span>Ev hedefi</span>
+                  <b>{money(HOME_GOAL_MINOR)}</b>
+                </div>
+              ) : null}
             </div>
             <div className="timeline">
               {game.career
@@ -476,29 +534,35 @@ export default function App() {
                   </p>
                 );
               })}
-              <div className="inspection-actions">
-                {Object.entries(inspectionOptions).map(([kind, option]) => (
-                  <button
-                    key={kind}
-                    onClick={() =>
-                      inspect(
-                        selected.id,
-                        kind as keyof typeof inspectionOptions,
-                      )
-                    }
-                  >
-                    {option.label}
-                    <small>
-                      {option.durationMin
-                        ? `${option.durationMin} dk · pazar ilerler`
-                        : "anında"}
-                    </small>
-                  </button>
-                ))}
-              </div>
+              {!ftueActive || game.ftue.stage === "EVIDENCE" ? (
+                <div className="inspection-actions">
+                  {Object.entries(inspectionOptions).map(([kind, option]) => (
+                    <button
+                      key={kind}
+                      onClick={() =>
+                        inspect(
+                          selected.id,
+                          kind as keyof typeof inspectionOptions,
+                        )
+                      }
+                    >
+                      {option.label}
+                      <small>
+                        {option.durationMin
+                          ? `${option.durationMin} dk · pazar ilerler`
+                          : "anında"}
+                      </small>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
               <button
                 className="primary"
-                onClick={() => setComparing((value) => !value)}
+                onClick={() => {
+                  const opening = !comparing;
+                  setComparing(opening);
+                  if (opening) markCompared();
+                }}
               >
                 {comparing
                   ? "Karşılaştırmayı kapat"
@@ -534,7 +598,8 @@ export default function App() {
                 )}
               </div>
             ) : null}
-            {negotiation?.counterMinor ? (
+            {(!ftueActive || game.ftue.stage === "NEGOTIATION") &&
+            negotiation?.counterMinor ? (
               <button
                 className="counter-offer"
                 onClick={() => {
@@ -545,22 +610,30 @@ export default function App() {
                 Karşı teklifi kabul et · {money(negotiation.counterMinor)}
               </button>
             ) : null}
-            <div className="sheet-actions">
-              <button onClick={() => offer(selected)}>
-                Pazarlık et{" "}
-                <small>
-                  {offers ? `${offers} hakkın var` : "Görüşme kapandı"}
-                </small>
-              </button>
-              <button
-                className="primary"
-                onClick={() => {
-                  if (buy(selected)) setSelectedId(null);
-                }}
-              >
-                Hemen al <small>{money(selected.priceMinor)}</small>
-              </button>
-            </div>
+            {!ftueActive || game.ftue.stage === "NEGOTIATION" ? (
+              <div className="sheet-actions">
+                <button onClick={() => offer(selected)}>
+                  Pazarlık et{" "}
+                  <small>
+                    {offers ? `${offers} hakkın var` : "Görüşme kapandı"}
+                  </small>
+                </button>
+                {!ftueActive ? (
+                  <button
+                    className="primary"
+                    onClick={() => {
+                      if (buy(selected)) setSelectedId(null);
+                    }}
+                  >
+                    Hemen al <small>{money(selected.priceMinor)}</small>
+                  </button>
+                ) : null}
+              </div>
+            ) : (
+              <p className="decision-lock">
+                Karar sırası: karşılaştır → kanıtı kontrol et → pazarlık.
+              </p>
+            )}
           </section>
         </div>
       ) : null}

@@ -11,6 +11,14 @@ import {
 } from "./world";
 
 describe("deterministic market world", () => {
+  it("does not punish an unfinished first session while the app is closed", () => {
+    const state = initialState(1_000);
+    const result = advanceOffline(state, 24 * 60 * 60_000);
+    expect(result.state.gameTimeMin).toBe(0);
+    expect(result.state.buyerOffers).toEqual(state.buyerOffers);
+    expect(result.state.ftue.stage).toBe("STARTING_SALE");
+  });
+
   it("generates identical listings, IDs, and game-time lifetimes", () => {
     const left = market(42, 500_000, 3, 12, 4);
     const right = market(42, 500_000, 3, 12, 4);
@@ -19,7 +27,7 @@ describe("deterministic market world", () => {
   });
 
   it("scans incrementally without replacing existing active listings", () => {
-    const state = initialState(1_000);
+    const state = initialState(1_000, "SANDBOX");
     const existingIds = activeMarketListings(state).map(
       (listing) => listing.id,
     );
@@ -35,7 +43,7 @@ describe("deterministic market world", () => {
   });
 
   it("does not mutate the market when no game time advances", () => {
-    const state = initialState(1_000);
+    const state = initialState(1_000, "SANDBOX");
     state.listings = state.listings.slice(0, 2);
     const result = advanceWorldTo(state, state.gameTimeMin);
     expect(result.state).toEqual(state);
@@ -43,7 +51,7 @@ describe("deterministic market world", () => {
   });
 
   it("expires a listing at its deterministic lifecycle deadline", () => {
-    const state = initialState(1_000);
+    const state = initialState(1_000, "SANDBOX");
     state.listings = [
       {
         ...state.listings[0],
@@ -62,7 +70,7 @@ describe("deterministic market world", () => {
   });
 
   it("replays NPC competition identically and can close an active listing", () => {
-    const state = initialState(1_000);
+    const state = initialState(1_000, "SANDBOX");
     const listing = {
       ...state.listings[0],
       createdAtGameMin: 0,
@@ -96,14 +104,14 @@ describe("deterministic market world", () => {
     expect(effectiveOfflineGameMinutes(240 * 60_000)).toBe(93);
     expect(effectiveOfflineGameMinutes(24 * 60 * 60_000)).toBe(93);
 
-    const state = initialState(10_000);
+    const state = initialState(10_000, "SANDBOX");
     const backward = advanceOffline(state, 1_000);
     expect(backward.state.gameTimeMin).toBe(0);
     expect(backward.state.lastWallClockMs).toBe(10_000);
   });
 
   it("protects a representative best opportunity during offline progress", () => {
-    const state = initialState(1_000);
+    const state = initialState(1_000, "SANDBOX");
     const best = [...activeMarketListings(state)].sort(
       (left, right) =>
         left.priceMinor / left.instance.fairValueMinor -
@@ -124,7 +132,7 @@ describe("deterministic market world", () => {
   });
 
   it("creates replayable buyer offers from world time and expires listings safely", () => {
-    let state = initialState(1_000);
+    let state = initialState(1_000, "SANDBOX");
     state.cashMinor = 100_000;
     state.transactionJournal[0] = {
       ...state.transactionJournal[0],

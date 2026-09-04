@@ -23,7 +23,7 @@ describe("deterministic economy", () => {
   });
 
   it("keeps cash separate from active owned-asset wealth", () => {
-    const state = initialState();
+    const state = initialState(0, "SANDBOX");
     const instance = state.listings[0].instance;
     const family = instance.family;
     state.cashMinor = 1_000;

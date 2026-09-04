@@ -23,7 +23,7 @@ export type {
   TransactionJournalEntry,
 } from "./domain/models";
 export { families } from "./content/families";
-export const SAVE_VERSION = 5;
+export const SAVE_VERSION = 6;
 export const HOME_GOAL_MINOR = 350_000_000;
 
 const attributeDefinitionSchema = z.object({
@@ -251,6 +251,22 @@ const negotiationSchema = z.object({
   counterMinor: z.number().int().nonnegative().optional(),
   closed: z.boolean(),
 });
+const ftueStageSchema = z.enum([
+  "STARTING_SALE",
+  "COMPARE",
+  "EVIDENCE",
+  "NEGOTIATION",
+  "PREPARATION",
+  "LISTING",
+  "BUYER_SALE",
+  "COMPLETE",
+]);
+const ftueSchema = z.object({
+  stage: ftueStageSchema,
+  dismissedStages: z.array(ftueStageSchema),
+  firstAssetId: z.string().optional(),
+  firstPlayerListingId: z.string().optional(),
+});
 
 const stateSchema = z
   .object({
@@ -268,6 +284,7 @@ const stateSchema = z
     negotiation: negotiationSchema.optional(),
     expertise: z.record(z.string(), z.number()),
     career: z.array(careerEventSchema),
+    ftue: ftueSchema,
     lastWallClockMs: z.number().nonnegative(),
   })
   .superRefine((state, context) => {
@@ -290,6 +307,38 @@ const stateSchema = z
       "transactionJournal",
       "Transaction id must be unique",
     );
+    const activeAssetListings = new Set<string>();
+    for (const listing of state.playerListings) {
+      if (!["ACTIVE", "RESERVED", "SOLD_PENDING"].includes(listing.state))
+        continue;
+      const asset = state.ownedAssets.find(
+        (item) => item.id === listing.ownedAssetId,
+      );
+      if (!asset || asset.currentListingId !== listing.id) {
+        context.addIssue({
+          code: "custom",
+          message: `Active player listing must reference its current OwnedAsset: ${listing.id}`,
+          path: ["playerListings"],
+        });
+      }
+      if (activeAssetListings.has(listing.ownedAssetId)) {
+        context.addIssue({
+          code: "custom",
+          message: `OwnedAsset cannot have two active listings: ${listing.ownedAssetId}`,
+          path: ["playerListings"],
+        });
+      }
+      activeAssetListings.add(listing.ownedAssetId);
+    }
+    for (const asset of state.ownedAssets) {
+      if (asset.state === "SOLD_COMPLETE" && asset.currentListingId) {
+        context.addIssue({
+          code: "custom",
+          message: `SoldComplete asset cannot have an active listing: ${asset.id}`,
+          path: ["ownedAssets"],
+        });
+      }
+    }
     const journal = state.transactionJournal.reduce(
       (sum, item) => ({
         cash: sum.cash + item.cashDeltaMinor,
@@ -410,7 +459,9 @@ export function market(
   );
   return Array.from({ length: count }, (_, index) => {
     const family =
-      index < Math.ceil(count / 2) ? focus : cohort[index % cohort.length];
+      index < Math.ceil(count / 2)
+        ? focus
+        : cohort[(index - Math.ceil(count / 2) + 1) % cohort.length];
     const instance = instanceFor(family, r);
     const priceMinor = Math.max(
       2_000,
@@ -487,33 +538,94 @@ const formatter = new Intl.NumberFormat("tr-TR", {
   maximumFractionDigits: 2,
 });
 export const money = (minor: number) => formatter.format(minor / 100);
-export const initialState = (lastWallClockMs = 0): GameState => {
-  const cashMinor = 42_000;
+export const initialState = (
+  lastWallClockMs = 0,
+  mode: "FTUE" | "SANDBOX" = "FTUE",
+): GameState => {
+  const seed = 90_421;
+  const sandboxCashMinor = 42_000;
   const base: GameState = {
     version: SAVE_VERSION,
-    cashMinor,
+    cashMinor: mode === "SANDBOX" ? sandboxCashMinor : 0,
     ownedAssets: [],
     realizedProfitMinor: 0,
     transactionJournal: [
       {
-        id: "opening-balance:v5",
+        id: "opening-balance:v6",
         kind: "OPENING_BALANCE",
         gameTime: 0,
-        cashDeltaMinor: cashMinor,
+        cashDeltaMinor: mode === "SANDBOX" ? sandboxCashMinor : 0,
         costBasisDeltaMinor: 0,
         realizedProfitDeltaMinor: 0,
-        metadata: { reason: "prototype-starting-balance" },
+        metadata: {
+          reason: mode === "FTUE" ? "zero-cash-first-session" : "test-sandbox",
+        },
       },
     ],
     gameTimeMin: 0,
-    seed: 90_421,
+    seed,
     marketCycle: 0,
     listings: [],
     playerListings: [],
     buyerOffers: [],
     expertise: {},
     career: [],
+    ftue: {
+      stage: mode === "FTUE" ? "STARTING_SALE" : "COMPLETE",
+      dismissedStages: [],
+    },
     lastWallClockMs,
   };
-  return { ...base, listings: market(base.seed, base.cashMinor, 0, 0) };
+  if (mode === "SANDBOX") {
+    return { ...base, listings: market(seed, sandboxCashMinor, 0, 0) };
+  }
+  const notebook =
+    families.find((family) => family.id === "notebook") ?? families[0];
+  const instance = {
+    ...instanceFor(notebook, rng(seed + 101)),
+    condition: 64,
+    fairValueMinor: 38_000,
+    accessoryComplete: false,
+  };
+  const assetId = "asset:ftue-starting-notebook";
+  const listingId = "player-listing:ftue-starting-notebook";
+  return {
+    ...base,
+    ownedAssets: [
+      {
+        id: assetId,
+        familyId: notebook.id,
+        sourceListingId: "legacy:starting-notebook",
+        instance,
+        state: "LISTED",
+        purchasePriceMinor: 0,
+        preparationCostMinor: 0,
+        inspectionCostMinor: 0,
+        transparentFeesMinor: 0,
+        bookCostMinor: 0,
+        acquiredAtGameMin: 0,
+        currentListingId: listingId,
+      },
+    ],
+    playerListings: [
+      {
+        id: listingId,
+        ownedAssetId: assetId,
+        askingPriceMinor: 42_000,
+        interest: 1,
+        createdAtGameMin: 0,
+        expiresAtGameMin: 1_440,
+        state: "ACTIVE",
+      },
+    ],
+    buyerOffers: [
+      {
+        id: "offer:ftue-starting-notebook",
+        listingId,
+        amountMinor: 42_000,
+        buyer: "Ece",
+        expiresAtGameMin: 60,
+      },
+    ],
+  };
 };

@@ -230,6 +230,23 @@ export type Negotiation = {
   closed: boolean;
 };
 
+export type FtueStage =
+  | "STARTING_SALE"
+  | "COMPARE"
+  | "EVIDENCE"
+  | "NEGOTIATION"
+  | "PREPARATION"
+  | "LISTING"
+  | "BUYER_SALE"
+  | "COMPLETE";
+
+export type FtueState = {
+  stage: FtueStage;
+  dismissedStages: FtueStage[];
+  firstAssetId?: AssetId;
+  firstPlayerListingId?: ListingId;
+};
+
 export type GameState = {
   version: number;
   cashMinor: number;
@@ -245,5 +262,6 @@ export type GameState = {
   negotiation?: Negotiation;
   expertise: Record<string, number>;
   career: CareerEvent[];
+  ftue: FtueState;
   lastWallClockMs: number;
 };

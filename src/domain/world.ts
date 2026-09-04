@@ -396,16 +396,17 @@ export function advanceWorldTo(
   const elapsedGameMin = targetGameTimeMin - initial.gameTimeMin;
   const activeCount = activeMarketListings(state).length;
   const depthArrivals =
-    elapsedGameMin > 0
+    elapsedGameMin > 0 && state.ftue.stage === "COMPLETE"
       ? Math.min(
           WORLD_CONFIG.scanArrivalCount,
           Math.max(0, WORLD_CONFIG.minActiveListings - activeCount),
         )
       : 0;
-  const arrivalResult = appendArrivals(
-    state,
-    Math.max(options.forceArrivals ?? 0, depthArrivals),
-  );
+  const requestedArrivals =
+    state.ftue.stage === "COMPLETE"
+      ? Math.max(options.forceArrivals ?? 0, depthArrivals)
+      : 0;
+  const arrivalResult = appendArrivals(state, requestedArrivals);
   state = pruneTerminalHistory(arrivalResult.state);
 
   return {
@@ -449,6 +450,22 @@ export function advanceOffline(
   state: GameState,
   wallClockMs: number,
 ): WorldAdvanceResult {
+  if (state.ftue.stage !== "COMPLETE") {
+    return {
+      state: {
+        ...state,
+        lastWallClockMs: Math.max(state.lastWallClockMs, wallClockMs),
+      },
+      summary: {
+        elapsedGameMin: 0,
+        arrivals: 0,
+        npcSales: 0,
+        marketExpirations: 0,
+        buyerOffers: 0,
+        playerListingExpirations: 0,
+      },
+    };
+  }
   const elapsedGameMin = effectiveOfflineGameMinutes(
     wallClockMs - state.lastWallClockMs,
   );

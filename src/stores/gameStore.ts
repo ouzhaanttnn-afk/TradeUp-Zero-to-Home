@@ -10,6 +10,18 @@ import {
 import { WORLD_CONFIG } from "../domain/config";
 import { inspectListing } from "../domain/decision";
 import { startPreparation } from "../domain/preparation";
+import {
+  dismissFtueStage,
+  isFtueActive,
+  recordFtueBuyerSale,
+  recordFtueCompare,
+  recordFtueEvidence,
+  recordFtueListing,
+  recordFtuePreparation,
+  recordFtuePurchase,
+  recordFtueWithdrawal,
+  revealFirstMarket,
+} from "../domain/ftue";
 import type { InspectionKind, PreparationKind } from "../domain/models";
 import {
   advanceWorldTo,
@@ -44,6 +56,8 @@ type Store = {
   acceptBuyer: (offerId: string) => void;
   inspect: (listingId: string, kind: InspectionKind) => void;
   prepare: (assetId: string, kind: PreparationKind) => void;
+  markCompared: () => void;
+  dismissCoach: () => void;
   reset: () => Promise<void>;
 };
 
@@ -146,6 +160,12 @@ export const useGameStore = create<Store>((set, get) => ({
   },
   buy: (item, priceMinor = item.priceMinor) => {
     const game = get().game;
+    if (isFtueActive(game) && game.ftue.stage !== "NEGOTIATION") {
+      set({
+        notice: "İlk alımdan önce karşılaştırma ve kanıt adımlarını tamamla.",
+      });
+      return false;
+    }
     const result = purchaseListing(game, item, priceMinor, game.gameTimeMin);
     if (!result.ok) {
       const notice =
@@ -156,7 +176,10 @@ export const useGameStore = create<Store>((set, get) => ({
       buzz();
       return false;
     }
-    const progressed = progressBy(result.state);
+    const purchasedAssetId = `asset:${item.id}`;
+    const progressed = progressBy(
+      recordFtuePurchase(result.state, purchasedAssetId),
+    );
     set({
       game: stampAndPersist(progressed.state),
       notice: worldNotice(
@@ -169,6 +192,10 @@ export const useGameStore = create<Store>((set, get) => ({
   },
   offer: (item) => {
     const game = get().game;
+    if (isFtueActive(game) && game.ftue.stage !== "NEGOTIATION") {
+      set({ notice: "Önce karşılaştır ve bir kanıtı kontrol et." });
+      return;
+    }
     const currentListing = game.listings.find(
       (listing) => listing.id === item.id,
     );
@@ -231,6 +258,10 @@ export const useGameStore = create<Store>((set, get) => ({
   },
   sell: (item, quick) => {
     const game = get().game;
+    if (isFtueActive(game) && game.ftue.firstAssetId === item.id) {
+      set({ notice: "İlk döngüde bu ürünü dengeli fiyatla listele." });
+      return;
+    }
     const quote = quoteAssetExit(item);
     const saleMinor = quick ? quote.quickSaleMinor : quote.balancedAskingMinor;
     const result = settleAssetSale(
@@ -258,6 +289,10 @@ export const useGameStore = create<Store>((set, get) => ({
   },
   list: (item, askingPriceMinor) => {
     const game = get().game;
+    if (isFtueActive(game) && game.ftue.stage !== "LISTING") {
+      set({ notice: "İlk ürün için önce bir hazırlık tamamla." });
+      return;
+    }
     const result = createPlayerListing(
       game,
       item.id,
@@ -269,7 +304,7 @@ export const useGameStore = create<Store>((set, get) => ({
       buzz();
       return;
     }
-    const progressed = progressBy(result.state);
+    const progressed = progressBy(recordFtueListing(result.state, item.id));
     set({
       game: stampAndPersist(progressed.state),
       notice: worldNotice(
@@ -290,7 +325,9 @@ export const useGameStore = create<Store>((set, get) => ({
       buzz();
       return;
     }
-    const progressed = progressBy(result.state);
+    const progressed = progressBy(
+      recordFtueWithdrawal(result.state, listingId),
+    );
     set({
       game: stampAndPersist(progressed.state),
       notice: worldNotice(
@@ -319,7 +356,11 @@ export const useGameStore = create<Store>((set, get) => ({
       buzz();
       return;
     }
-    const progressed = progressBy(result.state);
+    const ftueProgressed =
+      game.ftue.stage === "STARTING_SALE"
+        ? revealFirstMarket(result.state)
+        : recordFtueBuyerSale(result.state, listing.id);
+    const progressed = progressBy(ftueProgressed);
     set({
       game: stampAndPersist(progressed.state),
       notice: worldNotice(
@@ -330,12 +371,20 @@ export const useGameStore = create<Store>((set, get) => ({
     buzz(true);
   },
   inspect: (listingId, kind) => {
-    const result = inspectListing(get().game, listingId, kind);
+    const game = get().game;
+    if (isFtueActive(game) && game.ftue.stage !== "EVIDENCE") {
+      set({ notice: "Önce benzer ilanları karşılaştır." });
+      return;
+    }
+    const result = inspectListing(game, listingId, kind);
     if (!result.ok) {
       set({ notice: "Bu ilan artık incelenemiyor." });
       return;
     }
-    const progressed = progressBy(result.state, result.durationMin);
+    const progressed = progressBy(
+      recordFtueEvidence(result.state),
+      result.durationMin,
+    );
     set({
       game: stampAndPersist(progressed.state),
       notice: worldNotice(
@@ -347,7 +396,12 @@ export const useGameStore = create<Store>((set, get) => ({
     });
   },
   prepare: (assetId, kind) => {
-    const result = startPreparation(get().game, assetId, kind);
+    const game = get().game;
+    if (isFtueActive(game) && game.ftue.stage !== "PREPARATION") {
+      set({ notice: "Bu hazırlık ilk satın almadan sonra açılır." });
+      return;
+    }
+    const result = startPreparation(game, assetId, kind);
     if (!result.ok) {
       set({
         notice:
@@ -362,12 +416,25 @@ export const useGameStore = create<Store>((set, get) => ({
       Math.max(1, result.durationMin),
     );
     set({
-      game: stampAndPersist(progressed.state),
+      game: stampAndPersist(recordFtuePreparation(progressed.state, assetId)),
       notice: worldNotice(
         progressed,
         "Hazırlık tamamlandı; maliyet defter değerine işlendi.",
       ),
     });
+  },
+  markCompared: () => {
+    const game = get().game;
+    const next = recordFtueCompare(game);
+    if (next === game) return;
+    set({
+      game: stampAndPersist(next),
+      notice: "Farkları gördün. Şimdi seçtiğin ilandaki kanıtı kontrol et.",
+    });
+  },
+  dismissCoach: () => {
+    const game = get().game;
+    set({ game: stampAndPersist(dismissFtueStage(game)) });
   },
   reset: async () => {
     await clearGame();

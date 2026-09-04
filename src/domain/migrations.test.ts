@@ -63,7 +63,7 @@ describe("save migration", () => {
     };
 
     const state = validateState(migrateStateToCurrent(legacy));
-    expect(state.version).toBe(5);
+    expect(state.version).toBe(6);
     expect(state.cashMinor).toBe(150_000);
     expect(state.ownedAssets[0]).toMatchObject({
       id: "owned-1",
@@ -79,6 +79,7 @@ describe("save migration", () => {
       activeBookCost: true,
       realizedProfit: true,
     });
+    expect(state.ftue.stage).toBe("COMPLETE");
   });
 
   it("adds the injected game clock to a v3 save without changing totals", () => {
@@ -110,7 +111,7 @@ describe("save migration", () => {
 
     const state = validateState(migrateStateToCurrent(v3));
     expect(state).toMatchObject({
-      version: 5,
+      version: 6,
       gameTimeMin: 0,
       lastWallClockMs: 123_000,
       cashMinor: 42_000,

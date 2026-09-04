@@ -14,7 +14,7 @@ import {
 } from "./economy";
 
 function purchasedState(): GameState {
-  const state = initialState();
+  const state = initialState(0, "SANDBOX");
   state.cashMinor = 100_000;
   state.transactionJournal[0] = {
     ...state.transactionJournal[0],
@@ -123,7 +123,7 @@ describe("canonical ownership and accounting", () => {
   });
 
   it("rejects an unaffordable purchase atomically", () => {
-    const state = initialState();
+    const state = initialState(0, "SANDBOX");
     const before = structuredClone(state);
     const result = purchaseListing(
       state,
@@ -137,7 +137,7 @@ describe("canonical ownership and accounting", () => {
   });
 
   it("rejects a stale listing atomically", () => {
-    const state = initialState();
+    const state = initialState(0, "SANDBOX");
     const staleListing = state.listings[0];
     state.listings = state.listings.slice(1);
     const before = structuredClone(state);

@@ -59,6 +59,78 @@
 .compare-row.different b {
   color: var(--accent);
 }
+.coach {
+  position: relative;
+  margin: 12px 14px 0;
+  padding: 16px 42px 16px 16px;
+  border: 1px solid rgba(87, 231, 151, 0.32);
+  border-radius: 18px;
+  background: linear-gradient(
+    135deg,
+    rgba(20, 68, 48, 0.96),
+    rgba(9, 29, 21, 0.96)
+  );
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.24);
+}
+.coach > button {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+}
+.coach small {
+  color: var(--accent);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.coach h2 {
+  margin: 5px 0;
+  font-size: 1.08rem;
+}
+.coach p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+.starting-sale {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid rgba(87, 231, 151, 0.25);
+  border-radius: 20px;
+  background: rgba(13, 39, 28, 0.95);
+}
+.starting-sale img {
+  width: 92px;
+  height: 112px;
+  object-fit: cover;
+  border-radius: 14px;
+}
+.starting-sale h3 {
+  margin: 4px 0;
+}
+.starting-sale p {
+  margin: 6px 0 12px;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.starting-sale button {
+  width: 100%;
+  min-height: 46px;
+}
+.decision-lock {
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 196, 87, 0.1);
+  color: #f5d78d;
+  font-size: 0.82rem;
+}
 * {
   box-sizing: border-box;
 }
