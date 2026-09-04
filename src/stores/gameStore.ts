@@ -33,6 +33,7 @@ import {
   recordFtueWithdrawal,
   revealFirstMarket,
 } from "../domain/ftue";
+import { advanceRewardState } from "../domain/monetization";
 import type {
   InspectionKind,
   PreparationKind,
@@ -153,7 +154,13 @@ const withBuyerOfferAnalytics = (previous: GameState, state: GameState) => {
 
 const progressBy = (state: GameState, minutes = 1) => {
   const result = advanceWorldTo(state, state.gameTimeMin + minutes);
-  return { ...result, state: withBuyerOfferAnalytics(state, result.state) };
+  return {
+    ...result,
+    state: withBuyerOfferAnalytics(
+      state,
+      advanceRewardState(result.state, result.summary.elapsedGameMin),
+    ),
+  };
 };
 
 export const useGameStore = create<Store>((set, get) => ({

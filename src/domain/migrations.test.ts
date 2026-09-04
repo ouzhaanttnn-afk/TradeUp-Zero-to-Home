@@ -63,7 +63,7 @@ describe("save migration", () => {
     };
 
     const state = validateState(migrateStateToCurrent(legacy));
-    expect(state.version).toBe(7);
+    expect(state.version).toBe(8);
     expect(state.cashMinor).toBe(150_000);
     expect(state.ownedAssets[0]).toMatchObject({
       id: "owned-1",
@@ -111,7 +111,7 @@ describe("save migration", () => {
 
     const state = validateState(migrateStateToCurrent(v3));
     expect(state).toMatchObject({
-      version: 7,
+      version: 8,
       gameTimeMin: 0,
       lastWallClockMs: 123_000,
       cashMinor: 42_000,
@@ -149,7 +149,7 @@ describe("save migration", () => {
     delete v6.analytics;
     const state = validateState(migrateStateToCurrent(v6));
 
-    expect(state.version).toBe(7);
+    expect(state.version).toBe(8);
     expect(state.expertise).toMatchObject({
       marketXp: 90,
       categoryXp: { Elektronik: 90 },

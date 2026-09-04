@@ -24,6 +24,30 @@ const integer = (value: unknown, fallback = 0) =>
 const string = (value: unknown, fallback = "") =>
   typeof value === "string" ? value : fallback;
 const minor = (value: unknown) => Math.max(0, Math.round(number(value) * 100));
+const createDefaultMonetizationState = (gameTimeMin: number) => ({
+  entitlements: [],
+  consent: {
+    adPersonalizationAllowed: false,
+    adsServedWithConsent: false,
+    canRequestAds: false,
+    updatedAtGameMin: gameTimeMin,
+  },
+  usage: {
+    rewardSessionStartedAt: gameTimeMin,
+    sessionRewardCount: 0,
+    rollingRewardTimestamps: [],
+    placementUsage: {
+      MARKET_SCOUT: [],
+      FAST_INSPECTION: [],
+      FAST_PREPARATION: [],
+      LISTING_REACH: [],
+    },
+  },
+  firstSaleComplete: false,
+  lifetimeActivePlayMinutes: 0,
+  rewardCooldownUntilGameMin: undefined,
+  rewardTransactions: [],
+});
 
 function migrateFamily(value: unknown): Family {
   const source = record(value);
@@ -482,11 +506,27 @@ export function migrateStateToV4(value: unknown): unknown {
 }
 
 export function migrateStateToCurrent(value: unknown): unknown {
-  return migrateStateToV7(
-    migrateStateToV6(
-      migrateStateToV5(migrateStateToV4(migrateStateToV3(value))),
+  return migrateStateToV8(
+    migrateStateToV7(
+      migrateStateToV6(
+        migrateStateToV5(migrateStateToV4(migrateStateToV3(value))),
+      ),
     ),
   );
+}
+
+export function migrateStateToV8(value: unknown): unknown {
+  const source = record(value);
+  if (integer(source.version) >= 8) return value;
+  const gameTimeMin = Math.max(0, integer(source.gameTimeMin));
+  return {
+    ...source,
+    version: 8,
+    monetization:
+      source.monetization === undefined
+        ? createDefaultMonetizationState(gameTimeMin)
+        : source.monetization,
+  };
 }
 
 export function migrateStateToV7(value: unknown): unknown {

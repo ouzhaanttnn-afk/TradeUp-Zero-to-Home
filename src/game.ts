@@ -23,7 +23,7 @@ export type {
   TransactionJournalEntry,
 } from "./domain/models";
 export { families } from "./content/families";
-export const SAVE_VERSION = 7;
+export const SAVE_VERSION = 8;
 export const HOME_GOAL_MINOR = 350_000_000;
 
 const attributeDefinitionSchema = z.object({
@@ -322,6 +322,17 @@ const analyticsSchema = z.object({
         "sale_complete",
         "opportunity_lost",
         "career_timeline_opened",
+        "reward_request_started",
+        "reward_request_failed",
+        "reward_loaded",
+        "reward_applied",
+        "reward_closed_early",
+        "premium_claim_used",
+        "iap_opened",
+        "iap_purchase_started",
+        "iap_purchase_completed",
+        "iap_restore_started",
+        "iap_restore_completed",
       ]),
       atGameMin: z.number().int().nonnegative(),
       properties: z.record(
@@ -330,6 +341,55 @@ const analyticsSchema = z.object({
       ),
     }),
   ),
+});
+const rewardTransactionSchema = z.object({
+  id: z.string(),
+  placementId: z.enum([
+    "MARKET_SCOUT",
+    "FAST_INSPECTION",
+    "FAST_PREPARATION",
+    "LISTING_REACH",
+  ]),
+  source: z.enum(["ad", "premium"]),
+  status: z.enum(["REQUESTED", "APPLIED", "CANCELLED", "FAILED"]),
+  requestedAt: z.number().int().nonnegative(),
+  appliedAt: z.number().int().nonnegative().optional(),
+  targetId: z.string().optional(),
+});
+const entitlementSchema = z.object({
+  productId: z.string(),
+  entitlementId: z.string(),
+  status: z.enum(["PENDING", "OWNED", "REVOKED"]),
+  platform: z.enum(["ios", "android", "web"]),
+  purchasedAtGameMin: z.number().int().nonnegative().optional(),
+  verifiedAtGameMin: z.number().int().nonnegative().optional(),
+});
+const monetizationSchema = z.object({
+  entitlements: z.array(entitlementSchema),
+  consent: z.object({
+    adPersonalizationAllowed: z.boolean(),
+    adsServedWithConsent: z.boolean(),
+    canRequestAds: z.boolean(),
+    updatedAtGameMin: z.number().int().nonnegative(),
+  }),
+  usage: z.object({
+    rewardSessionStartedAt: z.number().int().nonnegative(),
+    sessionRewardCount: z.number().int().nonnegative(),
+    rollingRewardTimestamps: z.array(z.number().int().nonnegative()),
+    placementUsage: z.record(
+      z.enum([
+        "MARKET_SCOUT",
+        "FAST_INSPECTION",
+        "FAST_PREPARATION",
+        "LISTING_REACH",
+      ]),
+      z.array(z.number().int().nonnegative()),
+    ),
+  }),
+  firstSaleComplete: z.boolean(),
+  lifetimeActivePlayMinutes: z.number().int().nonnegative(),
+  rewardCooldownUntilGameMin: z.number().nonnegative().optional(),
+  rewardTransactions: z.array(rewardTransactionSchema),
 });
 const negotiationSchema = z.object({
   listingId: z.string(),
@@ -375,6 +435,7 @@ const stateSchema = z
     home: homeSchema,
     analytics: analyticsSchema,
     ftue: ftueSchema,
+    monetization: monetizationSchema,
     lastWallClockMs: z.number().nonnegative(),
   })
   .superRefine((state, context) => {
@@ -664,6 +725,32 @@ const formatter = new Intl.NumberFormat("tr-TR", {
   maximumFractionDigits: 2,
 });
 export const money = (minor: number) => formatter.format(minor / 100);
+
+const createDefaultMonetizationState = (gameTimeMin: number) => ({
+  entitlements: [],
+  consent: {
+    adPersonalizationAllowed: false,
+    adsServedWithConsent: false,
+    canRequestAds: false,
+    updatedAtGameMin: gameTimeMin,
+  },
+  usage: {
+    rewardSessionStartedAt: gameTimeMin,
+    sessionRewardCount: 0,
+    rollingRewardTimestamps: [],
+    placementUsage: {
+      MARKET_SCOUT: [],
+      FAST_INSPECTION: [],
+      FAST_PREPARATION: [],
+      LISTING_REACH: [],
+    },
+  },
+  firstSaleComplete: false,
+  lifetimeActivePlayMinutes: 0,
+  rewardCooldownUntilGameMin: undefined,
+  rewardTransactions: [],
+});
+
 export const initialState = (
   lastWallClockMs = 0,
   mode: "FTUE" | "SANDBOX" = "FTUE",
@@ -708,6 +795,7 @@ export const initialState = (
     },
     home: { unlocked: false, purchased: false, progressMilestones: [] },
     analytics: { enabled: true, events: [] },
+    monetization: createDefaultMonetizationState(0),
     ftue: {
       stage: mode === "FTUE" ? "STARTING_SALE" : "COMPLETE",
       dismissedStages: [],

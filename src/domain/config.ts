@@ -30,3 +30,87 @@ export const META_CONFIG = {
   analyticsEventLimit: 500,
   missedOpportunityLimit: 60,
 } as const;
+
+export const MONETIZATION_CONFIG = {
+  productCatalog: [
+    {
+      productId: "tradeup_premium_lifetime" as const,
+      entitlementId: "premium_lifetime" as const,
+    },
+    {
+      productId: "tradeup_theme_night_market" as const,
+      entitlementId: "theme_night_market" as const,
+    },
+    {
+      productId: "tradeup_theme_workshop" as const,
+      entitlementId: "theme_workshop" as const,
+    },
+    {
+      productId: "tradeup_home_styles_01" as const,
+      entitlementId: "home_styles_01" as const,
+    },
+  ],
+  reward: {
+    rollingWindowHours: 24,
+    globalCap: 8,
+    sessionCap: 4,
+    cooldownSeconds: 90,
+    placementCap: {
+      MARKET_SCOUT: 2,
+      FAST_INSPECTION: 3,
+      FAST_PREPARATION: 3,
+      LISTING_REACH: 2,
+    },
+    placementReward: {
+      MARKET_SCOUT_LISTING_COUNT: 4,
+      FAST_PREPARATION_TRIGGER_SECONDS: 60,
+      LISTING_REACH_MAX_AGE_GAME_MIN: 5,
+      MIN_LISTING_AGE_FOR_FAST_INSPECTION_SECONDS: 45,
+      MIN_ACTIVE_OFFERLESS_LISTING_ACTIVE_MIN: 5,
+    },
+    maxSameScreenCta: 1,
+    firstSaleCompleteThresholdMinutes: 20,
+    firstRewardedUnlockMinutes: 120,
+    premiumIntroCooldownDays: 7,
+  },
+  products: {
+    premium: {
+      productId: "tradeup_premium_lifetime" as const,
+      entitlementId: "premium_lifetime" as const,
+      platform: "web" as const,
+    },
+    themeNightMarket: {
+      productId: "tradeup_theme_night_market" as const,
+      entitlementId: "theme_night_market" as const,
+      platform: "web" as const,
+    },
+    themeWorkshop: {
+      productId: "tradeup_theme_workshop" as const,
+      entitlementId: "theme_workshop" as const,
+      platform: "web" as const,
+    },
+    homeStyles: {
+      productId: "tradeup_home_styles_01" as const,
+      entitlementId: "home_styles_01" as const,
+      platform: "web" as const,
+    },
+  },
+  ads: {
+    provider: "admob" as const,
+    sandboxAdUnit: "ca-app-pub-3940256099942544/5224354917",
+    productionAdUnit: undefined,
+    productionServingEnabled: false,
+    environment: "sandbox" as const,
+  },
+  billing: {
+    environment: "sandbox" as const,
+    sandboxProducts: {
+      ios: {},
+      android: {},
+    },
+    productionProducts: {
+      ios: {},
+      android: {},
+    },
+  },
+} as const;

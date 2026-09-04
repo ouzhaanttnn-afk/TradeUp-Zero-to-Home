@@ -286,6 +286,71 @@ export type HomeState = {
   progressMilestones: number[];
 };
 
+export type RewardPlacementId =
+  | "MARKET_SCOUT"
+  | "FAST_INSPECTION"
+  | "FAST_PREPARATION"
+  | "LISTING_REACH";
+
+export type MonetizationProductId =
+  | "tradeup_premium_lifetime"
+  | "tradeup_theme_night_market"
+  | "tradeup_theme_workshop"
+  | "tradeup_home_styles_01";
+
+export type EntitlementId =
+  | "premium_lifetime"
+  | "theme_night_market"
+  | "theme_workshop"
+  | "home_styles_01";
+
+export type EntitlementStatus = "PENDING" | "OWNED" | "REVOKED";
+
+export type EntitlementState = {
+  productId: MonetizationProductId;
+  entitlementId: EntitlementId;
+  status: EntitlementStatus;
+  platform: "ios" | "android" | "web";
+  purchasedAtGameMin?: number;
+  verifiedAtGameMin?: number;
+};
+
+export type RewardStatus = "REQUESTED" | "APPLIED" | "CANCELLED" | "FAILED";
+export type RewardSource = "ad" | "premium";
+export type RewardActionTransaction = {
+  id: TransactionId;
+  placementId: RewardPlacementId;
+  source: RewardSource;
+  status: RewardStatus;
+  requestedAt: number;
+  appliedAt?: number;
+  targetId?: string;
+};
+
+export type MonetizationUsage = {
+  rollingRewardTimestamps: number[];
+  sessionRewardCount: number;
+  placementUsage: Record<RewardPlacementId, number[]>;
+  rewardSessionStartedAt: number;
+};
+
+export type MonetizationConsentState = {
+  adPersonalizationAllowed: boolean;
+  adsServedWithConsent: boolean;
+  canRequestAds: boolean;
+  updatedAtGameMin: number;
+};
+
+export type MonetizationState = {
+  entitlements: EntitlementState[];
+  consent: MonetizationConsentState;
+  usage: MonetizationUsage;
+  firstSaleComplete: boolean;
+  lifetimeActivePlayMinutes: number;
+  rewardCooldownUntilGameMin?: number;
+  rewardTransactions: RewardActionTransaction[];
+};
+
 export type AnalyticsEventName =
   | "listing_impression"
   | "listing_open"
@@ -298,7 +363,18 @@ export type AnalyticsEventName =
   | "buyer_offer"
   | "sale_complete"
   | "opportunity_lost"
-  | "career_timeline_opened";
+  | "career_timeline_opened"
+  | "reward_request_started"
+  | "reward_request_failed"
+  | "reward_loaded"
+  | "reward_applied"
+  | "reward_closed_early"
+  | "premium_claim_used"
+  | "iap_opened"
+  | "iap_purchase_started"
+  | "iap_purchase_completed"
+  | "iap_restore_started"
+  | "iap_restore_completed";
 
 export type AnalyticsEvent = {
   id: string;
@@ -355,6 +431,7 @@ export type GameState = {
   follow: FollowState;
   home: HomeState;
   analytics: AnalyticsState;
+  monetization: MonetizationState;
   ftue: FtueState;
   lastWallClockMs: number;
 };

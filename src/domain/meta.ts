@@ -3,6 +3,7 @@ import { trackAnalytics } from "../infrastructure/analytics";
 import { HOME_GOAL_MINOR } from "../game";
 import { META_CONFIG } from "./config";
 import { netWorthMinor } from "./economy";
+import { markFirstSaleComplete } from "./monetization";
 import type {
   CareerEvent,
   CareerEventGroup,
@@ -187,6 +188,7 @@ export function recordCompletedSaleMeta(
         { ...common, amountMinor: proceedsMinor },
       ),
     );
+    next = markFirstSaleComplete(next);
   }
   if (
     profitMinor > 0 &&

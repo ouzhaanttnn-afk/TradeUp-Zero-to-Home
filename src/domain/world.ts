@@ -170,6 +170,7 @@ const offerForMinute = (
   state: GameState,
   listing: PlayerListing,
   gameTimeMin: number,
+  rollSalt = 0,
 ): BuyerOffer | undefined => {
   if (gameTimeMin - listing.createdAtGameMin < 3) return undefined;
   if (
@@ -195,12 +196,12 @@ const offerForMinute = (
     (asset.instance.liquidityBonusBps / 10_000) * 0.014 +
     priceFit * 0.02;
   const roll = rng(
-    state.seed + hashString(listing.id) * 65_537 + gameTimeMin * 131_071,
+    state.seed + hashString(listing.id) * 65_537 + gameTimeMin * 131_071 + rollSalt,
   )();
   if (roll >= arrivalChance) return undefined;
 
   const amountRoll = rng(
-    state.seed + hashString(listing.id) * 8_191 + gameTimeMin * 524_287,
+    state.seed + hashString(listing.id) * 8_191 + gameTimeMin * 524_287 + rollSalt,
   )();
   const conditionFactor = 0.96 + (asset.instance.condition - 75) / 500;
   const demandFactor = 0.96 + asset.instance.family.demand * 0.06;
@@ -221,6 +222,53 @@ const offerForMinute = (
     expiresAtGameMin: gameTimeMin + WORLD_CONFIG.buyerOfferLifetimeMin,
   };
 };
+
+export function rollBuyerExposure(
+  state: GameState,
+  listingId: string,
+  exposureId: string,
+): GameState {
+  if (state.transactionJournal.some((entry) => entry.id === exposureId)) {
+    return state;
+  }
+  const listing = state.playerListings.find(
+    (entry) => entry.id === listingId && entry.state === "ACTIVE",
+  );
+  if (!listing) return state;
+  const offer = offerForMinute(
+    state,
+    listing,
+    state.gameTimeMin,
+    hashString(exposureId),
+  );
+  return {
+    ...state,
+    buyerOffers: offer ? [...state.buyerOffers, offer] : state.buyerOffers,
+    playerListings: state.playerListings.map((entry) =>
+      entry.id === listingId
+        ? { ...entry, interest: Math.min(100, entry.interest + 1) }
+        : entry,
+    ),
+    transactionJournal: [
+      ...state.transactionJournal,
+      {
+        id: exposureId,
+        kind: "REWARD",
+        gameTime: state.gameTimeMin,
+        assetId: listing.ownedAssetId,
+        cashDeltaMinor: 0,
+        costBasisDeltaMinor: 0,
+        realizedProfitDeltaMinor: 0,
+        metadata: {
+          placementId: "LISTING_REACH",
+          listingId,
+          exposureRollCompleted: true,
+          offerCreated: Boolean(offer),
+        },
+      },
+    ],
+  };
+}
 
 function advancePlayerListingsMinute(state: GameState, gameTimeMin: number) {
   const expiredListingIds = new Set<string>();
