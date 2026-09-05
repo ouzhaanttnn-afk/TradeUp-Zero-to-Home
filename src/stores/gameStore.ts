@@ -402,16 +402,46 @@ export const useGameStore = create<Store>((set, get) => ({
       set({ notice: "İlk döngüde bu ürünü dengeli fiyatla listele." });
       return;
     }
-    const quote = quoteAssetExit(item);
-    const saleMinor = quick ? quote.quickSaleMinor : quote.balancedAskingMinor;
     const transactionId = `sale:direct:${item.id}`;
+    if (game.transactionJournal.some((entry) => entry.id === transactionId)) {
+      set({ notice: "Bu satış zaten tamamlandı." });
+      return;
+    }
+    const currentAsset = game.ownedAssets.find((asset) => asset.id === item.id);
+    if (
+      !currentAsset ||
+      !["IN_INVENTORY", "READY"].includes(currentAsset.state)
+    ) {
+      set({
+        notice:
+          "Bu ürün şu anda hızlı satışa uygun değil. Portföydeki durumunu kontrol et.",
+      });
+      return;
+    }
+    const quote = quoteAssetExit(currentAsset);
+    const previousQuote = quoteAssetExit(item);
+    const saleMinor = quick ? quote.quickSaleMinor : quote.balancedAskingMinor;
+    const previousSaleMinor = quick
+      ? previousQuote.quickSaleMinor
+      : previousQuote.balancedAskingMinor;
+    if (
+      saleMinor !== previousSaleMinor ||
+      currentAsset.bookCostMinor !== item.bookCostMinor ||
+      currentAsset.state !== item.state
+    ) {
+      set({
+        notice:
+          "Ürünün satış bilgileri değişti. Güncel tutarı kontrol edip satışı yeniden onayla.",
+      });
+      return;
+    }
     const result = settleAssetSale(
       game,
       item.id,
       saleMinor,
       transactionId,
       game.gameTimeMin,
-      item.currentListingId,
+      currentAsset.currentListingId,
     );
     if (!result.ok) {
       set({ notice: "Bu ürün artık satılamıyor." });
@@ -434,10 +464,10 @@ export const useGameStore = create<Store>((set, get) => ({
       game: stampAndPersist(progressed.state),
       notice: worldNotice(
         progressed,
-        `${item.instance.family.name} ${money(saleMinor)} fiyatına satıldı.`,
+        `${currentAsset.instance.family.name} ${money(saleMinor)} fiyatına satıldı.`,
       ),
     });
-    const profitable = saleMinor >= item.bookCostMinor;
+    const profitable = saleMinor >= currentAsset.bookCostMinor;
     buzz(game, profitable);
     sound(game, profitable ? "SALE_PROFIT" : "SALE_LOSS");
   },

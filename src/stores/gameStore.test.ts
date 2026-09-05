@@ -18,10 +18,73 @@ vi.mock("../services/persistence", () => ({
 }));
 
 import { initialState, validateState } from "../game";
-import { quoteAssetExit, reconcileJournal } from "../domain/economy";
+import {
+  addAssetCost,
+  quoteAssetExit,
+  reconcileJournal,
+} from "../domain/economy";
 import { playFeedbackSound } from "../infrastructure/audio";
 import { loadGameWithStatus } from "../services/persistence";
 import { useGameStore } from "./gameStore";
+
+describe("stale sale confirmation", () => {
+  beforeEach(() => {
+    const game = initialState(0, "SANDBOX");
+    game.cashMinor = 1_000_000;
+    game.transactionJournal[0].cashDeltaMinor = game.cashMinor;
+    useGameStore.setState({ game, ready: true, notice: "" });
+    useGameStore.getState().buy(game.listings[0], 20_000);
+  });
+
+  it("requires a fresh confirmation when costs changed even if the sale price stayed the same", () => {
+    const game = useGameStore.getState().game;
+    const oldAsset = game.ownedAssets[0];
+    const charged = addAssetCost(
+      game,
+      oldAsset.id,
+      "FEE",
+      500,
+      "fee:stale-sale",
+      game.gameTimeMin,
+    );
+    if (!charged.ok) throw new Error(charged.reason);
+    useGameStore.setState({ game: charged.state });
+    useGameStore.getState().sell(oldAsset, true);
+    expect(useGameStore.getState().game).toBe(charged.state);
+    expect(useGameStore.getState().notice).toContain("yeniden onayla");
+    const updated = charged.state.ownedAssets[0];
+    useGameStore.getState().sell(updated, true);
+    const sold = useGameStore.getState().game;
+    expect(sold.realizedProfitMinor).toBe(
+      quoteAssetExit(updated).quickSaleMinor - updated.bookCostMinor,
+    );
+    expect(reconcileJournal(sold)).toEqual({
+      cash: true,
+      activeBookCost: true,
+      realizedProfit: true,
+    });
+  });
+
+  it("rejects an old confirmation after preparation changes the product", () => {
+    const oldAsset = useGameStore.getState().game.ownedAssets[0];
+    useGameStore.getState().prepare(oldAsset.id, "CLEAN");
+    const prepared = useGameStore.getState().game;
+    useGameStore.getState().sell(oldAsset, true);
+    expect(useGameStore.getState().game).toBe(prepared);
+    expect(useGameStore.getState().notice).toContain("yeniden onayla");
+  });
+
+  it("cannot use an old inventory card to sell a now-listed product", () => {
+    const oldAsset = useGameStore.getState().game.ownedAssets[0];
+    useGameStore
+      .getState()
+      .list(oldAsset, quoteAssetExit(oldAsset).balancedAskingMinor);
+    const listed = useGameStore.getState().game;
+    useGameStore.getState().sell(oldAsset, true);
+    expect(useGameStore.getState().game).toBe(listed);
+    expect(useGameStore.getState().notice).toContain("uygun değil");
+  });
+});
 
 describe("replayed commands", () => {
   beforeEach(() => {
