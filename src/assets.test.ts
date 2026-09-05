@@ -9,7 +9,7 @@ import {
 } from "./assets";
 
 describe("asset manifest and visual treatments", () => {
-  it("registers every internal-alpha family while preserving the 24 dedicated heroes", () => {
+  it("registers every internal-alpha family and measured dedicated expansion", () => {
     expect(new Set(families.map((family) => family.assetKey)).size).toBe(60);
     expect(registeredAssetKeys).toHaveLength(60);
     for (const family of families) {
@@ -19,6 +19,8 @@ describe("asset manifest and visual treatments", () => {
     for (const family of heroFamilies) {
       expect(hasDedicatedAsset(family.assetKey)).toBe(true);
     }
+    expect(hasDedicatedAsset("prd_board_game")).toBe(true);
+    expect(hasDedicatedAsset("prd_portable_radio")).toBe(true);
   });
 
   it("returns a deterministic fallback for an unknown asset key", () => {

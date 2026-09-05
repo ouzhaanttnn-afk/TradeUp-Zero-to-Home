@@ -27,6 +27,8 @@ import tablet from "./assets/products/prd_tablet.png";
 import smartwatch from "./assets/products/prd_smartwatch.png";
 import camera from "./assets/products/prd_camera.png";
 import laptop from "./assets/products/prd_laptop.png";
+import boardGame from "./assets/products/prd_board_game.png";
+import portableRadio from "./assets/products/prd_portable_radio.png";
 
 const dedicatedAssets: Record<string, string> = {
   prd_notebook: notebook,
@@ -56,6 +58,8 @@ const dedicatedAssets: Record<string, string> = {
   prd_smartwatch: smartwatch,
   prd_camera: camera,
   prd_laptop: laptop,
+  prd_board_game: boardGame,
+  prd_portable_radio: portableRadio,
 };
 
 const fallbackSvg = (category: string, symbol: string, color: string) =>

@@ -161,8 +161,8 @@
     {
       "assetKey": "prd_board_game",
       "familyId": "board_game",
-      "source": "fallback:fb_small_item",
-      "dedicated": false
+      "source": "../products/prd_board_game.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_vintage_lighter",
@@ -173,8 +173,8 @@
     {
       "assetKey": "prd_portable_radio",
       "familyId": "portable_radio",
-      "source": "fallback:fb_audio",
-      "dedicated": false
+      "source": "../products/prd_portable_radio.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_studio_monitor",
