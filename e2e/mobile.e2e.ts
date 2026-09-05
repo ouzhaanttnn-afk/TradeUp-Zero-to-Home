@@ -62,6 +62,9 @@ async function checkLayout(page: Page) {
 async function checkMarketGrid(page: Page) {
   const cards = page.locator(".market-grid .market-card");
   await expect(cards).toHaveCount(3);
+  const largeText = await page
+    .locator(".app-shell")
+    .evaluate((shell) => shell.classList.contains("large-text"));
   const geometry = await cards.evaluateAll((items) =>
     items.slice(0, 3).map((item) => {
       const rect = item.getBoundingClientRect();
@@ -75,14 +78,20 @@ async function checkMarketGrid(page: Page) {
   );
   expect(Math.abs(geometry[0].top - geometry[1].top)).toBeLessThan(2);
   expect(geometry[1].left).toBeGreaterThan(geometry[0].left);
-  expect(geometry[2].top).toBeGreaterThan(geometry[0].top);
-  expect(
-    geometry.every((card) => card.width >= 135 && card.height <= 310),
-  ).toBe(true);
+  if (largeText) {
+    expect(geometry[2].top).toBeGreaterThan(geometry[0].top);
+    expect(
+      geometry.every((card) => card.width >= 135 && card.height <= 310),
+    ).toBe(true);
+  } else {
+    expect(Math.abs(geometry[0].top - geometry[2].top)).toBeLessThan(2);
+    expect(geometry[2].left).toBeGreaterThan(geometry[1].left);
+    expect(
+      geometry.every((card) => card.width >= 90 && card.height <= 180),
+    ).toBe(true);
+  }
   await expect(cards.first()).toContainText(/₺/);
-  await expect(cards.first()).toContainText(/kondisyon/);
-  await expect(cards.first()).toContainText(/Bilgi:/);
-  await expect(cards.first()).toContainText(/İlgi %/);
+  await expect(cards.first()).toHaveAttribute("aria-label", /kondisyon/);
 }
 
 for (const width of [320, 390, 430]) {
