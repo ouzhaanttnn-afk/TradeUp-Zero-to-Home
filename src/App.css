@@ -93,22 +93,44 @@
   border-radius: 16px;
 }
 .compare-row {
-  padding: 9px 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
-}
-.compare-row > span {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(54px, 1fr));
-  gap: 5px;
-  margin-top: 5px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+  padding: 10px 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  font-size: calc(0.78rem + var(--text-size-boost));
+  overflow-wrap: anywhere;
 }
-.compare-row em {
-  font-style: normal;
-  font-size: calc(0.72rem + var(--text-size-boost));
+.compare-card {
+  margin-top: 16px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+}
+.compare-card h4 {
+  margin: 0 0 12px;
+}
+.compare-card dl {
+  margin: 0 0 12px;
+}
+.compare-card button {
+  width: 100%;
+}
+.compare-row dd {
+  margin: 0;
+}
+.compare-row dt {
   color: var(--muted);
 }
-.compare-row.different b {
-  color: var(--accent);
+.compare-row small {
+  display: block;
+  margin-top: 4px;
+  font-size: calc(0.65rem + var(--text-size-boost));
+  color: var(--muted);
+}
+.compare-row.different {
+  border-left: 3px solid var(--accent);
+  background: rgba(255, 255, 255, 0.025);
 }
 .coach {
   position: relative;

@@ -11,6 +11,58 @@ import { purchaseListing, reconcileJournal } from "./economy";
 import { completeDuePreparations, startPreparation } from "./preparation";
 
 describe("decision vertical slice", () => {
+  it("keeps selected first and excludes inactive and unrelated listings", () => {
+    const state = initialState(0, "SANDBOX");
+    const first = state.listings[0];
+    state.listings = Array.from({ length: 8 }, (_, index) => ({
+      ...structuredClone(first),
+      id: `compare-${index}`,
+    }));
+    state.listings[1].state = "EXPIRED";
+    state.listings[2].familyId = "unrelated";
+    const result = comparableListings(state, "compare-3");
+    expect(result).toHaveLength(5);
+    expect(result[0].id).toBe("compare-3");
+    expect(
+      result.some((item) => ["compare-1", "compare-2"].includes(item.id)),
+    ).toBe(false);
+    expect(comparableListings(state, "compare-1")).toEqual([]);
+  });
+
+  it("collapses unchanged secondary attributes using sorted priorities", () => {
+    const first = structuredClone(initialState(0, "SANDBOX").listings[0]);
+    first.instance.family.attributes = [
+      {
+        ...first.instance.family.attributes[0],
+        id: "secondary",
+        label: "Secondary",
+        comparePriority: 9,
+      },
+      {
+        ...first.instance.family.attributes[0],
+        id: "essential",
+        label: "Essential",
+        comparePriority: 1,
+      },
+    ];
+    first.instance.attributes = [
+      { definitionId: "secondary", value: "same" },
+      { definitionId: "essential", value: "same" },
+    ];
+    const second = structuredClone(first);
+    expect(comparisonRows([first, second]).map((row) => row.label)).toContain(
+      "Essential",
+    );
+    expect(
+      comparisonRows([first, second]).map((row) => row.label),
+    ).not.toContain("Secondary");
+    second.instance.attributes[0].value = "different";
+    expect(
+      comparisonRows([first, second]).find((row) => row.label === "Secondary")
+        ?.different,
+    ).toBe(true);
+  });
+
   it("keeps 24 deep hero families and scales internal alpha to sixty across eight categories", () => {
     expect(heroFamilies).toHaveLength(24);
     expect(families).toHaveLength(60);

@@ -13,7 +13,6 @@ import {
 } from "./domain/economy";
 import {
   comparableListings,
-  comparisonRows,
   inspectionOptions,
   listingEstimateBand,
 } from "./domain/decision";
@@ -50,19 +49,14 @@ import { ownershipPresentation } from "./ui/ownershipPresentation";
 import { simplifyLegacyPlayerCopy } from "./ui/playerLanguage";
 import { saleHistoryCopy } from "./ui/saleHistory";
 import { formatEstimate, wealthPresentation } from "./ui/wealthPresentation";
+import {
+  comparisonPresentation,
+  sellerLabel,
+} from "./ui/comparisonPresentation";
 import { preparationPresentation } from "./ui/preparationPresentation";
 
 type Tab = "market" | "follow" | "portfolio" | "journey";
 type PortfolioSegment = "inventory" | "preparation" | "listings";
-
-const sellerLabel = {
-  urgent: "Acilci",
-  expert: "Piyasacı",
-  uninformed: "Bilgisiz",
-  emotional: "Duygusal",
-  merchant: "Tüccar",
-  risky: "Riskli",
-};
 
 const evidenceLabel = (confidence: number) =>
   confidence >= 0.72 ? "Yüksek" : confidence >= 0.46 ? "Orta" : "Düşük";
@@ -270,6 +264,14 @@ export default function App() {
 
   const selected =
     marketListings.find((listing) => listing.id === selectedId) ?? null;
+  const comparables =
+    selected && comparing ? comparableListings(game, selected.id) : [];
+  const compareRows = comparisonPresentation(
+    comparables,
+    selected
+      ? categoryExpertiseLevel(game, selected.instance.family.category)
+      : 0,
+  );
   const inventory = inventoryAssets(game);
   const workshop = preparationAssets(game);
   const playerListings = activePlayerListings(game).flatMap((playerListing) => {
@@ -1599,7 +1601,11 @@ export default function App() {
                 onClick={() => {
                   const opening = !comparing;
                   setComparing(opening);
-                  if (opening) markCompared(selected.id);
+                  if (
+                    opening &&
+                    comparableListings(game, selected.id).length >= 2
+                  )
+                    markCompared(selected.id);
                 }}
               >
                 {comparing
@@ -1609,30 +1615,57 @@ export default function App() {
             </div>
             {comparing ? (
               <div className="compare-stack">
-                <h3>
-                  Aynı ürün grubu ·{" "}
-                  {comparableListings(game, selected.id).length} ilan
-                </h3>
-                {comparisonRows(comparableListings(game, selected.id)).map(
-                  (row) => (
-                    <div
-                      className={
-                        row.different ? "compare-row different" : "compare-row"
-                      }
-                      key={row.label}
-                    >
-                      <b>{row.label}</b>
-                      <span>
-                        {row.values.map((value, index) => (
-                          <em key={`${value}-${index}`}>
-                            {row.label === "Fiyat"
-                              ? money(Number(value))
-                              : value}
-                          </em>
-                        ))}
-                      </span>
-                    </div>
-                  ),
+                <h3>Aynı ürün grubu · {comparables.length} ilan</h3>
+                {comparables.length < 2 ? (
+                  <p>
+                    Şu anda aynı ürün grubunda karşılaştırılabilecek başka aktif
+                    ilan yok.
+                  </p>
+                ) : (
+                  <>
+                    <p>
+                      Farklı satırlar işaretli. Satıcı tipi güvenilirlik
+                      garantisi değildir; inceleme bulgularını karşılaştır.
+                    </p>
+                    {comparables.map((item, index) => (
+                      <section
+                        className="compare-card"
+                        key={item.id}
+                        aria-label={`İlan ${index + 1}`}
+                      >
+                        <h4>
+                          İlan {index + 1} ·{" "}
+                          {index === 0 ? "Açık ilan" : "Alternatif"}
+                        </h4>
+                        <dl>
+                          {compareRows.map((row) => (
+                            <div
+                              className={
+                                row.different
+                                  ? "compare-row different"
+                                  : "compare-row"
+                              }
+                              key={row.label}
+                            >
+                              <dt>
+                                {row.label}
+                                {row.different ? <small>Farklı</small> : null}
+                              </dt>
+                              <dd>{row.values[index]}</dd>
+                            </div>
+                          ))}
+                        </dl>
+                        {index > 0 ? (
+                          <button
+                            className="secondary"
+                            onClick={() => selectListing(item.id)}
+                          >
+                            İlan {index + 1} detaylarını aç
+                          </button>
+                        ) : null}
+                      </section>
+                    ))}
+                  </>
                 )}
               </div>
             ) : null}

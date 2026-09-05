@@ -35,7 +35,11 @@ export function formatAttributeValue(
 }
 export const comparableListings = (state: GameState, listingId: string) => {
   const selected = state.listings.find((item) => item.id === listingId);
-  if (!selected) return [];
+  if (
+    !selected ||
+    !["ACTIVE", "WATCHED", "NEGOTIATING"].includes(selected.state)
+  )
+    return [];
   const same = state.listings.filter(
     (item) =>
       item.familyId === selected.familyId &&
@@ -50,6 +54,7 @@ export type ComparisonRow = {
   label: string;
   values: string[];
   different: boolean;
+  priority?: number;
 };
 export function comparisonRows(listings: Listing[]): ComparisonRow[] {
   if (!listings.length) return [];
@@ -66,7 +71,7 @@ export function comparisonRows(listings: Listing[]): ComparisonRow[] {
       different: true,
     },
     {
-      label: "Güven",
+      label: "Bilgi güveni",
       values: listings.map(
         (item) => `%${Math.round(item.instance.evidenceConfidence * 100)}`,
       ),
@@ -76,6 +81,7 @@ export function comparisonRows(listings: Listing[]): ComparisonRow[] {
       .sort((a, b) => a.comparePriority - b.comparePriority)
       .map((definition) => ({
         label: definition.label,
+        priority: definition.comparePriority,
         values: listings.map((item) => {
           const attribute = item.instance.attributes.find(
             (candidate) => candidate.definitionId === definition.id,
@@ -90,10 +96,7 @@ export function comparisonRows(listings: Listing[]): ComparisonRow[] {
   return rows
     .map((row) => ({ ...row, different: new Set(row.values).size > 1 }))
     .filter(
-      (row, index) =>
-        index < 3 ||
-        row.different ||
-        base.attributes[index - 3]?.comparePriority <= 2,
+      (row) => row.priority === undefined || row.different || row.priority <= 2,
     );
 }
 
