@@ -29,6 +29,8 @@ import camera from "./assets/products/prd_camera.png";
 import laptop from "./assets/products/prd_laptop.png";
 import boardGame from "./assets/products/prd_board_game.png";
 import portableRadio from "./assets/products/prd_portable_radio.png";
+import fountainPen from "./assets/products/prd_fountain_pen.png";
+import floorLamp from "./assets/products/prd_floor_lamp.png";
 
 const dedicatedAssets: Record<string, string> = {
   prd_notebook: notebook,
@@ -60,6 +62,8 @@ const dedicatedAssets: Record<string, string> = {
   prd_laptop: laptop,
   prd_board_game: boardGame,
   prd_portable_radio: portableRadio,
+  prd_fountain_pen: fountainPen,
+  prd_floor_lamp: floorLamp,
 };
 
 const fallbackSvg = (category: string, symbol: string, color: string) =>

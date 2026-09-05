@@ -2,14 +2,18 @@ import { expect, test } from "@playwright/test";
 import { familyById } from "../src/content/families";
 import { initialState, validateState } from "../src/game";
 
-test("first expanded product families use dedicated mobile artwork", async ({
+test("expanded product families use dedicated mobile artwork", async ({
   page,
 }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const state = initialState(Date.now(), "SANDBOX");
   const boardGame = familyById("board_game");
   const portableRadio = familyById("portable_radio");
-  if (!boardGame || !portableRadio) throw new Error("Asset family is missing");
+  const fountainPen = familyById("fountain_pen");
+  const floorLamp = familyById("floor_lamp");
+  if (!boardGame || !portableRadio || !fountainPen || !floorLamp) {
+    throw new Error("Asset family is missing");
+  }
   state.listings[0] = {
     ...state.listings[0],
     familyId: boardGame.id,
@@ -19,6 +23,16 @@ test("first expanded product families use dedicated mobile artwork", async ({
     ...state.listings[1],
     familyId: portableRadio.id,
     instance: { ...state.listings[1].instance, family: portableRadio },
+  };
+  state.listings[2] = {
+    ...state.listings[2],
+    familyId: fountainPen.id,
+    instance: { ...state.listings[2].instance, family: fountainPen },
+  };
+  state.listings[3] = {
+    ...state.listings[3],
+    familyId: floorLamp.id,
+    instance: { ...state.listings[3].instance, family: floorLamp },
   };
   const saved = validateState(state);
 
@@ -48,6 +62,8 @@ test("first expanded product families use dedicated mobile artwork", async ({
   for (const [name, assetName] of [
     ["Koleksiyon Masa Oyunu", "prd_board_game"],
     ["Kıyı Cep Radyosu", "prd_portable_radio"],
+    ["Dolma Kalem Seti", "prd_fountain_pen"],
+    ["Ark Zemin Lambası", "prd_floor_lamp"],
   ] as const) {
     const card = page.locator(".market-card").filter({ hasText: name });
     const visual = card.locator(".product-visual");

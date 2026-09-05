@@ -155,8 +155,8 @@
     {
       "assetKey": "prd_fountain_pen",
       "familyId": "fountain_pen",
-      "source": "fallback:fb_small_item",
-      "dedicated": false
+      "source": "../products/prd_fountain_pen.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_board_game",
@@ -197,8 +197,8 @@
     {
       "assetKey": "prd_floor_lamp",
       "familyId": "floor_lamp",
-      "source": "fallback:fb_home",
-      "dedicated": false
+      "source": "../products/prd_floor_lamp.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_side_table",

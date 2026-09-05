@@ -21,6 +21,8 @@ describe("asset manifest and visual treatments", () => {
     }
     expect(hasDedicatedAsset("prd_board_game")).toBe(true);
     expect(hasDedicatedAsset("prd_portable_radio")).toBe(true);
+    expect(hasDedicatedAsset("prd_fountain_pen")).toBe(true);
+    expect(hasDedicatedAsset("prd_floor_lamp")).toBe(true);
   });
 
   it("returns a deterministic fallback for an unknown asset key", () => {
