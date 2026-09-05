@@ -97,7 +97,7 @@ export const MONETIZATION_CONFIG = {
   },
   ads: {
     provider: "admob" as const,
-    sandboxAdUnit: import.meta.env.DEV
+    sandboxAdUnit: import.meta.env?.DEV
       ? "ca-app-pub-3940256099942544/5224354917"
       : undefined,
     productionAdUnit: undefined,
