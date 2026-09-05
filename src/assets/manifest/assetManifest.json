@@ -209,8 +209,8 @@
     {
       "assetKey": "prd_robot_vacuum",
       "familyId": "robot_vacuum",
-      "source": "fallback:fb_home",
-      "dedicated": false
+      "source": "../products/prd_robot_vacuum.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_stand_mixer",
