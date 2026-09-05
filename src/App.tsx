@@ -283,7 +283,7 @@ export default function App() {
     const frame = window.requestAnimationFrame(() => {
       const card = document.getElementById(`owned-${focusedAssetId}`);
       card?.focus({ preventScroll: true });
-      card?.scrollIntoView({ block: "nearest", behavior: "instant" });
+      card?.scrollIntoView({ block: "start", behavior: "instant" });
     });
     return () => window.cancelAnimationFrame(frame);
   }, [tab, portfolioSegment, focusedAssetId]);
@@ -480,6 +480,12 @@ export default function App() {
     tab === "portfolio" &&
     (portfolioSegment === coachSegment ||
       (game.ftue.stage === "LISTING" && portfolioSegment === "preparation"));
+  const showCoachHere =
+    showCoach &&
+    !(
+      atCoachDestination &&
+      (game.ftue.stage === "PREPARATION" || game.ftue.stage === "LISTING")
+    );
 
   const renderInventoryCard = (
     item: (typeof inventory)[number],
@@ -562,6 +568,24 @@ export default function App() {
               Hazırlık tamam. Ürününü satışa çıkarabilirsin.
             </p>
           ) : null}
+          {(item.state === "IN_INVENTORY" || item.state === "READY") &&
+          quickSaleAssetId !== item.id &&
+          (!ftueActive || game.ftue.stage === "LISTING") ? (
+            <div className="portfolio-next-action">
+              <small>SIRADAKİ ADIM</small>
+              <b>Dengeli fiyatla satışa çıkar</b>
+              <span>
+                Toplam harcaman {money(item.bookCostMinor)} · İlan fiyatı{" "}
+                {money(quote.balancedAskingMinor)}
+              </span>
+              <button
+                className="primary"
+                onClick={() => listAndContinue(item, quote.balancedAskingMinor)}
+              >
+                İlan oluştur <b>{money(quote.balancedAskingMinor)}</b>
+              </button>
+            </div>
+          ) : null}
           {showPreparation &&
           item.state !== "PREPARING" &&
           availablePreparations.length > 0 ? (
@@ -580,17 +604,26 @@ export default function App() {
                   ? "Diğer hazırlıklar"
                   : "Nasıl hazırlamak istersin?"}
               </summary>
+              {!item.instance.preparationHistory.length ? (
+                <p className="preparation-guide">
+                  Birini seç. Ücret toplam harcamana eklenir.
+                </p>
+              ) : null}
               <div className="sell-actions">
                 {availablePreparations.map((action) => (
                   <button
+                    className="preparation-action"
                     key={action.kind}
                     onClick={() => prepare(item.id, action.kind)}
                   >
-                    {action.label} <b>{money(action.costMinor)}</b>
-                    <small>Süre: {action.durationMin} dk</small>
-                    {preparationPresentation(item, action).map((effect) => (
-                      <small key={effect}>{effect}</small>
-                    ))}
+                    <span className="preparation-action-title">
+                      <b>{action.label}</b>
+                      <strong>{money(action.costMinor)}</strong>
+                    </span>
+                    <small>
+                      {action.durationMin} dk ·{" "}
+                      {preparationPresentation(item, action).join(" · ")}
+                    </small>
                   </button>
                 ))}
               </div>
@@ -648,16 +681,6 @@ export default function App() {
               </button>
             )
           ) : null}
-          {(item.state === "IN_INVENTORY" || item.state === "READY") &&
-          quickSaleAssetId !== item.id &&
-          (!ftueActive || game.ftue.stage === "LISTING") ? (
-            <button
-              className="primary"
-              onClick={() => listAndContinue(item, quote.balancedAskingMinor)}
-            >
-              İlan oluştur <b>{money(quote.balancedAskingMinor)}</b>
-            </button>
-          ) : null}
           {!showPreparation && availablePreparations.length > 0 ? (
             <button onClick={() => showOwnedAsset(item.id, "preparation")}>
               Ürünü hazırla
@@ -710,7 +733,7 @@ export default function App() {
       <div className="notice" role="status">
         {notice}
       </div>
-      {showCoach ? (
+      {showCoachHere ? (
         <aside className="coach" aria-label="İlk oturum rehberi">
           <button onClick={dismissCoach} aria-label="Rehberi kapat">
             <Icon name="close" />

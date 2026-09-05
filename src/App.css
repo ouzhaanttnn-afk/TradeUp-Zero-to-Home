@@ -690,6 +690,52 @@ main {
   outline: 2px solid #69d99c;
   outline-offset: 2px;
 }
+.preparation-guide {
+  margin: -3px 0 9px !important;
+  color: #a9bdb3 !important;
+}
+.sell-actions .preparation-action {
+  min-height: 74px;
+  padding: 10px 12px;
+  align-items: stretch;
+  text-align: left;
+}
+.preparation-action-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+.preparation-action-title strong {
+  color: var(--accent);
+  white-space: nowrap;
+}
+.sell-actions .preparation-action > small {
+  color: #a7b9b0;
+  line-height: 1.35;
+}
+.portfolio-next-action {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+  border: 1px solid rgba(94, 230, 160, 0.24);
+  border-radius: 14px;
+  background: rgba(94, 230, 160, 0.06);
+}
+.portfolio-next-action > small {
+  color: var(--accent);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.portfolio-next-action > span {
+  color: #9eb1a8;
+  font-size: calc(10px + var(--text-size-boost));
+}
+.portfolio-next-action button {
+  width: 100%;
+  margin-top: 4px;
+}
 .preparation-options ~ .primary {
   grid-column: 1 / -1;
 }

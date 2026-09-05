@@ -171,12 +171,36 @@ for (const choice of [
     await expect(
       page.getByRole("article", { name: "Kuzey Defteri", exact: true }),
     ).toBeFocused();
+    const firstAssetCard = page.getByRole("article", {
+      name: "Kuzey Defteri",
+      exact: true,
+    });
+    await expect(
+      page.getByRole("complementary", { name: "İlk oturum rehberi" }),
+    ).toHaveCount(0);
+    await expect(
+      firstAssetCard.getByRole("button", { name: /^Temizle/ }),
+    ).toBeInViewport({ ratio: 1 });
+    await expect(
+      firstAssetCard.getByRole("button", { name: /^Test et/ }),
+    ).toBeInViewport({ ratio: 1 });
+    await expect(
+      firstAssetCard.getByRole("button", { name: /^Eksikleri tamamla/ }),
+    ).toBeInViewport({ ratio: 1 });
     await checkLayout();
+    await page.screenshot({
+      path: testInfo.outputPath("preparation-choice.png"),
+      fullPage: true,
+      animations: "disabled",
+    });
     await page.getByRole("button", { name: /Temizle/ }).click();
     await stage("LISTING");
     await expect(
       page.getByRole("tab", { name: "Hazırlık", exact: true }),
     ).toHaveAttribute("aria-selected", "true");
+    await expect(
+      firstAssetCard.getByRole("button", { name: /^İlan oluştur/ }),
+    ).toBeInViewport({ ratio: 1 });
     await expect(
       page.getByText("Diğer hazırlıklar", { exact: true }),
     ).toBeVisible();

@@ -36,3 +36,10 @@ Kontroller masaüstü Chrome'un telefon boyutlu görünümündedir. Gerçek iOS/
 - Ek testler: 8 bütçe/yuvarlama testi; 320×640 büyük yazıda bütçeye uygun pazarlıkla alım, tam nakitle karşı teklif kabulü, yetersiz nakitte envantere geçiş. Alım sonrası kayıt yenilemede nakit, maliyet ve işlem günlüğü doğrulanır.
 
 Güncel doğrulama: 226 test ve 14 tarayıcı senaryosu; lint ve production build başarılı.
+
+## Hazırlıktan ilana geçiş
+
+- İlk ürünün hazırlık ekranındaki tekrar eden büyük rehber, oyuncu doğru ekrandayken gösterilmez; seçeneklerin üstündeki kısa yönlendirme yeterlidir.
+- Üç hazırlık seçeneği ücret, süre ve tüm görünür etkileri korunarak kompakt satırlara dönüştürüldü. 320×640 büyük yazıda üç seçenek aynı ekranda görülebilir.
+- Ürün hazır olduğunda dengeli ilan fiyatı ile güncel toplam harcama aynı “Sıradaki adım” alanında gösterilir; ana ilan düğmesi diğer isteğe bağlı hazırlıkların üstündedir.
+- Portföyde hedef ürüne geçiş kartı ekranın başına getirir ve odağı korur. Hazırlık türü, maliyeti, süresi, sonucu ve ilan fiyatı hesabı değişmedi.
