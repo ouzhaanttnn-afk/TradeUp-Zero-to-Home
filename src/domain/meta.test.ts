@@ -54,6 +54,33 @@ describe("expertise progression", () => {
 });
 
 describe("Takip", () => {
+  it.each([
+    [-1, 50],
+    [1.5, 50],
+    [NaN, 50],
+    [Infinity, 50],
+    [Number.MAX_SAFE_INTEGER + 1, 50],
+    [100, -1],
+    [100, 101],
+    [100, NaN],
+  ])(
+    "rejects invalid alarm values %s / %s without changing the state",
+    (price, condition) => {
+      const state = fundedSandbox();
+      expect(
+        addSavedSearch(state, state.listings[0].familyId, price, condition),
+      ).toBe(state);
+    },
+  );
+
+  it("rejects unknown families and keeps valid duplicate alarms idempotent", () => {
+    const state = fundedSandbox();
+    expect(addSavedSearch(state, "missing-family", 100, 50)).toBe(state);
+    const saved = addSavedSearch(state, state.listings[0].familyId, 100, 50);
+    expect(addSavedSearch(saved, state.listings[0].familyId, 100, 50)).toBe(
+      saved,
+    );
+  });
   it("keeps a watched listing purchasable and clears its watch entry", () => {
     const state = fundedSandbox();
     const listing = state.listings[0];

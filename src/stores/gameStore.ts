@@ -8,11 +8,13 @@ import {
   withdrawPlayerListing,
 } from "../domain/economy";
 import { WORLD_CONFIG } from "../domain/config";
-import { inspectListing } from "../domain/decision";
+import { comparableListings, inspectListing } from "../domain/decision";
 import { startPreparation } from "../domain/preparation";
 import {
   addSavedSearch,
   gainExpertise,
+  isValidSavedSearch,
+  marketExpertiseLevel,
   recordCompletedSaleMeta,
   removeSavedSearch,
   toggleWatch,
@@ -95,7 +97,7 @@ type Store = {
   inspect: (listingId: string, kind: InspectionKind) => void;
   prepare: (assetId: string, kind: PreparationKind) => void;
   openListing: (listingId: string) => void;
-  markCompared: (listingId?: string) => void;
+  markCompared: (listingId: string) => void;
   toggleWatch: (listingId: string) => void;
   saveSearch: (
     familyId: string,
@@ -769,7 +771,11 @@ export const useGameStore = create<Store>((set, get) => ({
   openListing: (listingId) => {
     const game = get().game;
     const listing = game.listings.find((item) => item.id === listingId);
-    if (!listing) return;
+    if (
+      !listing ||
+      !["ACTIVE", "WATCHED", "NEGOTIATING"].includes(listing.state)
+    )
+      return;
     let next = gainExpertise(game, "listingOpen", listing.familyId, listing.id);
     next = trackAnalytics(
       next,
@@ -779,8 +785,9 @@ export const useGameStore = create<Store>((set, get) => ({
     );
     set({ game: stampAndPersist(next) });
   },
-  markCompared: (listingId = "ftue-compare") => {
+  markCompared: (listingId) => {
     const game = get().game;
+    if (comparableListings(game, listingId).length < 2) return;
     const listing = game.listings.find((item) => item.id === listingId);
     let next = gainExpertise(game, "compare", listing?.familyId, listingId);
     next = recordFtueCompare(next);
@@ -815,6 +822,24 @@ export const useGameStore = create<Store>((set, get) => ({
     evidencePreference = "ANY",
   ) => {
     const game = get().game;
+    if (marketExpertiseLevel(game) < 3) {
+      set({ notice: "Ürün alarmı Pazar Seviye 3'te açılır." });
+      return;
+    }
+    if (
+      !isValidSavedSearch(
+        familyId,
+        maxPriceMinor,
+        minCondition,
+        evidencePreference,
+      )
+    ) {
+      set({
+        notice:
+          "Alarm kaydedilemedi; ürün, fiyat ve kondisyon bilgilerini kontrol et.",
+      });
+      return;
+    }
     const next = addSavedSearch(
       game,
       familyId,

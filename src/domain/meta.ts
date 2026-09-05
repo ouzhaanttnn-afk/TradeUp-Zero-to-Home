@@ -390,6 +390,15 @@ export function addSavedSearch(
   minCondition: number,
   evidencePreference: SavedSearch["evidencePreference"] = "ANY",
 ): GameState {
+  if (
+    !isValidSavedSearch(
+      familyId,
+      maxPriceMinor,
+      minCondition,
+      evidencePreference,
+    )
+  )
+    return state;
   const id = `search:${familyId}:${maxPriceMinor}:${minCondition}:${evidencePreference}`;
   if (state.follow.savedSearches.some((search) => search.id === id))
     return state;
@@ -411,6 +420,20 @@ export function addSavedSearch(
     },
   };
 }
+
+export const isValidSavedSearch = (
+  familyId: string,
+  maxPriceMinor: number,
+  minCondition: number,
+  evidencePreference: SavedSearch["evidencePreference"],
+) =>
+  Boolean(familyById(familyId)) &&
+  Number.isSafeInteger(maxPriceMinor) &&
+  maxPriceMinor >= 0 &&
+  Number.isFinite(minCondition) &&
+  minCondition >= 0 &&
+  minCondition <= 100 &&
+  ["ANY", "CHECKED"].includes(evidencePreference);
 
 export const removeSavedSearch = (
   state: GameState,

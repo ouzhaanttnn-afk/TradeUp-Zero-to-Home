@@ -581,13 +581,55 @@ describe("purchase negotiation rights", () => {
 });
 
 describe("FTUE store integration", () => {
+  it("does not award compare progress for missing, single or expired listings", () => {
+    const state = initialState(0, "SANDBOX");
+    state.listings = [state.listings[0]];
+    useGameStore.setState({ game: state, ready: true });
+    useGameStore.getState().markCompared("missing-listing");
+    useGameStore.getState().markCompared(state.listings[0].id);
+    expect(useGameStore.getState().game).toBe(state);
+    const expired = {
+      ...state,
+      listings: state.listings.map((listing) => ({
+        ...listing,
+        state: "EXPIRED" as const,
+      })),
+    };
+    useGameStore.setState({ game: expired });
+    useGameStore.getState().openListing(expired.listings[0].id);
+    useGameStore.getState().markCompared(expired.listings[0].id);
+    expect(useGameStore.getState().game).toBe(expired);
+  });
+
+  it("enforces the alarm unlock and rejects bad input after unlocking", () => {
+    const state = initialState(0, "SANDBOX");
+    useGameStore.setState({ game: state, ready: true });
+    useGameStore.getState().saveSearch(state.listings[0].familyId, 100, 50);
+    expect(useGameStore.getState().game).toBe(state);
+    expect(useGameStore.getState().notice).toContain("Seviye 3");
+    const unlocked = {
+      ...state,
+      expertise: { ...state.expertise, marketXp: 100_000 },
+    };
+    useGameStore.setState({ game: unlocked });
+    useGameStore.getState().saveSearch(state.listings[0].familyId, NaN, 50);
+    expect(useGameStore.getState().game).toBe(unlocked);
+    expect(useGameStore.getState().notice).toContain("kaydedilemedi");
+    useGameStore.getState().saveSearch(state.listings[0].familyId, 100, 50);
+    expect(
+      validateState(useGameStore.getState().game).follow.savedSearches,
+    ).toHaveLength(1);
+  });
+
   it("wires the full first-session loop through player actions", () => {
     useGameStore.setState({ game: initialState(), ready: true, notice: "" });
     useGameStore.getState().acceptBuyer("offer:ftue-starting-notebook");
     expect(useGameStore.getState().game.ftue.stage).toBe("COMPARE");
     expect(useGameStore.getState().game.listings).toHaveLength(3);
 
-    useGameStore.getState().markCompared();
+    useGameStore
+      .getState()
+      .markCompared(useGameStore.getState().game.listings[0].id);
     let game = useGameStore.getState().game;
     const choice = game.listings.find(
       (listing) => listing.priceMinor <= game.cashMinor,
