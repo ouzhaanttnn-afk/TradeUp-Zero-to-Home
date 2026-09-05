@@ -12,12 +12,20 @@ test("expanded product families use dedicated mobile artwork", async ({
   const fountainPen = familyById("fountain_pen");
   const floorLamp = familyById("floor_lamp");
   const gameCartridge = familyById("game_cartridge");
+  const perfumeSet = familyById("perfume_set");
+  const makeupSet = familyById("makeup_set");
+  const trenchCoat = familyById("trench_coat");
+  const leatherBag = familyById("leather_bag");
   if (
     !boardGame ||
     !portableRadio ||
     !fountainPen ||
     !floorLamp ||
-    !gameCartridge
+    !gameCartridge ||
+    !perfumeSet ||
+    !makeupSet ||
+    !trenchCoat ||
+    !leatherBag
   ) {
     throw new Error("Asset family is missing");
   }
@@ -46,6 +54,18 @@ test("expanded product families use dedicated mobile artwork", async ({
     familyId: gameCartridge.id,
     instance: { ...state.listings[4].instance, family: gameCartridge },
   };
+  for (const [index, family] of [
+    perfumeSet,
+    makeupSet,
+    trenchCoat,
+    leatherBag,
+  ].entries()) {
+    state.listings[index + 5] = {
+      ...state.listings[index + 5],
+      familyId: family.id,
+      instance: { ...state.listings[index + 5].instance, family },
+    };
+  }
   const saved = validateState(state);
 
   await page.goto("/");
@@ -77,6 +97,10 @@ test("expanded product families use dedicated mobile artwork", async ({
     ["Dolma Kalem Seti", "prd_fountain_pen"],
     ["Ark Zemin Lambası", "prd_floor_lamp"],
     ["Nadir Oyun Kartuşu", "prd_game_cartridge"],
+    ["Sedir Parfüm Seti", "prd_perfume_set"],
+    ["Mühürlü Renk Paleti", "prd_makeup_set"],
+    ["Ada Trençkot", "prd_trench_coat"],
+    ["Atölye Deri Çanta", "prd_leather_bag"],
   ] as const) {
     const card = page.locator(".market-card").filter({ hasText: name });
     const visual = card.locator(".product-visual");
@@ -109,6 +133,13 @@ test("expanded product families use dedicated mobile artwork", async ({
     .scrollIntoViewIfNeeded();
   await page.screenshot({
     path: testInfo.outputPath("game-cartridge-asset-390.png"),
+    animations: "disabled",
+  });
+  await page.getByRole("button", { name: "Moda/Bakım", exact: true }).click();
+  await expect(page.locator(".market-card")).toHaveCount(4);
+  await page.screenshot({
+    path: testInfo.outputPath("fashion-care-assets-390.png"),
+    fullPage: true,
     animations: "disabled",
   });
 });

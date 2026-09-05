@@ -63,12 +63,12 @@ describe("decision vertical slice", () => {
     ).toBe(true);
   });
 
-  it("keeps 24 deep hero families and scales internal alpha to sixty across eight categories", () => {
+  it("keeps 24 deep hero families and expands content across nine categories", () => {
     expect(heroFamilies).toHaveLength(24);
-    expect(families).toHaveLength(60);
-    expect(new Set(families.map((family) => family.category))).toHaveLength(8);
-    expect(new Set(families.map((family) => family.id)).size).toBe(60);
-    expect(new Set(families.map((family) => family.assetKey)).size).toBe(60);
+    expect(families).toHaveLength(64);
+    expect(new Set(families.map((family) => family.category))).toHaveLength(9);
+    expect(new Set(families.map((family) => family.id)).size).toBe(64);
+    expect(new Set(families.map((family) => family.assetKey)).size).toBe(64);
     for (const family of families) {
       expect(family.attributes.length).toBeGreaterThanOrEqual(3);
       expect(family.evidence.length).toBeGreaterThanOrEqual(2);

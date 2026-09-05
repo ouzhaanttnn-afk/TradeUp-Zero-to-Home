@@ -361,6 +361,30 @@
       "familyId": "action_camera",
       "source": "fallback:fb_photo",
       "dedicated": false
+    },
+    {
+      "assetKey": "prd_perfume_set",
+      "familyId": "perfume_set",
+      "source": "../products/prd_perfume_set.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_makeup_set",
+      "familyId": "makeup_set",
+      "source": "../products/prd_makeup_set.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_trench_coat",
+      "familyId": "trench_coat",
+      "source": "../products/prd_trench_coat.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_leather_bag",
+      "familyId": "leather_bag",
+      "source": "../products/prd_leather_bag.png",
+      "dedicated": true
     }
   ],
   "overlays": [

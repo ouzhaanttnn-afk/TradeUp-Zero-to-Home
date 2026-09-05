@@ -10,8 +10,8 @@ import {
 
 describe("asset manifest and visual treatments", () => {
   it("registers every internal-alpha family and measured dedicated expansion", () => {
-    expect(new Set(families.map((family) => family.assetKey)).size).toBe(60);
-    expect(registeredAssetKeys).toHaveLength(60);
+    expect(new Set(families.map((family) => family.assetKey)).size).toBe(64);
+    expect(registeredAssetKeys).toHaveLength(64);
     for (const family of families) {
       expect(registeredAssetKeys).toContain(family.assetKey);
       expect(assetFor(family.assetKey, family.category)).toBeTruthy();
@@ -24,6 +24,10 @@ describe("asset manifest and visual treatments", () => {
     expect(hasDedicatedAsset("prd_fountain_pen")).toBe(true);
     expect(hasDedicatedAsset("prd_floor_lamp")).toBe(true);
     expect(hasDedicatedAsset("prd_game_cartridge")).toBe(true);
+    expect(hasDedicatedAsset("prd_perfume_set")).toBe(true);
+    expect(hasDedicatedAsset("prd_makeup_set")).toBe(true);
+    expect(hasDedicatedAsset("prd_trench_coat")).toBe(true);
+    expect(hasDedicatedAsset("prd_leather_bag")).toBe(true);
   });
 
   it("returns a deterministic fallback for an unknown asset key", () => {

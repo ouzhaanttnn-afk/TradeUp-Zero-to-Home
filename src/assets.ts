@@ -32,6 +32,10 @@ import portableRadio from "./assets/products/prd_portable_radio.png";
 import fountainPen from "./assets/products/prd_fountain_pen.png";
 import floorLamp from "./assets/products/prd_floor_lamp.png";
 import gameCartridge from "./assets/products/prd_game_cartridge.png";
+import perfumeSet from "./assets/products/prd_perfume_set.png";
+import makeupSet from "./assets/products/prd_makeup_set.png";
+import trenchCoat from "./assets/products/prd_trench_coat.png";
+import leatherBag from "./assets/products/prd_leather_bag.png";
 
 const dedicatedAssets: Record<string, string> = {
   prd_notebook: notebook,
@@ -66,6 +70,10 @@ const dedicatedAssets: Record<string, string> = {
   prd_fountain_pen: fountainPen,
   prd_floor_lamp: floorLamp,
   prd_game_cartridge: gameCartridge,
+  prd_perfume_set: perfumeSet,
+  prd_makeup_set: makeupSet,
+  prd_trench_coat: trenchCoat,
+  prd_leather_bag: leatherBag,
 };
 
 const fallbackSvg = (category: string, symbol: string, color: string) =>
@@ -80,6 +88,7 @@ const categoryFallbacks: Record<string, string> = {
   Telefon: fallbackSvg("Telefon", "▯", "#75d5d0"),
   Bilgisayar: fallbackSvg("Bilgisayar", "▣", "#8db8ff"),
   Fotoğraf: fallbackSvg("Fotoğraf", "◫", "#ff9c83"),
+  "Moda/Bakım": fallbackSvg("Moda/Bakım", "✦", "#d8b27c"),
 };
 
 export const assetFor = (key: string, category?: string) =>
