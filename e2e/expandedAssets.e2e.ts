@@ -16,6 +16,7 @@ test("expanded product families use dedicated mobile artwork", async ({
   const makeupSet = familyById("makeup_set");
   const trenchCoat = familyById("trench_coat");
   const leatherBag = familyById("leather_bag");
+  const vrHeadset = familyById("vr_headset");
   if (
     !boardGame ||
     !portableRadio ||
@@ -25,7 +26,8 @@ test("expanded product families use dedicated mobile artwork", async ({
     !perfumeSet ||
     !makeupSet ||
     !trenchCoat ||
-    !leatherBag
+    !leatherBag ||
+    !vrHeadset
   ) {
     throw new Error("Asset family is missing");
   }
@@ -66,6 +68,11 @@ test("expanded product families use dedicated mobile artwork", async ({
       instance: { ...state.listings[index + 5].instance, family },
     };
   }
+  state.listings[9] = {
+    ...state.listings[9],
+    familyId: vrHeadset.id,
+    instance: { ...state.listings[9].instance, family: vrHeadset },
+  };
   const saved = validateState(state);
 
   await page.goto("/");
@@ -101,6 +108,7 @@ test("expanded product families use dedicated mobile artwork", async ({
     ["Mühürlü Renk Paleti", "prd_makeup_set"],
     ["Ada Trençkot", "prd_trench_coat"],
     ["Atölye Deri Çanta", "prd_leather_bag"],
+    ["Vista VR Başlık", "prd_vr_headset"],
   ] as const) {
     const card = page.locator(".market-card").filter({ hasText: name });
     const visual = card.locator(".product-visual");

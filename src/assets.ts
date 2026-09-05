@@ -27,6 +27,7 @@ import tablet from "./assets/products/prd_tablet.png";
 import smartwatch from "./assets/products/prd_smartwatch.png";
 import camera from "./assets/products/prd_camera.png";
 import laptop from "./assets/products/prd_laptop.png";
+import vrHeadset from "./assets/products/prd_vr_headset.png";
 import boardGame from "./assets/products/prd_board_game.png";
 import portableRadio from "./assets/products/prd_portable_radio.png";
 import fountainPen from "./assets/products/prd_fountain_pen.png";
@@ -65,6 +66,7 @@ const dedicatedAssets: Record<string, string> = {
   prd_smartwatch: smartwatch,
   prd_camera: camera,
   prd_laptop: laptop,
+  prd_vr_headset: vrHeadset,
   prd_board_game: boardGame,
   prd_portable_radio: portableRadio,
   prd_fountain_pen: fountainPen,

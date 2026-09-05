@@ -221,8 +221,8 @@
     {
       "assetKey": "prd_vr_headset",
       "familyId": "vr_headset",
-      "source": "fallback:fb_game",
-      "dedicated": false
+      "source": "../products/prd_vr_headset.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_gaming_keyboard",
