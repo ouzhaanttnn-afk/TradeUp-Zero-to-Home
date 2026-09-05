@@ -339,13 +339,20 @@ export const useGameStore = create<Store>((set, get) => ({
       set({ notice: "Bu ilan artık pazarda değil." });
       return;
     }
+    if (currentListing.priceMinor !== item.priceMinor) {
+      set({
+        notice:
+          "İlan fiyatı değişti. Güncel fiyatı kontrol edip teklifini yeniden gönder.",
+      });
+      return;
+    }
     const current =
       game.negotiation?.listingId === item.id
         ? game.negotiation
         : {
             listingId: item.id,
             offersRemaining: 2 as const,
-            sellerFloorMinor: sellerFloor(item),
+            sellerFloorMinor: sellerFloor(currentListing),
             closed: false,
           };
     if (current.closed || current.offersRemaining === 0) {
@@ -354,9 +361,15 @@ export const useGameStore = create<Store>((set, get) => ({
     }
     const index = 3 - current.offersRemaining;
     const offerMinor =
-      Math.round((item.priceMinor * (index === 1 ? 0.82 : 0.91)) / 1_000) *
-      1_000;
-    const result = resolveOffer(item, offerMinor, index);
+      Math.round(
+        (currentListing.priceMinor * (index === 1 ? 0.82 : 0.91)) / 1_000,
+      ) * 1_000;
+    const result = resolveOffer(
+      currentListing,
+      offerMinor,
+      index,
+      current.sellerFloorMinor,
+    );
     const offeredGame = trackAnalytics(
       game,
       "offer_submitted",
@@ -364,8 +377,16 @@ export const useGameStore = create<Store>((set, get) => ({
       `${item.id}:${index}`,
     );
     if (result.result === "accepted") {
-      if (offeredGame !== game) set({ game: offeredGame });
-      get().buy(item, offerMinor);
+      const acceptedGame: GameState = {
+        ...offeredGame,
+        negotiation: {
+          ...current,
+          offersRemaining: (current.offersRemaining - 1) as 0 | 1,
+          closed: true,
+        },
+      };
+      set({ game: stampAndPersist(acceptedGame) });
+      get().buy(currentListing, offerMinor);
       return;
     }
     const remaining = (current.offersRemaining - 1) as 0 | 1;

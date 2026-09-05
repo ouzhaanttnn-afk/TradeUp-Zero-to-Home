@@ -713,8 +713,12 @@ export function sellerFloor(item: Listing) {
     ) * 1_000
   );
 }
-export function resolveOffer(item: Listing, offer: number, index: number) {
-  const floorMinor = sellerFloor(item);
+export function resolveOffer(
+  item: Listing,
+  offer: number,
+  index: number,
+  floorMinor = sellerFloor(item),
+) {
   const roll = rng(item.seed + offer * 17 + index * 101)();
   if (offer >= floorMinor) return { result: "accepted" as const, floorMinor };
   if (offer >= floorMinor * (0.88 + roll * 0.08))

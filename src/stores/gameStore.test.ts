@@ -260,6 +260,63 @@ describe("purchase negotiation rights", () => {
     useGameStore.getState().offer(listing);
     expect(useGameStore.getState().game).toEqual(afterTwo);
   });
+
+  it("keeps an accepted but unfunded offer closed after save/load", () => {
+    const game = useGameStore.getState().game;
+    const listing = game.listings[0];
+    listing.priceMinor = 100_000;
+    listing.instance.fairValueMinor = 1_000;
+    game.cashMinor = 0;
+    game.transactionJournal[0].cashDeltaMinor = 0;
+    useGameStore.setState({ game });
+    useGameStore.getState().offer(listing);
+    expect(useGameStore.getState().game.negotiation).toMatchObject({
+      offersRemaining: 1,
+      closed: true,
+    });
+    const restored = validateState(
+      JSON.parse(JSON.stringify(useGameStore.getState().game)),
+    );
+    useGameStore.setState({ game: restored });
+    useGameStore.getState().offer(listing);
+    expect(useGameStore.getState().game).toBe(restored);
+    expect(reconcileJournal(restored)).toEqual({
+      cash: true,
+      activeBookCost: true,
+      realizedProfit: true,
+    });
+  });
+
+  it("uses the saved negotiation floor rather than recalculating from a changed item", () => {
+    const game = useGameStore.getState().game;
+    const listing = game.listings[0];
+    listing.priceMinor = 10_000;
+    listing.instance.fairValueMinor = 1_000;
+    game.negotiation = {
+      listingId: listing.id,
+      offersRemaining: 1,
+      sellerFloorMinor: 1_000_000,
+      closed: false,
+    };
+    useGameStore.setState({ game });
+    useGameStore.getState().offer(listing);
+    expect(useGameStore.getState().game.negotiation).toMatchObject({
+      offersRemaining: 0,
+      sellerFloorMinor: 1_000_000,
+      closed: true,
+    });
+    expect(useGameStore.getState().game.ownedAssets).toHaveLength(0);
+  });
+
+  it("requires review of a changed asking price without using an offer right", () => {
+    const game = useGameStore.getState().game;
+    const oldListing = structuredClone(game.listings[0]);
+    game.listings[0].priceMinor += 1_000;
+    useGameStore.setState({ game });
+    useGameStore.getState().offer(oldListing);
+    expect(useGameStore.getState().game).toBe(game);
+    expect(useGameStore.getState().notice).toContain("İlan fiyatı değişti");
+  });
 });
 
 describe("FTUE store integration", () => {
