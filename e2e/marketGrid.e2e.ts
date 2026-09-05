@@ -40,6 +40,9 @@ for (const width of [320, 430]) {
     await expect(
       cards.first().locator(".market-evidence-signal"),
     ).toContainText("Bilgi");
+    await expect(
+      cards.first().locator(".market-evidence-signal"),
+    ).toContainText("Yeni");
     const boxes = await cards.evaluateAll((items) =>
       items.slice(0, 9).map((item) => {
         const box = item.getBoundingClientRect();

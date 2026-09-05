@@ -1003,7 +1003,7 @@ export default function App() {
                     data-listing-id={item.id}
                     data-price-minor={item.priceMinor}
                     onClick={() => selectListing(item.id)}
-                    aria-label={`${item.instance.family.name}, fiyat ${money(item.priceMinor)}, kondisyon yüzde ${item.instance.condition}, ${itemSignal.text}. İlan detaylarını aç`}
+                    aria-label={`${item.instance.family.name}, fiyat ${money(item.priceMinor)}, kondisyon yüzde ${item.instance.condition}, bilgi güveni ${evidenceLabel(item.instance.evidenceConfidence)}, ${listingAgeLabel(item.createdAtGameMin, game.gameTimeMin)}, ${itemSignal.text}. İlan detaylarını aç`}
                   >
                     <div className="market-visual-frame">
                       <ProductVisual
@@ -1014,7 +1014,12 @@ export default function App() {
                         %{item.instance.condition}
                       </span>
                       <span className="market-evidence-signal">
-                        Bilgi {evidenceLabel(item.instance.evidenceConfidence)}
+                        Bilgi {evidenceLabel(item.instance.evidenceConfidence)}{" "}
+                        ·{" "}
+                        {listingAgeLabel(
+                          item.createdAtGameMin,
+                          game.gameTimeMin,
+                        )}
                       </span>
                     </div>
                     <span className={`market-heat market-heat--${risk.level}`}>
