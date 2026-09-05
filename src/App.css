@@ -356,15 +356,32 @@ button:disabled {
 .app-shell.home-atmosphere-pulse::before {
   animation: home-atmosphere-arrival 1.6s ease-out;
 }
+.app-shell.home-atmosphere-pulse {
+  animation: home-milestone-frame 1.6s ease-out;
+}
 @keyframes home-atmosphere-arrival {
   0% {
+    opacity: calc(var(--home-gold-progress) * 0.58);
     filter: brightness(1);
   }
   38% {
-    filter: brightness(1.65) saturate(1.35);
+    opacity: calc(0.2 + var(--home-gold-progress) * 0.38);
+    filter: brightness(1.55) saturate(1.35);
   }
   100% {
+    opacity: calc(var(--home-gold-progress) * 0.58);
     filter: brightness(1);
+  }
+}
+@keyframes home-milestone-frame {
+  0%,
+  100% {
+    box-shadow: 0 0 70px rgba(0, 0, 0, 0.45);
+  }
+  38% {
+    box-shadow:
+      0 0 58px rgba(230, 181, 76, 0.34),
+      inset 0 0 34px rgba(230, 181, 76, 0.08);
   }
 }
 .app-shell.large-text {

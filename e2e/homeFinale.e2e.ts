@@ -65,6 +65,16 @@ test("wealth atmosphere culminates in an accessible home purchase finale", async
 
   const finale = page.getByRole("dialog", { name: "Anahtar artık sende." });
   await expect(finale).toBeVisible();
+  await expect(page.locator(".app-shell")).toHaveClass(/home-atmosphere-pulse/);
+  expect(
+    await page.locator(".app-shell").evaluate((shell) => ({
+      frame: getComputedStyle(shell).animationName,
+      gold: getComputedStyle(shell, "::before").animationName,
+    })),
+  ).toEqual({
+    frame: "home-milestone-frame",
+    gold: "home-atmosphere-arrival",
+  });
   await expect(finale).toContainText("İlk satışını tamamladın");
   await expect(finale).toContainText("Yeni en iyi satışın");
   await expect(page.locator(".app-shell")).toHaveClass(/home-complete/);
