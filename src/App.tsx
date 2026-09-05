@@ -62,6 +62,8 @@ import {
   filterMarketListings,
   listingAgeLabel,
   marketCategories,
+  sortMarketListings,
+  type MarketSort,
 } from "./ui/marketCard";
 import { purchaseBudget } from "./ui/purchaseBudget";
 
@@ -184,6 +186,7 @@ export default function App() {
     useState<PortfolioSegment>("inventory");
   const [timelineFilter, setTimelineFilter] = useState<TimelineFilter>("ALL");
   const [marketCategory, setMarketCategory] = useState(ALL_MARKET_CATEGORIES);
+  const [marketSort, setMarketSort] = useState<MarketSort>("MARKET");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [comparing, setComparing] = useState(false);
   const [purchaseFeedback, setPurchaseFeedback] = useState("");
@@ -307,9 +310,9 @@ export default function App() {
     marketCategoryOptions.includes(marketCategory)
       ? marketCategory
       : ALL_MARKET_CATEGORIES;
-  const visibleMarketListings = filterMarketListings(
-    marketListings,
-    activeMarketCategory,
+  const visibleMarketListings = sortMarketListings(
+    filterMarketListings(marketListings, activeMarketCategory),
+    marketSort,
   );
   const impressionKey = marketListings.map((listing) => listing.id).join("|");
   useEffect(() => {
@@ -784,13 +787,36 @@ export default function App() {
                   {visibleMarketListings.length} ilan
                 </span>
                 {!ftueActive ? (
-                  <button
-                    className="market-refresh"
-                    onClick={scan}
-                    aria-label="Pazarı yenile"
-                  >
-                    <Icon name="refresh" />
-                  </button>
+                  <>
+                    <label
+                      className={`market-sort${marketSort === "MARKET" ? "" : " market-sort--active"}`}
+                      title="Pazarı sırala"
+                    >
+                      <Icon name="sort" />
+                      <select
+                        aria-label="Pazar sıralaması"
+                        value={marketSort}
+                        onChange={(event) =>
+                          setMarketSort(event.target.value as MarketSort)
+                        }
+                      >
+                        <option value="MARKET">Pazar sırası</option>
+                        <option value="PRICE_ASC">
+                          Fiyat: düşükten yükseğe
+                        </option>
+                        <option value="PRICE_DESC">
+                          Fiyat: yüksekten düşüğe
+                        </option>
+                      </select>
+                    </label>
+                    <button
+                      className="market-refresh"
+                      onClick={scan}
+                      aria-label="Pazarı yenile"
+                    >
+                      <Icon name="refresh" />
+                    </button>
+                  </>
                 ) : null}
               </div>
             </div>
@@ -874,6 +900,8 @@ export default function App() {
                   <button
                     className="listing market-card"
                     key={item.id}
+                    data-listing-id={item.id}
+                    data-price-minor={item.priceMinor}
                     onClick={() => selectListing(item.id)}
                     aria-label={`${item.instance.family.name}, fiyat ${money(item.priceMinor)}, kondisyon yüzde ${item.instance.condition}, ${itemSignal.text}. İlan detaylarını aç`}
                   >

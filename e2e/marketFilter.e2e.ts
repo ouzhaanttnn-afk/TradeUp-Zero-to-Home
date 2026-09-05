@@ -46,11 +46,38 @@ test("category filter narrows the market without adding vertical controls", asyn
       return rect.width === 44 && rect.height === 44;
     }),
   ).toBe(true);
+  const sort = page.getByLabel("Pazar sıralaması");
+  await expect(sort).toHaveValue("MARKET");
+  const cards = page.locator(".market-grid .market-card");
+  const originalOrder = await cards.evaluateAll((items) =>
+    items.map((item) => item.getAttribute("data-listing-id")),
+  );
+  const prices = () =>
+    cards.evaluateAll((items) =>
+      items.map((item) => Number(item.getAttribute("data-price-minor"))),
+    );
+  await sort.selectOption("PRICE_ASC");
+  expect(await prices()).toEqual(
+    [...saved.listings]
+      .map((listing) => listing.priceMinor)
+      .sort((left, right) => left - right),
+  );
   await page.screenshot({
-    path: testInfo.outputPath("compact-market-refresh-320.png"),
+    path: testInfo.outputPath("compact-market-sort-320.png"),
     animations: "disabled",
   });
-
+  await sort.selectOption("PRICE_DESC");
+  expect(await prices()).toEqual(
+    [...saved.listings]
+      .map((listing) => listing.priceMinor)
+      .sort((left, right) => right - left),
+  );
+  await sort.selectOption("MARKET");
+  expect(
+    await cards.evaluateAll((items) =>
+      items.map((item) => item.getAttribute("data-listing-id")),
+    ),
+  ).toEqual(originalOrder);
   const filters = page.getByRole("group", { name: "Pazar kategorileri" });
   await expect(filters).toBeVisible();
   await expect(filters.getByRole("button", { name: "Tümü" })).toHaveAttribute(
@@ -70,7 +97,6 @@ test("category filter narrows the market without adding vertical controls", asyn
   ).toBeVisible();
   await filters.getByRole("button", { name: category, exact: true }).click();
 
-  const cards = page.locator(".market-grid .market-card");
   await expect(cards).toHaveCount(categoryCount);
   await expect(
     filters.getByRole("button", { name: category, exact: true }),

@@ -1,6 +1,7 @@
 import type { Listing } from "../domain/models";
 
 export const ALL_MARKET_CATEGORIES = "ALL";
+export type MarketSort = "MARKET" | "PRICE_ASC" | "PRICE_DESC";
 
 export function listingAgeLabel(createdAtGameMin: number, gameTimeMin: number) {
   const age = Math.max(0, gameTimeMin - createdAtGameMin);
@@ -19,5 +20,15 @@ export function filterMarketListings(listings: Listing[], category: string) {
   if (category === ALL_MARKET_CATEGORIES) return listings;
   return listings.filter(
     (listing) => listing.instance.family.category === category,
+  );
+}
+
+export function sortMarketListings(listings: Listing[], sort: MarketSort) {
+  if (sort === "MARKET") return listings;
+  const direction = sort === "PRICE_ASC" ? 1 : -1;
+  return [...listings].sort(
+    (left, right) =>
+      (left.priceMinor - right.priceMinor) * direction ||
+      left.id.localeCompare(right.id),
   );
 }

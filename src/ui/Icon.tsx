@@ -1,5 +1,12 @@
 export type IconName =
-  "close" | "follow" | "home" | "journey" | "offer" | "portfolio" | "refresh";
+  | "close"
+  | "follow"
+  | "home"
+  | "journey"
+  | "offer"
+  | "portfolio"
+  | "refresh"
+  | "sort";
 
 interface IconProps {
   name: IconName;
@@ -49,6 +56,14 @@ const paths: Record<IconName, React.ReactNode> = {
     <>
       <path d="M20 7v5h-5" />
       <path d="M19 12a7.5 7.5 0 1 0 .35 4" />
+    </>
+  ),
+  sort: (
+    <>
+      <path d="M7 4v16" />
+      <path d="m4 7 3-3 3 3" />
+      <path d="M17 20V4" />
+      <path d="m14 17 3 3 3-3" />
     </>
   ),
 };

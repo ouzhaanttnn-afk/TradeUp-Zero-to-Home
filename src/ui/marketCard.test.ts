@@ -5,6 +5,7 @@ import {
   filterMarketListings,
   listingAgeLabel,
   marketCategories,
+  sortMarketListings,
 } from "./marketCard";
 
 describe("market card age", () => {
@@ -44,5 +45,25 @@ describe("market category filter", () => {
         (listing) => listing.instance.family.category === category,
       ),
     ).toBe(true);
+  });
+
+  it("sorts a copy by price and preserves the market order option", () => {
+    const originalIds = listings.map((listing) => listing.id);
+    const ascending = sortMarketListings(listings, "PRICE_ASC");
+    const descending = sortMarketListings(listings, "PRICE_DESC");
+
+    expect(ascending).not.toBe(listings);
+    expect(ascending.map((listing) => listing.priceMinor)).toEqual(
+      [...listings]
+        .map((listing) => listing.priceMinor)
+        .sort((left, right) => left - right),
+    );
+    expect(descending.map((listing) => listing.priceMinor)).toEqual(
+      [...listings]
+        .map((listing) => listing.priceMinor)
+        .sort((left, right) => right - left),
+    );
+    expect(sortMarketListings(listings, "MARKET")).toBe(listings);
+    expect(listings.map((listing) => listing.id)).toEqual(originalIds);
   });
 });
