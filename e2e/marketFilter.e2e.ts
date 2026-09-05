@@ -42,6 +42,17 @@ test("category filter narrows the market without adding vertical controls", asyn
     "aria-pressed",
     "true",
   );
+  await page.evaluate(() => window.scrollTo(0, 900));
+  await expect
+    .poll(() =>
+      filters.evaluate((element) =>
+        Math.round(element.getBoundingClientRect().top),
+      ),
+    )
+    .toBe(0);
+  await expect(
+    filters.getByRole("button", { name: category, exact: true }),
+  ).toBeVisible();
   await filters.getByRole("button", { name: category, exact: true }).click();
 
   const cards = page.locator(".market-grid .market-card");
@@ -68,8 +79,7 @@ test("category filter narrows the market without adding vertical controls", asyn
   ).toBe(true);
 
   await page.screenshot({
-    path: testInfo.outputPath("market-category-filter-320.png"),
-    fullPage: true,
+    path: testInfo.outputPath("sticky-market-category-filter-320.png"),
     animations: "disabled",
   });
 

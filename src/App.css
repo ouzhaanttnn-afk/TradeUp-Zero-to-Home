@@ -213,7 +213,7 @@ body {
     #091510 38%,
     #050a08 100%
   );
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 button {
   font: inherit;
@@ -252,7 +252,7 @@ button:disabled {
   );
   padding-bottom: calc(88px + env(safe-area-inset-bottom));
   position: relative;
-  overflow-x: hidden;
+  overflow-x: clip;
   box-shadow: 0 0 70px rgba(0, 0, 0, 0.45);
 }
 .app-shell.large-text {
@@ -389,10 +389,20 @@ main {
   font-weight: 800;
 }
 .market-filters {
+  position: sticky;
+  z-index: 7;
+  top: env(safe-area-inset-top);
   margin-inline: -14px;
+  padding-block: 7px;
   padding-inline: 14px;
   scroll-padding-inline: 14px;
   scroll-snap-type: x proximity;
+  background: linear-gradient(
+    180deg,
+    rgba(5, 18, 12, 0.98) 72%,
+    rgba(5, 18, 12, 0.86)
+  );
+  backdrop-filter: blur(14px);
 }
 .market-filters button {
   flex: 0 0 auto;
