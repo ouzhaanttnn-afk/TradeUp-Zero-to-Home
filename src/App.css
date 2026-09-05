@@ -430,14 +430,14 @@ header h1 {
   height: 100%;
 }
 .wallet {
-  margin: 0 12px;
-  padding: 7px 10px;
+  margin: 0 10px;
+  padding: 6px 8px;
   border: 1px solid #294338;
-  border-radius: 15px;
+  border-radius: 14px;
   background: linear-gradient(145deg, #162c23, #0d1c16);
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 4px 8px;
+  gap: 3px 7px;
   box-shadow: 0 7px 20px rgba(0, 0, 0, 0.14);
 }
 .wallet div {
@@ -447,11 +447,11 @@ header h1 {
   min-width: 0;
 }
 .wallet small {
-  font-size: calc(8px + var(--text-size-boost));
+  font-size: calc(7px + var(--text-size-boost));
   color: #8fa99c;
 }
 .wallet strong {
-  font-size: calc(13px + var(--text-size-boost));
+  font-size: calc(12px + var(--text-size-boost));
   line-height: 1.15;
   letter-spacing: -0.25px;
   overflow-wrap: anywhere;
@@ -472,12 +472,12 @@ header h1 {
   border-radius: 10px;
 }
 .notice {
-  margin: 6px 12px 0;
-  padding: 7px 10px;
+  margin: 5px 10px 0;
+  padding: 6px 9px;
   border-radius: 10px;
   background: #12221b;
   color: #a8c4b5;
-  font-size: calc(12px + var(--text-size-boost));
+  font-size: calc(11px + var(--text-size-boost));
   border-left: 3px solid #55da92;
   line-height: 1.3;
 }
@@ -902,37 +902,37 @@ main {
 }
 .inventory-grid {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 .owned {
   border: 1px solid rgba(137, 193, 164, 0.18);
   background:
     radial-gradient(circle at 0 0, rgba(65, 127, 96, 0.13), transparent 38%),
     linear-gradient(145deg, #12231c, #0b1712);
-  border-radius: 19px;
-  padding: 8px;
+  border-radius: 18px;
+  padding: 7px;
   display: grid;
-  grid-template-columns: 72px minmax(0, 1fr);
-  gap: 7px;
+  grid-template-columns: 68px minmax(0, 1fr);
+  gap: 6px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
 }
 .owned--listing {
-  grid-template-columns: 64px minmax(0, 1fr);
-  gap: 7px;
-  padding: 7px;
-  border-radius: 16px;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 6px;
+  padding: 6px;
+  border-radius: 15px;
 }
 .owned--listing .owned-icon {
-  width: 64px;
-  height: 62px;
-  min-height: 62px;
+  width: 58px;
+  height: 58px;
+  min-height: 58px;
 }
 .owned--listing .owned-metrics {
-  margin-top: 5px;
-  gap: 4px;
+  margin-top: 4px;
+  gap: 3px;
 }
 .owned--listing .owned-metrics div {
-  padding: 5px;
+  padding: 4px;
 }
 .owned-copy {
   min-width: 0;
@@ -984,12 +984,12 @@ main {
 .owned-metrics {
   display: grid;
   grid-template-columns: 0.82fr 1.18fr;
-  gap: 6px;
-  margin-top: 5px;
+  gap: 5px;
+  margin-top: 4px;
 }
 .owned-metrics div {
   min-width: 0;
-  padding: 6px;
+  padding: 5px;
   border: 1px solid rgba(137, 193, 164, 0.08);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.025);
@@ -1000,11 +1000,11 @@ main {
 }
 .owned-metrics span {
   color: #789286;
-  font-size: calc(8px + var(--text-size-boost));
+  font-size: calc(7px + var(--text-size-boost));
 }
 .owned-metrics b {
   margin-top: 3px;
-  font-size: calc(11px + var(--text-size-boost));
+  font-size: calc(10px + var(--text-size-boost));
   overflow-wrap: anywhere;
 }
 .listing-metrics {
@@ -1013,7 +1013,7 @@ main {
 .owned-facts {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: 4px;
   align-items: center;
 }
 .owned-icon {
@@ -1029,7 +1029,7 @@ main {
   font-size: calc(13px + var(--text-size-boost));
 }
 .owned p {
-  font-size: calc(9px + var(--text-size-boost));
+  font-size: calc(8px + var(--text-size-boost));
   color: #8da399;
   margin-top: 3px;
 }
@@ -1037,7 +1037,7 @@ main {
   grid-column: 1/-1;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 7px;
+  gap: 6px;
 }
 .buyer-actions {
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1052,8 +1052,8 @@ main {
   border: 1px solid #365247;
   background: #15261f;
   border-radius: 12px;
-  padding: 10px 6px;
-  font-size: calc(10px + var(--text-size-boost));
+  padding: 9px 6px;
+  font-size: calc(9px + var(--text-size-boost));
   display: flex;
   flex-direction: column;
   gap: 3px;
@@ -1079,9 +1079,9 @@ main {
   min-width: 0;
 }
 .preparation-options summary {
-  min-height: 44px;
-  padding: 9px 0;
-  font-size: calc(11px + var(--text-size-boost));
+  min-height: 40px;
+  padding: 8px 0;
+  font-size: calc(10px + var(--text-size-boost));
   cursor: pointer;
 }
 .preparation-options summary:focus-visible {
@@ -1089,12 +1089,12 @@ main {
   outline-offset: 2px;
 }
 .preparation-guide {
-  margin: -3px 0 9px !important;
+  margin: -3px 0 8px !important;
   color: #a9bdb3 !important;
 }
 .sell-actions .preparation-action {
-  min-height: 74px;
-  padding: 10px 12px;
+  min-height: 70px;
+  padding: 9px 10px;
   align-items: stretch;
   text-align: left;
 }
@@ -1116,8 +1116,8 @@ main {
 .portfolio-next-action {
   grid-column: 1 / -1;
   display: grid;
-  gap: 5px;
-  padding: 9px;
+  gap: 4px;
+  padding: 8px;
   border: 1px solid rgba(94, 230, 160, 0.24);
   border-radius: 14px;
   background: rgba(94, 230, 160, 0.06);
@@ -1129,28 +1129,28 @@ main {
 }
 .portfolio-next-action > span {
   color: #9eb1a8;
-  font-size: calc(10px + var(--text-size-boost));
+  font-size: calc(9px + var(--text-size-boost));
 }
 .portfolio-next-action button {
   width: 100%;
-  margin-top: 3px;
+  margin-top: 2px;
 }
 .preparation-options ~ .primary {
   grid-column: 1 / -1;
 }
 .buyer-offer {
-  padding-top: 11px;
+  padding-top: 9px;
   border-top: 1px solid #365247;
 }
 .buyer-offer h4 {
-  margin: 0 0 7px;
-  font-size: calc(14px + var(--text-size-boost));
+  margin: 0 0 6px;
+  font-size: calc(13px + var(--text-size-boost));
 }
 .sale-breakdown {
   margin: 0;
   display: grid;
-  gap: 5px;
-  font-size: calc(13px + var(--text-size-boost));
+  gap: 4px;
+  font-size: calc(12px + var(--text-size-boost));
 }
 .sale-breakdown > div {
   display: flex;
@@ -1172,38 +1172,38 @@ main {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   min-width: 0;
   border-top: 1px solid #365247;
-  padding-top: 6px;
+  padding-top: 5px;
 }
 .listing-wait-copy {
   display: grid;
-  gap: 2px;
+  gap: 1px;
   min-width: 0;
 }
 .listing-wait-copy b {
-  font-size: calc(11px + var(--text-size-boost));
+  font-size: calc(10px + var(--text-size-boost));
   overflow-wrap: anywhere;
 }
 .listing-wait-copy span {
   color: #849c91;
-  font-size: calc(9px + var(--text-size-boost));
+  font-size: calc(8px + var(--text-size-boost));
 }
 .listing-wait > button {
-  min-width: 94px;
-  padding: 7px 9px;
+  min-width: 88px;
+  padding: 6px 8px;
   border: 1px solid #365247;
   border-radius: 10px;
   background: #15261f;
   color: #c4d6cd;
-  font-size: calc(9px + var(--text-size-boost));
+  font-size: calc(8px + var(--text-size-boost));
 }
 .listing-withdraw-actions {
   margin-top: -1px;
 }
 .owned--listing .listing-withdraw-actions button {
-  min-height: 44px;
+  min-height: 40px;
   padding-block: 7px;
 }
 @media (max-width: 430px) {
@@ -1482,7 +1482,7 @@ nav .active .nav-icon {
   max-height: 92svh;
   overflow: auto;
   border-radius: 28px 28px 0 0;
-  padding: 10px var(--sheet-gutter) calc(24px + env(safe-area-inset-bottom));
+  padding: 8px var(--sheet-gutter) calc(20px + env(safe-area-inset-bottom));
   background:
     radial-gradient(circle at 50% 0, rgba(74, 139, 107, 0.22), transparent 28%),
     linear-gradient(180deg, #142b22, #09140f 42%);
@@ -1494,7 +1494,7 @@ nav .active .nav-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
+  gap: 6px;
 }
 .sheet-follow-actions button svg {
   width: 16px;
@@ -1505,7 +1505,7 @@ nav .active .nav-icon {
   height: 4px;
   border-radius: 5px;
   background: #5e766b;
-  margin: 1px auto 9px;
+  margin: 1px auto 8px;
 }
 .close {
   position: absolute;
@@ -1521,10 +1521,10 @@ nav .active .nav-icon {
 }
 .sheet-hero-shell {
   position: relative;
-  margin-bottom: 14px;
+  margin-bottom: 11px;
 }
 .hero-art {
-  height: 190px;
+  height: 180px;
   border-radius: 20px;
   background: radial-gradient(circle, #315b48, #12251d);
   display: grid;
@@ -1560,8 +1560,8 @@ nav .active .nav-icon {
   letter-spacing: 0.11em;
 }
 .sheet-title h2 {
-  font-size: calc(24px + var(--text-size-boost));
-  margin: 5px 0 9px;
+  font-size: calc(22px + var(--text-size-boost));
+  margin: 4px 0 7px;
   letter-spacing: -0.45px;
 }
 .detail-price {
@@ -1585,8 +1585,8 @@ nav .active .nav-icon {
 }
 .band,
 .details {
-  margin-top: 15px;
-  padding: 13px;
+  margin-top: 12px;
+  padding: 11px;
   border-radius: 13px;
   border: 1px solid rgba(137, 193, 164, 0.08);
   background: rgba(8, 24, 17, 0.76);
@@ -1594,12 +1594,12 @@ nav .active .nav-icon {
 .band div {
   display: flex;
   justify-content: space-between;
-  font-size: calc(11px + var(--text-size-boost));
+  font-size: calc(10px + var(--text-size-boost));
 }
 .band i {
   display: block;
   height: 5px;
-  margin-top: 12px;
+  margin-top: 10px;
   background: linear-gradient(90deg, #d9504b, #e4d65a, #51d695);
   position: relative;
   border-radius: 5px;
@@ -1617,13 +1617,13 @@ nav .active .nav-icon {
 .details {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 4px;
+  gap: 3px;
   text-align: center;
 }
 .details div {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
   padding: 7px 4px;
   border-right: 1px solid var(--line-soft);
 }
@@ -1631,24 +1631,24 @@ nav .active .nav-icon {
   border-right: 0;
 }
 .details span {
-  font-size: calc(9px + var(--text-size-boost));
+  font-size: calc(8px + var(--text-size-boost));
   color: #7f988d;
 }
 .details b {
-  font-size: calc(12px + var(--text-size-boost));
+  font-size: calc(11px + var(--text-size-boost));
 }
 .sheet-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 6px;
   margin-top: 0;
 }
 .sheet-actions button {
-  padding: 10px 9px;
+  padding: 8px 8px;
   font-weight: 700;
 }
 .sheet-actions small {
-  font-size: calc(9px + var(--text-size-boost));
+  font-size: calc(8px + var(--text-size-boost));
   font-weight: 400;
 }
 .counter-offer small {
@@ -1914,9 +1914,9 @@ nav .active .nav-icon {
 .segments {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 4px;
-  padding: 4px;
-  margin-bottom: 7px;
+  gap: 3px;
+  padding: 3px;
+  margin-bottom: 6px;
   border: 1px solid #294338;
   border-radius: 14px;
   background: #0c1813;
@@ -1925,10 +1925,10 @@ nav .active .nav-icon {
   min-width: 0;
   border: 0;
   border-radius: 10px;
-  padding: 6px 6px;
+  padding: 5px 4px;
   background: transparent;
   color: #7f998e;
-  font-size: calc(10px + var(--text-size-boost));
+  font-size: calc(9px + var(--text-size-boost));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1937,14 +1937,14 @@ nav .active .nav-icon {
 .segments button > b {
   display: grid;
   place-items: center;
-  min-width: 18px;
-  min-height: 18px;
-  padding-inline: 4px;
+  min-width: 16px;
+  min-height: 16px;
+  padding-inline: 3px;
   border: 1px solid rgba(137, 193, 164, 0.15);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.04);
   color: #9db1a7;
-  font-size: calc(8px + var(--text-size-boost));
+  font-size: calc(7px + var(--text-size-boost));
 }
 .segments .active {
   color: #092016;
@@ -1958,13 +1958,13 @@ nav .active .nav-icon {
 }
 .module-title,
 .timeline-header {
-  margin: 16px 3px 8px;
+  margin: 14px 3px 7px;
   font-size: calc(14px + var(--text-size-boost));
 }
 .compact-feed,
 .follow-stack {
   display: grid;
-  gap: 6px;
+  gap: 5px;
 }
 .subtle {
   color: #789084;
@@ -1980,7 +1980,7 @@ nav .active .nav-icon {
   background:
     radial-gradient(circle at 100% 0, rgba(82, 143, 111, 0.1), transparent 34%),
     linear-gradient(140deg, #12251d, #0b1712);
-  padding: 10px;
+  padding: 9px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14);
 }
 .follow-card small,
@@ -1996,7 +1996,7 @@ nav .active .nav-icon {
 .home-card h3,
 .locked-home h3 {
   margin-top: 3px;
-  font-size: calc(14px + var(--text-size-boost));
+  font-size: calc(13px + var(--text-size-boost));
 }
 .follow-card p,
 .expertise-card p,
@@ -2005,7 +2005,7 @@ nav .active .nav-icon {
 .settings-card p {
   margin-top: 4px;
   color: #8fa69b;
-  font-size: calc(10px + var(--text-size-boost));
+  font-size: calc(9px + var(--text-size-boost));
   line-height: 1.5;
 }
 .follow-card.missed {
@@ -2023,12 +2023,12 @@ nav .active .nav-icon {
 }
 .match-count {
   flex: 0 0 auto;
-  padding: 5px 8px;
+  padding: 4px 7px;
   border: 1px solid var(--line-soft);
   border-radius: 999px;
   color: #8fa69b;
   background: rgba(255, 255, 255, 0.04);
-  font-size: calc(9px + var(--text-size-boost));
+  font-size: calc(8px + var(--text-size-boost));
   font-weight: 800;
 }
 .match-count.has-matches {
@@ -2039,12 +2039,12 @@ nav .active .nav-icon {
 .alarm-criteria {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-  margin-top: 8px;
+  gap: 5px;
+  margin-top: 7px;
 }
 .alarm-criteria > span {
   min-width: 0;
-  padding: 6px;
+  padding: 5px;
   border: 1px solid rgba(137, 193, 164, 0.09);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.025);
@@ -2070,7 +2070,7 @@ nav .active .nav-icon {
 }
 .missed-reason {
   display: inline-flex;
-  padding: 4px 7px;
+  padding: 3px 6px;
   border: 1px solid rgba(228, 181, 78, 0.25);
   border-radius: 999px;
   color: #efcd8c !important;
@@ -2094,23 +2094,23 @@ nav .active .nav-icon {
   border: 1px solid #355246;
   border-radius: 10px;
   background: #15261f;
-  padding: 9px 11px;
-  font-size: calc(11px + var(--text-size-boost));
+  padding: 8px 10px;
+  font-size: calc(10px + var(--text-size-boost));
 }
 .settings-card button {
   min-height: 44px;
 }
 .follow-card > button {
   width: 100%;
-  margin-top: 8px;
-  min-height: 44px;
+  margin-top: 6px;
+  min-height: 40px;
   padding: 8px 10px;
 }
 .inline-actions {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 7px;
-  margin-top: 11px;
+  gap: 6px;
+  margin-top: 9px;
 }
 .text-button {
   color: #9eb7aa;
@@ -2207,7 +2207,7 @@ nav .active .nav-icon {
   font-size: calc(9px + var(--text-size-boost));
 }
 .metric-grid b {
-  margin-top: 5px;
+  margin-top: 4px;
   overflow-wrap: anywhere;
   font-size: calc(13px + var(--text-size-boost));
 }
@@ -2271,14 +2271,14 @@ nav .active .nav-icon {
 .home-card,
 .locked-home {
   display: grid;
-  grid-template-columns: 64px minmax(0, 1fr);
-  gap: 13px;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 10px;
   align-items: center;
 }
 .home-silhouette,
 .locked-home > span {
-  width: 64px;
-  height: 74px;
+  width: 58px;
+  height: 68px;
   display: grid;
   place-items: center;
   border-radius: 18px 18px 10px 10px;
@@ -2299,16 +2299,16 @@ nav .active .nav-icon {
 }
 .home-cash-plan {
   display: grid;
-  gap: 8px;
-  margin-top: 12px;
-  padding: 10px;
+  gap: 7px;
+  margin-top: 10px;
+  padding: 9px;
   border: 1px solid rgba(232, 190, 99, 0.24);
   border-radius: 12px;
   background: rgba(211, 158, 48, 0.08);
 }
 .home-cash-plan span {
   color: #dac99e;
-  font-size: calc(10px + var(--text-size-boost));
+  font-size: calc(9px + var(--text-size-boost));
   line-height: 1.45;
 }
 .home-cash-plan button {
