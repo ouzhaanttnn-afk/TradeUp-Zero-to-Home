@@ -33,6 +33,51 @@ import {
 } from "../services/monetization";
 
 describe("application lifecycle", () => {
+  it("keeps the background boundary when a provider responds while paused", async () => {
+    await useGameStore.getState().flush();
+    const clock = vi
+      .spyOn(systemTimeProvider, "nowWallMs")
+      .mockReturnValue(1_000);
+    let finish!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    configureMonetizationAdapters({
+      ...unavailableMonetizationAdapters,
+      consent: {
+        refresh: async () => {
+          await gate;
+          return { canRequestAds: false, adPersonalizationAllowed: false };
+        },
+        openPrivacyOptions: async () => {},
+      },
+    });
+    try {
+      const game = initialState(1_000, "SANDBOX");
+      game.ftue.stage = "COMPLETE";
+      useGameStore.setState({
+        game,
+        ready: true,
+        sessionActive: true,
+        monetizationBusy: false,
+      });
+      const pending = useGameStore.getState().openPurchases();
+      await useGameStore.getState().pause();
+      clock.mockReturnValue(121_000);
+      finish();
+      await pending;
+      expect(useGameStore.getState().game.lastWallClockMs).toBe(1_000);
+      clock.mockReturnValue(301_000);
+      await useGameStore.getState().resume();
+      expect(useGameStore.getState().game.gameTimeMin).toBe(5);
+    } finally {
+      finish();
+      clock.mockRestore();
+      configureMonetizationAdapters(unavailableMonetizationAdapters);
+      useGameStore.setState({ sessionActive: true });
+    }
+  });
+
   it("coalesces concurrent startup loads", async () => {
     await useGameStore.getState().flush();
     const game = initialState(0, "SANDBOX");

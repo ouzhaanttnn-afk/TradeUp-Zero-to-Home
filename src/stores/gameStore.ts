@@ -155,7 +155,9 @@ const enqueueSave = (state: GameState, wallClockMs: number) => {
 const stampAndPersist = (state: GameState) => {
   const wallClockMs = Math.max(
     state.lastWallClockMs,
-    systemTimeProvider.nowWallMs(),
+    useGameStore.getState().sessionActive
+      ? systemTimeProvider.nowWallMs()
+      : state.lastWallClockMs,
   );
   const stamped = { ...state, lastWallClockMs: wallClockMs };
   enqueueSave(stamped, wallClockMs);
@@ -256,7 +258,14 @@ export const useGameStore = create<Store>((set, get) => ({
     if (!get().sessionActive) return;
     set({ sessionActive: false });
     if (!get().ready) return;
-    const game = stampAndPersist(get().game);
+    const current = get().game;
+    const game = stampAndPersist({
+      ...current,
+      lastWallClockMs: Math.max(
+        current.lastWallClockMs,
+        systemTimeProvider.nowWallMs(),
+      ),
+    });
     set({ game });
     await saveQueue.catch(() => undefined);
   },
