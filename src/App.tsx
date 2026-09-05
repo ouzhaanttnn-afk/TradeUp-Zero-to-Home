@@ -57,6 +57,7 @@ import {
 } from "./ui/comparisonPresentation";
 import { preparationPresentation } from "./ui/preparationPresentation";
 import { listingActivity } from "./ui/listingActivity";
+import { listingAgeLabel } from "./ui/marketCard";
 import { purchaseBudget } from "./ui/purchaseBudget";
 
 type Tab = "market" | "follow" | "portfolio" | "journey";
@@ -770,7 +771,7 @@ export default function App() {
               </div>
               <span>{marketListings.length} ilan</span>
             </div>
-            <div className="feed">
+            <div className="feed market-grid">
               {!selected && canClaimReward("MARKET_SCOUT") ? (
                 <button
                   className="reward-cta"
@@ -817,7 +818,7 @@ export default function App() {
                 const watched = game.follow.watchedListingIds.includes(item.id);
                 return (
                   <button
-                    className="listing"
+                    className="listing market-card"
                     key={item.id}
                     onClick={() => selectListing(item.id)}
                     aria-label={`${item.instance.family.name}, fiyat ${money(item.priceMinor)}, kondisyon yüzde ${item.instance.condition}, ${itemSignal.text}. İlan detaylarını aç`}
@@ -826,32 +827,39 @@ export default function App() {
                       instance={item.instance}
                       className="product-art"
                     />
+                    <span className={`market-heat market-heat--${risk.level}`}>
+                      {risk.text}
+                    </span>
                     <div className="listing-copy">
-                      <div className="meta">
-                        <span>
-                          {item.instance.family.category} · Seviye{" "}
-                          {categoryLevel}
-                        </span>
-                        <span className={watched ? "watch-state" : undefined}>
-                          {watched ? <Icon name="follow" /> : null}
-                          {watched ? "Takipte" : risk.text}
-                        </span>
-                      </div>
+                      <small className="market-category">
+                        {item.instance.family.category} · Sv. {categoryLevel}
+                      </small>
                       <h3>{item.instance.family.name}</h3>
-                      <div className="tags">
-                        <b className={itemSignal.cls}>{itemSignal.text}</b>
-                        <span>%{item.instance.condition} kondisyon</span>
-                        {categoryLevel >= 1 ? (
-                          <span>
-                            Satış hızı %
-                            {Math.round(item.instance.family.liquidity * 100)}
+                      <div className="market-price-row">
+                        <strong>{money(item.priceMinor)}</strong>
+                        {watched ? (
+                          <span className="watch-state">
+                            <Icon name="follow" /> Takipte
                           </span>
                         ) : null}
                       </div>
-                    </div>
-                    <div className="price">
-                      <strong>{money(item.priceMinor)}</strong>
-                      <small>ilgi %{item.interest}</small>
+                      <div className="tags">
+                        <b className={itemSignal.cls}>{itemSignal.text}</b>
+                        <span>%{item.instance.condition} kondisyon</span>
+                      </div>
+                      <div className="market-card-facts">
+                        <span>
+                          Bilgi:{" "}
+                          {evidenceLabel(item.instance.evidenceConfidence)}
+                        </span>
+                        <span>İlgi %{item.interest}</span>
+                        <span>
+                          {listingAgeLabel(
+                            item.createdAtGameMin,
+                            game.gameTimeMin,
+                          )}
+                        </span>
+                      </div>
                     </div>
                   </button>
                 );

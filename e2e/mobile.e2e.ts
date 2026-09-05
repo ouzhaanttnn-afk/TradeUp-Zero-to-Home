@@ -59,6 +59,32 @@ async function checkLayout(page: Page) {
   expect(issues).toEqual([]);
 }
 
+async function checkMarketGrid(page: Page) {
+  const cards = page.locator(".market-grid .market-card");
+  await expect(cards).toHaveCount(3);
+  const geometry = await cards.evaluateAll((items) =>
+    items.slice(0, 3).map((item) => {
+      const rect = item.getBoundingClientRect();
+      return {
+        left: rect.left,
+        top: rect.top,
+        width: rect.width,
+        height: rect.height,
+      };
+    }),
+  );
+  expect(Math.abs(geometry[0].top - geometry[1].top)).toBeLessThan(2);
+  expect(geometry[1].left).toBeGreaterThan(geometry[0].left);
+  expect(geometry[2].top).toBeGreaterThan(geometry[0].top);
+  expect(
+    geometry.every((card) => card.width >= 135 && card.height <= 310),
+  ).toBe(true);
+  await expect(cards.first()).toContainText(/₺/);
+  await expect(cards.first()).toContainText(/kondisyon/);
+  await expect(cards.first()).toContainText(/Bilgi:/);
+  await expect(cards.first()).toContainText(/İlgi %/);
+}
+
 for (const width of [320, 390, 430]) {
   test(`comparison and accessibility settings at ${width}px`, async ({
     page,
@@ -68,6 +94,7 @@ for (const width of [320, 390, 430]) {
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto("/");
     await page.getByRole("button", { name: "Teklifi kabul et · ₺420" }).click();
+    await checkMarketGrid(page);
     await checkLayout(page);
     await page.getByRole("button", { name: "Yolculuk", exact: true }).click();
     await page.getByRole("button", { name: "Ayarlar", exact: true }).click();
@@ -101,6 +128,12 @@ for (const width of [320, 390, 430]) {
         .getByRole("button"),
     ).toHaveAttribute("aria-pressed", "false");
     await page.getByRole("button", { name: "Pazar", exact: true }).click();
+    await checkMarketGrid(page);
+    await page.screenshot({
+      path: testInfo.outputPath(`market-grid-${width}.png`),
+      fullPage: true,
+      animations: "disabled",
+    });
     await page
       .getByRole("button", {
         name: "Kuzey Defteri, fiyat ₺140, kondisyon yüzde 55, Piyasa fiyatı. İlan detaylarını aç",
