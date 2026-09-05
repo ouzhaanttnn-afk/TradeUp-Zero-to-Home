@@ -185,14 +185,14 @@
     {
       "assetKey": "prd_dac_amp",
       "familyId": "dac_amp",
-      "source": "fallback:fb_audio",
-      "dedicated": false
+      "source": "../products/prd_dac_amp.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_cassette_player",
       "familyId": "cassette_player",
-      "source": "fallback:fb_audio",
-      "dedicated": false
+      "source": "../products/prd_cassette_player.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_floor_lamp",

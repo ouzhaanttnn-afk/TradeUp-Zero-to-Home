@@ -1,6 +1,26 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { familyById } from "../src/content/families";
-import { initialState, validateState } from "../src/game";
+import { initialState, validateState, type GameState } from "../src/game";
+
+const persistGame = async (page: Page, game: GameState) => {
+  await page.evaluate(async (savedGame) => {
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open("tradeup", 1);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const transaction = db.transaction("game", "readwrite");
+        transaction.objectStore("game").put(savedGame, "main");
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = () => reject(transaction.error);
+      });
+    } finally {
+      db.close();
+    }
+  }, game);
+};
 
 test("expanded product families use dedicated mobile artwork", async ({
   page,
@@ -114,23 +134,7 @@ test("expanded product families use dedicated mobile artwork", async ({
   await expect(
     page.getByRole("heading", { name: "Fırsat akışı" }),
   ).toBeVisible();
-  await page.evaluate(async (game) => {
-    const db = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open("tradeup", 1);
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-    try {
-      await new Promise<void>((resolve, reject) => {
-        const transaction = db.transaction("game", "readwrite");
-        transaction.objectStore("game").put(game, "main");
-        transaction.oncomplete = () => resolve();
-        transaction.onerror = () => reject(transaction.error);
-      });
-    } finally {
-      db.close();
-    }
-  }, saved);
+  await persistGame(page, saved);
   await page.reload();
 
   for (const [name, assetName] of [
@@ -190,4 +194,47 @@ test("expanded product families use dedicated mobile artwork", async ({
     fullPage: true,
     animations: "disabled",
   });
+});
+
+test("audio expansion artwork loads without category fallbacks", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const state = initialState(Date.now(), "SANDBOX");
+  const dacAmp = familyById("dac_amp");
+  const cassettePlayer = familyById("cassette_player");
+  if (!dacAmp || !cassettePlayer) {
+    throw new Error("Audio asset family is missing");
+  }
+  for (const [index, family] of [dacAmp, cassettePlayer].entries()) {
+    state.listings[index] = {
+      ...state.listings[index],
+      familyId: family.id,
+      instance: { ...state.listings[index].instance, family },
+    };
+  }
+
+  await page.goto("/");
+  await persistGame(page, validateState(state));
+  await page.reload();
+
+  for (const [name, assetName] of [
+    ["Orbit DAC Amfi", "prd_dac_amp"],
+    ["Sahil Kasetçalar", "prd_cassette_player"],
+  ] as const) {
+    const card = page.locator(".market-card").filter({ hasText: name });
+    const visual = card.locator(".product-visual");
+    const image = visual.locator("img");
+    await expect(card).toHaveCount(1);
+    await expect(visual).not.toHaveClass(/product-visual--fallback/);
+    await expect(image).toHaveAttribute("src", new RegExp(assetName));
+    await expect
+      .poll(() =>
+        image.evaluate(
+          (element: HTMLImageElement) =>
+            element.complete && element.naturalWidth > 0,
+        ),
+      )
+      .toBe(true);
+  }
 });
