@@ -35,6 +35,46 @@ function memoryStorage(
 }
 
 describe("persistence resilience", () => {
+  it("restores an intact backup when the primary key is missing", async () => {
+    const backup = initialState(1_000, "SANDBOX");
+    backup.accessibility.largeText = true;
+    const memory = memoryStorage({ [BACKUP_KEY]: backup });
+    const result = await loadGameFromStorage(memory.storage, {
+      nowWallMs: () => 1_000,
+    });
+    expect(result.recovery).toBe("RECOVERED_BACKUP");
+    expect(result.state.accessibility.largeText).toBe(true);
+    expect(result.state.transactionJournal).toEqual(backup.transactionJournal);
+    expect(memory.values.get(MAIN_KEY)).toEqual(result.state);
+    expect(reconcileJournal(result.state)).toEqual({
+      cash: true,
+      activeBookCost: true,
+      realizedProfit: true,
+    });
+  });
+
+  it("starts normally only when neither a primary nor backup exists", async () => {
+    const memory = memoryStorage();
+    const result = await loadGameFromStorage(memory.storage, {
+      nowWallMs: () => 1_000,
+    });
+    expect(result.recovery).toBe("NONE");
+    expect(memory.commits).toHaveLength(0);
+  });
+
+  it("reports a failed backup lookup instead of treating it as a new career", async () => {
+    const memory = memoryStorage();
+    memory.storage.read = async (key) => {
+      if (key === BACKUP_KEY) throw new Error("temporarily unavailable");
+      return undefined;
+    };
+    const result = await loadGameFromStorage(memory.storage, {
+      nowWallMs: () => 1_000,
+    });
+    expect(result.recovery).toBe("STORAGE_UNAVAILABLE");
+    expect(memory.commits).toHaveLength(0);
+  });
+
   it("atomically keeps the previous valid state as the last-known-good backup", async () => {
     const previous = initialState(1_000, "SANDBOX");
     const next = { ...previous, seed: previous.seed + 1 };
@@ -93,6 +133,10 @@ describe("persistence resilience", () => {
     );
     expect(result.state.transactionJournal).toEqual(backup.transactionJournal);
     expect(memory.values.get(MAIN_KEY)).toEqual(result.state);
+    expect(memory.values.get("backup:corrupt:1000")).toEqual({
+      version: 8,
+      cashMinor: -1,
+    });
     expect(reconcileJournal(result.state)).toEqual({
       cash: true,
       activeBookCost: true,

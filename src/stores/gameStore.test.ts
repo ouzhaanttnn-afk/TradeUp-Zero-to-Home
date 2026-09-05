@@ -24,7 +24,7 @@ import {
   reconcileJournal,
 } from "../domain/economy";
 import { playFeedbackSound } from "../infrastructure/audio";
-import { loadGameWithStatus } from "../services/persistence";
+import { loadGameWithStatus, saveGame } from "../services/persistence";
 import { useGameStore } from "./gameStore";
 import {
   configureMonetizationAdapters,
@@ -274,6 +274,26 @@ describe("accessibility preferences", () => {
 });
 
 describe("persistence recovery notice", () => {
+  it("does not overwrite an unreadable save with fallback gameplay", async () => {
+    await useGameStore.getState().flush();
+    vi.mocked(saveGame).mockClear();
+    vi.mocked(loadGameWithStatus).mockResolvedValueOnce({
+      state: initialState(1_000, "SANDBOX"),
+      recovery: "STORAGE_UNAVAILABLE",
+    });
+    await useGameStore.getState().hydrate();
+    useGameStore.getState().tick();
+    await useGameStore.getState().flush();
+    expect(saveGame).not.toHaveBeenCalled();
+    vi.mocked(loadGameWithStatus).mockResolvedValueOnce({
+      state: initialState(1_000, "SANDBOX"),
+      recovery: "NONE",
+    });
+    await useGameStore.getState().hydrate();
+    await useGameStore.getState().flush();
+    expect(saveGame).toHaveBeenCalled();
+  });
+
   it("tells the player when the last valid backup was restored", async () => {
     vi.mocked(loadGameWithStatus).mockResolvedValueOnce({
       state: initialState(1_000, "SANDBOX"),

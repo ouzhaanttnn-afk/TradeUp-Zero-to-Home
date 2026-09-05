@@ -107,8 +107,19 @@ export async function loadGameFromStorage(
     };
   }
 
-  if (raw === undefined)
-    return { state: initialState(wallClockMs), recovery: "NONE" };
+  const primaryMissing = raw === undefined;
+  if (primaryMissing) {
+    try {
+      raw = await storage.read(LAST_GOOD_BACKUP_KEY);
+    } catch {
+      return {
+        state: initialState(wallClockMs),
+        recovery: "STORAGE_UNAVAILABLE",
+      };
+    }
+    if (raw === undefined)
+      return { state: initialState(wallClockMs), recovery: "NONE" };
+  }
 
   let state: GameState;
   let sourceVersion = "unknown";
@@ -138,7 +149,10 @@ export async function loadGameFromStorage(
     }
 
     try {
-      await storage.commit(recovered);
+      await storage.commit(recovered, {
+        key: `backup:corrupt:${wallClockMs}`,
+        value: raw,
+      });
     } catch {
       return { state: recovered, recovery: "STORAGE_UNAVAILABLE" };
     }
@@ -157,7 +171,7 @@ export async function loadGameFromStorage(
   } catch {
     return { state, recovery: "STORAGE_UNAVAILABLE" };
   }
-  return { state, recovery: "NONE" };
+  return { state, recovery: primaryMissing ? "RECOVERED_BACKUP" : "NONE" };
 }
 
 export async function saveGame(

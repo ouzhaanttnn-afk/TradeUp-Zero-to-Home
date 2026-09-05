@@ -131,8 +131,10 @@ const sound = (state: GameState, event: FeedbackSound) => {
 };
 
 let saveQueue = Promise.resolve();
+let persistenceSuspended = false;
 
 const enqueueSave = (state: GameState, wallClockMs: number) => {
+  if (persistenceSuspended) return;
   saveQueue = saveQueue
     .catch(() => undefined)
     .then(() => saveGame(state, { nowWallMs: () => wallClockMs }));
@@ -207,6 +209,8 @@ export const useGameStore = create<Store>((set, get) => ({
   hydrate: async () => {
     await saveQueue.catch(() => undefined);
     const { state: game, recovery } = await loadGameWithStatus();
+    // Never overwrite an unreadable save with the temporary fallback career.
+    persistenceSuspended = recovery === "STORAGE_UNAVAILABLE";
     const recoveryNotice =
       recovery === "RECOVERED_BACKUP"
         ? "Kayıt sorunu bulundu; son sağlam yedek geri yüklendi."
@@ -231,6 +235,7 @@ export const useGameStore = create<Store>((set, get) => ({
     });
   },
   flush: async () => {
+    if (persistenceSuspended) return;
     await saveQueue.catch(() => undefined);
     const state = get().game;
     const wallClockMs = Math.max(
@@ -1008,7 +1013,9 @@ export const useGameStore = create<Store>((set, get) => ({
     set({ game: stampAndPersist(dismissFtueStage(game)) });
   },
   reset: async () => {
+    await saveQueue.catch(() => undefined);
     await clearGame();
+    persistenceSuspended = false;
     const game = initialState(systemTimeProvider.nowWallMs());
     set({ game, notice: "Yeni kariyer başladı." });
     await saveGame(game);
