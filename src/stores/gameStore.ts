@@ -54,7 +54,11 @@ import {
   type OwnedAsset,
 } from "../game";
 import { systemTimeProvider } from "../infrastructure/time";
-import { clearGame, loadGame, saveGame } from "../services/persistence";
+import {
+  clearGame,
+  loadGameWithStatus,
+  saveGame,
+} from "../services/persistence";
 
 type Store = {
   game: GameState;
@@ -169,8 +173,20 @@ export const useGameStore = create<Store>((set, get) => ({
   notice: "Piyasa canlı. İyi fırsatlar beklemez.",
   hydrate: async () => {
     await saveQueue.catch(() => undefined);
-    const game = await loadGame();
-    set({ game, ready: true });
+    const { state: game, recovery } = await loadGameWithStatus();
+    const recoveryNotice =
+      recovery === "RECOVERED_BACKUP"
+        ? "Kayıt sorunu bulundu; son sağlam yedek geri yüklendi."
+        : recovery === "RESET_AFTER_CORRUPTION"
+          ? "Kayıt ve yedek okunamadı; hasarlı kayıt korundu ve yeni kariyer açıldı."
+          : recovery === "STORAGE_UNAVAILABLE"
+            ? "Cihaz kaydına erişilemiyor; ilerlemen bu oturumda saklanamayabilir."
+            : undefined;
+    set((current) => ({
+      game,
+      ready: true,
+      notice: recoveryNotice ?? current.notice,
+    }));
   },
   flush: async () => {
     await saveQueue.catch(() => undefined);

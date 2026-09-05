@@ -7,12 +7,32 @@ vi.mock("@capacitor/haptics", () => ({
 vi.mock("../services/persistence", () => ({
   clearGame: vi.fn(() => Promise.resolve()),
   loadGame: vi.fn(),
+  loadGameWithStatus: vi.fn(() =>
+    Promise.resolve({ state: initialState(), recovery: "NONE" }),
+  ),
   saveGame: vi.fn(() => Promise.resolve()),
 }));
 
 import { initialState } from "../game";
 import { quoteAssetExit, reconcileJournal } from "../domain/economy";
+import { loadGameWithStatus } from "../services/persistence";
 import { useGameStore } from "./gameStore";
+
+describe("persistence recovery notice", () => {
+  it("tells the player when the last valid backup was restored", async () => {
+    vi.mocked(loadGameWithStatus).mockResolvedValueOnce({
+      state: initialState(1_000, "SANDBOX"),
+      recovery: "RECOVERED_BACKUP",
+    });
+
+    await useGameStore.getState().hydrate();
+
+    expect(useGameStore.getState()).toMatchObject({
+      ready: true,
+      notice: "Kayıt sorunu bulundu; son sağlam yedek geri yüklendi.",
+    });
+  });
+});
 
 describe("purchase negotiation rights", () => {
   beforeEach(() => {
