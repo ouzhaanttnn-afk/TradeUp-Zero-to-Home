@@ -1,0 +1,78 @@
+import { expect, test } from "@playwright/test";
+import { initialState, validateState } from "../src/game";
+
+test("category filter narrows the market without adding vertical controls", async ({
+  page,
+}, testInfo) => {
+  await page.setViewportSize({ width: 320, height: 844 });
+  const saved = validateState(initialState(Date.now(), "SANDBOX"));
+  saved.accessibility.largeText = true;
+  saved.accessibility.reducedMotion = true;
+  const category = saved.listings[0].instance.family.category;
+  const categoryCount = saved.listings.filter(
+    (listing) => listing.instance.family.category === category,
+  ).length;
+
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", { name: "Fırsat akışı" }),
+  ).toBeVisible();
+  await page.evaluate(async (state) => {
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open("tradeup", 1);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const transaction = db.transaction("game", "readwrite");
+        transaction.objectStore("game").put(state, "main");
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = () => reject(transaction.error);
+      });
+    } finally {
+      db.close();
+    }
+  }, saved);
+  await page.reload();
+
+  const filters = page.getByRole("group", { name: "Pazar kategorileri" });
+  await expect(filters).toBeVisible();
+  await expect(filters.getByRole("button", { name: "Tümü" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await filters.getByRole("button", { name: category, exact: true }).click();
+
+  const cards = page.locator(".market-grid .market-card");
+  await expect(cards).toHaveCount(categoryCount);
+  await expect(
+    filters.getByRole("button", { name: category, exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator(".section-title > span")).toHaveText(
+    `${categoryCount} ilan`,
+  );
+  expect(
+    await cards
+      .locator(".market-category")
+      .evaluateAll(
+        (items, expectedCategory) =>
+          items.every((item) => item.textContent?.startsWith(expectedCategory)),
+        category,
+      ),
+  ).toBe(true);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+
+  await page.screenshot({
+    path: testInfo.outputPath("market-category-filter-320.png"),
+    fullPage: true,
+    animations: "disabled",
+  });
+
+  await filters.getByRole("button", { name: "Tümü" }).click();
+  await expect(cards).toHaveCount(saved.listings.length);
+});

@@ -57,7 +57,12 @@ import {
 } from "./ui/comparisonPresentation";
 import { preparationPresentation } from "./ui/preparationPresentation";
 import { listingActivity } from "./ui/listingActivity";
-import { listingAgeLabel } from "./ui/marketCard";
+import {
+  ALL_MARKET_CATEGORIES,
+  filterMarketListings,
+  listingAgeLabel,
+  marketCategories,
+} from "./ui/marketCard";
 import { purchaseBudget } from "./ui/purchaseBudget";
 
 type Tab = "market" | "follow" | "portfolio" | "journey";
@@ -178,6 +183,7 @@ export default function App() {
   const [portfolioSegment, setPortfolioSegment] =
     useState<PortfolioSegment>("inventory");
   const [timelineFilter, setTimelineFilter] = useState<TimelineFilter>("ALL");
+  const [marketCategory, setMarketCategory] = useState(ALL_MARKET_CATEGORIES);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [comparing, setComparing] = useState(false);
   const [purchaseFeedback, setPurchaseFeedback] = useState("");
@@ -291,7 +297,20 @@ export default function App() {
   }, [tab, portfolioSegment, focusedAssetId]);
 
   const total = wealth(game);
-  const marketListings = activeMarketListings(game);
+  const marketListings = useMemo(() => activeMarketListings(game), [game]);
+  const marketCategoryOptions = useMemo(
+    () => marketCategories(marketListings),
+    [marketListings],
+  );
+  const activeMarketCategory =
+    marketCategory === ALL_MARKET_CATEGORIES ||
+    marketCategoryOptions.includes(marketCategory)
+      ? marketCategory
+      : ALL_MARKET_CATEGORIES;
+  const visibleMarketListings = filterMarketListings(
+    marketListings,
+    activeMarketCategory,
+  );
   const impressionKey = marketListings.map((listing) => listing.id).join("|");
   useEffect(() => {
     if (ready && impressionKey)
@@ -769,8 +788,39 @@ export default function App() {
                 <small>CANLI PAZAR</small>
                 <h2>Fırsat akışı</h2>
               </div>
-              <span>{marketListings.length} ilan</span>
+              <span>{visibleMarketListings.length} ilan</span>
             </div>
+            {!ftueActive && marketCategoryOptions.length > 1 ? (
+              <div
+                className="chips market-filters"
+                role="group"
+                aria-label="Pazar kategorileri"
+              >
+                <button
+                  className={
+                    activeMarketCategory === ALL_MARKET_CATEGORIES
+                      ? "active"
+                      : ""
+                  }
+                  aria-pressed={activeMarketCategory === ALL_MARKET_CATEGORIES}
+                  onClick={() => setMarketCategory(ALL_MARKET_CATEGORIES)}
+                >
+                  Tümü
+                </button>
+                {marketCategoryOptions.map((category) => (
+                  <button
+                    className={
+                      activeMarketCategory === category ? "active" : ""
+                    }
+                    aria-pressed={activeMarketCategory === category}
+                    key={category}
+                    onClick={() => setMarketCategory(category)}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+            ) : null}
             <div className="feed market-grid">
               {!selected && canClaimReward("MARKET_SCOUT") ? (
                 <button
@@ -808,7 +858,7 @@ export default function App() {
                   </div>
                 </article>
               ) : null}
-              {marketListings.map((item) => {
+              {visibleMarketListings.map((item) => {
                 const categoryLevel = categoryExpertiseLevel(
                   game,
                   item.instance.family.category,

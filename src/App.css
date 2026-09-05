@@ -388,6 +388,16 @@ main {
   border-color: #d8ffe6;
   font-weight: 800;
 }
+.market-filters {
+  margin-inline: -14px;
+  padding-inline: 14px;
+  scroll-padding-inline: 14px;
+  scroll-snap-type: x proximity;
+}
+.market-filters button {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
 .feed {
   display: grid;
   gap: 8px;
