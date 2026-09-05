@@ -205,7 +205,18 @@ test("secondary expansion artwork loads without category fallbacks", async ({
   const cassettePlayer = familyById("cassette_player");
   const eReader = familyById("e_reader");
   const mobileProjector = familyById("mobile_projector");
-  if (!dacAmp || !cassettePlayer || !eReader || !mobileProjector) {
+  const monitor = familyById("monitor");
+  const miniPc = familyById("mini_pc");
+  const mechanicalKeyboard = familyById("mechanical_keyboard");
+  if (
+    !dacAmp ||
+    !cassettePlayer ||
+    !eReader ||
+    !mobileProjector ||
+    !monitor ||
+    !miniPc ||
+    !mechanicalKeyboard
+  ) {
     throw new Error("Expanded asset family is missing");
   }
   for (const [index, family] of [
@@ -213,6 +224,9 @@ test("secondary expansion artwork loads without category fallbacks", async ({
     cassettePlayer,
     eReader,
     mobileProjector,
+    monitor,
+    miniPc,
+    mechanicalKeyboard,
   ].entries()) {
     state.listings[index] = {
       ...state.listings[index],
@@ -230,6 +244,9 @@ test("secondary expansion artwork loads without category fallbacks", async ({
     ["Sahil Kasetçalar", "prd_cassette_player"],
     ["Kuzey E-Kitap Okuyucu", "prd_e_reader"],
     ["Cep Projektörü", "prd_mobile_projector"],
+    ["Vela Çalışma Monitörü", "prd_monitor"],
+    ["Orbit Mini Bilgisayar", "prd_mini_pc"],
+    ["Kuzey Mekanik Klavye", "prd_mechanical_keyboard"],
   ] as const) {
     const card = page.locator(".market-card").filter({ hasText: name });
     const visual = card.locator(".product-visual");

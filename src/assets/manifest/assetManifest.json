@@ -299,20 +299,20 @@
     {
       "assetKey": "prd_monitor",
       "familyId": "monitor",
-      "source": "fallback:fb_computer",
-      "dedicated": false
+      "source": "../products/prd_monitor.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_mini_pc",
       "familyId": "mini_pc",
-      "source": "fallback:fb_computer",
-      "dedicated": false
+      "source": "../products/prd_mini_pc.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_mechanical_keyboard",
       "familyId": "mechanical_keyboard",
-      "source": "fallback:fb_computer",
-      "dedicated": false
+      "source": "../products/prd_mechanical_keyboard.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_graphics_tablet",

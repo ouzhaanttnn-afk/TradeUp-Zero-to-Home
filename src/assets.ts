@@ -38,6 +38,9 @@ import dacAmp from "./assets/products/prd_dac_amp.png";
 import cassettePlayer from "./assets/products/prd_cassette_player.png";
 import eReader from "./assets/products/prd_e_reader.png";
 import mobileProjector from "./assets/products/prd_mobile_projector.png";
+import monitor from "./assets/products/prd_monitor.png";
+import miniPc from "./assets/products/prd_mini_pc.png";
+import mechanicalKeyboard from "./assets/products/prd_mechanical_keyboard.png";
 import boardGame from "./assets/products/prd_board_game.png";
 import portableRadio from "./assets/products/prd_portable_radio.png";
 import fountainPen from "./assets/products/prd_fountain_pen.png";
@@ -87,6 +90,9 @@ const dedicatedAssets: Record<string, string> = {
   prd_cassette_player: cassettePlayer,
   prd_e_reader: eReader,
   prd_mobile_projector: mobileProjector,
+  prd_monitor: monitor,
+  prd_mini_pc: miniPc,
+  prd_mechanical_keyboard: mechanicalKeyboard,
   prd_board_game: boardGame,
   prd_portable_radio: portableRadio,
   prd_fountain_pen: fountainPen,

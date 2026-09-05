@@ -39,6 +39,9 @@ describe("asset manifest and visual treatments", () => {
     expect(hasDedicatedAsset("prd_cassette_player")).toBe(true);
     expect(hasDedicatedAsset("prd_e_reader")).toBe(true);
     expect(hasDedicatedAsset("prd_mobile_projector")).toBe(true);
+    expect(hasDedicatedAsset("prd_monitor")).toBe(true);
+    expect(hasDedicatedAsset("prd_mini_pc")).toBe(true);
+    expect(hasDedicatedAsset("prd_mechanical_keyboard")).toBe(true);
   });
 
   it("returns a deterministic fallback for an unknown asset key", () => {
