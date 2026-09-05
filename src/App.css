@@ -783,6 +783,38 @@ main {
   font-size: calc(12px + var(--text-size-boost));
   line-height: 1.5;
 }
+.sale-result {
+  margin-top: 12px;
+  padding: 18px;
+  border: 1px solid rgba(94, 230, 160, 0.34);
+  border-radius: 18px;
+  background: linear-gradient(
+    145deg,
+    rgba(22, 62, 44, 0.96),
+    rgba(9, 28, 20, 0.98)
+  );
+  box-shadow: var(--shadow-card);
+}
+.sale-result-copy > small {
+  color: var(--accent);
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+.sale-result-copy h3 {
+  margin: 7px 0 16px;
+  font-size: calc(19px + var(--text-size-boost));
+}
+.sale-result-copy > p {
+  margin: 15px 0 12px;
+  color: #afc4b9;
+  font-size: calc(12px + var(--text-size-boost));
+}
+.sale-result > button {
+  width: 100%;
+  min-height: 52px;
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+}
 .nav-offer-count {
   position: absolute;
   right: 8px;

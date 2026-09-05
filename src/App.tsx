@@ -49,6 +49,7 @@ import {
 import { ownershipPresentation } from "./ui/ownershipPresentation";
 import { simplifyLegacyPlayerCopy } from "./ui/playerLanguage";
 import { saleHistoryCopy } from "./ui/saleHistory";
+import { latestSaleResult } from "./ui/saleResult";
 import { formatEstimate, wealthPresentation } from "./ui/wealthPresentation";
 import {
   comparisonPresentation,
@@ -330,6 +331,7 @@ export default function App() {
     (count, entry) => count + entry.activity.offers.length,
     0,
   );
+  const latestSale = latestSaleResult(game);
   const watchedListings = marketListings.filter((listing) =>
     game.follow.watchedListingIds.includes(listing.id),
   );
@@ -485,6 +487,12 @@ export default function App() {
     !(
       atCoachDestination &&
       (game.ftue.stage === "PREPARATION" || game.ftue.stage === "LISTING")
+    ) &&
+    !(
+      tab === "portfolio" &&
+      portfolioSegment === "listings" &&
+      !playerListings.length &&
+      latestSale
     );
 
   const renderInventoryCard = (
@@ -1255,22 +1263,62 @@ export default function App() {
             {portfolioSegment === "listings" &&
             !playerListings.length &&
             !game.buyerOffers.length ? (
-              <div className="empty">
-                <span className="empty-icon">
-                  <Icon name="portfolio" />
-                </span>
-                <h3>Aktif ilanın yok</h3>
-                <p>Bir ürününü seçip satışa çıkar.</p>
-                <button
-                  onClick={() =>
-                    inventory.length
-                      ? setPortfolioSegment("inventory")
-                      : navigate("market")
-                  }
-                >
-                  {inventory.length ? "Ürünlerini gör" : "Pazara dön"}
-                </button>
-              </div>
+              latestSale ? (
+                <section className="sale-result" aria-label="Son satış sonucu">
+                  <div className="sale-result-copy" role="status">
+                    <small>SATIŞ TAMAMLANDI</small>
+                    <h3>{latestSale.assetName} satıldı</h3>
+                    <dl className="sale-breakdown">
+                      <div>
+                        <dt>Hesabına giren</dt>
+                        <dd>{money(latestSale.proceedsMinor)}</dd>
+                      </div>
+                      <div>
+                        <dt>Toplam harcaman</dt>
+                        <dd>{money(latestSale.bookCostMinor)}</dd>
+                      </div>
+                      <div
+                        className={
+                          latestSale.profitMinor < 0 ? "loss" : "profit"
+                        }
+                      >
+                        <dt>
+                          {latestSale.profitMinor < 0
+                            ? "Net zararın"
+                            : latestSale.profitMinor > 0
+                              ? "Net kârın"
+                              : "Net sonuç"}
+                        </dt>
+                        <dd>{signedMoney(latestSale.profitMinor)}</dd>
+                      </div>
+                    </dl>
+                    <p>Yeni fırsat için paran hazır: {money(game.cashMinor)}</p>
+                  </div>
+                  <button
+                    className="primary"
+                    onClick={() => navigate("market")}
+                  >
+                    Yeni fırsatlara bak
+                  </button>
+                </section>
+              ) : (
+                <div className="empty">
+                  <span className="empty-icon">
+                    <Icon name="portfolio" />
+                  </span>
+                  <h3>Aktif ilanın yok</h3>
+                  <p>Bir ürününü seçip satışa çıkar.</p>
+                  <button
+                    onClick={() =>
+                      inventory.length
+                        ? setPortfolioSegment("inventory")
+                        : navigate("market")
+                    }
+                  >
+                    {inventory.length ? "Ürünlerini gör" : "Pazara dön"}
+                  </button>
+                </div>
+              )
             ) : null}
           </>
         ) : null}

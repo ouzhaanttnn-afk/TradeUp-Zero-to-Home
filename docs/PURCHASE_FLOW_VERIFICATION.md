@@ -43,3 +43,10 @@ Güncel doğrulama: 226 test ve 14 tarayıcı senaryosu; lint ve production buil
 - Üç hazırlık seçeneği ücret, süre ve tüm görünür etkileri korunarak kompakt satırlara dönüştürüldü. 320×640 büyük yazıda üç seçenek aynı ekranda görülebilir.
 - Ürün hazır olduğunda dengeli ilan fiyatı ile güncel toplam harcama aynı “Sıradaki adım” alanında gösterilir; ana ilan düğmesi diğer isteğe bağlı hazırlıkların üstündedir.
 - Portföyde hedef ürüne geçiş kartı ekranın başına getirir ve odağı korur. Hazırlık türü, maliyeti, süresi, sonucu ve ilan fiyatı hesabı değişmedi.
+
+## Satış sonucu ve yeni fırsat
+
+- Oyuncu bir alıcı teklifini kabul ettiğinde boş `İlanlarım` ekranında kalmaz. Son satış sonucu işlem günlüğündeki tamamlanmış `SALE` kaydından gösterilir.
+- Hesaba giren tutar, o satıştaki toplam harcama, işaretli net kâr/zarar ve güncel nakit tek kartta görünür. Güncel ürün değeri veya ilan fiyatı geçmiş maliyet yerine kullanılmaz.
+- “Yeni fırsatlara bak” ana düğmesi doğrudan Pazara döner. İlk oturumun tamamlanma rehberi sonuç kartını tekrarlamaz.
+- Sonuç ekran okuyucuya mesaj olarak duyurulur; içindeki devam düğmesi mesajın parçası değildir. 320×640 büyük yazıda sonuç ve devam düğmesi görünürlük testiyle korunur.

@@ -356,6 +356,34 @@ for (const choice of [
         (event) => event.name === "offer_submitted",
       ).length,
     ).toBeLessThanOrEqual(2);
+    const saleResult = page.getByRole("region", { name: "Son satış sonucu" });
+    await expect(saleResult.getByRole("status")).toBeVisible();
+    await expect(saleResult).toContainText(
+      `Hesabına giren${money(sale.cashDeltaMinor)}`,
+    );
+    await expect(saleResult).toContainText(
+      `Toplam harcaman${money(firstAsset.bookCostMinor)}`,
+    );
+    await expect(saleResult).toContainText(
+      `Net kârın${signedMoney(sale.realizedProfitDeltaMinor)}`,
+    );
+    await expect(
+      page.getByRole("complementary", { name: "İlk oturum rehberi" }),
+    ).toHaveCount(0);
+    const nextOpportunity = saleResult.getByRole("button", {
+      name: "Yeni fırsatlara bak",
+      exact: true,
+    });
+    await expect(nextOpportunity).toBeInViewport({ ratio: 1 });
+    await page.screenshot({
+      path: testInfo.outputPath("sale-complete.png"),
+      fullPage: true,
+      animations: "disabled",
+    });
+    await nextOpportunity.click();
+    await expect(
+      page.getByRole("heading", { name: "Fırsat akışı" }),
+    ).toBeVisible();
     await page.reload();
     await expect(
       page.getByRole("heading", { name: "Fırsat akışı" }),
