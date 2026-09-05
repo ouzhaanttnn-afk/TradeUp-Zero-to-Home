@@ -59,20 +59,20 @@
     {
       "assetKey": "prd_chair",
       "familyId": "chair",
-      "fallbackSource": "../products/prd_desk.png",
-      "dedicated": false
+      "source": "../products/prd_chair.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_coffee",
       "familyId": "coffee",
-      "fallbackSource": "../products/prd_desk.png",
-      "dedicated": false
+      "source": "../products/prd_coffee.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_lamp",
       "familyId": "lamp",
-      "fallbackSource": "../products/prd_desk.png",
-      "dedicated": false
+      "source": "../products/prd_lamp.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_console",
@@ -83,20 +83,20 @@
     {
       "assetKey": "prd_handheld",
       "familyId": "handheld",
-      "fallbackSource": "../products/prd_console.png",
-      "dedicated": false
+      "source": "../products/prd_handheld.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_controller",
       "familyId": "controller",
-      "fallbackSource": "../products/prd_console.png",
-      "dedicated": false
+      "source": "../products/prd_controller.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_game_collection",
       "familyId": "game_collection",
-      "fallbackSource": "../products/prd_console.png",
-      "dedicated": false
+      "source": "../products/prd_game_collection.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_guitar",
@@ -107,20 +107,20 @@
     {
       "assetKey": "prd_keyboard",
       "familyId": "keyboard",
-      "fallbackSource": "../products/prd_guitar.png",
-      "dedicated": false
+      "source": "../products/prd_keyboard.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_microphone",
       "familyId": "microphone",
-      "fallbackSource": "../products/prd_guitar.png",
-      "dedicated": false
+      "source": "../products/prd_microphone.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_pedal",
       "familyId": "pedal",
-      "fallbackSource": "../products/prd_guitar.png",
-      "dedicated": false
+      "source": "../products/prd_pedal.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_phone",
@@ -131,20 +131,20 @@
     {
       "assetKey": "prd_compact_phone",
       "familyId": "compact_phone",
-      "fallbackSource": "../products/prd_phone.png",
-      "dedicated": false
+      "source": "../products/prd_compact_phone.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_tablet",
       "familyId": "tablet",
-      "fallbackSource": "../products/prd_phone.png",
-      "dedicated": false
+      "source": "../products/prd_tablet.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_smartwatch",
       "familyId": "smartwatch",
-      "fallbackSource": "../products/prd_watch.png",
-      "dedicated": false
+      "source": "../products/prd_smartwatch.png",
+      "dedicated": true
     }
   ],
   "overlays": [

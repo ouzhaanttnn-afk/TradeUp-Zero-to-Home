@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { families, initialState } from "./game";
-import { assetFor, registeredAssetKeys, visualTreatmentFor } from "./assets";
+import {
+  assetFor,
+  hasDedicatedAsset,
+  registeredAssetKeys,
+  visualTreatmentFor,
+} from "./assets";
 
 describe("asset manifest and visual treatments", () => {
   it("registers one stable asset key for every hero family", () => {
@@ -9,6 +14,7 @@ describe("asset manifest and visual treatments", () => {
     for (const family of families) {
       expect(registeredAssetKeys).toContain(family.assetKey);
       expect(assetFor(family.assetKey)).toBeTruthy();
+      expect(hasDedicatedAsset(family.assetKey)).toBe(true);
     }
   });
 
