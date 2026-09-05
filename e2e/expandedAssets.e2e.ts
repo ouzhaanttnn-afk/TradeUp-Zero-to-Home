@@ -208,6 +208,10 @@ test("secondary expansion artwork loads without category fallbacks", async ({
   const monitor = familyById("monitor");
   const miniPc = familyById("mini_pc");
   const mechanicalKeyboard = familyById("mechanical_keyboard");
+  const instantCamera = familyById("instant_camera");
+  const tripod = familyById("tripod");
+  const cameraFlash = familyById("camera_flash");
+  const actionCamera = familyById("action_camera");
   if (
     !dacAmp ||
     !cassettePlayer ||
@@ -215,7 +219,11 @@ test("secondary expansion artwork loads without category fallbacks", async ({
     !mobileProjector ||
     !monitor ||
     !miniPc ||
-    !mechanicalKeyboard
+    !mechanicalKeyboard ||
+    !instantCamera ||
+    !tripod ||
+    !cameraFlash ||
+    !actionCamera
   ) {
     throw new Error("Expanded asset family is missing");
   }
@@ -227,6 +235,10 @@ test("secondary expansion artwork loads without category fallbacks", async ({
     monitor,
     miniPc,
     mechanicalKeyboard,
+    instantCamera,
+    tripod,
+    cameraFlash,
+    actionCamera,
   ].entries()) {
     state.listings[index] = {
       ...state.listings[index],
@@ -247,6 +259,10 @@ test("secondary expansion artwork loads without category fallbacks", async ({
     ["Vela Çalışma Monitörü", "prd_monitor"],
     ["Orbit Mini Bilgisayar", "prd_mini_pc"],
     ["Kuzey Mekanik Klavye", "prd_mechanical_keyboard"],
+    ["Anı Şipşak Kamera", "prd_instant_camera"],
+    ["Karbon Seyahat Tripodu", "prd_tripod"],
+    ["Stüdyo Tepe Flaşı", "prd_camera_flash"],
+    ["Rota Aksiyon Kamerası", "prd_action_camera"],
   ] as const) {
     const card = page.locator(".market-card").filter({ hasText: name });
     const visual = card.locator(".product-visual");

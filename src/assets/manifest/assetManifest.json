@@ -341,26 +341,26 @@
     {
       "assetKey": "prd_instant_camera",
       "familyId": "instant_camera",
-      "source": "fallback:fb_photo",
-      "dedicated": false
+      "source": "../products/prd_instant_camera.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_tripod",
       "familyId": "tripod",
-      "source": "fallback:fb_photo",
-      "dedicated": false
+      "source": "../products/prd_tripod.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_camera_flash",
       "familyId": "camera_flash",
-      "source": "fallback:fb_photo",
-      "dedicated": false
+      "source": "../products/prd_camera_flash.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_action_camera",
       "familyId": "action_camera",
-      "source": "fallback:fb_photo",
-      "dedicated": false
+      "source": "../products/prd_action_camera.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_perfume_set",
