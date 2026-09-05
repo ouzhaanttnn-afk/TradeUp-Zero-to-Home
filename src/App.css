@@ -895,6 +895,24 @@ main {
   gap: 9px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
 }
+.owned--listing {
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 8px;
+  padding: 8px;
+  border-radius: 16px;
+}
+.owned--listing .owned-icon {
+  width: 64px;
+  height: 68px;
+  min-height: 68px;
+}
+.owned--listing .owned-metrics {
+  margin-top: 5px;
+  gap: 4px;
+}
+.owned--listing .owned-metrics div {
+  padding: 5px 6px;
+}
 .owned-copy {
   min-width: 0;
 }
@@ -1129,18 +1147,50 @@ main {
 }
 .listing-wait {
   grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
   min-width: 0;
   border-top: 1px solid #365247;
-  padding-top: 14px;
+  padding-top: 8px;
 }
-.listing-wait h4 {
-  margin: 0 0 8px;
-  font-size: calc(14px + var(--text-size-boost));
+.listing-wait-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
 }
-.listing-wait p {
-  margin: 8px 0 12px;
-  font-size: calc(12px + var(--text-size-boost));
-  line-height: 1.5;
+.listing-wait-copy b {
+  font-size: calc(11px + var(--text-size-boost));
+  overflow-wrap: anywhere;
+}
+.listing-wait-copy span {
+  color: #849c91;
+  font-size: calc(9px + var(--text-size-boost));
+}
+.listing-wait > button {
+  min-width: 94px;
+  padding: 7px 9px;
+  border: 1px solid #365247;
+  border-radius: 10px;
+  background: #15261f;
+  color: #c4d6cd;
+  font-size: calc(10px + var(--text-size-boost));
+}
+.listing-withdraw-actions {
+  margin-top: -1px;
+}
+.owned--listing .listing-withdraw-actions button {
+  min-height: 44px;
+  padding-block: 7px;
+}
+@media (max-width: 430px) {
+  .app-shell.large-text .owned--listing .owned-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .app-shell.large-text .owned--listing .owned-metrics div {
+    padding-inline: 4px;
+  }
 }
 .sale-result {
   margin-top: 12px;
@@ -1684,10 +1734,15 @@ nav .active .nav-icon {
   overflow: hidden;
 }
 .product-art img,
-.owned-icon img,
-.hero-art img {
+.owned-icon img {
   width: 100%;
   height: 100%;
+  object-fit: contain;
+}
+.hero-art img {
+  width: 170px;
+  height: 170px;
+  max-width: calc(100% - 20px);
   object-fit: contain;
 }
 .product-visual {

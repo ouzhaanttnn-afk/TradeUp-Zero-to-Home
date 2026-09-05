@@ -85,6 +85,11 @@ for (const width of [320, 430]) {
       exact: true,
     });
     await expect(waiting).toContainText("Az önce yayınlandı");
+    await expect(waiting).not.toContainText("Teklifler anında");
+    const listingCardHeight = await waiting
+      .locator("xpath=ancestor::article")
+      .evaluate((card) => card.getBoundingClientRect().height);
+    expect(listingCardHeight).toBeLessThan(width === 430 ? 220 : 310);
     await expect(page.locator(".nav-offer-count")).toHaveCount(0);
     const layout = async () => {
       expect(

@@ -1330,7 +1330,7 @@ export default function App() {
                       const ownershipState = ownershipPresentation(asset.state);
                       return (
                         <article
-                          className="owned"
+                          className="owned owned--listing"
                           key={playerListing.id}
                           id={`owned-${asset.id}`}
                           tabIndex={-1}
@@ -1370,22 +1370,13 @@ export default function App() {
                               role="group"
                               aria-label="İlan durumu"
                             >
-                              <h4>İlanın yayında</h4>
-                              <p>
-                                {activity.ageLabel} · Alıcı teklifi bekleniyor.
-                              </p>
-                              <p>
-                                Teklifler anında gelmeyebilir. Bu ekranda
-                                beklemek zorunda değilsin.
-                              </p>
-                              <div className="sell-actions">
-                                <button
-                                  className="primary"
-                                  onClick={() => navigate("market")}
-                                >
-                                  Pazara göz at
-                                </button>
+                              <div className="listing-wait-copy">
+                                <b>Yayında · {activity.ageLabel}</b>
+                                <span>Alıcı teklifi bekleniyor</span>
                               </div>
+                              <button onClick={() => navigate("market")}>
+                                Pazara göz at
+                              </button>
                             </div>
                           ) : null}
                           {activity.offers.map((buyerOffer) => {
@@ -1468,7 +1459,7 @@ export default function App() {
                               </div>
                             );
                           })}
-                          <div className="sell-actions">
+                          <div className="sell-actions listing-withdraw-actions">
                             <button
                               onClick={() => {
                                 withdrawListing(playerListing.id);
