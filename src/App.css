@@ -762,15 +762,15 @@ main {
   display: grid;
   grid-template-columns: 54px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   text-align: left;
   width: 100%;
   border: 1px solid #20382e;
   border-radius: 16px;
-  padding: 10px;
+  padding: 8px;
   background: linear-gradient(115deg, #13241d, #0c1712);
   cursor: pointer;
-  min-height: 80px;
+  min-height: 74px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
 }
 @media (hover: hover) {
@@ -781,7 +781,7 @@ main {
 }
 .product-art {
   width: 54px;
-  height: 58px;
+  height: 54px;
   border-radius: 13px;
   display: grid;
   place-items: center;
@@ -792,18 +792,18 @@ main {
   min-width: 0;
 }
 .listing h3 {
-  font-size: calc(13px + var(--text-size-boost));
+  font-size: calc(12px + var(--text-size-boost));
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin: 3px 0 6px;
+  margin: 2px 0 4px;
 }
 .meta,
 .tags {
   display: flex;
   gap: 6px;
   align-items: center;
-  font-size: calc(9px + var(--text-size-boost));
+  font-size: calc(8px + var(--text-size-boost));
   color: #779185;
 }
 .meta {
@@ -1685,9 +1685,12 @@ nav .active .nav-icon {
   .listing {
     grid-template-columns: 48px minmax(0, 1fr) auto;
     padding: 8px;
+    min-height: 70px;
+    gap: 7px;
   }
   .product-art {
     width: 48px;
+    height: 48px;
   }
   .price strong {
     font-size: calc(12px + var(--text-size-boost));
