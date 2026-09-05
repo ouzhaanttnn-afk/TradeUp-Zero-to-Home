@@ -1053,7 +1053,7 @@ main {
   background: #15261f;
   border-radius: 12px;
   padding: 10px 6px;
-  font-size: calc(11px + var(--text-size-boost));
+  font-size: calc(10px + var(--text-size-boost));
   display: flex;
   flex-direction: column;
   gap: 3px;
@@ -1080,8 +1080,8 @@ main {
 }
 .preparation-options summary {
   min-height: 44px;
-  padding: 12px 0;
-  font-size: calc(12px + var(--text-size-boost));
+  padding: 9px 0;
+  font-size: calc(11px + var(--text-size-boost));
   cursor: pointer;
 }
 .preparation-options summary:focus-visible {
@@ -1111,12 +1111,13 @@ main {
 .sell-actions .preparation-action > small {
   color: #a7b9b0;
   line-height: 1.35;
+  font-size: calc(9px + var(--text-size-boost));
 }
 .portfolio-next-action {
   grid-column: 1 / -1;
   display: grid;
   gap: 5px;
-  padding: 12px;
+  padding: 9px;
   border: 1px solid rgba(94, 230, 160, 0.24);
   border-radius: 14px;
   background: rgba(94, 230, 160, 0.06);
@@ -1132,7 +1133,7 @@ main {
 }
 .portfolio-next-action button {
   width: 100%;
-  margin-top: 4px;
+  margin-top: 3px;
 }
 .preparation-options ~ .primary {
   grid-column: 1 / -1;
@@ -1171,10 +1172,10 @@ main {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
   border-top: 1px solid #365247;
-  padding-top: 8px;
+  padding-top: 6px;
 }
 .listing-wait-copy {
   display: grid;
@@ -1196,7 +1197,7 @@ main {
   border-radius: 10px;
   background: #15261f;
   color: #c4d6cd;
-  font-size: calc(10px + var(--text-size-boost));
+  font-size: calc(9px + var(--text-size-boost));
 }
 .listing-withdraw-actions {
   margin-top: -1px;
@@ -1910,9 +1911,9 @@ nav .active .nav-icon {
 .segments {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 5px;
-  padding: 5px;
-  margin-bottom: 9px;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 7px;
   border: 1px solid #294338;
   border-radius: 14px;
   background: #0c1813;
@@ -1921,10 +1922,10 @@ nav .active .nav-icon {
   min-width: 0;
   border: 0;
   border-radius: 10px;
-  padding: 8px 7px;
+  padding: 6px 6px;
   background: transparent;
   color: #7f998e;
-  font-size: calc(11px + var(--text-size-boost));
+  font-size: calc(10px + var(--text-size-boost));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1933,14 +1934,14 @@ nav .active .nav-icon {
 .segments button > b {
   display: grid;
   place-items: center;
-  min-width: 20px;
-  min-height: 20px;
-  padding-inline: 5px;
+  min-width: 18px;
+  min-height: 18px;
+  padding-inline: 4px;
   border: 1px solid rgba(137, 193, 164, 0.15);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.04);
   color: #9db1a7;
-  font-size: calc(9px + var(--text-size-boost));
+  font-size: calc(8px + var(--text-size-boost));
 }
 .segments .active {
   color: #092016;
@@ -1976,7 +1977,7 @@ nav .active .nav-icon {
   background:
     radial-gradient(circle at 100% 0, rgba(82, 143, 111, 0.1), transparent 34%),
     linear-gradient(140deg, #12251d, #0b1712);
-  padding: 14px;
+  padding: 10px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14);
 }
 .follow-card small,
@@ -1984,24 +1985,24 @@ nav .active .nav-icon {
 .home-card small,
 .locked-home small {
   color: #69d99c;
-  font-size: calc(9px + var(--text-size-boost));
+  font-size: calc(8px + var(--text-size-boost));
   font-weight: 800;
   letter-spacing: 0.08em;
 }
 .follow-card h3,
 .home-card h3,
 .locked-home h3 {
-  margin-top: 4px;
-  font-size: calc(15px + var(--text-size-boost));
+  margin-top: 3px;
+  font-size: calc(14px + var(--text-size-boost));
 }
 .follow-card p,
 .expertise-card p,
 .home-card p,
 .locked-home p,
 .settings-card p {
-  margin-top: 6px;
+  margin-top: 4px;
   color: #8fa69b;
-  font-size: calc(11px + var(--text-size-boost));
+  font-size: calc(10px + var(--text-size-boost));
   line-height: 1.5;
 }
 .follow-card.missed {
@@ -2036,11 +2037,11 @@ nav .active .nav-icon {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 6px;
-  margin-top: 12px;
+  margin-top: 8px;
 }
 .alarm-criteria > span {
   min-width: 0;
-  padding: 8px;
+  padding: 6px;
   border: 1px solid rgba(137, 193, 164, 0.09);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.025);
@@ -2051,12 +2052,12 @@ nav .active .nav-icon {
 }
 .alarm-criteria small {
   color: #789286;
-  font-size: calc(8px + var(--text-size-boost));
+  font-size: calc(7px + var(--text-size-boost));
   letter-spacing: 0;
 }
 .alarm-criteria b {
-  margin-top: 4px;
-  font-size: calc(10px + var(--text-size-boost));
+  margin-top: 3px;
+  font-size: calc(9px + var(--text-size-boost));
   overflow-wrap: anywhere;
 }
 .missed-meta {
@@ -2098,7 +2099,9 @@ nav .active .nav-icon {
 }
 .follow-card > button {
   width: 100%;
-  margin-top: 10px;
+  margin-top: 8px;
+  min-height: 44px;
+  padding: 8px 10px;
 }
 .inline-actions {
   display: grid;
@@ -2122,7 +2125,9 @@ nav .active .nav-icon {
 }
 .settings-card > button {
   width: 100%;
-  margin-top: 10px;
+  margin-top: 8px;
+  min-height: 44px;
+  padding: 8px 10px;
 }
 .settings-card .text-button {
   margin-top: 6px;
