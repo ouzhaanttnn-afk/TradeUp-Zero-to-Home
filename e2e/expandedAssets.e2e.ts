@@ -20,6 +20,7 @@ test("expanded product families use dedicated mobile artwork", async ({
   const robotVacuum = familyById("robot_vacuum");
   const foldPhone = familyById("fold_phone");
   const racingWheel = familyById("racing_wheel");
+  const standMixer = familyById("stand_mixer");
   if (
     !boardGame ||
     !portableRadio ||
@@ -33,7 +34,8 @@ test("expanded product families use dedicated mobile artwork", async ({
     !vrHeadset ||
     !robotVacuum ||
     !foldPhone ||
-    !racingWheel
+    !racingWheel ||
+    !standMixer
   ) {
     throw new Error("Asset family is missing");
   }
@@ -94,6 +96,11 @@ test("expanded product families use dedicated mobile artwork", async ({
     familyId: racingWheel.id,
     instance: { ...state.listings[12].instance, family: racingWheel },
   };
+  state.listings[13] = {
+    ...state.listings[13],
+    familyId: standMixer.id,
+    instance: { ...state.listings[13].instance, family: standMixer },
+  };
   const saved = validateState(state);
 
   await page.goto("/");
@@ -133,6 +140,7 @@ test("expanded product families use dedicated mobile artwork", async ({
     ["Rota Robot Süpürge", "prd_robot_vacuum"],
     ["Nova Fold Telefon", "prd_fold_phone"],
     ["Apex Yarış Direksiyonu", "prd_racing_wheel"],
+    ["Mutfak Stand Mikseri", "prd_stand_mixer"],
   ] as const) {
     const card = page.locator(".market-card").filter({ hasText: name });
     const visual = card.locator(".product-visual");

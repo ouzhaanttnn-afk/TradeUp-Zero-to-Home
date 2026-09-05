@@ -215,8 +215,8 @@
     {
       "assetKey": "prd_stand_mixer",
       "familyId": "stand_mixer",
-      "source": "fallback:fb_home",
-      "dedicated": false
+      "source": "../products/prd_stand_mixer.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_vr_headset",
