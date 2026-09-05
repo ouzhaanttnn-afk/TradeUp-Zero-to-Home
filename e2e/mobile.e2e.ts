@@ -97,6 +97,11 @@ for (const width of [320, 390, 430]) {
     await checkMarketGrid(page);
     await checkLayout(page);
     await page.getByRole("button", { name: "Yolculuk", exact: true }).click();
+    await page.screenshot({
+      path: testInfo.outputPath(`journey-${width}.png`),
+      fullPage: true,
+      animations: "disabled",
+    });
     await page.getByRole("button", { name: "Ayarlar", exact: true }).click();
     await page
       .getByRole("button", { name: "Standart · büyüt", exact: true })

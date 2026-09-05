@@ -1079,6 +1079,7 @@ main {
 .journey-score {
   position: relative;
   overflow: hidden;
+  border-radius: 22px;
   background:
     radial-gradient(
       circle at 92% 8%,
@@ -1086,6 +1087,7 @@ main {
       transparent 36%
     ),
     linear-gradient(140deg, #214f3d, #11231b);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.24);
 }
 .journey-score.loss {
   border-color: #6a423d;
@@ -1708,10 +1710,13 @@ nav .active .nav-icon {
 .expertise-card,
 .home-card,
 .locked-home {
-  border: 1px solid #274036;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #12251d, #0c1813);
+  border: 1px solid rgba(137, 193, 164, 0.18);
+  border-radius: 19px;
+  background:
+    radial-gradient(circle at 100% 0, rgba(82, 143, 111, 0.1), transparent 34%),
+    linear-gradient(140deg, #12251d, #0b1712);
   padding: 14px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14);
 }
 .follow-card small,
 .expertise-card small,
@@ -1918,9 +1923,11 @@ nav .active .nav-icon {
 }
 .metric-grid div {
   min-width: 0;
+  min-height: 67px;
   padding: 12px;
-  border-radius: 12px;
-  background: #101d18;
+  border: 1px solid rgba(137, 193, 164, 0.08);
+  border-radius: 14px;
+  background: linear-gradient(145deg, #112019, #0c1813);
 }
 .metric-grid span,
 .metric-grid b {
@@ -1965,7 +1972,8 @@ nav .active .nav-icon {
   margin-top: 10px;
   border-radius: 6px;
   overflow: hidden;
-  background: #263a31;
+  border: 1px solid rgba(137, 193, 164, 0.08);
+  background: #20342b;
 }
 .xp-bar i {
   display: block;
@@ -2018,6 +2026,17 @@ nav .active .nav-icon {
 }
 .timeline-filters {
   margin-bottom: 10px;
+  padding-bottom: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+}
+.timeline-filters::-webkit-scrollbar {
+  display: none;
+}
+.timeline-filters button {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
 }
 .compact-empty {
   padding: 24px 18px;
@@ -2031,9 +2050,12 @@ nav .active .nav-icon {
   grid-template-columns: 14px minmax(0, 1fr) auto;
   gap: 10px;
   padding: 14px 13px;
-  border: 1px solid rgba(114, 176, 143, 0.1);
-  border-radius: 14px;
-  background: linear-gradient(135deg, #112019, #0d1813);
+  border: 1px solid rgba(114, 176, 143, 0.14);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 100% 0, rgba(72, 128, 98, 0.08), transparent 36%),
+    linear-gradient(135deg, #112019, #0c1712);
+  box-shadow: 0 9px 24px rgba(0, 0, 0, 0.12);
 }
 .timeline-rail {
   display: flex;
