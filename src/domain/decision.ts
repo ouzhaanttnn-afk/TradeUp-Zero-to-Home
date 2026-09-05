@@ -5,6 +5,7 @@ import type {
   ItemInstance,
   Listing,
 } from "./models";
+import { confirmedEvidenceStatus } from "./evidence";
 
 const clamp01 = (value: number) => Math.max(0, Math.min(1, value));
 export function listingEstimateBand(listing: Listing, expertiseLevel = 0) {
@@ -128,6 +129,11 @@ export function inspectListing(
   instance.evidence = instance.evidence.map((record) => {
     if (!eligible.some((definition) => definition.id === record.definitionId))
       return record;
+    if (
+      kind !== "QUICK_TEST" &&
+      (record.status === "CHECKED" || record.status === "VERIFIED")
+    )
+      return record;
     const defectDefinition = instance.family.defects.find(
       (definition) => definition.evidenceId === record.definitionId,
     );
@@ -136,9 +142,7 @@ export function inspectListing(
     );
     const status =
       kind === "QUICK_TEST"
-        ? defect?.present
-          ? "CHECKED"
-          : "VERIFIED"
+        ? confirmedEvidenceStatus(instance, record.definitionId)
         : defect?.present
           ? "SUSPICIOUS"
           : kind === "PHOTO"
@@ -149,12 +153,14 @@ export function inspectListing(
   if (kind === "QUICK_TEST")
     instance.defects = instance.defects.map((defect) => ({
       ...defect,
-      revealed: eligible.some(
-        (definition) =>
-          instance.family.defects.find(
-            (candidate) => candidate.id === defect.definitionId,
-          )?.evidenceId === definition.id,
-      ),
+      revealed:
+        defect.revealed ||
+        eligible.some(
+          (definition) =>
+            instance.family.defects.find(
+              (candidate) => candidate.id === defect.definitionId,
+            )?.evidenceId === definition.id,
+        ),
     }));
   instance.evidenceConfidence = clamp01(
     instance.evidenceConfidence + option.confidenceGain,

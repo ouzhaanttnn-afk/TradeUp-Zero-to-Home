@@ -4,6 +4,7 @@ import type {
   PreparationKind,
   PreparationDefinition,
 } from "./models";
+import { confirmedEvidenceStatus } from "./evidence";
 
 export function preparationOutcome(
   asset: OwnedAsset,
@@ -154,7 +155,7 @@ export function completeDuePreparations(
       if (pending.kind === "TEST") {
         instance.evidence = instance.evidence.map((record) => ({
           ...record,
-          status: "VERIFIED" as const,
+          status: confirmedEvidenceStatus(instance, record.definitionId),
         }));
         instance.defects = instance.defects.map((defect) => ({
           ...defect,
