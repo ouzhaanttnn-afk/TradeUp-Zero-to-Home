@@ -300,6 +300,44 @@ describe("buyer offer settlement", () => {
     useGameStore.setState({ game: initialState(0), ready: true, notice: "" });
   });
 
+  it("records the normal buyer wait and tempo revision without changing cash", () => {
+    useGameStore.setState({
+      game: initialState(0, "SANDBOX"),
+      ready: true,
+      sessionActive: true,
+    });
+    useGameStore.getState().buy(useGameStore.getState().game.listings[0], 100);
+    const asset = useGameStore.getState().game.ownedAssets[0];
+    useGameStore
+      .getState()
+      .list(asset, quoteAssetExit(asset).balancedAskingMinor);
+    const listed = useGameStore.getState().game;
+    for (
+      let minute = 0;
+      minute < 120 && !useGameStore.getState().game.buyerOffers.length;
+      minute++
+    ) {
+      useGameStore.getState().tick();
+    }
+    const offered = useGameStore.getState().game;
+    const offer = offered.buyerOffers[0];
+    expect(offer).toBeDefined();
+    const listing = offered.playerListings.find(
+      (item) => item.id === offer.listingId,
+    )!;
+    const event = offered.analytics.events.find(
+      (item) => item.id === `analytics:buyer_offer:${offer.id}`,
+    )!;
+    expect(event.properties).toMatchObject({
+      buyerTempoRevision: "buyer-tempo-2026-09-05",
+      scripted: false,
+      listingAgeAtOfferMin:
+        offer.expiresAtGameMin - 60 - listing.createdAtGameMin,
+    });
+    expect(offered.cashMinor).toBe(listed.cashMinor);
+    expect(offered.transactionJournal).toEqual(listed.transactionJournal);
+  });
+
   it.each(["offer", "listing"] as const)(
     "rejects an expired %s at the saved game-time boundary without changing accounting",
     (expired) => {
@@ -732,6 +770,15 @@ describe("FTUE store integration", () => {
     const offer = game.buyerOffers.find((item) =>
       item.id.startsWith("offer:ftue-first-flip:"),
     )!;
+    expect(
+      game.analytics.events.find(
+        (event) => event.id === `analytics:buyer_offer:${offer.id}`,
+      )?.properties,
+    ).toMatchObject({
+      buyerTempoRevision: "buyer-tempo-2026-09-05",
+      scripted: true,
+      listingAgeAtOfferMin: 0,
+    });
     useGameStore.getState().acceptBuyer(offer.id);
     game = useGameStore.getState().game;
     expect(game.ftue.stage).toBe("COMPLETE");

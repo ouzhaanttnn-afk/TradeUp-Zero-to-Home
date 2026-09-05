@@ -784,7 +784,19 @@ Vertical slice satış tarafında üç aksiyon kullanır: **Kabul et**, **Bir ka
 - Nadiren askingPrice üstü acil alıcı gelebilir; rarity/demand ile gerekçelenir.
 - Reserved state sırasında başka buyer offer çifte satış yaratamaz.
 
-## Gelişmiş müşteri ilişkisi
+### Kullanıcı onaylı tempo revizyonu — 5 Eylül 2026
+
+Oyuncu geri bildirimi: ilk öğretici satıştan sonra ilanlarda teklif beklemek akışı durduruyor. Kullanıcının “Biraz daha hızlandıralım” talebi yalnız alıcı bekleme temposu için aşağıdaki sınırlı revizyonu yetkilendirir:
+
+- Normal ilanda ilk alıcı değerlendirmesi 3 yerine 1 oyun dakikasında başlar.
+- Mevcut fiyat uyumu, talep, satış hızı ve hazırlık etkilerinden hesaplanan geliş olasılığı `BUYER_TEMPO_CONFIG.arrivalMultiplier = 2` ile çarpılır; kesin alıcı veya süre garantisi yoktur.
+- Teklif tutarı formülü, ürün değerleri, maliyet/kâr hesabı, dünya saati, ilan/teklif ömrü ve iki pazarlık hakkı değişmez. İlk oturumun zorunlu satın alma adımları kaldırılmaz.
+- Reklam yerleşimleri, uygunluk şartları ve limitleri değişmez. İlan öne çıkarma mevcut ortak alıcı algoritmasını bir kez çalıştırmaya devam eder; ayrı bir ücretli olasılık bonusu yoktur.
+- `buyer_offer` olayına tempo sürümü, öğretici teklif ayrımı ve teklifin oluştuğu ilan yaşı eklenir. Deterministik eski/yeni karşılaştırması teknik doğrulamadır; gerçek oyuncu verisinin yerini tutmaz. Kayıtlarda zaten oluşmuş tekliflerin tutarı ve süresi geriye dönük değiştirilmez.
+
+Bu revizyon, diğer kapsam dondurma kurallarını veya monetizasyon kalibrasyon zarfını genişletmez.
+
+## Gelişmiş müşteri ilişkisi (ertelenen kapsam)
 > **[ERTELENDİ] Gelişmiş müşteri ilişkisi:** Tekrarlayan müşteriler, güven puanı ve özel siparişler ancak çekirdek buyer offer verisi güçlü retention gösterirse post-soft-launch kapsamına alınır.
 
 

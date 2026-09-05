@@ -15,6 +15,13 @@ export const WORLD_CONFIG = {
   offlineClosureRatio: 0.5,
 } as const;
 
+// User-approved buyer-wait calibration; does not accelerate the world clock.
+export const BUYER_TEMPO_CONFIG = {
+  revision: "buyer-tempo-2026-09-05",
+  minimumAgeMin: 1,
+  arrivalMultiplier: 2,
+} as const;
+
 export const META_CONFIG = {
   expertiseLevelXp: [0, 30, 80, 150, 240, 350, 480, 630, 800, 990, 1_200],
   expertiseXp: {

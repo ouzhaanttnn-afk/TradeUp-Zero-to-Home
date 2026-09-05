@@ -7,7 +7,7 @@ import {
   settleAssetSale,
   withdrawPlayerListing,
 } from "../domain/economy";
-import { WORLD_CONFIG } from "../domain/config";
+import { BUYER_TEMPO_CONFIG, WORLD_CONFIG } from "../domain/config";
 import { comparableListings, inspectListing } from "../domain/decision";
 import { startPreparation } from "../domain/preparation";
 import {
@@ -197,7 +197,20 @@ const withBuyerOfferAnalytics = (previous: GameState, state: GameState) => {
         trackAnalytics(
           next,
           "buyer_offer",
-          { listingId: offer.listingId, amountMinor: offer.amountMinor },
+          {
+            listingId: offer.listingId,
+            amountMinor: offer.amountMinor,
+            buyerTempoRevision: BUYER_TEMPO_CONFIG.revision,
+            scripted: offer.id.startsWith("offer:ftue-"),
+            listingAgeAtOfferMin: Math.max(
+              0,
+              offer.expiresAtGameMin -
+                WORLD_CONFIG.buyerOfferLifetimeMin -
+                (state.playerListings.find(
+                  (listing) => listing.id === offer.listingId,
+                )?.createdAtGameMin ?? state.gameTimeMin),
+            ),
+          },
           offer.id,
         ),
       state,

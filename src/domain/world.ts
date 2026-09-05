@@ -1,5 +1,5 @@
 import { market, rng } from "../game";
-import { WORLD_CONFIG } from "./config";
+import { BUYER_TEMPO_CONFIG, WORLD_CONFIG } from "./config";
 import { netWorthMinor } from "./economy";
 import { completeDuePreparations } from "./preparation";
 import { recordMarketExits } from "./meta";
@@ -166,13 +166,18 @@ function advanceMarketMinute(
 const activePlayerListing = (listing: PlayerListing) =>
   listing.state === "ACTIVE";
 
-const offerForMinute = (
+export const buyerOfferForMinute = (
   state: GameState,
   listing: PlayerListing,
   gameTimeMin: number,
   rollSalt = 0,
+  tempo: {
+    minimumAgeMin: number;
+    arrivalMultiplier: number;
+  } = BUYER_TEMPO_CONFIG,
 ): BuyerOffer | undefined => {
-  if (gameTimeMin - listing.createdAtGameMin < 3) return undefined;
+  if (gameTimeMin - listing.createdAtGameMin < tempo.minimumAgeMin)
+    return undefined;
   if (
     state.buyerOffers.some(
       (offer) =>
@@ -196,12 +201,19 @@ const offerForMinute = (
     (asset.instance.liquidityBonusBps / 10_000) * 0.014 +
     priceFit * 0.02;
   const roll = rng(
-    state.seed + hashString(listing.id) * 65_537 + gameTimeMin * 131_071 + rollSalt,
+    state.seed +
+      hashString(listing.id) * 65_537 +
+      gameTimeMin * 131_071 +
+      rollSalt,
   )();
-  if (roll >= arrivalChance) return undefined;
+  if (roll >= clamp01(arrivalChance * tempo.arrivalMultiplier))
+    return undefined;
 
   const amountRoll = rng(
-    state.seed + hashString(listing.id) * 8_191 + gameTimeMin * 524_287 + rollSalt,
+    state.seed +
+      hashString(listing.id) * 8_191 +
+      gameTimeMin * 524_287 +
+      rollSalt,
   )();
   const conditionFactor = 0.96 + (asset.instance.condition - 75) / 500;
   const demandFactor = 0.96 + asset.instance.family.demand * 0.06;
@@ -235,7 +247,7 @@ export function rollBuyerExposure(
     (entry) => entry.id === listingId && entry.state === "ACTIVE",
   );
   if (!listing) return state;
-  const offer = offerForMinute(
+  const offer = buyerOfferForMinute(
     state,
     listing,
     state.gameTimeMin,
@@ -324,7 +336,7 @@ function advancePlayerListingsMinute(state: GameState, gameTimeMin: number) {
   const newOffers = playerListings
     .filter(activePlayerListing)
     .flatMap((listing) => {
-      const offer = offerForMinute(offerState, listing, gameTimeMin);
+      const offer = buyerOfferForMinute(offerState, listing, gameTimeMin);
       return offer ? [offer] : [];
     });
   const offeredListingIds = new Set(newOffers.map((offer) => offer.listingId));
