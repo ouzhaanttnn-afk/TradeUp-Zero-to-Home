@@ -39,6 +39,7 @@ import { HOME_GOAL_MINOR, money, signal, signedMoney, wealth } from "./game";
 import { useGameStore } from "./stores/gameStore";
 import { Icon, type IconName } from "./ui/Icon";
 import { evidencePresentation } from "./ui/evidencePresentation";
+import { missedOpportunityPresentation } from "./ui/followPresentation";
 import { ownershipPresentation } from "./ui/ownershipPresentation";
 import { simplifyLegacyPlayerCopy } from "./ui/playerLanguage";
 
@@ -635,9 +636,10 @@ export default function App() {
             <div className="feed compact-feed">
               {watchedListings.map((item) => (
                 <button
-                  className="listing"
+                  className="listing watch-listing"
                   key={item.id}
                   onClick={() => selectListing(item.id)}
+                  aria-label={`${item.instance.family.name}, fiyat ${money(item.priceMinor)}, yüzde ${item.instance.condition} kondisyon. Takip edilen ilanı aç`}
                 >
                   <ProductVisual
                     instance={item.instance}
@@ -668,16 +670,36 @@ export default function App() {
                 );
                 return (
                   <article className="follow-card" key={search.id}>
-                    <div>
-                      <small>KAYITLI ARAMA · {matches.length} EŞLEŞME</small>
-                      <h3>{family?.name ?? "Bilinmeyen ürün grubu"}</h3>
-                      <p>
-                        En çok {money(search.maxPriceMinor)} · min. %
-                        {search.minCondition} kondisyon · bilgi{" "}
-                        {search.evidencePreference === "CHECKED"
-                          ? "kontrol edilmiş"
-                          : "fark etmez"}
-                      </p>
+                    <div className="follow-card-heading">
+                      <div>
+                        <small>ÜRÜN ALARMI</small>
+                        <h3>{family?.name ?? "Bilinmeyen ürün grubu"}</h3>
+                      </div>
+                      <span
+                        className={`match-count${matches.length ? " has-matches" : ""}`}
+                      >
+                        {matches.length
+                          ? `${matches.length} eşleşme`
+                          : "Bekliyor"}
+                      </span>
+                    </div>
+                    <div className="alarm-criteria">
+                      <span>
+                        <small>En yüksek fiyat</small>
+                        <b>{money(search.maxPriceMinor)}</b>
+                      </span>
+                      <span>
+                        <small>En düşük kondisyon</small>
+                        <b>%{search.minCondition}</b>
+                      </span>
+                      <span>
+                        <small>Bilgi kontrolü</small>
+                        <b>
+                          {search.evidencePreference === "CHECKED"
+                            ? "Gerekli"
+                            : "Fark etmez"}
+                        </b>
+                      </span>
                     </div>
                     <div className="inline-actions">
                       {matches[0] ? (
@@ -688,7 +710,10 @@ export default function App() {
                           Eşleşmeyi aç
                         </button>
                       ) : null}
-                      <button onClick={() => removeSearch(search.id)}>
+                      <button
+                        className="text-button"
+                        onClick={() => removeSearch(search.id)}
+                      >
                         Kaldır
                       </button>
                     </div>
@@ -704,19 +729,25 @@ export default function App() {
                 const similar = marketListings.find(
                   (listing) => listing.familyId === missed.familyId,
                 );
+                const missedState = missedOpportunityPresentation(
+                  missed.reason,
+                  game.gameTimeMin,
+                  missed.atGameMin,
+                );
                 return (
                   <article className="follow-card missed" key={missed.id}>
-                    <div>
-                      <small>
-                        {missed.reason === "NPC_PURCHASE"
-                          ? "BAŞKA ALICI ALDI"
-                          : "SÜRESİ DOLDU"}{" "}
-                        · {missed.atGameMin}. DK
+                    <div className="missed-meta">
+                      <small className={`missed-reason ${missedState.tone}`}>
+                        {missedState.label}
                       </small>
+                      <span className="missed-age">{missedState.ageLabel}</span>
+                    </div>
+                    <div>
                       <h3>{missed.familyName}</h3>
                       <p>
                         {money(missed.priceMinor)} · %{missed.condition}{" "}
-                        kondisyon. Karar kaydı silinmedi; bu bir ceza değil.
+                        kondisyon. Fırsat kapandı; benzer ilanları aramaya devam
+                        edebilirsin.
                       </p>
                     </div>
                     {similar ? (
