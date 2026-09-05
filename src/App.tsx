@@ -35,7 +35,7 @@ import type {
   MonetizationProductId,
 } from "./domain/models";
 import { activeMarketListings, npcRiskSignal } from "./domain/world";
-import { HOME_GOAL_MINOR, money, signal, wealth } from "./game";
+import { HOME_GOAL_MINOR, money, signal, signedMoney, wealth } from "./game";
 import { useGameStore } from "./stores/gameStore";
 
 type Tab = "market" | "follow" | "portfolio" | "journey";
@@ -166,6 +166,7 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [purchasesOpen, setPurchasesOpen] = useState(false);
   const [resetArmed, setResetArmed] = useState(false);
+  const [quickSaleAssetId, setQuickSaleAssetId] = useState<string | null>(null);
   const {
     game,
     ready,
@@ -356,11 +357,59 @@ export default function App() {
                 ))
             : null}
           {!showPreparation && !ftueActive ? (
-            <button onClick={() => sell(item, true)}>
-              Hızlı çık <b>{money(quote.quickSaleMinor)}</b>
-            </button>
+            quickSaleAssetId === item.id ? (
+              <div
+                className="quick-sale-confirm"
+                role="group"
+                aria-label="Hızlı satış onayı"
+              >
+                <strong>
+                  {quote.quickSaleProfitMinor >= 0 ? "Net kâr" : "Net zarar"}{" "}
+                  <span
+                    className={
+                      quote.quickSaleProfitMinor < 0 ? "loss" : "profit"
+                    }
+                  >
+                    {signedMoney(quote.quickSaleProfitMinor)}
+                  </span>
+                </strong>
+                <small>
+                  Gelir {money(quote.quickSaleMinor)} · Defter maliyeti{" "}
+                  {money(item.bookCostMinor)}
+                </small>
+                <small>
+                  Dengeli ilana göre vazgeçilen tahmini premium{" "}
+                  {money(quote.estimatedPremiumGivenUpMinor)}
+                </small>
+                <button
+                  className="primary"
+                  onClick={() => {
+                    setQuickSaleAssetId(null);
+                    sell(item, true);
+                  }}
+                >
+                  Satışı onayla · {money(quote.quickSaleMinor)}
+                </button>
+                <button
+                  className="text-button"
+                  onClick={() => setQuickSaleAssetId(null)}
+                >
+                  Vazgeç
+                </button>
+              </div>
+            ) : (
+              <button onClick={() => setQuickSaleAssetId(item.id)}>
+                Hızlı çık · net{" "}
+                <b
+                  className={quote.quickSaleProfitMinor < 0 ? "loss" : "profit"}
+                >
+                  {signedMoney(quote.quickSaleProfitMinor)}
+                </b>
+              </button>
+            )
           ) : null}
           {!showPreparation &&
+          quickSaleAssetId !== item.id &&
           (!ftueActive || game.ftue.stage === "LISTING") ? (
             <button
               className="primary"

@@ -59,12 +59,21 @@ export const netWorthMinor = (
 export const activeBookCostMinor = (state: Pick<GameState, "ownedAssets">) =>
   activeOwnedAssets(state).reduce((sum, asset) => sum + asset.bookCostMinor, 0);
 
-export const quoteAssetExit = (asset: OwnedAsset) => ({
-  quickSaleMinor:
-    Math.round((asset.instance.fairValueMinor * 0.82) / 1_000) * 1_000,
-  balancedAskingMinor:
-    Math.round((asset.instance.fairValueMinor * 1.05) / 1_000) * 1_000,
-});
+export const quoteAssetExit = (asset: OwnedAsset) => {
+  const quickSaleMinor =
+    Math.round((asset.instance.fairValueMinor * 0.82) / 1_000) * 1_000;
+  const balancedAskingMinor =
+    Math.round((asset.instance.fairValueMinor * 1.05) / 1_000) * 1_000;
+  return {
+    quickSaleMinor,
+    balancedAskingMinor,
+    quickSaleProfitMinor: quickSaleMinor - asset.bookCostMinor,
+    estimatedPremiumGivenUpMinor: Math.max(
+      0,
+      balancedAskingMinor - quickSaleMinor,
+    ),
+  };
+};
 
 const hasJournalEntry = (
   state: Pick<GameState, "transactionJournal">,

@@ -462,6 +462,26 @@ main {
 .loss {
   color: #ff867d;
 }
+.profit {
+  color: #69d99c;
+}
+.quick-sale-confirm {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 7px;
+  padding: 10px;
+  border: 1px solid #4b6659;
+  border-radius: 12px;
+  background: #0d1b15;
+}
+.quick-sale-confirm > strong,
+.quick-sale-confirm > small {
+  text-align: left;
+}
+.quick-sale-confirm > small {
+  color: #9eb7aa;
+  line-height: 1.4;
+}
 .score-card p {
   font-size: calc(12px + var(--text-size-boost));
   line-height: 1.5;

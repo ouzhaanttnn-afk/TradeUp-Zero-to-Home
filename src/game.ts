@@ -732,6 +732,8 @@ const formatter = new Intl.NumberFormat("tr-TR", {
   maximumFractionDigits: 2,
 });
 export const money = (minor: number) => formatter.format(minor / 100);
+export const signedMoney = (minor: number) =>
+  minor > 0 ? `+${money(minor)}` : minor < 0 ? money(minor) : `±${money(0)}`;
 
 const createDefaultMonetizationState = (gameTimeMin: number) => ({
   entitlements: [],

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { initialState, validateState } from "../game";
+import { initialState, signedMoney, validateState } from "../game";
 import type { GameState, OwnedAsset, OwnershipState } from "./models";
 import {
   activeBookCostMinor,
@@ -8,6 +8,7 @@ import {
   createPlayerListing,
   netWorthMinor,
   purchaseListing,
+  quoteAssetExit,
   reconcileJournal,
   settleAssetSale,
   withdrawPlayerListing,
@@ -26,6 +27,28 @@ function purchasedState(): GameState {
 }
 
 describe("canonical ownership and accounting", () => {
+  it("quotes quick-sale proceeds, full-book-cost profit and forgone premium before settlement", () => {
+    const state = purchasedState();
+    const asset = {
+      ...state.ownedAssets[0],
+      bookCostMinor: 23_000,
+      instance: {
+        ...state.ownedAssets[0].instance,
+        fairValueMinor: 40_000,
+      },
+    };
+
+    expect(quoteAssetExit(asset)).toEqual({
+      quickSaleMinor: 33_000,
+      balancedAskingMinor: 42_000,
+      quickSaleProfitMinor: 10_000,
+      estimatedPremiumGivenUpMinor: 9_000,
+    });
+    expect(signedMoney(10_000)).toMatch(/^\+/);
+    expect(signedMoney(-10_000)).toMatch(/^-/);
+    expect(signedMoney(0)).toMatch(/^±/);
+  });
+
   it("keeps an asset in net worth when it is listed", () => {
     const before = purchasedState();
     const asset = before.ownedAssets[0];
