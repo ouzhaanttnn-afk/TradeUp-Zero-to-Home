@@ -335,8 +335,8 @@
     {
       "assetKey": "prd_camera_lens",
       "familyId": "camera_lens",
-      "source": "fallback:fb_photo",
-      "dedicated": false
+      "source": "../products/prd_camera_lens.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_instant_camera",
