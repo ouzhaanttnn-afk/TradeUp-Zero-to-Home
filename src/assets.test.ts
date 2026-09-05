@@ -9,12 +9,13 @@ import {
 } from "./assets";
 
 describe("asset manifest and visual treatments", () => {
-  it("registers every internal-alpha family and measured dedicated expansion", () => {
+  it("registers a dedicated asset for every internal-alpha family", () => {
     expect(new Set(families.map((family) => family.assetKey)).size).toBe(64);
     expect(registeredAssetKeys).toHaveLength(64);
     for (const family of families) {
       expect(registeredAssetKeys).toContain(family.assetKey);
       expect(assetFor(family.assetKey, family.category)).toBeTruthy();
+      expect(hasDedicatedAsset(family.assetKey)).toBe(true);
     }
     for (const family of heroFamilies) {
       expect(hasDedicatedAsset(family.assetKey)).toBe(true);
@@ -54,6 +55,8 @@ describe("asset manifest and visual treatments", () => {
     expect(hasDedicatedAsset("prd_audio_interface")).toBe(true);
     expect(hasDedicatedAsset("prd_drum_machine")).toBe(true);
     expect(hasDedicatedAsset("prd_violin")).toBe(true);
+    expect(hasDedicatedAsset("prd_graphics_tablet")).toBe(true);
+    expect(hasDedicatedAsset("prd_router")).toBe(true);
   });
 
   it("returns a deterministic fallback for an unknown asset key", () => {

@@ -317,14 +317,14 @@
     {
       "assetKey": "prd_graphics_tablet",
       "familyId": "graphics_tablet",
-      "source": "fallback:fb_computer",
-      "dedicated": false
+      "source": "../products/prd_graphics_tablet.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_router",
       "familyId": "router",
-      "source": "fallback:fb_computer",
-      "dedicated": false
+      "source": "../products/prd_router.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_camera",

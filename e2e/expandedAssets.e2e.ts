@@ -307,6 +307,8 @@ test("final expansion artwork loads without category fallbacks", async ({
     ["audio_interface", "Vox Ses Arayüzü", "prd_audio_interface"],
     ["drum_machine", "Ritim Davul Makinesi", "prd_drum_machine"],
     ["violin", "Ladin Öğrenci Kemanı", "prd_violin"],
+    ["graphics_tablet", "Çizim Tableti", "prd_graphics_tablet"],
+    ["router", "Mesh Ağ İstasyonu", "prd_router"],
   ] as const;
   const families = rows.map(([familyId]) => familyById(familyId));
   if (families.some((family) => !family)) {

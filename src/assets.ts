@@ -53,6 +53,8 @@ import bassGuitar from "./assets/products/prd_bass_guitar.png";
 import audioInterface from "./assets/products/prd_audio_interface.png";
 import drumMachine from "./assets/products/prd_drum_machine.png";
 import violin from "./assets/products/prd_violin.png";
+import graphicsTablet from "./assets/products/prd_graphics_tablet.png";
+import router from "./assets/products/prd_router.png";
 import boardGame from "./assets/products/prd_board_game.png";
 import portableRadio from "./assets/products/prd_portable_radio.png";
 import fountainPen from "./assets/products/prd_fountain_pen.png";
@@ -117,6 +119,8 @@ const dedicatedAssets: Record<string, string> = {
   prd_audio_interface: audioInterface,
   prd_drum_machine: drumMachine,
   prd_violin: violin,
+  prd_graphics_tablet: graphicsTablet,
+  prd_router: router,
   prd_board_game: boardGame,
   prd_portable_radio: portableRadio,
   prd_fountain_pen: fountainPen,
