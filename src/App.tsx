@@ -1126,24 +1126,25 @@ export default function App() {
               role="tablist"
               aria-label="Portföy bölümleri"
             >
-              {(["inventory", "preparation", "listings"] as const).map(
-                (segment) => (
-                  <button
-                    role="tab"
-                    aria-selected={portfolioSegment === segment}
-                    aria-controls="portfolio-panel"
-                    className={portfolioSegment === segment ? "active" : ""}
-                    key={segment}
-                    onClick={() => setPortfolioSegment(segment)}
-                  >
-                    {segment === "inventory"
-                      ? "Envanter"
-                      : segment === "preparation"
-                        ? "Hazırlık"
-                        : "İlanlarım"}
-                  </button>
-                ),
-              )}
+              {(
+                [
+                  ["inventory", "Envanter", inventory.length],
+                  ["preparation", "Hazırlık", workshop.length],
+                  ["listings", "İlanlarım", playerListings.length],
+                ] as const
+              ).map(([segment, label, count]) => (
+                <button
+                  role="tab"
+                  aria-selected={portfolioSegment === segment}
+                  aria-controls="portfolio-panel"
+                  className={portfolioSegment === segment ? "active" : ""}
+                  key={segment}
+                  onClick={() => setPortfolioSegment(segment)}
+                >
+                  <span>{label}</span>
+                  <b aria-hidden="true">{count}</b>
+                </button>
+              ))}
             </div>
             {portfolioSegment !== "listings" &&
             !(portfolioSegment === "preparation"
@@ -1853,44 +1854,50 @@ export default function App() {
             >
               <Icon name="close" />
             </button>
-            <ProductVisual
-              instance={selected.instance}
-              className="hero-art"
-              alt={selected.instance.family.name}
-            />
-            <div className="sheet-title">
-              <small>
-                {selected.instance.family.category} ·{" "}
-                {sellerLabel[selected.seller]} satıcı
-              </small>
-              <h2 id="listing-detail-title">{selected.instance.family.name}</h2>
-            </div>
-            <div className="detail-price">
-              <div>
-                <small>İLAN FİYATI</small>
-                <strong>{money(selected.priceMinor)}</strong>
-              </div>
-              <span
-                className={
-                  signal(
-                    selected,
-                    categoryExpertiseLevel(
-                      game,
-                      selected.instance.family.category,
-                    ),
-                  ).cls
-                }
-              >
-                {
-                  signal(
-                    selected,
-                    categoryExpertiseLevel(
-                      game,
-                      selected.instance.family.category,
-                    ),
-                  ).text
-                }
+            <div className="sheet-hero-shell">
+              <ProductVisual
+                instance={selected.instance}
+                className="hero-art"
+                alt={selected.instance.family.name}
+              />
+              <span className="sheet-category">
+                {selected.instance.family.category}
               </span>
+            </div>
+            <div className="sheet-summary">
+              <div className="sheet-title">
+                <small>{sellerLabel[selected.seller]} satıcı</small>
+                <h2 id="listing-detail-title">
+                  {selected.instance.family.name}
+                </h2>
+              </div>
+              <div className="detail-price">
+                <div>
+                  <small>İLAN FİYATI</small>
+                  <strong>{money(selected.priceMinor)}</strong>
+                </div>
+                <span
+                  className={
+                    signal(
+                      selected,
+                      categoryExpertiseLevel(
+                        game,
+                        selected.instance.family.category,
+                      ),
+                    ).cls
+                  }
+                >
+                  {
+                    signal(
+                      selected,
+                      categoryExpertiseLevel(
+                        game,
+                        selected.instance.family.category,
+                      ),
+                    ).text
+                  }
+                </span>
+              </div>
             </div>
             <div className="sheet-follow-actions">
               <button
@@ -2085,6 +2092,10 @@ export default function App() {
               role="group"
               aria-label="Satın alma adımları"
             >
+              <div className="sheet-decision-heading">
+                <small>KARARIN</small>
+                <span>Nakit {money(game.cashMinor)}</span>
+              </div>
               {purchaseFeedback ? (
                 <p className="sheet-feedback" role="status">
                   {purchaseFeedback}

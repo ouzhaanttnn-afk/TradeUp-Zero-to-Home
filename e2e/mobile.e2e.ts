@@ -139,6 +139,13 @@ for (const width of [320, 390, 430]) {
         name: "Kuzey Defteri, fiyat ₺140, kondisyon yüzde 55, Piyasa fiyatı. İlan detaylarını aç",
       })
       .click();
+    await expect(page.locator(".sheet-category")).toHaveText("Küçük Eşya");
+    await expect(page.locator(".sheet-decision-heading")).toContainText(
+      "KARARIN",
+    );
+    await expect(page.locator(".sheet-decision-heading")).toContainText(
+      "Nakit ₺420",
+    );
     await page
       .getByRole("button", {
         name: "Benzer ilanlarla karşılaştır",

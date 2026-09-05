@@ -175,6 +175,13 @@ for (const choice of [
       name: "Kuzey Defteri",
       exact: true,
     });
+    await expect(firstAssetCard.locator("h3")).toHaveText("Kuzey Defteri");
+    expect(
+      await firstAssetCard.locator(".owned-icon").evaluate((element) => {
+        const box = element.getBoundingClientRect();
+        return box.width >= 68 && box.height >= 74;
+      }),
+    ).toBe(true);
     await expect(
       page.getByRole("complementary", { name: "İlk oturum rehberi" }),
     ).toHaveCount(0);
