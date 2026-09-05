@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "test": "vitest run",
+    "test:offline": "pnpm build && playwright test",
     "test:coverage": "vitest run --coverage",
     "format": "prettier --write src",
     "cap:sync": "capacitor sync android",
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.1",
+    "@playwright/test": "^1.62.1",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",

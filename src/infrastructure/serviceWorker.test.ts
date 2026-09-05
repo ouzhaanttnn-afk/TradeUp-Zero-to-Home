@@ -118,6 +118,10 @@ describe("offline worker", () => {
     );
     app.fetch.mockRejectedValue(new Error("offline"));
     expect(await (await app.request("/assets/app.js"))?.text()).toBe("cached");
+    expect(app.cache.match.mock.calls[0]).toEqual([
+      expect.objectContaining({ url: "https://tradeup.test/assets/app.js" }),
+      { ignoreVary: true },
+    ]);
   });
   it("uses the shell only for navigation and returns an error for missing assets", async () => {
     const app = worker();

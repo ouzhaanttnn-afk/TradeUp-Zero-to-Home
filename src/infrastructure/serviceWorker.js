@@ -40,10 +40,12 @@ self.addEventListener("fetch", (event) => {
       } catch {
         try {
           const cache = await caches.open(CACHE);
-          const cached = await cache.match(request);
+          // Precache fetches and module loads can differ in Origin headers.
+          // Only same-origin game resources reach this handler.
+          const cached = await cache.match(request, { ignoreVary: true });
           if (cached) return cached;
           if (request.mode === "navigate") {
-            const shell = await cache.match("/");
+            const shell = await cache.match("/", { ignoreVary: true });
             if (shell) return shell;
           }
         } catch {
