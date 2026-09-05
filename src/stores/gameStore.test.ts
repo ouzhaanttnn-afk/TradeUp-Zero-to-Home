@@ -17,11 +17,72 @@ vi.mock("../services/persistence", () => ({
   saveGame: vi.fn(() => Promise.resolve()),
 }));
 
-import { initialState } from "../game";
+import { initialState, validateState } from "../game";
 import { quoteAssetExit, reconcileJournal } from "../domain/economy";
 import { playFeedbackSound } from "../infrastructure/audio";
 import { loadGameWithStatus } from "../services/persistence";
 import { useGameStore } from "./gameStore";
+
+describe("replayed commands", () => {
+  beforeEach(() => {
+    const game = initialState(0, "SANDBOX");
+    game.cashMinor = 1_000_000;
+    game.transactionJournal[0].cashDeltaMinor = game.cashMinor;
+    useGameStore.setState({ game, ready: true, notice: "" });
+  });
+
+  it.each([
+    "purchase",
+    "preparation",
+    "inspection",
+    "withdrawal",
+    "sale",
+  ] as const)(
+    "replaying %s after save/load does not advance the market, duplicate analytics or change money",
+    (action) => {
+      const listing = useGameStore.getState().game.listings[0];
+      let replay: () => unknown;
+      if (action === "inspection") {
+        replay = () =>
+          useGameStore.getState().inspect(listing.id, "QUICK_TEST");
+      } else if (action === "purchase") {
+        replay = () => useGameStore.getState().buy(listing, 20_000);
+      } else {
+        useGameStore.getState().buy(listing, 20_000);
+        const asset = useGameStore.getState().game.ownedAssets[0];
+        if (action === "preparation") {
+          replay = () => useGameStore.getState().prepare(asset.id, "CLEAN");
+        } else if (action === "sale") {
+          replay = () => useGameStore.getState().sell(asset, true);
+        } else {
+          useGameStore
+            .getState()
+            .list(asset, quoteAssetExit(asset).balancedAskingMinor);
+          const playerListing = useGameStore.getState().game.playerListings[0];
+          replay = () =>
+            useGameStore.getState().withdrawListing(playerListing.id);
+        }
+      }
+      replay();
+      const restored = validateState(
+        JSON.parse(JSON.stringify(useGameStore.getState().game)),
+      );
+      useGameStore.setState({ game: restored });
+      vi.mocked(Haptics.notification).mockClear();
+      vi.mocked(playFeedbackSound).mockClear();
+      replay();
+      replay();
+      expect(useGameStore.getState().game).toBe(restored);
+      expect(reconcileJournal(restored)).toEqual({
+        cash: true,
+        activeBookCost: true,
+        realizedProfit: true,
+      });
+      expect(Haptics.notification).not.toHaveBeenCalled();
+      expect(playFeedbackSound).not.toHaveBeenCalled();
+    },
+  );
+});
 
 describe("accessibility preferences", () => {
   beforeEach(() => {

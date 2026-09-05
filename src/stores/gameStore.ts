@@ -291,6 +291,10 @@ export const useGameStore = create<Store>((set, get) => ({
       sound(game, "WARNING");
       return false;
     }
+    if (result.idempotent) {
+      set({ notice: "Bu ürün zaten satın alındı." });
+      return true;
+    }
     const purchasedAssetId = `asset:${item.id}`;
     let next = gainExpertise(
       result.state,
@@ -415,6 +419,10 @@ export const useGameStore = create<Store>((set, get) => ({
       sound(game, "WARNING");
       return;
     }
+    if (result.idempotent) {
+      set({ notice: "Bu satış zaten tamamlandı." });
+      return;
+    }
     const withMeta = recordCompletedSaleMeta(
       game,
       result.state,
@@ -451,6 +459,10 @@ export const useGameStore = create<Store>((set, get) => ({
       sound(game, "WARNING");
       return;
     }
+    if (result.idempotent) {
+      set({ notice: "Bu ilan zaten oluşturuldu." });
+      return;
+    }
     let next = recordFtueListing(result.state, item.id);
     next = withBuyerOfferAnalytics(result.state, next);
     next = trackAnalytics(
@@ -484,6 +496,10 @@ export const useGameStore = create<Store>((set, get) => ({
       sound(game, "WARNING");
       return;
     }
+    if (result.idempotent) {
+      set({ notice: "Bu ilan zaten geri çekildi." });
+      return;
+    }
     const progressed = progressBy(
       recordFtueWithdrawal(result.state, listingId),
     );
@@ -515,6 +531,10 @@ export const useGameStore = create<Store>((set, get) => ({
       set({ notice: "Bu teklif artık kabul edilemiyor." });
       buzz(game);
       sound(game, "WARNING");
+      return;
+    }
+    if (result.idempotent) {
+      set({ notice: "Bu satış zaten tamamlandı." });
       return;
     }
     const ftueProgressed =
@@ -554,6 +574,10 @@ export const useGameStore = create<Store>((set, get) => ({
       set({ notice: "Bu ilan artık incelenemiyor." });
       return;
     }
+    if (result.idempotent) {
+      set({ notice: "Bu kontrol zaten yapıldı." });
+      return;
+    }
     const listing = result.state.listings.find((item) => item.id === listingId);
     let next = gainExpertise(
       result.state,
@@ -573,9 +597,7 @@ export const useGameStore = create<Store>((set, get) => ({
       game: stampAndPersist(progressed.state),
       notice: worldNotice(
         progressed,
-        result.idempotent
-          ? "Bu kontrol zaten yapıldı."
-          : "Yeni kanıtlar tahmin aralığını daralttı.",
+        "Yeni kanıtlar tahmin aralığını daralttı.",
       ),
     });
   },
@@ -593,6 +615,10 @@ export const useGameStore = create<Store>((set, get) => ({
             ? "Bu hazırlık için yeterli nakit yok."
             : "Bu hazırlık şu anda yapılamıyor.",
       });
+      return;
+    }
+    if (result.idempotent) {
+      set({ notice: "Bu hazırlık zaten yapıldı." });
       return;
     }
     const tracked = trackAnalytics(
