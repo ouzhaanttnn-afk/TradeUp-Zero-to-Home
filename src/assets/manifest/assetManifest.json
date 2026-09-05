@@ -179,8 +179,8 @@
     {
       "assetKey": "prd_studio_monitor",
       "familyId": "studio_monitor",
-      "source": "fallback:fb_audio",
-      "dedicated": false
+      "source": "../products/prd_studio_monitor.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_dac_amp",

@@ -33,6 +33,7 @@ import cameraLens from "./assets/products/prd_camera_lens.png";
 import foldPhone from "./assets/products/prd_fold_phone.png";
 import racingWheel from "./assets/products/prd_racing_wheel.png";
 import standMixer from "./assets/products/prd_stand_mixer.png";
+import studioMonitor from "./assets/products/prd_studio_monitor.png";
 import boardGame from "./assets/products/prd_board_game.png";
 import portableRadio from "./assets/products/prd_portable_radio.png";
 import fountainPen from "./assets/products/prd_fountain_pen.png";
@@ -77,6 +78,7 @@ const dedicatedAssets: Record<string, string> = {
   prd_fold_phone: foldPhone,
   prd_racing_wheel: racingWheel,
   prd_stand_mixer: standMixer,
+  prd_studio_monitor: studioMonitor,
   prd_board_game: boardGame,
   prd_portable_radio: portableRadio,
   prd_fountain_pen: fountainPen,

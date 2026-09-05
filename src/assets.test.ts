@@ -34,6 +34,7 @@ describe("asset manifest and visual treatments", () => {
     expect(hasDedicatedAsset("prd_fold_phone")).toBe(true);
     expect(hasDedicatedAsset("prd_racing_wheel")).toBe(true);
     expect(hasDedicatedAsset("prd_stand_mixer")).toBe(true);
+    expect(hasDedicatedAsset("prd_studio_monitor")).toBe(true);
   });
 
   it("returns a deterministic fallback for an unknown asset key", () => {
