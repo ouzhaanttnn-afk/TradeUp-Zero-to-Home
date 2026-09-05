@@ -105,7 +105,7 @@ const seeds: Seed[] = [
   ],
   [
     "vinyl",
-    "Klasik Plak",
+    "Koleksiyonluk Klasik Plak Kapsülü",
     "prd_vinyl",
     42_000,
     "Küçük Eşya",
@@ -114,7 +114,7 @@ const seeds: Seed[] = [
   ],
   [
     "book",
-    "İmzalı İlk Baskı",
+    "Koleksiyonluk İlk Baskı Seti",
     "prd_book",
     98_000,
     "Küçük Eşya",
@@ -231,12 +231,12 @@ const seeds: Seed[] = [
   ],
   [
     "game_collection",
-    "Retro Oyun Seti",
+    "Koleksiyon Oyuncak Figür Seti",
     "prd_game_collection",
     150_000,
     "Oyun",
-    ["Platform", "Adet", "Kutulu"],
-    ["Disk yüzeyi", "Çalışma testi"],
+    ["Set Türü", "Adet", "Kutulu"],
+    ["Figür durumu", "İşçilik kontrolü"],
   ],
   [
     "guitar",
@@ -364,7 +364,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "board_game",
-    "Koleksiyon Masa Oyunu",
+    "Koleksiyon Masa Oyunu Seti",
     "prd_board_game",
     84_000,
     "Küçük Eşya",
@@ -494,7 +494,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "game_cartridge",
-    "Nadir Oyun Kartuşu",
+    "Nadir Koleksiyon Kartuşu",
     "prd_game_cartridge",
     175_000,
     "Oyun",
