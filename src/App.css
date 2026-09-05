@@ -241,6 +241,7 @@ button:disabled {
 }
 .app-shell {
   --text-size-boost: 0px;
+  --home-gold-progress: 0;
   width: min(100%, 430px);
   min-height: 100vh;
   min-height: 100svh;
@@ -254,6 +255,49 @@ button:disabled {
   position: relative;
   overflow-x: clip;
   box-shadow: 0 0 70px rgba(0, 0, 0, 0.45);
+}
+.app-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      circle at 82% 9%,
+      rgba(255, 215, 116, 0.52),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 5% 48%,
+      rgba(186, 125, 30, 0.34),
+      transparent 36%
+    ),
+    linear-gradient(145deg, rgba(226, 174, 68, 0.25), rgba(91, 54, 11, 0.1));
+  opacity: calc(var(--home-gold-progress) * 0.58);
+  transition:
+    opacity 1.4s ease,
+    filter 1.4s ease;
+}
+.app-shell.home-complete {
+  box-shadow: 0 0 78px rgba(212, 159, 51, 0.4);
+}
+.app-shell.home-complete::before {
+  filter: saturate(1.22) brightness(1.08);
+}
+.app-shell.home-atmosphere-pulse::before {
+  animation: home-atmosphere-arrival 1.6s ease-out;
+}
+@keyframes home-atmosphere-arrival {
+  0% {
+    filter: brightness(1);
+  }
+  38% {
+    filter: brightness(1.65) saturate(1.35);
+  }
+  100% {
+    filter: brightness(1);
+  }
 }
 .app-shell.large-text {
   --text-size-boost: 3px;
@@ -2035,6 +2079,171 @@ nav .active .nav-icon {
 }
 .locked-home {
   opacity: 0.72;
+}
+.home-purchase-button {
+  width: 100%;
+  margin-top: 12px;
+  border-color: #f3ce72;
+  color: #241704;
+  background: linear-gradient(135deg, #ffe39a, #d7a538);
+  box-shadow: 0 10px 24px rgba(212, 159, 51, 0.18);
+}
+.home-cash-plan {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px;
+  border: 1px solid rgba(232, 190, 99, 0.24);
+  border-radius: 12px;
+  background: rgba(211, 158, 48, 0.08);
+}
+.home-cash-plan span {
+  color: #dac99e;
+  font-size: calc(10px + var(--text-size-boost));
+  line-height: 1.45;
+}
+.home-cash-plan button {
+  min-height: 40px;
+}
+.home-finale {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  width: min(100%, 430px);
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: calc(28px + env(safe-area-inset-top)) 24px
+    calc(28px + env(safe-area-inset-bottom));
+  overflow: hidden;
+  text-align: center;
+  color: #251804;
+  background:
+    radial-gradient(
+      circle at 50% 24%,
+      rgba(255, 250, 213, 0.95),
+      transparent 25%
+    ),
+    radial-gradient(circle at 16% 78%, rgba(121, 70, 5, 0.24), transparent 32%),
+    linear-gradient(155deg, #ffecad 0%, #e4b44f 48%, #ad721b 100%);
+  animation: home-finale-arrival 900ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.home-finale-glow {
+  position: absolute;
+  width: 310px;
+  height: 310px;
+  border: 1px solid rgba(255, 255, 255, 0.56);
+  border-radius: 50%;
+  box-shadow: 0 0 90px rgba(255, 246, 196, 0.75);
+  animation: home-finale-glow 4s ease-out both;
+}
+.home-finale-house {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 92px;
+  height: 92px;
+  border-radius: 28px 28px 18px 18px;
+  color: #ffeeba;
+  background: #342006;
+  box-shadow: 0 18px 45px rgba(72, 40, 3, 0.28);
+  font-size: 50px;
+  animation: home-finale-house 1.2s 350ms cubic-bezier(0.18, 0.82, 0.2, 1) both;
+}
+.home-finale > small,
+.home-finale > h2,
+.home-finale > p,
+.home-finale-highlights,
+.home-finale > button {
+  position: relative;
+}
+.home-finale > small {
+  margin-top: 8px;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+}
+.home-finale > h2 {
+  font-size: calc(30px + var(--text-size-boost));
+  letter-spacing: -0.04em;
+}
+.home-finale > p {
+  max-width: 330px;
+  color: rgba(48, 29, 3, 0.76);
+  font-size: calc(13px + var(--text-size-boost));
+  line-height: 1.55;
+}
+.home-finale-highlights {
+  display: grid;
+  width: 100%;
+  gap: 6px;
+  margin-top: 4px;
+}
+.home-finale-highlights span {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 11px;
+  border: 1px solid rgba(73, 43, 3, 0.16);
+  border-radius: 11px;
+  background: rgba(255, 249, 218, 0.28);
+  font-size: calc(10px + var(--text-size-boost));
+}
+.home-finale-highlights b {
+  text-align: left;
+}
+.home-finale > button {
+  width: 100%;
+  margin-top: 6px;
+  border-color: #342006;
+  color: #ffeeba;
+  background: #342006;
+  animation: home-finale-action 500ms 3.2s ease both;
+}
+@keyframes home-finale-arrival {
+  from {
+    opacity: 0;
+    clip-path: circle(0 at 50% 46%);
+  }
+  to {
+    opacity: 1;
+    clip-path: circle(85% at 50% 46%);
+  }
+}
+@keyframes home-finale-glow {
+  from {
+    opacity: 0;
+    transform: scale(0.25) rotate(-8deg);
+  }
+  48% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.32;
+    transform: scale(1.55) rotate(5deg);
+  }
+}
+@keyframes home-finale-house {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.72);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes home-finale-action {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .timeline-header h3 {
   margin-top: 3px;

@@ -13,6 +13,8 @@ import { WORLD_CONFIG } from "./config";
 
 type EconomyFailureReason =
   | "INSUFFICIENT_CASH"
+  | "HOME_NOT_UNLOCKED"
+  | "HOME_ALREADY_PURCHASED"
   | "LISTING_NOT_ACTIVE"
   | "ASSET_NOT_FOUND"
   | "ASSET_NOT_AVAILABLE"
@@ -192,6 +194,63 @@ export function purchaseListing(
             sourceListingId: currentListing.id,
             familyId: currentListing.familyId,
           },
+        ),
+      ],
+    },
+  };
+}
+
+export function purchaseHome(
+  state: GameState,
+  purchasePriceMinor: number,
+  transactionId: string,
+  gameTime: number,
+): EconomyCommandResult {
+  if (hasJournalEntry(state, transactionId)) {
+    return { ok: true, state, idempotent: true };
+  }
+  if (!state.home.unlocked) {
+    return { ok: false, state, reason: "HOME_NOT_UNLOCKED" };
+  }
+  if (state.home.purchased) {
+    return { ok: false, state, reason: "HOME_ALREADY_PURCHASED" };
+  }
+  if (!Number.isInteger(purchasePriceMinor) || purchasePriceMinor <= 0) {
+    return { ok: false, state, reason: "INVALID_AMOUNT" };
+  }
+  if (state.cashMinor < purchasePriceMinor) {
+    return { ok: false, state, reason: "INSUFFICIENT_CASH" };
+  }
+
+  return {
+    ok: true,
+    idempotent: false,
+    state: {
+      ...state,
+      cashMinor: state.cashMinor - purchasePriceMinor,
+      home: { ...state.home, purchased: true },
+      career: [
+        ...state.career,
+        {
+          id: `career:${transactionId}`,
+          type: "HOME_PURCHASE",
+          group: "HOME",
+          atGameMin: gameTime,
+          label: "Kendi evini aldın",
+          amountMinor: purchasePriceMinor,
+        },
+      ],
+      transactionJournal: [
+        ...state.transactionJournal,
+        journalEntry(
+          transactionId,
+          "HOME_PURCHASE",
+          gameTime,
+          undefined,
+          -purchasePriceMinor,
+          0,
+          0,
+          { purchasePriceMinor },
         ),
       ],
     },

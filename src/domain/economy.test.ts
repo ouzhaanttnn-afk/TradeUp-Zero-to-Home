@@ -9,6 +9,7 @@ import {
   conservativeMarkToMarketMinor,
   createPlayerListing,
   netWorthMinor,
+  purchaseHome,
   purchaseListing,
   preparationAssets,
   inventoryAssets,
@@ -34,6 +35,62 @@ function purchasedState(): GameState {
 }
 
 describe("canonical ownership and accounting", () => {
+  it("purchases the home atomically with cash and preserves journal reconciliation", () => {
+    const state = initialState(0, "SANDBOX");
+    const priceMinor = 350_000_000;
+    state.cashMinor = priceMinor;
+    state.home = { ...state.home, unlocked: true };
+    state.transactionJournal[0] = {
+      ...state.transactionJournal[0],
+      cashDeltaMinor: priceMinor,
+    };
+
+    const result = purchaseHome(state, priceMinor, "home-purchase:career", 480);
+    if (!result.ok) throw new Error(result.reason);
+
+    expect(result.state.cashMinor).toBe(0);
+    expect(result.state.home.purchased).toBe(true);
+    expect(result.state.career.at(-1)).toMatchObject({
+      type: "HOME_PURCHASE",
+      amountMinor: priceMinor,
+    });
+    expect(result.state.transactionJournal.at(-1)).toMatchObject({
+      kind: "HOME_PURCHASE",
+      cashDeltaMinor: -priceMinor,
+    });
+    expect(reconcileJournal(result.state)).toEqual({
+      cash: true,
+      activeBookCost: true,
+      realizedProfit: true,
+    });
+
+    const repeated = purchaseHome(
+      result.state,
+      priceMinor,
+      "home-purchase:career",
+      480,
+    );
+    expect(repeated.ok && repeated.idempotent).toBe(true);
+    expect(repeated.state).toBe(result.state);
+  });
+
+  it("does not auto-sell inventory when home cash is insufficient", () => {
+    const state = initialState(0, "SANDBOX");
+    state.home = { ...state.home, unlocked: true };
+    const beforeAssets = state.ownedAssets;
+    const result = purchaseHome(
+      state,
+      350_000_000,
+      "home-purchase:insufficient",
+      480,
+    );
+
+    expect(result).toMatchObject({ ok: false, reason: "INSUFFICIENT_CASH" });
+    expect(result.state.cashMinor).toBe(state.cashMinor);
+    expect(result.state.ownedAssets).toBe(beforeAssets);
+    expect(result.state.home.purchased).toBe(false);
+  });
+
   it.each([15_000, 20_000, 30_000])(
     "previews the same profit as settlement for %s minor-unit proceeds",
     (proceeds) => {

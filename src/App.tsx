@@ -1,4 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import { App as CapacitorApp } from "@capacitor/app";
 import "./App.css";
 import { assetFor, fallbackAssetFor, visualTreatmentFor } from "./assets";
@@ -67,6 +73,7 @@ import {
   type MarketSort,
 } from "./ui/marketCard";
 import { purchaseBudget } from "./ui/purchaseBudget";
+import { homeAtmosphereStage, homeGoldPercent } from "./ui/homeAtmosphere";
 
 type Tab = "market" | "follow" | "portfolio" | "journey";
 type PortfolioSegment = "inventory" | "preparation" | "listings";
@@ -196,8 +203,12 @@ export default function App() {
   const [resetArmed, setResetArmed] = useState(false);
   const [quickSaleAssetId, setQuickSaleAssetId] = useState<string | null>(null);
   const [focusedAssetId, setFocusedAssetId] = useState<string | null>(null);
+  const [homeFinaleOpen, setHomeFinaleOpen] = useState(false);
+  const [homePulseStage, setHomePulseStage] = useState<number | null>(null);
   const sheetCloseRef = useRef<HTMLButtonElement>(null);
   const comparisonRef = useRef<HTMLDivElement>(null);
+  const homeFinaleButtonRef = useRef<HTMLButtonElement>(null);
+  const previousHomeStageRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     if (!comparing) return;
@@ -222,6 +233,7 @@ export default function App() {
     scan,
     tick,
     buy,
+    buyHome,
     offer,
     sell,
     list,
@@ -291,6 +303,22 @@ export default function App() {
       previousFocus?.focus();
     };
   }, [selectedId]);
+  useEffect(() => {
+    if (!homeFinaleOpen) return undefined;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    const frame = window.requestAnimationFrame(() =>
+      homeFinaleButtonRef.current?.focus(),
+    );
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setHomeFinaleOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("keydown", closeOnEscape);
+      previousFocus?.focus();
+    };
+  }, [homeFinaleOpen]);
 
   useEffect(() => {
     if (tab !== "portfolio" || !focusedAssetId) return;
@@ -403,9 +431,35 @@ export default function App() {
   const marketLevel = marketExpertiseLevel(game);
   const marketXpTarget = nextExpertiseThreshold(game.expertise.marketXp);
   const estimates = wealthPresentation(game);
-  const homeProgress = Math.min(
-    100,
-    Math.floor((total / HOME_GOAL_MINOR) * 100),
+  const homeProgress = game.home.purchased
+    ? 100
+    : Math.min(100, Math.floor((total / HOME_GOAL_MINOR) * 100));
+  const goldPercent = homeGoldPercent(
+    total,
+    HOME_GOAL_MINOR,
+    game.home.purchased,
+  );
+  const atmosphereStage = homeAtmosphereStage(goldPercent);
+  useEffect(() => {
+    const previous = previousHomeStageRef.current;
+    previousHomeStageRef.current = atmosphereStage;
+    if (previous === undefined || atmosphereStage <= previous) return undefined;
+    setHomePulseStage(atmosphereStage);
+    const timer = window.setTimeout(() => setHomePulseStage(null), 1_600);
+    return () => window.clearTimeout(timer);
+  }, [atmosphereStage]);
+  const finaleHighlights = useMemo(
+    () =>
+      (
+        [
+          "FIRST_SALE",
+          "BEST_FLIP_UPDATED",
+          "DOMINANT_CATEGORY_CHANGED",
+        ] as const
+      )
+        .map((type) => game.career.findLast((event) => event.type === type))
+        .filter((event) => event !== undefined),
+    [game.career],
   );
   const timeline = useMemo(
     () =>
@@ -727,7 +781,12 @@ export default function App() {
 
   return (
     <div
-      className={`app-shell${game.accessibility.reducedMotion ? " reduced-motion" : ""}${game.accessibility.largeText ? " large-text" : ""}`}
+      className={`app-shell${game.accessibility.reducedMotion ? " reduced-motion" : ""}${game.accessibility.largeText ? " large-text" : ""}${game.home.purchased ? " home-complete" : ""}${homePulseStage !== null ? " home-atmosphere-pulse" : ""}`}
+      style={
+        {
+          "--home-gold-progress": `${goldPercent / 100}`,
+        } as CSSProperties
+      }
     >
       <header>
         <div>
@@ -1729,24 +1788,53 @@ export default function App() {
                 </div>
                 <div>
                   <small>EV YOLCULUĞU · %{homeProgress}</small>
-                  <h3>Kendi alanına giden yol</h3>
+                  <h3>
+                    {game.home.purchased
+                      ? "Evin artık senin"
+                      : "Kendi alanına giden yol"}
+                  </h3>
                   <p>
-                    {homeProgress < 50
-                      ? "İlk kârlı satışınla hedef görünür oldu."
-                      : `Kalan tahmini mesafe ${formatEstimate({
-                          lowMinor: Math.max(
-                            0,
-                            HOME_GOAL_MINOR - estimates.total.highMinor,
-                          ),
-                          highMinor: Math.max(
-                            0,
-                            HOME_GOAL_MINOR - estimates.total.lowMinor,
-                          ),
-                        })}. Ev alımı için hedefte nakit gerekecek.`}
+                    {game.home.purchased
+                      ? "Hedef tamamlandı; pazar ve kariyerin açık kalmaya devam ediyor."
+                      : homeProgress < 50
+                        ? "İlk kârlı satışınla hedef görünür oldu."
+                        : `Kalan tahmini mesafe ${formatEstimate({
+                            lowMinor: Math.max(
+                              0,
+                              HOME_GOAL_MINOR - estimates.total.highMinor,
+                            ),
+                            highMinor: Math.max(
+                              0,
+                              HOME_GOAL_MINOR - estimates.total.lowMinor,
+                            ),
+                          })}. Ev alımı için hedefte nakit gerekecek.`}
                   </p>
                   <div className="xp-bar">
                     <i style={{ width: `${homeProgress}%` }} />
                   </div>
+                  {!game.home.purchased && game.cashMinor >= HOME_GOAL_MINOR ? (
+                    <button
+                      className="home-purchase-button"
+                      onClick={() => {
+                        if (buyHome()) setHomeFinaleOpen(true);
+                      }}
+                    >
+                      Evi satın al · {money(HOME_GOAL_MINOR)}
+                    </button>
+                  ) : null}
+                  {!game.home.purchased &&
+                  homeProgress >= 100 &&
+                  game.cashMinor < HOME_GOAL_MINOR ? (
+                    <div className="home-cash-plan">
+                      <span>
+                        Nakit eksiği {money(HOME_GOAL_MINOR - game.cashMinor)}.
+                        Ürünlerin otomatik satılmaz.
+                      </span>
+                      <button onClick={() => navigate("portfolio")}>
+                        Portföyü aç
+                      </button>
+                    </div>
+                  ) : null}
                 </div>
               </section>
             ) : (
@@ -1868,6 +1956,46 @@ export default function App() {
           </button>
         ))}
       </nav>
+
+      {homeFinaleOpen ? (
+        <section
+          className="home-finale"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="home-finale-title"
+        >
+          <div className="home-finale-glow" aria-hidden="true" />
+          <div className="home-finale-house" aria-hidden="true">
+            <Icon name="home" />
+          </div>
+          <small>ZERO TO HOME</small>
+          <h2 id="home-finale-title">Anahtar artık sende.</h2>
+          <p>
+            Sıfırdan başladın. Aldın, hazırladın, sattın ve kendi evine ulaştın.
+          </p>
+          {finaleHighlights.length ? (
+            <div
+              className="home-finale-highlights"
+              aria-label="Yolculuğundan anlar"
+            >
+              {finaleHighlights.map((event) => (
+                <span key={event.id}>
+                  <b>{simplifyLegacyPlayerCopy(event.label)}</b>
+                  {event.amountMinor !== undefined
+                    ? money(event.amountMinor)
+                    : null}
+                </span>
+              ))}
+            </div>
+          ) : null}
+          <button
+            ref={homeFinaleButtonRef}
+            onClick={() => setHomeFinaleOpen(false)}
+          >
+            Yolculuğa devam et
+          </button>
+        </section>
+      ) : null}
 
       {selected ? (
         <div className="scrim" onClick={() => setSelectedId(null)}>

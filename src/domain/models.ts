@@ -202,6 +202,7 @@ export type TransactionKind =
   | "LISTING"
   | "RESERVATION"
   | "SALE"
+  | "HOME_PURCHASE"
   | "REFUND"
   | "REWARD";
 

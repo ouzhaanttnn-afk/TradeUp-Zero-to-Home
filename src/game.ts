@@ -229,6 +229,7 @@ const journalEntrySchema = z.object({
     "LISTING",
     "RESERVATION",
     "SALE",
+    "HOME_PURCHASE",
     "REFUND",
     "REWARD",
   ]),

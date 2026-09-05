@@ -4,6 +4,7 @@ import {
   buyerCounterMinor,
   counterBuyerOffer,
   createPlayerListing,
+  purchaseHome,
   purchaseListing,
   quoteAssetExit,
   rejectBuyerOffer,
@@ -55,6 +56,7 @@ import {
 } from "../domain/world";
 import {
   initialState,
+  HOME_GOAL_MINOR,
   money,
   playerOfferMinor,
   resolveOffer,
@@ -93,6 +95,7 @@ type Store = {
   scan: () => void;
   tick: () => void;
   buy: (item: Listing, priceMinor?: number) => boolean;
+  buyHome: () => boolean;
   offer: (item: Listing) => void;
   sell: (item: OwnedAsset, quick: boolean) => void;
   list: (item: OwnedAsset, askingPriceMinor: number) => void;
@@ -403,6 +406,38 @@ export const useGameStore = create<Store>((set, get) => ({
     });
     buzz(game, true);
     sound(game, "PURCHASE");
+    return true;
+  },
+  buyHome: () => {
+    const game = get().game;
+    const result = purchaseHome(
+      game,
+      HOME_GOAL_MINOR,
+      "home-purchase:career",
+      game.gameTimeMin,
+    );
+    if (!result.ok) {
+      const notice =
+        result.reason === "INSUFFICIENT_CASH"
+          ? `${money(HOME_GOAL_MINOR - game.cashMinor)} nakit eksik. Portföyün otomatik satılmaz.`
+          : result.reason === "HOME_NOT_UNLOCKED"
+            ? "Ev yolculuğu henüz açılmadı."
+            : "Bu ev zaten senin.";
+      set({ notice });
+      buzz(game);
+      sound(game, "WARNING");
+      return false;
+    }
+    if (result.idempotent) {
+      set({ notice: "Bu ev zaten senin." });
+      return true;
+    }
+    set({
+      game: stampAndPersist(result.state),
+      notice: "Kendi evini aldın. Yolculuğun burada bitmiyor.",
+    });
+    buzz(game, true);
+    sound(game, "SALE_PROFIT");
     return true;
   },
   offer: (item) => {
