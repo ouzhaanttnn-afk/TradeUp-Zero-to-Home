@@ -51,6 +51,13 @@ describe("accessibility preferences", () => {
       "Arayüz hareketleri azaltıldı.",
     );
   });
+
+  it("stores the large-text preference for the compact mobile layout", () => {
+    useGameStore.getState().setLargeText(true);
+
+    expect(useGameStore.getState().game.accessibility.largeText).toBe(true);
+    expect(useGameStore.getState().notice).toBe("Büyük metin görünümü açıldı.");
+  });
 });
 
 describe("persistence recovery notice", () => {

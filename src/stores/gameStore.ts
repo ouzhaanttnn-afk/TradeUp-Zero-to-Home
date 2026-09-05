@@ -91,6 +91,7 @@ type Store = {
   setAnalytics: (enabled: boolean) => void;
   setHaptics: (enabled: boolean) => void;
   setReducedMotion: (enabled: boolean) => void;
+  setLargeText: (enabled: boolean) => void;
   dismissCoach: () => void;
   reset: () => Promise<void>;
 };
@@ -684,6 +685,18 @@ export const useGameStore = create<Store>((set, get) => ({
       notice: enabled
         ? "Arayüz hareketleri azaltıldı."
         : "Arayüz hareketleri açıldı.",
+    });
+  },
+  setLargeText: (enabled) => {
+    const game = get().game;
+    set({
+      game: stampAndPersist({
+        ...game,
+        accessibility: { ...game.accessibility, largeText: enabled },
+      }),
+      notice: enabled
+        ? "Büyük metin görünümü açıldı."
+        : "Standart metin görünümü açıldı.",
     });
   },
   dismissCoach: () => {

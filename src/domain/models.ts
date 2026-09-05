@@ -388,6 +388,7 @@ export type AnalyticsState = {
 export type AccessibilityPreferences = {
   hapticsEnabled: boolean;
   reducedMotion: boolean;
+  largeText: boolean;
 };
 
 export type Negotiation = {

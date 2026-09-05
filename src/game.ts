@@ -23,7 +23,7 @@ export type {
   TransactionJournalEntry,
 } from "./domain/models";
 export { families } from "./content/families";
-export const SAVE_VERSION = 9;
+export const SAVE_VERSION = 10;
 export const HOME_GOAL_MINOR = 350_000_000;
 
 const attributeDefinitionSchema = z.object({
@@ -345,6 +345,7 @@ const analyticsSchema = z.object({
 const accessibilitySchema = z.object({
   hapticsEnabled: z.boolean(),
   reducedMotion: z.boolean(),
+  largeText: z.boolean(),
 });
 const rewardTransactionSchema = z.object({
   id: z.string(),
@@ -800,7 +801,11 @@ export const initialState = (
     },
     home: { unlocked: false, purchased: false, progressMilestones: [] },
     analytics: { enabled: true, events: [] },
-    accessibility: { hapticsEnabled: true, reducedMotion: false },
+    accessibility: {
+      hapticsEnabled: true,
+      reducedMotion: false,
+      largeText: false,
+    },
     monetization: createDefaultMonetizationState(0),
     ftue: {
       stage: mode === "FTUE" ? "STARTING_SALE" : "COMPLETE",

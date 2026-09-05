@@ -506,15 +506,31 @@ export function migrateStateToV4(value: unknown): unknown {
 }
 
 export function migrateStateToCurrent(value: unknown): unknown {
-  return migrateStateToV9(
-    migrateStateToV8(
-      migrateStateToV7(
-        migrateStateToV6(
-          migrateStateToV5(migrateStateToV4(migrateStateToV3(value))),
+  return migrateStateToV10(
+    migrateStateToV9(
+      migrateStateToV8(
+        migrateStateToV7(
+          migrateStateToV6(
+            migrateStateToV5(migrateStateToV4(migrateStateToV3(value))),
+          ),
         ),
       ),
     ),
   );
+}
+
+export function migrateStateToV10(value: unknown): unknown {
+  const source = record(value);
+  if (integer(source.version) >= 10) return value;
+  const accessibility = record(source.accessibility);
+  return {
+    ...source,
+    version: 10,
+    accessibility: {
+      ...accessibility,
+      largeText: false,
+    },
+  };
 }
 
 export function migrateStateToV9(value: unknown): unknown {

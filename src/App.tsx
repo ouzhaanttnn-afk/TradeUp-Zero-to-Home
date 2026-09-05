@@ -127,6 +127,7 @@ export default function App() {
     setAnalytics,
     setHaptics,
     setReducedMotion,
+    setLargeText,
     reset,
   } = useGameStore();
 
@@ -294,7 +295,7 @@ export default function App() {
 
   return (
     <div
-      className={`app-shell${game.accessibility.reducedMotion ? " reduced-motion" : ""}`}
+      className={`app-shell${game.accessibility.reducedMotion ? " reduced-motion" : ""}${game.accessibility.largeText ? " large-text" : ""}`}
     >
       <header>
         <div>
@@ -711,6 +712,17 @@ export default function App() {
                     {game.accessibility.reducedMotion
                       ? "Açık · kapat"
                       : "Kapalı · aç"}
+                  </button>
+                </div>
+                <div>
+                  <span>Metin boyutu</span>
+                  <button
+                    aria-pressed={game.accessibility.largeText}
+                    onClick={() => setLargeText(!game.accessibility.largeText)}
+                  >
+                    {game.accessibility.largeText
+                      ? "Büyük · standart"
+                      : "Standart · büyüt"}
                   </button>
                 </div>
                 <div>
