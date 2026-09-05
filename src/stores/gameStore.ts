@@ -223,6 +223,7 @@ export const useGameStore = create<Store>((set, get) => ({
     const refreshed = await refreshMonetization(
       game,
       getMonetizationAdapters(),
+      () => get().game,
     );
     set({
       game: stampAndPersist(refreshed.state),
@@ -858,10 +859,11 @@ export const useGameStore = create<Store>((set, get) => ({
       {},
       `store:${get().game.gameTimeMin}`,
     );
-    set({ monetizationBusy: true });
+    set({ game: stampAndPersist(game), monetizationBusy: true });
     const refreshed = await refreshMonetization(
       game,
       getMonetizationAdapters(),
+      () => get().game,
     );
     set({
       game: stampAndPersist(refreshed.state),
@@ -887,11 +889,12 @@ export const useGameStore = create<Store>((set, get) => ({
       { productId },
       `purchase-start:${productId}:${get().game.gameTimeMin}`,
     );
-    set({ monetizationBusy: true });
+    set({ game: stampAndPersist(before), monetizationBusy: true });
     const result = await purchaseStoreProduct(
       before,
       productId,
       getMonetizationAdapters().billing,
+      () => get().game,
     );
     const next =
       result.status === "OWNED"
@@ -923,10 +926,11 @@ export const useGameStore = create<Store>((set, get) => ({
       {},
       `restore-start:${get().game.gameTimeMin}`,
     );
-    set({ monetizationBusy: true });
+    set({ game: stampAndPersist(before), monetizationBusy: true });
     const result = await restoreStoreProducts(
       before,
       getMonetizationAdapters().billing,
+      () => get().game,
     );
     const next = result.failed
       ? result.state
@@ -967,6 +971,10 @@ export const useGameStore = create<Store>((set, get) => ({
       placementId,
       premium ? "premium" : "ad",
       getMonetizationAdapters().rewarded,
+      {
+        read: () => get().game,
+        publish: (game) => set({ game: stampAndPersist(game) }),
+      },
     );
     const eventName =
       result.status === "APPLIED"

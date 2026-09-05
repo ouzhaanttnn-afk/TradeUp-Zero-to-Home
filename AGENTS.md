@@ -34,7 +34,7 @@ Do not change mechanics, progression, economy, negotiation, rewarded ads, IAP, o
 
 ## Mandatory production order
 
-Follow the production order. Per the user's updated instruction, batch small related fixes into a complete work block, verify and commit them, and continue without requesting `Devam` after each small fix. Pause at meaningful phase boundaries or when a critical user decision is required.
+Follow the production order. Per the user's updated instruction, complete, verify and commit related work blocks and continue without requesting `Devam`, including at ordinary phase boundaries. Pause only for a critical user decision, missing publisher-owned credentials or information, or an action requiring new authority (such as publication or a GDD revision). Progress reports do not require the user to reply.
 
 1. P0 — Economic integrity: unified OwnedAsset, book cost, journal, net worth, settlement tests.
 2. P0 — Deterministic world: injected clock, lifecycle tick, active NPC hazard, incremental arrivals.
@@ -44,7 +44,7 @@ Follow the production order. Per the user's updated instruction, batch small rel
 6. P3 — Monetization foundation: billing, entitlement, consent and rewarded adapters; exactly four placements and four non-consumable SKUs; sandbox/test identities first, production behind its quality gate.
 7. P4 — Content scale only after vertical-slice and monetization-safety tests pass.
 
-`Devam` starts only the next package; it does not reopen product design.
+Standing authorization covers the next in-scope packages in order; it does not reopen product design.
 
 ## Required workflow and quality gates
 

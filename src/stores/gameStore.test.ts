@@ -26,6 +26,71 @@ import {
 import { playFeedbackSound } from "../infrastructure/audio";
 import { loadGameWithStatus } from "../services/persistence";
 import { useGameStore } from "./gameStore";
+import {
+  configureMonetizationAdapters,
+  unavailableMonetizationAdapters,
+} from "../services/monetization";
+
+describe("delayed provider responses", () => {
+  it.each(["hydrate", "openPurchases"] as const)(
+    "preserves gameplay while %s waits for consent",
+    async (action) => {
+      await useGameStore.getState().flush();
+      const game = initialState(0, "SANDBOX");
+      useGameStore.setState({ game, ready: true, monetizationBusy: false });
+      vi.mocked(loadGameWithStatus).mockResolvedValueOnce({
+        state: game,
+        recovery: "NONE",
+      });
+      let entered!: () => void;
+      const started = new Promise<void>((resolve) => {
+        entered = resolve;
+      });
+      let finish!: () => void;
+      const gate = new Promise<void>((resolve) => {
+        finish = resolve;
+      });
+      configureMonetizationAdapters({
+        ...unavailableMonetizationAdapters,
+        consent: {
+          refresh: async () => {
+            entered();
+            await gate;
+            return { canRequestAds: false, adPersonalizationAllowed: false };
+          },
+          openPrivacyOptions: async () => {},
+        },
+      });
+      try {
+        const pending = useGameStore.getState()[action]();
+        await started;
+        useGameStore.getState().tick();
+        useGameStore.getState().setLargeText(true);
+        const advanced = useGameStore.getState().game;
+        finish();
+        await pending;
+        const after = useGameStore.getState().game;
+        expect(after.gameTimeMin).toBe(advanced.gameTimeMin);
+        expect(after.listings).toEqual(advanced.listings);
+        expect(after.accessibility.largeText).toBe(true);
+        expect(after.transactionJournal).toEqual(advanced.transactionJournal);
+        expect(reconcileJournal(after)).toEqual({
+          cash: true,
+          activeBookCost: true,
+          realizedProfit: true,
+        });
+      } finally {
+        finish();
+        configureMonetizationAdapters(unavailableMonetizationAdapters);
+        vi.mocked(loadGameWithStatus).mockReset();
+        vi.mocked(loadGameWithStatus).mockResolvedValue({
+          state: initialState(),
+          recovery: "NONE",
+        });
+      }
+    },
+  );
+});
 
 describe("stale sale confirmation", () => {
   beforeEach(() => {
@@ -227,13 +292,11 @@ describe("persistence recovery notice", () => {
 describe("purchase negotiation rights", () => {
   it("preserves each listing's two rights when switching between sellers and reloading", () => {
     const game = initialState(0, "SANDBOX");
-    const listings = game.listings
-      .slice(0, 2)
-      .map((listing) => ({
-        ...listing,
-        priceMinor: 1_000,
-        instance: { ...listing.instance, fairValueMinor: 1_000_000 },
-      }));
+    const listings = game.listings.slice(0, 2).map((listing) => ({
+      ...listing,
+      priceMinor: 1_000,
+      instance: { ...listing.instance, fairValueMinor: 1_000_000 },
+    }));
     game.listings = listings;
     useGameStore.setState({ game, ready: true });
     for (const listing of listings) useGameStore.getState().offer(listing);

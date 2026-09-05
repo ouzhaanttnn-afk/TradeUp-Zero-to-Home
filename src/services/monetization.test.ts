@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { initialState } from "../game";
+import { advanceWorldTo } from "../domain/world";
+import { applyRewardedResult } from "../domain/monetization";
+import { reconcileJournal } from "../domain/economy";
 import {
   createSandboxBillingAdapter,
   createSandboxConsentAdapter,
@@ -35,6 +38,159 @@ const unlockedState = () => {
 };
 
 describe("monetization application service", () => {
+  it("preserves live progress when consent refresh resolves late", async () => {
+    const state = initialState(0, "SANDBOX");
+    let live = state;
+    let finish!: (value: {
+      canRequestAds: boolean;
+      adPersonalizationAllowed: boolean;
+    }) => void;
+    const pending = refreshMonetization(
+      state,
+      {
+        consent: {
+          refresh: () =>
+            new Promise((resolve) => {
+              finish = resolve;
+            }),
+          openPrivacyOptions: async () => {},
+        },
+        billing: createSandboxBillingAdapter({ products: [product] }),
+        rewarded: createSandboxRewardedAdAdapter([]),
+      },
+      () => live,
+    );
+    live = advanceWorldTo(state, 3).state;
+    finish({ canRequestAds: false, adPersonalizationAllowed: false });
+    const result = await pending;
+    expect(result.state.gameTimeMin).toBe(3);
+    expect(result.state.listings).toEqual(live.listings);
+    expect(result.state.transactionJournal).toEqual(live.transactionJournal);
+  });
+
+  it.each(["CANCELLED", "FAILED", "THROW", "VERIFIED"] as const)(
+    "keeps live progress after delayed purchase %s",
+    async (status) => {
+      const state = initialState(0, "SANDBOX");
+      let live = state;
+      let finish!: () => void;
+      const gate = new Promise<void>((resolve) => {
+        finish = resolve;
+      });
+      const billing = createSandboxBillingAdapter({ products: [product] });
+      billing.purchase = async () => {
+        await gate;
+        if (status === "THROW") throw new Error("offline");
+        if (status === "VERIFIED")
+          return {
+            status,
+            event: {
+              transactionId: "late-purchase",
+              productId: product.productId,
+              entitlementId: "premium_lifetime",
+              platform: "android",
+              status: "OWNED",
+            },
+          };
+        return status === "FAILED" ? { status, reason: "offline" } : { status };
+      };
+      const pending = purchaseStoreProduct(
+        state,
+        product.productId,
+        billing,
+        () => live,
+      );
+      live = advanceWorldTo(state, 3).state;
+      finish();
+      const result = await pending;
+      expect(result.state.gameTimeMin).toBe(3);
+      expect(result.state.transactionJournal).toEqual(live.transactionJournal);
+      expect(
+        result.state.monetization.entitlements.some(
+          (entry) => entry.status === "OWNED",
+        ),
+      ).toBe(status === "VERIFIED");
+      expect(reconcileJournal(result.state)).toEqual({
+        cash: true,
+        activeBookCost: true,
+        realizedProfit: true,
+      });
+    },
+  );
+
+  it("keeps the original reward identity after time advances and ignores duplicate completion", async () => {
+    let live = unlockedState();
+    let finish!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    const pending = runRewardedAction(
+      live,
+      "MARKET_SCOUT",
+      "ad",
+      {
+        show: async () => {
+          await gate;
+          return {
+            status: "USER_EARNED",
+            providerTransactionId: "late-reward",
+          };
+        },
+      },
+      {
+        read: () => live,
+        publish: (next) => {
+          live = next;
+        },
+      },
+    );
+    const requested = live.monetization.rewardTransactions.at(-1)!;
+    expect(requested.status).toBe("REQUESTED");
+    live = { ...live, gameTimeMin: live.gameTimeMin + 1 };
+    finish();
+    const result = await pending;
+    expect(result.status).toBe("APPLIED");
+    expect(result.state.gameTimeMin).toBe(1);
+    expect(
+      result.state.monetization.rewardTransactions.find(
+        (entry) => entry.id === requested.id,
+      ),
+    ).toMatchObject({ status: "APPLIED", requestedAt: requested.requestedAt });
+    expect(result.state.monetization.usage.sessionRewardCount).toBe(1);
+    expect(applyRewardedResult(result.state, requested.id)).toBe(result.state);
+  });
+
+  it("does not grant a delayed reward after its request no longer exists", async () => {
+    let live = unlockedState();
+    let finish!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    const pending = runRewardedAction(
+      live,
+      "MARKET_SCOUT",
+      "ad",
+      {
+        show: async () => {
+          await gate;
+          return { status: "USER_EARNED", providerTransactionId: "old-reward" };
+        },
+      },
+      {
+        read: () => live,
+        publish: (next) => {
+          live = next;
+        },
+      },
+    );
+    live = initialState(0, "SANDBOX");
+    finish();
+    const result = await pending;
+    expect(result.status).toBe("INELIGIBLE");
+    expect(result.state).toBe(live);
+    expect(result.state.monetization.usage.sessionRewardCount).toBe(0);
+  });
+
   it("fails closed on consent and accepts only locked localized metadata", async () => {
     const result = await refreshMonetization(initialState(), {
       consent: createSandboxConsentAdapter({

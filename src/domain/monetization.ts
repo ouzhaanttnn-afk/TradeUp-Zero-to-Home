@@ -31,13 +31,13 @@ type RewardRequestResult =
   | { ok: false; reason: RewardRequestReason; state: GameState };
 
 type RewardEligibility =
-  | { ok: true; targetId?: string }
-  | { ok: false; reason: RewardRequestReason };
+  { ok: true; targetId?: string } | { ok: false; reason: RewardRequestReason };
 
 const REWARD_WINDOW_MIN = MONETIZATION_CONFIG.reward.rollingWindowHours * 60;
 const SESSION_CAP = MONETIZATION_CONFIG.reward.sessionCap;
 const GLOBAL_CAP = MONETIZATION_CONFIG.reward.globalCap;
-const FIRST_SALE_LOCK_MIN = MONETIZATION_CONFIG.reward.firstSaleCompleteThresholdMinutes;
+const FIRST_SALE_LOCK_MIN =
+  MONETIZATION_CONFIG.reward.firstSaleCompleteThresholdMinutes;
 const LISTING_REACH_MAX_AGE_MIN =
   MONETIZATION_CONFIG.reward.placementReward.LISTING_REACH_MAX_AGE_GAME_MIN;
 const LISTING_SCOUT_ADD_COUNT =
@@ -159,7 +159,8 @@ const nextPlacementTarget = (
       isActiveMarketListing(listing.state),
     ).length;
     const inspectedCount = state.analytics.events.filter(
-      (event) => event.name === "listing_open" || event.name === "listing_impression",
+      (event) =>
+        event.name === "listing_open" || event.name === "listing_impression",
     ).length;
     return activeCount < 8 || inspectedCount >= 8
       ? `market-scout:${state.marketCycle}:${state.gameTimeMin}`
@@ -167,13 +168,12 @@ const nextPlacementTarget = (
   }
 
   if (placementId === "FAST_INSPECTION") {
-    return state.transactionJournal
-      .find(
-        (entry) =>
-          entry.kind === "INSPECTION" &&
-          entry.metadata.status === "IN_PROGRESS" &&
-          Number(entry.metadata.completesAtGameMin) - state.gameTimeMin > 0.75,
-      )?.id;
+    return state.transactionJournal.find(
+      (entry) =>
+        entry.kind === "INSPECTION" &&
+        entry.metadata.status === "IN_PROGRESS" &&
+        Number(entry.metadata.completesAtGameMin) - state.gameTimeMin > 0.75,
+    )?.id;
   }
 
   if (placementId === "FAST_PREPARATION") {
@@ -188,8 +188,8 @@ const nextPlacementTarget = (
 
   return activePlayerListings(state).find(
     (listing) =>
-      state.gameTimeMin - listing.createdAtGameMin >= LISTING_REACH_MAX_AGE_MIN &&
-      !listOffersByListing(state, listing.id),
+      state.gameTimeMin - listing.createdAtGameMin >=
+        LISTING_REACH_MAX_AGE_MIN && !listOffersByListing(state, listing.id),
   )?.id;
 };
 
@@ -201,6 +201,7 @@ const applyReward = (
   placementId: RewardPlacementId,
   source: "ad" | "premium",
   targetId: string | undefined,
+  transaction?: RewardActionTransaction,
 ): GameState => {
   let next = state;
 
@@ -219,10 +220,7 @@ const applyReward = (
     if (additional > 0) {
       const arrivals: Listing[] = market(
         state.seed,
-        Math.max(
-          0,
-          netWorthMinor(state),
-        ),
+        Math.max(0, netWorthMinor(state)),
         state.marketCycle + 1,
         state.gameTimeMin,
         additional,
@@ -284,13 +282,15 @@ const applyReward = (
     );
   }
 
-  const actionId = `reward:${placementId}:${source}:${state.gameTimeMin}:${targetId ?? "global"}`;
+  const actionId =
+    transaction?.id ??
+    `reward:${placementId}:${source}:${state.gameTimeMin}:${targetId ?? "global"}`;
   const applied: RewardActionTransaction = {
     id: actionId,
     placementId,
     source,
     status: "APPLIED",
-    requestedAt: nowSeconds(state),
+    requestedAt: transaction?.requestedAt ?? nowSeconds(state),
     appliedAt: nowSeconds(state),
     targetId,
   };
@@ -341,7 +341,10 @@ export const getRewardEligibility = (
   const targetId = nextPlacementTarget(placementId, state);
   const normalizedTransactions = cleanupRewardTransactions(state, nowMin);
 
-  if (normalizedTransactions.length !== state.monetization.rewardTransactions.length) {
+  if (
+    normalizedTransactions.length !==
+    state.monetization.rewardTransactions.length
+  ) {
     state = {
       ...state,
       monetization: {
@@ -386,8 +389,12 @@ export const getRewardEligibility = (
   }
 
   const caps = countCaps(state);
-  if (caps.globalCount >= GLOBAL_CAP) return { ok: false, reason: "GLOBAL_CAP" };
-  if (caps.placementCounts[placementId] >= MONETIZATION_CONFIG.reward.placementCap[placementId]) {
+  if (caps.globalCount >= GLOBAL_CAP)
+    return { ok: false, reason: "GLOBAL_CAP" };
+  if (
+    caps.placementCounts[placementId] >=
+    MONETIZATION_CONFIG.reward.placementCap[placementId]
+  ) {
     return { ok: false, reason: "PLACEMENT_CAP" };
   }
 
@@ -472,11 +479,19 @@ export const applyRewardedResult = (
   );
   if (!transaction || transaction.status === "APPLIED") return state;
   if (transaction.status !== "REQUESTED") return state;
+  const eligibility = getRewardEligibility(state, transaction.placementId);
+  if (
+    !eligibility.ok ||
+    (transaction.placementId !== "MARKET_SCOUT" &&
+      eligibility.targetId !== transaction.targetId)
+  )
+    return closeRewardedAction(state, rewardId, "FAILED");
   return applyReward(
     state,
     transaction.placementId,
     transaction.source,
     transaction.targetId,
+    transaction,
   );
 };
 
@@ -567,10 +582,9 @@ export const syncVerifiedEntitlement = (
   const owned = status === "OWNED";
   const next = setRewardEntitlement(state, productId, owned, platform);
   if (owned) return next;
-  const entitlementId =
-    MONETIZATION_CONFIG.productCatalog.find(
-      (product) => product.productId === productId,
-    )?.entitlementId;
+  const entitlementId = MONETIZATION_CONFIG.productCatalog.find(
+    (product) => product.productId === productId,
+  )?.entitlementId;
   if (!entitlementId) return state;
   return {
     ...state,

@@ -91,6 +91,7 @@ export type MonetizationRefreshResult = {
 export const refreshMonetization = async (
   state: GameState,
   adapters: MonetizationAdapters,
+  currentState: () => GameState = () => state,
 ): Promise<MonetizationRefreshResult> => {
   const [consent, products] = await Promise.allSettled([
     adapters.consent.refresh(),
@@ -99,11 +100,11 @@ export const refreshMonetization = async (
   const next =
     consent.status === "fulfilled"
       ? syncConsentState(
-          state,
+          currentState(),
           consent.value.canRequestAds,
           consent.value.adPersonalizationAllowed,
         )
-      : syncConsentState(state, false, false);
+      : syncConsentState(currentState(), false, false);
   const metadata =
     products.status === "fulfilled" ? validMetadata(products.value) : [];
   return {
@@ -119,10 +120,12 @@ export const purchaseStoreProduct = async (
   state: GameState,
   productId: MonetizationProductId,
   billing: BillingAdapter,
+  currentState: () => GameState = () => state,
 ): Promise<{ state: GameState; status: PurchaseFlowStatus }> => {
   if (!isLockedProduct(productId)) return { state, status: "FAILED" };
   try {
     const result = await billing.purchase(productId);
+    state = currentState();
     if (result.status === "CANCELLED") return { state, status: "CANCELLED" };
     if (result.status === "FAILED") return { state, status: "FAILED" };
     if (!isMatchingEvent(result.event, productId)) {
@@ -150,17 +153,18 @@ export const purchaseStoreProduct = async (
       status: "OWNED",
     };
   } catch {
-    return { state, status: "FAILED" };
+    return { state: currentState(), status: "FAILED" };
   }
 };
 
 export const restoreStoreProducts = async (
   state: GameState,
   billing: BillingAdapter,
+  currentState: () => GameState = () => state,
 ): Promise<{ state: GameState; synced: number; failed: boolean }> => {
   try {
     const events = await billing.restore();
-    let next = state;
+    let next = currentState();
     let synced = 0;
     for (const event of events) {
       if (!isMatchingEvent(event)) continue;
@@ -174,7 +178,7 @@ export const restoreStoreProducts = async (
     }
     return { state: next, synced, failed: false };
   } catch {
-    return { state, synced: 0, failed: true };
+    return { state: currentState(), synced: 0, failed: true };
   }
 };
 
@@ -186,6 +190,7 @@ export const runRewardedAction = async (
   placementId: RewardPlacementId,
   source: "ad" | "premium",
   rewarded: RewardedAdAdapter,
+  live?: { read: () => GameState; publish: (state: GameState) => void },
 ): Promise<{ state: GameState; status: RewardFlowStatus }> => {
   const requested = requestMonetizedAction(state, placementId, source);
   if (!requested.ok) {
@@ -194,22 +199,31 @@ export const runRewardedAction = async (
   if (source === "premium") {
     return { state: requested.state, status: "APPLIED" };
   }
+  // Publish the request before yielding so callbacks use the current ledger.
+  live?.publish(requested.state);
+  const currentState = () => live?.read() ?? requested.state;
   try {
     const result = await rewarded.show(placementId);
     if (result.status === "USER_EARNED") {
+      const next = applyRewardedResult(currentState(), requested.rewardId);
       return {
-        state: applyRewardedResult(requested.state, requested.rewardId),
-        status: "APPLIED",
+        state: next,
+        status: next.monetization.rewardTransactions.some(
+          (entry) =>
+            entry.id === requested.rewardId && entry.status === "APPLIED",
+        )
+          ? "APPLIED"
+          : "INELIGIBLE",
       };
     }
     const status = result.status === "CANCELLED" ? "CANCELLED" : "FAILED";
     return {
-      state: closeRewardedAction(requested.state, requested.rewardId, status),
+      state: closeRewardedAction(currentState(), requested.rewardId, status),
       status,
     };
   } catch {
     return {
-      state: closeRewardedAction(requested.state, requested.rewardId, "FAILED"),
+      state: closeRewardedAction(currentState(), requested.rewardId, "FAILED"),
       status: "FAILED",
     };
   }
