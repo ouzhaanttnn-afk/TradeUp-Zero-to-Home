@@ -173,15 +173,15 @@
 .starting-sale {
   display: grid;
   grid-template-columns: 92px 1fr;
-  gap: 14px;
-  padding: 14px;
+  gap: 10px;
+  padding: 10px;
   border: 1px solid rgba(87, 231, 151, 0.25);
   border-radius: 20px;
   background: rgba(13, 39, 28, 0.95);
 }
 .starting-sale img {
   width: 92px;
-  height: 112px;
+  height: 102px;
   object-fit: cover;
   border-radius: 14px;
 }
@@ -192,13 +192,13 @@
   min-width: 0;
 }
 .starting-sale p {
-  margin: 6px 0 12px;
+  margin: 4px 0 9px;
   color: var(--muted);
   font-size: calc(0.8rem + var(--text-size-boost));
 }
 .starting-sale button {
   width: 100%;
-  min-height: 46px;
+  min-height: 42px;
 }
 * {
   box-sizing: border-box;
@@ -431,27 +431,27 @@ header h1 {
 }
 .wallet {
   margin: 0 12px;
-  padding: 9px 11px;
+  padding: 7px 10px;
   border: 1px solid #294338;
   border-radius: 15px;
   background: linear-gradient(145deg, #162c23, #0d1c16);
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px 10px;
+  gap: 4px 8px;
   box-shadow: 0 7px 20px rgba(0, 0, 0, 0.14);
 }
 .wallet div {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 0px;
   min-width: 0;
 }
 .wallet small {
-  font-size: calc(9px + var(--text-size-boost));
+  font-size: calc(8px + var(--text-size-boost));
   color: #8fa99c;
 }
 .wallet strong {
-  font-size: calc(15px + var(--text-size-boost));
+  font-size: calc(13px + var(--text-size-boost));
   line-height: 1.15;
   letter-spacing: -0.25px;
   overflow-wrap: anywhere;
@@ -482,16 +482,16 @@ header h1 {
   line-height: 1.3;
 }
 main {
-  padding: 14px 12px;
+  padding: 10px 10px;
 }
 .section-title {
   display: flex;
   justify-content: space-between;
   align-items: end;
-  margin: 0 2px 9px;
+  margin: 0 2px 7px;
 }
 .section-title h2 {
-  font-size: calc(22px + var(--text-size-boost));
+  font-size: calc(20px + var(--text-size-boost));
   letter-spacing: -0.7px;
 }
 .section-title > span,
@@ -597,7 +597,7 @@ main {
 }
 .market-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
+  gap: 5px;
 }
 .market-grid > .starting-sale,
 .market-grid > .reward-cta {
@@ -608,16 +608,16 @@ main {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 5px;
+  gap: 4px;
   min-width: 0;
-  min-height: 136px;
-  padding: 5px;
+  min-height: 122px;
+  padding: 4px;
   overflow: hidden;
   border-radius: 13px;
 }
 .market-grid .product-art {
   width: 100%;
-  height: clamp(64px, 19vw, 78px);
+  height: clamp(58px, 17vw, 70px);
   aspect-ratio: auto;
   flex: 0 0 auto;
   border-radius: 9px;
@@ -697,7 +697,7 @@ main {
   min-height: 2.45em;
   margin: 1px 0 2px;
   overflow: hidden;
-  font-size: calc(10px + var(--text-size-boost));
+  font-size: calc(9px + var(--text-size-boost));
   line-height: 1.22;
   white-space: normal;
   -webkit-box-orient: vertical;
@@ -714,7 +714,7 @@ main {
 .market-price-row > strong {
   min-width: 0;
   overflow: hidden;
-  font-size: calc(13px + var(--text-size-boost));
+  font-size: calc(12px + var(--text-size-boost));
   text-overflow: ellipsis;
   color: #f4f8f6;
 }
@@ -748,11 +748,11 @@ main {
   gap: 8px;
 }
 .app-shell.large-text .market-grid .market-card {
-  min-height: 176px;
-  padding: 7px;
+  min-height: 156px;
+  padding: 6px;
 }
 .app-shell.large-text .market-grid .product-art {
-  height: 96px;
+  height: 84px;
 }
 .listing {
   display: grid;
@@ -906,29 +906,29 @@ main {
     radial-gradient(circle at 0 0, rgba(65, 127, 96, 0.13), transparent 38%),
     linear-gradient(145deg, #12231c, #0b1712);
   border-radius: 19px;
-  padding: 10px;
+  padding: 8px;
   display: grid;
   grid-template-columns: 72px minmax(0, 1fr);
-  gap: 9px;
+  gap: 7px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
 }
 .owned--listing {
   grid-template-columns: 64px minmax(0, 1fr);
-  gap: 8px;
-  padding: 8px;
+  gap: 7px;
+  padding: 7px;
   border-radius: 16px;
 }
 .owned--listing .owned-icon {
   width: 64px;
-  height: 68px;
-  min-height: 68px;
+  height: 62px;
+  min-height: 62px;
 }
 .owned--listing .owned-metrics {
   margin-top: 5px;
   gap: 4px;
 }
 .owned--listing .owned-metrics div {
-  padding: 5px 6px;
+  padding: 5px;
 }
 .owned-copy {
   min-width: 0;
@@ -981,11 +981,11 @@ main {
   display: grid;
   grid-template-columns: 0.82fr 1.18fr;
   gap: 6px;
-  margin-top: 7px;
+  margin-top: 5px;
 }
 .owned-metrics div {
   min-width: 0;
-  padding: 7px;
+  padding: 6px;
   border: 1px solid rgba(137, 193, 164, 0.08);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.025);
@@ -1014,7 +1014,7 @@ main {
 }
 .owned-icon {
   align-self: stretch;
-  min-height: 78px;
+  min-height: 72px;
   border: 1px solid rgba(137, 193, 164, 0.1);
   border-radius: 14px;
   background: radial-gradient(circle at 38% 22%, #294c3d, #0c1913 74%);
@@ -1022,12 +1022,12 @@ main {
   overflow: hidden;
 }
 .owned h3 {
-  font-size: calc(14px + var(--text-size-boost));
+  font-size: calc(13px + var(--text-size-boost));
 }
 .owned p {
-  font-size: calc(10px + var(--text-size-boost));
+  font-size: calc(9px + var(--text-size-boost));
   color: #8da399;
-  margin-top: 4px;
+  margin-top: 3px;
 }
 .sell-actions {
   grid-column: 1/-1;
@@ -1639,7 +1639,7 @@ nav .active .nav-icon {
   margin-top: 0;
 }
 .sheet-actions button {
-  padding: 13px;
+  padding: 10px 9px;
   font-weight: 700;
 }
 .sheet-actions small {
@@ -1669,7 +1669,7 @@ nav .active .nav-icon {
     --sheet-gutter: 14px;
   }
   .wallet strong {
-    font-size: calc(15px + var(--text-size-boost));
+    font-size: calc(13px + var(--text-size-boost));
   }
   .buyer-actions {
     grid-template-columns: 1fr 1fr;
@@ -1950,13 +1950,13 @@ nav .active .nav-icon {
 }
 .module-title,
 .timeline-header {
-  margin: 22px 3px 10px;
+  margin: 16px 3px 8px;
   font-size: calc(14px + var(--text-size-boost));
 }
 .compact-feed,
 .follow-stack {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 .subtle {
   color: #789084;
@@ -2617,9 +2617,9 @@ nav .active .nav-icon {
   position: sticky;
   z-index: 5;
   bottom: calc(-24px - env(safe-area-inset-bottom));
-  margin: 16px calc(var(--sheet-gutter) * -1)
-    calc(-24px - env(safe-area-inset-bottom));
-  padding: 11px var(--sheet-gutter) calc(14px + env(safe-area-inset-bottom));
+  margin: 12px calc(var(--sheet-gutter) * -1)
+    calc(-22px - env(safe-area-inset-bottom));
+  padding: 9px var(--sheet-gutter) calc(10px + env(safe-area-inset-bottom));
   border-top: 1px solid rgba(118, 183, 150, 0.18);
   background: linear-gradient(
     180deg,
@@ -2648,7 +2648,7 @@ nav .active .nav-icon {
 }
 .sheet-decision .sheet-actions button,
 .sheet-decision > button {
-  min-height: 56px;
+  min-height: 48px;
   border-radius: 14px;
 }
 .sheet-next {
