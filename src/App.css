@@ -593,7 +593,10 @@ main {
 }
 .feed {
   display: grid;
-  gap: 8px;
+  gap: 6px;
+}
+.feed.market-grid {
+  grid-auto-rows: minmax(118px, auto);
 }
 .market-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -694,14 +697,14 @@ main {
 }
 .market-grid .listing h3 {
   display: -webkit-box;
-  min-height: 2.45em;
-  margin: 1px 0 2px;
+  min-height: 1.15em;
+  margin: 1px 0 1px;
   overflow: hidden;
   font-size: calc(9px + var(--text-size-boost));
   line-height: 1.22;
   white-space: normal;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
 }
 .market-price-row {
   display: flex;
@@ -721,6 +724,7 @@ main {
 .market-price-row .watch-state {
   flex: 0 0 auto;
   font-size: 0;
+  line-height: 1;
 }
 .market-price-row .watch-state svg {
   width: 12px;
