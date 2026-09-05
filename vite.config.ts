@@ -3,6 +3,9 @@ import { defineConfig } from "vite";
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 
+export const shouldPrecacheBuildAsset = (path: string) =>
+  !path.endsWith(".map") && !/\.(?:avif|jpe?g|png|webp)$/i.test(path);
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
@@ -22,7 +25,7 @@ export default defineConfig({
           "/icon-512.png",
           "/favicon.svg",
           ...Object.keys(bundle)
-            .filter((path) => !path.endsWith(".map"))
+            .filter(shouldPrecacheBuildAsset)
             .map((path) => `/${path}`),
         ].sort();
         const revision = createHash("sha256")
