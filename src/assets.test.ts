@@ -46,6 +46,10 @@ describe("asset manifest and visual treatments", () => {
     expect(hasDedicatedAsset("prd_tripod")).toBe(true);
     expect(hasDedicatedAsset("prd_camera_flash")).toBe(true);
     expect(hasDedicatedAsset("prd_action_camera")).toBe(true);
+    expect(hasDedicatedAsset("prd_vintage_lighter")).toBe(true);
+    expect(hasDedicatedAsset("prd_side_table")).toBe(true);
+    expect(hasDedicatedAsset("prd_rugged_phone")).toBe(true);
+    expect(hasDedicatedAsset("prd_gaming_keyboard")).toBe(true);
   });
 
   it("returns a deterministic fallback for an unknown asset key", () => {

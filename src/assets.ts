@@ -45,6 +45,10 @@ import instantCamera from "./assets/products/prd_instant_camera.png";
 import tripod from "./assets/products/prd_tripod.png";
 import cameraFlash from "./assets/products/prd_camera_flash.png";
 import actionCamera from "./assets/products/prd_action_camera.png";
+import vintageLighter from "./assets/products/prd_vintage_lighter.png";
+import sideTable from "./assets/products/prd_side_table.png";
+import ruggedPhone from "./assets/products/prd_rugged_phone.png";
+import gamingKeyboard from "./assets/products/prd_gaming_keyboard.png";
 import boardGame from "./assets/products/prd_board_game.png";
 import portableRadio from "./assets/products/prd_portable_radio.png";
 import fountainPen from "./assets/products/prd_fountain_pen.png";
@@ -101,6 +105,10 @@ const dedicatedAssets: Record<string, string> = {
   prd_tripod: tripod,
   prd_camera_flash: cameraFlash,
   prd_action_camera: actionCamera,
+  prd_vintage_lighter: vintageLighter,
+  prd_side_table: sideTable,
+  prd_rugged_phone: ruggedPhone,
+  prd_gaming_keyboard: gamingKeyboard,
   prd_board_game: boardGame,
   prd_portable_radio: portableRadio,
   prd_fountain_pen: fountainPen,

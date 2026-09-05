@@ -212,6 +212,10 @@ test("secondary expansion artwork loads without category fallbacks", async ({
   const tripod = familyById("tripod");
   const cameraFlash = familyById("camera_flash");
   const actionCamera = familyById("action_camera");
+  const vintageLighter = familyById("vintage_lighter");
+  const sideTable = familyById("side_table");
+  const ruggedPhone = familyById("rugged_phone");
+  const gamingKeyboard = familyById("gaming_keyboard");
   if (
     !dacAmp ||
     !cassettePlayer ||
@@ -223,7 +227,11 @@ test("secondary expansion artwork loads without category fallbacks", async ({
     !instantCamera ||
     !tripod ||
     !cameraFlash ||
-    !actionCamera
+    !actionCamera ||
+    !vintageLighter ||
+    !sideTable ||
+    !ruggedPhone ||
+    !gamingKeyboard
   ) {
     throw new Error("Expanded asset family is missing");
   }
@@ -239,6 +247,10 @@ test("secondary expansion artwork loads without category fallbacks", async ({
     tripod,
     cameraFlash,
     actionCamera,
+    vintageLighter,
+    sideTable,
+    ruggedPhone,
+    gamingKeyboard,
   ].entries()) {
     state.listings[index] = {
       ...state.listings[index],
@@ -263,6 +275,10 @@ test("secondary expansion artwork loads without category fallbacks", async ({
     ["Karbon Seyahat Tripodu", "prd_tripod"],
     ["Stüdyo Tepe Flaşı", "prd_camera_flash"],
     ["Rota Aksiyon Kamerası", "prd_action_camera"],
+    ["Cep Çakmağı", "prd_vintage_lighter"],
+    ["Ceviz Yan Sehpa", "prd_side_table"],
+    ["Atlas Dayanıklı Telefon", "prd_rugged_phone"],
+    ["Forge Oyun Klavyesi", "prd_gaming_keyboard"],
   ] as const) {
     const card = page.locator(".market-card").filter({ hasText: name });
     const visual = card.locator(".product-visual");

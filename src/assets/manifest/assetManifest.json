@@ -167,8 +167,8 @@
     {
       "assetKey": "prd_vintage_lighter",
       "familyId": "vintage_lighter",
-      "source": "fallback:fb_small_item",
-      "dedicated": false
+      "source": "../products/prd_vintage_lighter.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_portable_radio",
@@ -203,8 +203,8 @@
     {
       "assetKey": "prd_side_table",
       "familyId": "side_table",
-      "source": "fallback:fb_home",
-      "dedicated": false
+      "source": "../products/prd_side_table.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_robot_vacuum",
@@ -227,8 +227,8 @@
     {
       "assetKey": "prd_gaming_keyboard",
       "familyId": "gaming_keyboard",
-      "source": "fallback:fb_game",
-      "dedicated": false
+      "source": "../products/prd_gaming_keyboard.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_racing_wheel",
@@ -275,8 +275,8 @@
     {
       "assetKey": "prd_rugged_phone",
       "familyId": "rugged_phone",
-      "source": "fallback:fb_phone",
-      "dedicated": false
+      "source": "../products/prd_rugged_phone.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_e_reader",
