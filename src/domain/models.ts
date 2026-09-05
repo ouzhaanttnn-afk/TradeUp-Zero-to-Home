@@ -188,6 +188,8 @@ export type BuyerOffer = {
   amountMinor: number;
   buyer: string;
   expiresAtGameMin: number;
+  counterUsed?: boolean;
+  initialAmountMinor?: number;
 };
 
 export type TransactionKind =

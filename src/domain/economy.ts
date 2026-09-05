@@ -1,5 +1,6 @@
 import type {
   AssetId,
+  BuyerOffer,
   GameState,
   Listing,
   ListingId,
@@ -16,6 +17,7 @@ type EconomyFailureReason =
   | "ASSET_NOT_FOUND"
   | "ASSET_NOT_AVAILABLE"
   | "BUYER_OFFER_NOT_FOUND"
+  | "COUNTER_NOT_AVAILABLE"
   | "PLAYER_LISTING_NOT_FOUND"
   | "INVALID_AMOUNT";
 
@@ -385,6 +387,125 @@ export function rejectBuyerOffer(
       ...state,
       buyerOffers: state.buyerOffers.filter((item) => item.id !== offerId),
     },
+  };
+}
+
+export const buyerCounterMinor = (
+  offer: Pick<BuyerOffer, "amountMinor">,
+  listing: Pick<PlayerListing, "askingPriceMinor">,
+) => {
+  if (listing.askingPriceMinor <= offer.amountMinor) return undefined;
+  const midpoint = Math.round(
+    (offer.amountMinor + listing.askingPriceMinor) / 2_000,
+  );
+  return Math.min(
+    listing.askingPriceMinor,
+    Math.max(offer.amountMinor + 1_000, midpoint * 1_000),
+  );
+};
+
+export type BuyerCounterResult =
+  | {
+      ok: true;
+      state: GameState;
+      outcome: "ACCEPTED" | "FINAL" | "WITHDREW";
+      amountMinor: number;
+      transactionId?: string;
+    }
+  | { ok: false; state: GameState; reason: EconomyFailureReason };
+
+const stableTextHash = (value: string) => {
+  let hash = 2_166_136_261;
+  for (const character of value) {
+    hash ^= character.charCodeAt(0);
+    hash = Math.imul(hash, 16_777_619);
+  }
+  return hash >>> 0;
+};
+
+export function counterBuyerOffer(
+  state: GameState,
+  offerId: string,
+  counterMinor: number,
+  gameTime: number,
+): BuyerCounterResult {
+  const offer = state.buyerOffers.find((item) => item.id === offerId);
+  if (!offer) return { ok: false, state, reason: "BUYER_OFFER_NOT_FOUND" };
+  const listing = state.playerListings.find(
+    (item) => item.id === offer.listingId,
+  );
+  if (!listing || listing.state !== "ACTIVE") {
+    return { ok: false, state, reason: "PLAYER_LISTING_NOT_FOUND" };
+  }
+  if (
+    offer.counterUsed ||
+    offer.expiresAtGameMin <= gameTime ||
+    listing.expiresAtGameMin <= gameTime
+  ) {
+    return { ok: false, state, reason: "COUNTER_NOT_AVAILABLE" };
+  }
+  if (
+    !Number.isInteger(counterMinor) ||
+    counterMinor <= offer.amountMinor ||
+    counterMinor > listing.askingPriceMinor
+  ) {
+    return { ok: false, state, reason: "INVALID_AMOUNT" };
+  }
+
+  const roll = (state.seed + stableTextHash(offer.id)) % 100;
+  if (roll < 45) {
+    const transactionId = `sale:buyer-counter:${offer.id}`;
+    const settled = settleAssetSale(
+      state,
+      listing.ownedAssetId,
+      counterMinor,
+      transactionId,
+      gameTime,
+      listing.id,
+    );
+    if (!settled.ok) return settled;
+    return {
+      ok: true,
+      state: settled.state,
+      outcome: "ACCEPTED",
+      amountMinor: counterMinor,
+      transactionId,
+    };
+  }
+  if (roll < 80) {
+    const finalMinor = Math.max(
+      offer.amountMinor + 1_000,
+      Math.round(
+        (offer.amountMinor + (counterMinor - offer.amountMinor) * 0.55) / 1_000,
+      ) * 1_000,
+    );
+    return {
+      ok: true,
+      state: {
+        ...state,
+        buyerOffers: state.buyerOffers.map((item) =>
+          item.id === offerId
+            ? {
+                ...item,
+                initialAmountMinor: item.amountMinor,
+                amountMinor: Math.min(counterMinor, finalMinor),
+                counterUsed: true,
+              }
+            : item,
+        ),
+      },
+      outcome: "FINAL",
+      amountMinor: Math.min(counterMinor, finalMinor),
+    };
+  }
+  return {
+    ok: true,
+    state: {
+      ...state,
+      buyerOffers: state.buyerOffers.filter((item) => item.id !== offerId),
+    },
+    outcome: "WITHDREW",
+    amountMinor: counterMinor,
   };
 }
 

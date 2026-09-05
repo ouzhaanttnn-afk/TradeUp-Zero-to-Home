@@ -4,6 +4,8 @@ import type { GameState, OwnedAsset, OwnershipState } from "./models";
 import {
   activeBookCostMinor,
   addAssetCost,
+  buyerCounterMinor,
+  counterBuyerOffer,
   conservativeMarkToMarketMinor,
   createPlayerListing,
   netWorthMinor,
@@ -290,6 +292,93 @@ describe("canonical ownership and accounting", () => {
       activeBookCost: true,
       realizedProfit: true,
     });
+  });
+
+  it("resolves the single buyer counter deterministically without opening a message chain", () => {
+    const state = purchasedState();
+    const asset = state.ownedAssets[0];
+    const listed = createPlayerListing(state, asset.id, 36_000, 20);
+    if (!listed.ok) throw new Error(listed.reason);
+    const listing = listed.state.playerListings[0];
+    const counterMinor = buyerCounterMinor({ amountMinor: 30_000 }, listing)!;
+    expect(counterMinor).toBe(33_000);
+
+    const outcomes = new Map<
+      "ACCEPTED" | "FINAL" | "WITHDREW",
+      ReturnType<typeof counterBuyerOffer>
+    >();
+    for (let index = 0; index < 1_000 && outcomes.size < 3; index++) {
+      const offerId = `offer:counter-branch:${index}`;
+      const offered: GameState = {
+        ...listed.state,
+        buyerOffers: [
+          {
+            id: offerId,
+            listingId: listing.id,
+            amountMinor: 30_000,
+            buyer: "Selin",
+            expiresAtGameMin: 80,
+          },
+        ],
+      };
+      const result = counterBuyerOffer(offered, offerId, counterMinor, 30);
+      if (result.ok && !outcomes.has(result.outcome)) {
+        outcomes.set(result.outcome, result);
+      }
+    }
+    expect([...outcomes.keys()].sort()).toEqual([
+      "ACCEPTED",
+      "FINAL",
+      "WITHDREW",
+    ]);
+
+    const accepted = outcomes.get("ACCEPTED")!;
+    if (!accepted.ok) throw new Error(accepted.reason);
+    expect(accepted.state.ownedAssets[0].state).toBe("SOLD_COMPLETE");
+    expect(accepted.state.cashMinor).toBe(
+      listed.state.cashMinor + counterMinor,
+    );
+    expect(reconcileJournal(accepted.state)).toEqual({
+      cash: true,
+      activeBookCost: true,
+      realizedProfit: true,
+    });
+
+    const final = outcomes.get("FINAL")!;
+    if (!final.ok) throw new Error(final.reason);
+    expect(final.state.buyerOffers[0]).toMatchObject({
+      amountMinor: final.amountMinor,
+      initialAmountMinor: 30_000,
+      counterUsed: true,
+    });
+    expect(final.state.cashMinor).toBe(listed.state.cashMinor);
+    expect(final.state.transactionJournal).toEqual(
+      listed.state.transactionJournal,
+    );
+    expect(
+      validateState(JSON.parse(JSON.stringify(final.state))).buyerOffers[0],
+    ).toMatchObject({
+      initialAmountMinor: 30_000,
+      counterUsed: true,
+    });
+    expect(
+      counterBuyerOffer(
+        final.state,
+        final.state.buyerOffers[0].id,
+        counterMinor,
+        30,
+      ).ok,
+    ).toBe(false);
+
+    const withdrew = outcomes.get("WITHDREW")!;
+    if (!withdrew.ok) throw new Error(withdrew.reason);
+    expect(withdrew.state.buyerOffers).toEqual([]);
+    expect(withdrew.state.playerListings[0].state).toBe("ACTIVE");
+    expect(withdrew.state.ownedAssets[0].state).toBe("LISTED");
+    expect(withdrew.state.cashMinor).toBe(listed.state.cashMinor);
+    expect(withdrew.state.transactionJournal).toEqual(
+      listed.state.transactionJournal,
+    );
   });
 
   it("rejects duplicate ownership records during state validation", () => {

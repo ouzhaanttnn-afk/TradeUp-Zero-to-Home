@@ -7,6 +7,7 @@ import {
   activeBookCostMinor,
   activeOwnedAssets,
   activePlayerListings,
+  buyerCounterMinor,
   inventoryAssets,
   preparationAssets,
   quoteAssetExit,
@@ -226,6 +227,7 @@ export default function App() {
     list,
     withdrawListing,
     acceptBuyer,
+    counterBuyer,
     rejectBuyer,
     inspect,
     prepare,
@@ -1284,6 +1286,9 @@ export default function App() {
                               asset,
                               buyerOffer.amountMinor,
                             );
+                            const counterMinor = !buyerOffer.counterUsed
+                              ? buyerCounterMinor(buyerOffer, playerListing)
+                              : undefined;
                             return (
                               <div
                                 className="buyer-offer"
@@ -1291,7 +1296,12 @@ export default function App() {
                                 role="group"
                                 aria-label={`${buyerOffer.buyer} alıcı teklifi`}
                               >
-                                <h4>{buyerOffer.buyer} teklif verdi</h4>
+                                <h4>
+                                  {buyerOffer.buyer}{" "}
+                                  {buyerOffer.counterUsed
+                                    ? "son fiyatını verdi"
+                                    : "teklif verdi"}
+                                </h4>
                                 <dl className="sale-breakdown">
                                   <div>
                                     <dt>Alacağın tutar</dt>
@@ -1321,17 +1331,31 @@ export default function App() {
                                     game.gameTimeMin}{" "}
                                   oyun dakikası içinde karar ver.
                                 </p>
-                                <div className="sell-actions">
+                                <div
+                                  className={`sell-actions${counterMinor === undefined ? "" : " buyer-actions"}`}
+                                >
                                   <button
                                     className="primary"
+                                    aria-label="Teklifi kabul et"
                                     onClick={() => acceptBuyer(buyerOffer.id)}
                                   >
-                                    Teklifi kabul et
+                                    Kabul et
                                   </button>
+                                  {counterMinor !== undefined ? (
+                                    <button
+                                      aria-label={`Karşı teklif yap: ${money(counterMinor)} iste`}
+                                      onClick={() =>
+                                        counterBuyer(buyerOffer.id)
+                                      }
+                                    >
+                                      {money(counterMinor)} iste
+                                    </button>
+                                  ) : null}
                                   <button
+                                    aria-label="Teklifi reddet"
                                     onClick={() => rejectBuyer(buyerOffer.id)}
                                   >
-                                    Teklifi reddet
+                                    Reddet
                                   </button>
                                 </div>
                               </div>

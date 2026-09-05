@@ -831,6 +831,9 @@ main {
   grid-template-columns: 1fr 1fr;
   gap: 7px;
 }
+.buyer-actions {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
 .preparation-status {
   grid-column: 1 / -1;
   overflow-wrap: anywhere;
@@ -1431,6 +1434,12 @@ nav .active .nav-icon {
   }
   .wallet strong {
     font-size: calc(15px + var(--text-size-boost));
+  }
+  .buyer-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+  .buyer-actions button:last-child {
+    grid-column: 1 / -1;
   }
   .listing {
     grid-template-columns: 48px minmax(0, 1fr) auto;

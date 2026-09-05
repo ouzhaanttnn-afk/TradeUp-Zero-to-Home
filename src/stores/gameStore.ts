@@ -1,6 +1,8 @@
 import { Haptics, NotificationType } from "@capacitor/haptics";
 import { create } from "zustand";
 import {
+  buyerCounterMinor,
+  counterBuyerOffer,
   createPlayerListing,
   purchaseListing,
   quoteAssetExit,
@@ -96,6 +98,7 @@ type Store = {
   list: (item: OwnedAsset, askingPriceMinor: number) => void;
   withdrawListing: (listingId: string) => void;
   acceptBuyer: (offerId: string) => void;
+  counterBuyer: (offerId: string) => void;
   rejectBuyer: (offerId: string) => void;
   inspect: (listingId: string, kind: InspectionKind) => void;
   prepare: (assetId: string, kind: PreparationKind) => void;
@@ -714,6 +717,66 @@ export const useGameStore = create<Store>((set, get) => ({
       buyerOffer.amountMinor >= (soldAsset?.bookCostMinor ?? 0);
     buzz(game, profitable);
     sound(game, profitable ? "SALE_PROFIT" : "SALE_LOSS");
+  },
+  counterBuyer: (offerId) => {
+    const game = get().game;
+    const buyerOffer = game.buyerOffers.find((item) => item.id === offerId);
+    const listing = buyerOffer
+      ? game.playerListings.find((item) => item.id === buyerOffer.listingId)
+      : undefined;
+    const counterMinor =
+      buyerOffer && listing
+        ? buyerCounterMinor(buyerOffer, listing)
+        : undefined;
+    if (!buyerOffer || !listing || counterMinor === undefined) {
+      set({ notice: "Bu teklif için karşı teklif yapılamıyor." });
+      return;
+    }
+    const result = counterBuyerOffer(
+      game,
+      offerId,
+      counterMinor,
+      game.gameTimeMin,
+    );
+    if (!result.ok) {
+      set({ notice: "Bu teklif için pazarlık hakkın kalmadı." });
+      buzz(game);
+      sound(game, "WARNING");
+      return;
+    }
+    if (result.outcome === "ACCEPTED") {
+      const transactionId = result.transactionId!;
+      const ftueProgressed = recordFtueBuyerSale(result.state, listing.id);
+      const withMeta = recordCompletedSaleMeta(
+        game,
+        ftueProgressed,
+        listing.ownedAssetId,
+        transactionId,
+      );
+      const progressed = progressBy(withMeta);
+      set({
+        game: stampAndPersist(progressed.state),
+        notice: worldNotice(
+          progressed,
+          `${buyerOffer.buyer} karşı teklifini kabul etti: ${money(result.amountMinor)}.`,
+        ),
+      });
+      const asset = game.ownedAssets.find(
+        (item) => item.id === listing.ownedAssetId,
+      );
+      const profitable = result.amountMinor >= (asset?.bookCostMinor ?? 0);
+      buzz(game, profitable);
+      sound(game, profitable ? "SALE_PROFIT" : "SALE_LOSS");
+      return;
+    }
+    set({
+      game: stampAndPersist(result.state),
+      notice:
+        result.outcome === "FINAL"
+          ? `${buyerOffer.buyer} son fiyatını verdi: ${money(result.amountMinor)}.`
+          : `${buyerOffer.buyer} pazarlıktan çekildi. İlanın yayında kalıyor.`,
+    });
+    sound(game, result.outcome === "FINAL" ? "OFFER" : "WARNING");
   },
   rejectBuyer: (offerId) => {
     const game = get().game;

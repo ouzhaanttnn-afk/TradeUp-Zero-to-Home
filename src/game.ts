@@ -214,6 +214,8 @@ const buyerOfferSchema = z.object({
   amountMinor: z.number().int().nonnegative(),
   buyer: z.string(),
   expiresAtGameMin: z.number().int().nonnegative(),
+  counterUsed: z.boolean().optional(),
+  initialAmountMinor: z.number().int().nonnegative().optional(),
 });
 const journalEntrySchema = z.object({
   id: z.string(),

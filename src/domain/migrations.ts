@@ -403,6 +403,14 @@ function currentBuyerOffer(
       source.expiresAtGameMin === undefined
         ? gameTimeMin + remainingLegacyMin
         : Math.max(gameTimeMin + 1, integer(source.expiresAtGameMin)),
+    ...(source.counterUsed === undefined
+      ? {}
+      : { counterUsed: Boolean(source.counterUsed) }),
+    ...(source.initialAmountMinor === undefined
+      ? {}
+      : {
+          initialAmountMinor: Math.max(0, integer(source.initialAmountMinor)),
+        }),
   };
 }
 
