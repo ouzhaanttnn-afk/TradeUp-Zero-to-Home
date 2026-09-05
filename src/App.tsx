@@ -93,6 +93,38 @@ const nextSoundLevel: Record<SoundLevel, SoundLevel> = {
   NORMAL: "OFF",
 };
 
+export function StartupSkeleton() {
+  return (
+    <div
+      className="startup-shell"
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+      aria-label="Kayıt yükleniyor"
+    >
+      <header className="startup-header">
+        <div>
+          <span className="eyebrow">TRADEUP</span>
+          <h1>Zero to Home</h1>
+        </div>
+      </header>
+      <section className="startup-wallet" aria-hidden="true">
+        <i />
+        <i />
+      </section>
+      <main className="startup-content" aria-hidden="true">
+        <i className="startup-line startup-line--short" />
+        <i className="startup-line startup-line--title" />
+        <div className="startup-grid">
+          {Array.from({ length: 9 }, (_, index) => (
+            <i key={index} />
+          ))}
+        </div>
+      </main>
+    </div>
+  );
+}
+
 const storeCopy: Record<
   MonetizationProductId,
   { title: string; detail: string }
@@ -441,13 +473,14 @@ export default function App() {
   );
   const atmosphereStage = homeAtmosphereStage(goldPercent);
   useEffect(() => {
+    if (!ready) return undefined;
     const previous = previousHomeStageRef.current;
     previousHomeStageRef.current = atmosphereStage;
     if (previous === undefined || atmosphereStage <= previous) return undefined;
     setHomePulseStage(atmosphereStage);
     const timer = window.setTimeout(() => setHomePulseStage(null), 1_600);
     return () => window.clearTimeout(timer);
-  }, [atmosphereStage]);
+  }, [atmosphereStage, ready]);
   const finaleHighlights = useMemo(
     () =>
       (
@@ -471,6 +504,8 @@ export default function App() {
     [game.career, timelineFilter],
   );
   const completedSales = completedSalesPresentation(game.realizedProfitMinor);
+
+  if (!ready) return <StartupSkeleton />;
 
   const selectListing = (listingId: string) => {
     setSelectedId(listingId);
