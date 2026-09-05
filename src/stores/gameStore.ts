@@ -89,11 +89,14 @@ type Store = {
   recordImpressions: (listingIds: string[]) => void;
   openJourney: () => void;
   setAnalytics: (enabled: boolean) => void;
+  setHaptics: (enabled: boolean) => void;
+  setReducedMotion: (enabled: boolean) => void;
   dismissCoach: () => void;
   reset: () => Promise<void>;
 };
 
-const buzz = (success = false) => {
+const buzz = (state: GameState, success = false) => {
+  if (!state.accessibility.hapticsEnabled) return;
   void Haptics.notification({
     type: success ? NotificationType.Success : NotificationType.Warning,
   }).catch(() => undefined);
@@ -246,7 +249,7 @@ export const useGameStore = create<Store>((set, get) => ({
           ? `${money(priceMinor - game.cashMinor)} nakit eksik. Önce satış yap.`
           : "Bu ilan artık satın alınamıyor.";
       set({ notice });
-      buzz();
+      buzz(game);
       return false;
     }
     const purchasedAssetId = `asset:${item.id}`;
@@ -271,7 +274,7 @@ export const useGameStore = create<Store>((set, get) => ({
         `${item.instance.family.name} envanterine eklendi.`,
       ),
     });
-    buzz(true);
+    buzz(game, true);
     return true;
   },
   offer: (item) => {
@@ -346,7 +349,7 @@ export const useGameStore = create<Store>((set, get) => ({
       game: stampAndPersist(progressed.state),
       notice: worldNotice(progressed, fallback),
     });
-    buzz();
+    buzz(game);
   },
   sell: (item, quick) => {
     const game = get().game;
@@ -367,7 +370,7 @@ export const useGameStore = create<Store>((set, get) => ({
     );
     if (!result.ok) {
       set({ notice: "Bu ürün artık satılamıyor." });
-      buzz();
+      buzz(game);
       return;
     }
     const withMeta = recordCompletedSaleMeta(
@@ -384,7 +387,7 @@ export const useGameStore = create<Store>((set, get) => ({
         `${item.instance.family.name} ${money(saleMinor)} fiyatına satıldı.`,
       ),
     });
-    buzz(true);
+    buzz(game, true);
   },
   list: (item, askingPriceMinor) => {
     const game = get().game;
@@ -400,7 +403,7 @@ export const useGameStore = create<Store>((set, get) => ({
     );
     if (!result.ok) {
       set({ notice: "Bu ürün ilana çıkarılamıyor." });
-      buzz();
+      buzz(game);
       return;
     }
     let next = recordFtueListing(result.state, item.id);
@@ -432,7 +435,7 @@ export const useGameStore = create<Store>((set, get) => ({
     const result = withdrawPlayerListing(game, listingId, game.gameTimeMin);
     if (!result.ok) {
       set({ notice: "İlan geri çekilemedi." });
-      buzz();
+      buzz(game);
       return;
     }
     const progressed = progressBy(
@@ -464,7 +467,7 @@ export const useGameStore = create<Store>((set, get) => ({
     );
     if (!result.ok) {
       set({ notice: "Bu teklif artık kabul edilemiyor." });
-      buzz();
+      buzz(game);
       return;
     }
     const ftueProgressed =
@@ -485,7 +488,7 @@ export const useGameStore = create<Store>((set, get) => ({
         `Alıcı teklifi kabul edildi: ${money(buyerOffer.amountMinor)}.`,
       ),
     });
-    buzz(true);
+    buzz(game, true);
   },
   inspect: (listingId, kind) => {
     const game = get().game;
@@ -657,6 +660,30 @@ export const useGameStore = create<Store>((set, get) => ({
       notice: enabled
         ? "İsteğe bağlı analitik açıldı."
         : "Analitik kapatıldı ve yerel olay kuyruğu temizlendi.",
+    });
+  },
+  setHaptics: (enabled) => {
+    const game = get().game;
+    set({
+      game: stampAndPersist({
+        ...game,
+        accessibility: { ...game.accessibility, hapticsEnabled: enabled },
+      }),
+      notice: enabled
+        ? "Dokunsal geri bildirim açıldı."
+        : "Dokunsal geri bildirim kapatıldı.",
+    });
+  },
+  setReducedMotion: (enabled) => {
+    const game = get().game;
+    set({
+      game: stampAndPersist({
+        ...game,
+        accessibility: { ...game.accessibility, reducedMotion: enabled },
+      }),
+      notice: enabled
+        ? "Arayüz hareketleri azaltıldı."
+        : "Arayüz hareketleri açıldı.",
     });
   },
   dismissCoach: () => {

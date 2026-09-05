@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { Haptics } from "@capacitor/haptics";
 
 vi.mock("@capacitor/haptics", () => ({
   Haptics: { notification: vi.fn(() => Promise.resolve()) },
@@ -17,6 +18,40 @@ import { initialState } from "../game";
 import { quoteAssetExit, reconcileJournal } from "../domain/economy";
 import { loadGameWithStatus } from "../services/persistence";
 import { useGameStore } from "./gameStore";
+
+describe("accessibility preferences", () => {
+  beforeEach(() => {
+    vi.mocked(Haptics.notification).mockClear();
+    useGameStore.setState({
+      game: initialState(0, "SANDBOX"),
+      ready: true,
+      notice: "",
+    });
+  });
+
+  it("suppresses native haptics when the player disables them", () => {
+    useGameStore.getState().setHaptics(false);
+    const game = useGameStore.getState().game;
+    const listing = game.listings[0];
+
+    expect(useGameStore.getState().buy(listing, game.cashMinor + 1)).toBe(
+      false,
+    );
+    expect(Haptics.notification).not.toHaveBeenCalled();
+    expect(useGameStore.getState().game.accessibility.hapticsEnabled).toBe(
+      false,
+    );
+  });
+
+  it("stores the explicit reduced-motion preference in game state", () => {
+    useGameStore.getState().setReducedMotion(true);
+
+    expect(useGameStore.getState().game.accessibility.reducedMotion).toBe(true);
+    expect(useGameStore.getState().notice).toBe(
+      "Arayüz hareketleri azaltıldı.",
+    );
+  });
+});
 
 describe("persistence recovery notice", () => {
   it("tells the player when the last valid backup was restored", async () => {

@@ -23,7 +23,7 @@ export type {
   TransactionJournalEntry,
 } from "./domain/models";
 export { families } from "./content/families";
-export const SAVE_VERSION = 8;
+export const SAVE_VERSION = 9;
 export const HOME_GOAL_MINOR = 350_000_000;
 
 const attributeDefinitionSchema = z.object({
@@ -342,6 +342,10 @@ const analyticsSchema = z.object({
     }),
   ),
 });
+const accessibilitySchema = z.object({
+  hapticsEnabled: z.boolean(),
+  reducedMotion: z.boolean(),
+});
 const rewardTransactionSchema = z.object({
   id: z.string(),
   placementId: z.enum([
@@ -434,6 +438,7 @@ const stateSchema = z
     follow: followSchema,
     home: homeSchema,
     analytics: analyticsSchema,
+    accessibility: accessibilitySchema,
     ftue: ftueSchema,
     monetization: monetizationSchema,
     lastWallClockMs: z.number().nonnegative(),
@@ -795,6 +800,7 @@ export const initialState = (
     },
     home: { unlocked: false, purchased: false, progressMilestones: [] },
     analytics: { enabled: true, events: [] },
+    accessibility: { hapticsEnabled: true, reducedMotion: false },
     monetization: createDefaultMonetizationState(0),
     ftue: {
       stage: mode === "FTUE" ? "STARTING_SALE" : "COMPLETE",

@@ -287,10 +287,7 @@ export type HomeState = {
 };
 
 export type RewardPlacementId =
-  | "MARKET_SCOUT"
-  | "FAST_INSPECTION"
-  | "FAST_PREPARATION"
-  | "LISTING_REACH";
+  "MARKET_SCOUT" | "FAST_INSPECTION" | "FAST_PREPARATION" | "LISTING_REACH";
 
 export type MonetizationProductId =
   | "tradeup_premium_lifetime"
@@ -388,6 +385,11 @@ export type AnalyticsState = {
   events: AnalyticsEvent[];
 };
 
+export type AccessibilityPreferences = {
+  hapticsEnabled: boolean;
+  reducedMotion: boolean;
+};
+
 export type Negotiation = {
   listingId: ListingId;
   offersRemaining: 0 | 1 | 2;
@@ -431,6 +433,7 @@ export type GameState = {
   follow: FollowState;
   home: HomeState;
   analytics: AnalyticsState;
+  accessibility: AccessibilityPreferences;
   monetization: MonetizationState;
   ftue: FtueState;
   lastWallClockMs: number;

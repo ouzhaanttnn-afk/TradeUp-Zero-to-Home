@@ -17,13 +17,13 @@ The binding product specification is
 - Two-player-offer negotiation with stable seller floor and counteroffers
 - Buy → inventory → listing/withdrawal → settlement loop with idempotent transactions
 - Diminishing, capped offline progress with a protected opportunity sample
-- Versioned IndexedDB persistence with explicit v2 → v3 → v4 migrations and backup
+- Versioned IndexedDB persistence with an explicit v2 → … → v9 migration chain and recoverable backup
 - Ordered critical-save queue plus Capacitor background/resume synchronization
 - Career event history produced by canonical economic transactions
 - Data-driven fictional product families and `assetKey` manifest
-- Original app icon and nine product assets with deterministic fallback
+- Original app icon and 24 dedicated product-family hero assets with deterministic fallback
 - PWA manifest/service worker and Capacitor Android wrapper
-- Native haptics adapter with web-safe fallback
+- Player-controlled reduced motion and native haptics with web-safe fallback
 
 ## Commands
 

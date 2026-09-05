@@ -506,13 +506,28 @@ export function migrateStateToV4(value: unknown): unknown {
 }
 
 export function migrateStateToCurrent(value: unknown): unknown {
-  return migrateStateToV8(
-    migrateStateToV7(
-      migrateStateToV6(
-        migrateStateToV5(migrateStateToV4(migrateStateToV3(value))),
+  return migrateStateToV9(
+    migrateStateToV8(
+      migrateStateToV7(
+        migrateStateToV6(
+          migrateStateToV5(migrateStateToV4(migrateStateToV3(value))),
+        ),
       ),
     ),
   );
+}
+
+export function migrateStateToV9(value: unknown): unknown {
+  const source = record(value);
+  if (integer(source.version) >= 9) return value;
+  return {
+    ...source,
+    version: 9,
+    accessibility: {
+      hapticsEnabled: true,
+      reducedMotion: false,
+    },
+  };
 }
 
 export function migrateStateToV8(value: unknown): unknown {

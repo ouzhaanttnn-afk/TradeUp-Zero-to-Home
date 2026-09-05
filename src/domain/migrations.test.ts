@@ -63,7 +63,7 @@ describe("save migration", () => {
     };
 
     const state = validateState(migrateStateToCurrent(legacy));
-    expect(state.version).toBe(8);
+    expect(state.version).toBe(9);
     expect(state.cashMinor).toBe(150_000);
     expect(state.ownedAssets[0]).toMatchObject({
       id: "owned-1",
@@ -111,7 +111,7 @@ describe("save migration", () => {
 
     const state = validateState(migrateStateToCurrent(v3));
     expect(state).toMatchObject({
-      version: 8,
+      version: 9,
       gameTimeMin: 0,
       lastWallClockMs: 123_000,
       cashMinor: 42_000,
@@ -149,7 +149,7 @@ describe("save migration", () => {
     delete v6.analytics;
     const state = validateState(migrateStateToCurrent(v6));
 
-    expect(state.version).toBe(8);
+    expect(state.version).toBe(9);
     expect(state.expertise).toMatchObject({
       marketXp: 90,
       categoryXp: { Elektronik: 90 },
@@ -167,6 +167,26 @@ describe("save migration", () => {
       missedOpportunities: [],
     });
     expect(state.home.unlocked).toBe(true);
+    expect(reconcileJournal(state)).toEqual({
+      cash: true,
+      activeBookCost: true,
+      realizedProfit: true,
+    });
+  });
+
+  it("adds accessible motion and haptics preferences to a v8 save", () => {
+    const current = initialState(2_000, "SANDBOX");
+    const v8: Record<string, unknown> = { ...current, version: 8 };
+    delete v8.accessibility;
+
+    const state = validateState(migrateStateToCurrent(v8));
+
+    expect(state.version).toBe(9);
+    expect(state.accessibility).toEqual({
+      hapticsEnabled: true,
+      reducedMotion: false,
+    });
+    expect(state.transactionJournal).toEqual(current.transactionJournal);
     expect(reconcileJournal(state)).toEqual({
       cash: true,
       activeBookCost: true,

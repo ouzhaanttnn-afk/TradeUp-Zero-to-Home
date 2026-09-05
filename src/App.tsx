@@ -125,6 +125,8 @@ export default function App() {
     recordImpressions,
     openJourney,
     setAnalytics,
+    setHaptics,
+    setReducedMotion,
     reset,
   } = useGameStore();
 
@@ -291,7 +293,9 @@ export default function App() {
   };
 
   return (
-    <div className="app-shell">
+    <div
+      className={`app-shell${game.accessibility.reducedMotion ? " reduced-motion" : ""}`}
+    >
       <header>
         <div>
           <span className="eyebrow">TRADEUP</span>
@@ -684,8 +688,37 @@ export default function App() {
             {settingsOpen ? (
               <section className="settings-card">
                 <div>
+                  <span>Dokunsal geri bildirim</span>
+                  <button
+                    aria-pressed={game.accessibility.hapticsEnabled}
+                    onClick={() =>
+                      setHaptics(!game.accessibility.hapticsEnabled)
+                    }
+                  >
+                    {game.accessibility.hapticsEnabled
+                      ? "Açık · kapat"
+                      : "Kapalı · aç"}
+                  </button>
+                </div>
+                <div>
+                  <span>Azaltılmış hareket</span>
+                  <button
+                    aria-pressed={game.accessibility.reducedMotion}
+                    onClick={() =>
+                      setReducedMotion(!game.accessibility.reducedMotion)
+                    }
+                  >
+                    {game.accessibility.reducedMotion
+                      ? "Açık · kapat"
+                      : "Kapalı · aç"}
+                  </button>
+                </div>
+                <div>
                   <span>İsteğe bağlı analitik</span>
-                  <button onClick={() => setAnalytics(!game.analytics.enabled)}>
+                  <button
+                    aria-pressed={game.analytics.enabled}
+                    onClick={() => setAnalytics(!game.analytics.enabled)}
+                  >
                     {game.analytics.enabled ? "Açık · kapat" : "Kapalı · aç"}
                   </button>
                 </div>

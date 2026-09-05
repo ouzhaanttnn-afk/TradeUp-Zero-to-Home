@@ -767,12 +767,22 @@ nav .active {
   background: #67d8ad;
 }
 @media (prefers-reduced-motion: reduce) {
-  .product-visual,
-  .condition-overlay,
-  .visual-badge {
-    transition: none;
-    animation: none;
+  .app-shell *,
+  .app-shell *::before,
+  .app-shell *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
+}
+.app-shell.reduced-motion *,
+.app-shell.reduced-motion *::before,
+.app-shell.reduced-motion *::after {
+  scroll-behavior: auto !important;
+  transition-duration: 0.01ms !important;
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
 }
 .owned-icon {
   width: 45px;
