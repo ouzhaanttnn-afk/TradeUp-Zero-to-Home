@@ -37,6 +37,14 @@ for (const width of [320, 430]) {
     await expect(cards.first().locator(".market-condition-signal")).toHaveText(
       `%${saved.listings[0].instance.condition}`,
     );
+    await expect(cards.first().locator("img")).toHaveAttribute(
+      "loading",
+      "eager",
+    );
+    await expect(cards.nth(6).locator("img")).toHaveAttribute(
+      "loading",
+      "lazy",
+    );
     await expect(
       cards.first().locator(".market-evidence-signal"),
     ).toContainText("Bilgi");

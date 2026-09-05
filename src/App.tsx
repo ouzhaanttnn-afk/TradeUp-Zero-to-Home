@@ -170,10 +170,12 @@ function ProductVisual({
   instance,
   className,
   alt = "",
+  priority = false,
 }: {
   instance: ItemInstance;
   className: string;
   alt?: string;
+  priority?: boolean;
 }) {
   const visual = visualTreatmentFor(instance);
   return (
@@ -184,6 +186,9 @@ function ProductVisual({
     >
       <img
         src={assetFor(instance.family.assetKey, instance.family.category)}
+        loading={priority ? "eager" : "lazy"}
+        decoding="async"
+        fetchPriority={priority ? "high" : "auto"}
         onError={(event) => {
           const fallback = fallbackAssetFor(instance.family.category);
           if (event.currentTarget.src !== fallback)
@@ -988,7 +993,7 @@ export default function App() {
                   </div>
                 </article>
               ) : null}
-              {visibleMarketListings.map((item) => {
+              {visibleMarketListings.map((item, index) => {
                 const categoryLevel = categoryExpertiseLevel(
                   game,
                   item.instance.family.category,
@@ -1009,6 +1014,7 @@ export default function App() {
                       <ProductVisual
                         instance={item.instance}
                         className="product-art"
+                        priority={index < 6}
                       />
                       <span className="market-condition-signal">
                         %{item.instance.condition}
@@ -2059,6 +2065,7 @@ export default function App() {
                 instance={selected.instance}
                 className="hero-art"
                 alt={selected.instance.family.name}
+                priority
               />
               <span className="sheet-category">
                 {selected.instance.family.category}

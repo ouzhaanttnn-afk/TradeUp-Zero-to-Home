@@ -158,10 +158,11 @@ for (const width of [320, 390, 430]) {
       "object-fit",
       "contain",
     );
-    await expect(page.locator(".hero-art img")).toHaveCSS(
-      "height",
-      "170px",
+    await expect(page.locator(".hero-art img")).toHaveAttribute(
+      "loading",
+      "eager",
     );
+    await expect(page.locator(".hero-art img")).toHaveCSS("height", "170px");
     await expect(page.locator(".sheet-decision-heading")).toContainText(
       "KARARIN",
     );
