@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { App as CapacitorApp } from "@capacitor/app";
 import "./App.css";
 import { assetFor, visualTreatmentFor } from "./assets";
@@ -167,6 +167,7 @@ export default function App() {
   const [purchasesOpen, setPurchasesOpen] = useState(false);
   const [resetArmed, setResetArmed] = useState(false);
   const [quickSaleAssetId, setQuickSaleAssetId] = useState<string | null>(null);
+  const sheetCloseRef = useRef<HTMLButtonElement>(null);
   const {
     game,
     ready,
@@ -229,6 +230,22 @@ export default function App() {
       if (removeListener) void removeListener();
     };
   }, [flush, hydrate]);
+  useEffect(() => {
+    if (!selectedId) return undefined;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    const frame = window.requestAnimationFrame(() =>
+      sheetCloseRef.current?.focus(),
+    );
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSelectedId(null);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("keydown", closeOnEscape);
+      previousFocus?.focus();
+    };
+  }, [selectedId]);
 
   const total = wealth(game);
   const marketListings = activeMarketListings(game);
@@ -528,6 +545,7 @@ export default function App() {
                     className="listing"
                     key={item.id}
                     onClick={() => selectListing(item.id)}
+                    aria-label={`${item.instance.family.name}, fiyat ${money(item.priceMinor)}, kondisyon yüzde ${item.instance.condition}, ${itemSignal.text}. İlan detaylarını aç`}
                   >
                     <ProductVisual
                       instance={item.instance}
@@ -712,6 +730,7 @@ export default function App() {
                   <button
                     role="tab"
                     aria-selected={portfolioSegment === segment}
+                    aria-controls="portfolio-panel"
                     className={portfolioSegment === segment ? "active" : ""}
                     key={segment}
                     onClick={() => setPortfolioSegment(segment)}
@@ -736,7 +755,18 @@ export default function App() {
                 <button onClick={() => navigate("market")}>Pazara git</button>
               </div>
             ) : null}
-            <div className="inventory-grid">
+            <div
+              className="inventory-grid"
+              id="portfolio-panel"
+              role="tabpanel"
+              aria-label={
+                portfolioSegment === "inventory"
+                  ? "Envanter"
+                  : portfolioSegment === "preparation"
+                    ? "Hazırlık"
+                    : "İlanlarım"
+              }
+            >
               {portfolioSegment === "preparation" &&
               canClaimReward("FAST_PREPARATION") ? (
                 <button
@@ -1186,6 +1216,7 @@ export default function App() {
             className={tab === item ? "active" : ""}
             key={item}
             onClick={() => navigate(item)}
+            aria-current={tab === item ? "page" : undefined}
           >
             <span>
               {item === "market"
@@ -1212,9 +1243,13 @@ export default function App() {
           <section
             className="sheet"
             onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="listing-detail-title"
           >
-            <div className="grab" />
+            <div className="grab" aria-hidden="true" />
             <button
+              ref={sheetCloseRef}
               className="close"
               onClick={() => setSelectedId(null)}
               aria-label="Kapat"
@@ -1230,7 +1265,7 @@ export default function App() {
               {selected.instance.family.category} ·{" "}
               {sellerLabel[selected.seller]} satıcı
             </small>
-            <h2>{selected.instance.family.name}</h2>
+            <h2 id="listing-detail-title">{selected.instance.family.name}</h2>
             <div className="detail-price">
               <strong>{money(selected.priceMinor)}</strong>
               <span
