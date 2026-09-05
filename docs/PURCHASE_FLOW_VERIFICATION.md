@@ -26,3 +26,13 @@ Yeni mekanik, ekonomi ayarı veya ilk oturumu atlama eklenmedi.
 
 Ekran görüntüleri test çalıştırıldığında `test-results/` altında üretilir; bu klasör sürüm kontrolüne alınmaz.
 Kontroller masaüstü Chrome'un telefon boyutlu görünümündedir. Gerçek iOS/Android cihaz testi veya oyuncuların karar süresinde ölçülmüş iyileşme yerine geçmez.
+
+## Bütçe erişimi düzeltmesi
+
+- İlan fiyatı nakdi aştığında bütçeye uygun mevcut pazarlık teklifi artık gizlenmez.
+- Teklif, karşı teklif ve doğrudan alım için gerçek tutar, alış sonrası kalan nakit veya eksik tutar gösterilir. Ödenemeyen seçenekler açıklamayla devre dışıdır.
+- Tüm mevcut seçenekler bütçeyi aşıyorsa en düşük eksik tutar ve envantere geçiş sunulur. Kapalı pazarlık yeni teklif seçeneği sayılmaz; kayıtlı karşı teklif mevcut kurallarıyla korunur.
+- Teklif tutarı önizlemesi ve işlem, aynı mevcut yuvarlama hesabını kullanır. Oranlar, satıcı yanıtı, iki hak sınırı ve ilk oturum kapıları değişmedi. İşlem katmanındaki yetersiz nakit ve yeniden deneme korumaları korunur.
+- Ek testler: 8 bütçe/yuvarlama testi; 320×640 büyük yazıda bütçeye uygun pazarlıkla alım, tam nakitle karşı teklif kabulü, yetersiz nakitte envantere geçiş. Alım sonrası kayıt yenilemede nakit, maliyet ve işlem günlüğü doğrulanır.
+
+Güncel doğrulama: 226 test ve 14 tarayıcı senaryosu; lint ve production build başarılı.

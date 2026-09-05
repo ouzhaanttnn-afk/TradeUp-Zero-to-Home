@@ -714,6 +714,12 @@ export function sellerFloor(item: Listing) {
     ) * 1_000
   );
 }
+export function playerOfferMinor(askingMinor: number, offerIndex: 1 | 2) {
+  return (
+    Math.round((askingMinor * (offerIndex === 1 ? 0.82 : 0.91)) / 1_000) * 1_000
+  );
+}
+
 export function resolveOffer(
   item: Listing,
   offer: number,

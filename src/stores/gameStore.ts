@@ -53,6 +53,7 @@ import {
 import {
   initialState,
   money,
+  playerOfferMinor,
   resolveOffer,
   sellerFloor,
   type GameState,
@@ -438,11 +439,8 @@ export const useGameStore = create<Store>((set, get) => ({
       set({ notice: "Görüşme kapandı." });
       return;
     }
-    const index = 3 - current.offersRemaining;
-    const offerMinor =
-      Math.round(
-        (currentListing.priceMinor * (index === 1 ? 0.82 : 0.91)) / 1_000,
-      ) * 1_000;
+    const index = current.offersRemaining === 2 ? 1 : 2;
+    const offerMinor = playerOfferMinor(currentListing.priceMinor, index);
     const result = resolveOffer(
       currentListing,
       offerMinor,

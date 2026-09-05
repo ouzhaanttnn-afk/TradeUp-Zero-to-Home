@@ -1115,6 +1115,14 @@ nav .active .nav-icon {
   font-size: calc(9px + var(--text-size-boost));
   font-weight: 400;
 }
+.counter-offer small {
+  display: block;
+  margin-top: 4px;
+  font-size: calc(11px + var(--text-size-boost));
+}
+.sheet-actions + .cash-shortfall {
+  margin-top: 8px;
+}
 @media (max-width: 350px) {
   header {
     padding-inline: 14px;

@@ -56,6 +56,7 @@ import {
 } from "./ui/comparisonPresentation";
 import { preparationPresentation } from "./ui/preparationPresentation";
 import { listingActivity } from "./ui/listingActivity";
+import { purchaseBudget } from "./ui/purchaseBudget";
 
 type Tab = "market" | "follow" | "portfolio" | "journey";
 type PortfolioSegment = "inventory" | "preparation" | "listings";
@@ -340,6 +341,21 @@ export default function App() {
     : undefined;
   const offers = negotiating?.offersRemaining ?? 2;
   const ftueActive = isFtueActive(game);
+  const budget = selected
+    ? purchaseBudget(
+        selected.priceMinor,
+        game.cashMinor,
+        negotiating,
+        !ftueActive,
+      )
+    : null;
+  const balanceCopy = (quote: {
+    shortfallMinor: number;
+    remainingMinor: number;
+  }) =>
+    quote.shortfallMinor
+      ? `${money(quote.shortfallMinor)} nakit eksik`
+      : `Alırsan kalan: ${money(quote.remainingMinor)}`;
   const premiumReward = hasPremiumEntitlement(game);
   const rewardProviderAvailable =
     premiumReward || game.monetization.consent.canRequestAds;
@@ -1921,62 +1937,85 @@ export default function App() {
                 </p>
               ) : null}
               {(!ftueActive || game.ftue.stage === "NEGOTIATION") &&
-              negotiating?.counterMinor ? (
+              budget?.counter ? (
                 <button
                   className="counter-offer"
+                  disabled={budget.counter.shortfallMinor > 0}
                   onClick={() => {
                     purchaseAndContinue(selected.id, () =>
-                      buy(selected, negotiating.counterMinor),
+                      buy(selected, budget.counter!.amountMinor),
                     );
                   }}
                 >
-                  Karşı teklifi kabul et · {money(negotiating.counterMinor)}
+                  Karşı teklifi kabul et · {money(budget.counter.amountMinor)}
+                  <small>{balanceCopy(budget.counter)}</small>
                 </button>
               ) : null}
               {!ftueActive || game.ftue.stage === "NEGOTIATION" ? (
-                selected.priceMinor > game.cashMinor && !ftueActive ? (
-                  <div className="cash-shortfall">
-                    <p>
-                      {money(selected.priceMinor - game.cashMinor)} nakit eksik.
-                    </p>
-                    <button
-                      onClick={() => {
-                        setSelectedId(null);
-                        navigate("portfolio");
-                        setPortfolioSegment("inventory");
-                      }}
-                    >
-                      Satabileceğin ürünleri gör
-                    </button>
-                  </div>
-                ) : (
+                <>
                   <div className="sheet-actions">
                     <button
-                      className={ftueActive ? "primary" : ""}
-                      disabled={offers === 0 || negotiating?.closed}
+                      className={
+                        ftueActive ||
+                        (budget?.offer?.shortfallMinor === 0 &&
+                          budget.direct?.shortfallMinor)
+                          ? "primary"
+                          : ""
+                      }
+                      disabled={
+                        !budget?.offer || budget.offer.shortfallMinor > 0
+                      }
                       onClick={() =>
                         purchaseAndContinue(selected.id, () => offer(selected))
                       }
                     >
-                      Pazarlık et{" "}
-                      <small>
-                        {offers && !negotiating?.closed
-                          ? `${offers} hakkın var`
-                          : "Görüşme kapandı"}
-                      </small>
+                      Pazarlık et
+                      {budget?.offer ? (
+                        <>
+                          <small>
+                            {money(budget.offer.amountMinor)} teklif · {offers}{" "}
+                            hak
+                          </small>
+                          <small>{balanceCopy(budget.offer)}</small>
+                        </>
+                      ) : (
+                        <small>Görüşme kapandı</small>
+                      )}
                     </button>
-                    {!ftueActive ? (
+                    {budget?.direct ? (
                       <button
-                        className="primary"
-                        onClick={() => {
-                          purchaseAndContinue(selected.id, () => buy(selected));
-                        }}
+                        className={
+                          budget.direct.shortfallMinor ? "" : "primary"
+                        }
+                        disabled={budget.direct.shortfallMinor > 0}
+                        onClick={() =>
+                          purchaseAndContinue(selected.id, () => buy(selected))
+                        }
                       >
-                        Hemen al <small>{money(selected.priceMinor)}</small>
+                        Hemen al{" "}
+                        <small>{money(budget.direct.amountMinor)}</small>
+                        <small>{balanceCopy(budget.direct)}</small>
                       </button>
                     ) : null}
                   </div>
-                )
+                  {budget && budget.shortfallMinor > 0 ? (
+                    <div className="cash-shortfall">
+                      <p>
+                        Bu alış için en az {money(budget.shortfallMinor)} nakit
+                        eksik.
+                      </p>
+                      <button
+                        onClick={() => {
+                          setSelectedId(null);
+                          navigate("portfolio");
+                          setPortfolioSegment("inventory");
+                        }}
+                      >
+                        Satabileceğin ürünleri gör
+                      </button>
+                    </div>
+                  ) : null}
+                </>
               ) : (
                 <>
                   <p className="sheet-step">
