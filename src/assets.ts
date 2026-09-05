@@ -36,6 +36,8 @@ import standMixer from "./assets/products/prd_stand_mixer.png";
 import studioMonitor from "./assets/products/prd_studio_monitor.png";
 import dacAmp from "./assets/products/prd_dac_amp.png";
 import cassettePlayer from "./assets/products/prd_cassette_player.png";
+import eReader from "./assets/products/prd_e_reader.png";
+import mobileProjector from "./assets/products/prd_mobile_projector.png";
 import boardGame from "./assets/products/prd_board_game.png";
 import portableRadio from "./assets/products/prd_portable_radio.png";
 import fountainPen from "./assets/products/prd_fountain_pen.png";
@@ -83,6 +85,8 @@ const dedicatedAssets: Record<string, string> = {
   prd_studio_monitor: studioMonitor,
   prd_dac_amp: dacAmp,
   prd_cassette_player: cassettePlayer,
+  prd_e_reader: eReader,
+  prd_mobile_projector: mobileProjector,
   prd_board_game: boardGame,
   prd_portable_radio: portableRadio,
   prd_fountain_pen: fountainPen,

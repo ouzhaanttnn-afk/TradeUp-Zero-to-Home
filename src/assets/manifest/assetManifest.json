@@ -281,14 +281,14 @@
     {
       "assetKey": "prd_e_reader",
       "familyId": "e_reader",
-      "source": "fallback:fb_phone",
-      "dedicated": false
+      "source": "../products/prd_e_reader.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_mobile_projector",
       "familyId": "mobile_projector",
-      "source": "fallback:fb_phone",
-      "dedicated": false
+      "source": "../products/prd_mobile_projector.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_laptop",

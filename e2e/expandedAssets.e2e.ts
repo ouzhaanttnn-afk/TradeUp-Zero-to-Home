@@ -196,17 +196,24 @@ test("expanded product families use dedicated mobile artwork", async ({
   });
 });
 
-test("audio expansion artwork loads without category fallbacks", async ({
+test("secondary expansion artwork loads without category fallbacks", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const state = initialState(Date.now(), "SANDBOX");
   const dacAmp = familyById("dac_amp");
   const cassettePlayer = familyById("cassette_player");
-  if (!dacAmp || !cassettePlayer) {
-    throw new Error("Audio asset family is missing");
+  const eReader = familyById("e_reader");
+  const mobileProjector = familyById("mobile_projector");
+  if (!dacAmp || !cassettePlayer || !eReader || !mobileProjector) {
+    throw new Error("Expanded asset family is missing");
   }
-  for (const [index, family] of [dacAmp, cassettePlayer].entries()) {
+  for (const [index, family] of [
+    dacAmp,
+    cassettePlayer,
+    eReader,
+    mobileProjector,
+  ].entries()) {
     state.listings[index] = {
       ...state.listings[index],
       familyId: family.id,
@@ -221,6 +228,8 @@ test("audio expansion artwork loads without category fallbacks", async ({
   for (const [name, assetName] of [
     ["Orbit DAC Amfi", "prd_dac_amp"],
     ["Sahil Kasetçalar", "prd_cassette_player"],
+    ["Kuzey E-Kitap Okuyucu", "prd_e_reader"],
+    ["Cep Projektörü", "prd_mobile_projector"],
   ] as const) {
     const card = page.locator(".market-card").filter({ hasText: name });
     const visual = card.locator(".product-visual");
