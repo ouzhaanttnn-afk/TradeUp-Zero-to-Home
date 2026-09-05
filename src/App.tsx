@@ -38,6 +38,7 @@ import { activeMarketListings, npcRiskSignal } from "./domain/world";
 import { HOME_GOAL_MINOR, money, signal, signedMoney, wealth } from "./game";
 import { useGameStore } from "./stores/gameStore";
 import { Icon, type IconName } from "./ui/Icon";
+import { evidencePresentation } from "./ui/evidencePresentation";
 
 type Tab = "market" | "follow" | "portfolio" | "journey";
 type PortfolioSegment = "inventory" | "preparation" | "listings";
@@ -1270,13 +1271,18 @@ export default function App() {
               className="hero-art"
               alt={selected.instance.family.name}
             />
-            <small>
-              {selected.instance.family.category} ·{" "}
-              {sellerLabel[selected.seller]} satıcı
-            </small>
-            <h2 id="listing-detail-title">{selected.instance.family.name}</h2>
+            <div className="sheet-title">
+              <small>
+                {selected.instance.family.category} ·{" "}
+                {sellerLabel[selected.seller]} satıcı
+              </small>
+              <h2 id="listing-detail-title">{selected.instance.family.name}</h2>
+            </div>
             <div className="detail-price">
-              <strong>{money(selected.priceMinor)}</strong>
+              <div>
+                <small>İLAN FİYATI</small>
+                <strong>{money(selected.priceMinor)}</strong>
+              </div>
               <span
                 className={
                   signal(
@@ -1388,7 +1394,7 @@ export default function App() {
               </div>
               <div>
                 <span>Pazarlık hakkı</span>
-                <b>
+                <b aria-label={`${offers} pazarlık hakkı kaldı`}>
                   {"● ".repeat(offers)}
                   {"○ ".repeat(2 - offers)}
                 </b>
@@ -1403,9 +1409,13 @@ export default function App() {
                 const definition = selected.instance.family.evidence.find(
                   (item) => item.id === record.definitionId,
                 );
+                const evidenceState = evidencePresentation(record.status);
                 return (
-                  <p key={record.definitionId}>
-                    <b>{definition?.label}</b> · {record.status}
+                  <p className="evidence-row" key={record.definitionId}>
+                    <b>{definition?.label}</b>
+                    <span className={`evidence-state ${evidenceState.tone}`}>
+                      {evidenceState.label}
+                    </span>
                   </p>
                 );
               })}
@@ -1482,59 +1492,61 @@ export default function App() {
                 )}
               </div>
             ) : null}
-            {(!ftueActive || game.ftue.stage === "NEGOTIATION") &&
-            negotiating?.counterMinor ? (
-              <button
-                className="counter-offer"
-                onClick={() => {
-                  if (buy(selected, negotiating.counterMinor))
-                    setSelectedId(null);
-                }}
-              >
-                Karşı teklifi kabul et · {money(negotiating.counterMinor)}
-              </button>
-            ) : null}
-            {!ftueActive || game.ftue.stage === "NEGOTIATION" ? (
-              selected.priceMinor > game.cashMinor && !ftueActive ? (
-                <div className="cash-shortfall">
-                  <p>
-                    {money(selected.priceMinor - game.cashMinor)} nakit eksik.
-                  </p>
-                  <button
-                    onClick={() => {
+            <div className="sheet-decision">
+              {(!ftueActive || game.ftue.stage === "NEGOTIATION") &&
+              negotiating?.counterMinor ? (
+                <button
+                  className="counter-offer"
+                  onClick={() => {
+                    if (buy(selected, negotiating.counterMinor))
                       setSelectedId(null);
-                      navigate("portfolio");
-                      setPortfolioSegment("listings");
-                    }}
-                  >
-                    Portföyden çıkış planla
-                  </button>
-                </div>
-              ) : (
-                <div className="sheet-actions">
-                  <button onClick={() => offer(selected)}>
-                    Pazarlık et{" "}
-                    <small>
-                      {offers ? `${offers} hakkın var` : "Görüşme kapandı"}
-                    </small>
-                  </button>
-                  {!ftueActive ? (
+                  }}
+                >
+                  Karşı teklifi kabul et · {money(negotiating.counterMinor)}
+                </button>
+              ) : null}
+              {!ftueActive || game.ftue.stage === "NEGOTIATION" ? (
+                selected.priceMinor > game.cashMinor && !ftueActive ? (
+                  <div className="cash-shortfall">
+                    <p>
+                      {money(selected.priceMinor - game.cashMinor)} nakit eksik.
+                    </p>
                     <button
-                      className="primary"
                       onClick={() => {
-                        if (buy(selected)) setSelectedId(null);
+                        setSelectedId(null);
+                        navigate("portfolio");
+                        setPortfolioSegment("listings");
                       }}
                     >
-                      Hemen al <small>{money(selected.priceMinor)}</small>
+                      Portföyden çıkış planla
                     </button>
-                  ) : null}
-                </div>
-              )
-            ) : (
-              <p className="decision-lock">
-                Karar sırası: karşılaştır → kanıtı kontrol et → pazarlık.
-              </p>
-            )}
+                  </div>
+                ) : (
+                  <div className="sheet-actions">
+                    <button onClick={() => offer(selected)}>
+                      Pazarlık et{" "}
+                      <small>
+                        {offers ? `${offers} hakkın var` : "Görüşme kapandı"}
+                      </small>
+                    </button>
+                    {!ftueActive ? (
+                      <button
+                        className="primary"
+                        onClick={() => {
+                          if (buy(selected)) setSelectedId(null);
+                        }}
+                      >
+                        Hemen al <small>{money(selected.priceMinor)}</small>
+                      </button>
+                    ) : null}
+                  </div>
+                )
+              ) : (
+                <p className="decision-lock">
+                  Karar sırası: karşılaştır → kanıtı kontrol et → pazarlık.
+                </p>
+              )}
+            </div>
           </section>
         </div>
       ) : null}
