@@ -538,6 +538,36 @@ main {
   border-radius: 9px;
   background: radial-gradient(circle at 35% 20%, #2b503f, #12221b 72%);
 }
+.market-visual-frame {
+  position: relative;
+  flex: 0 0 auto;
+}
+.market-condition-signal,
+.market-evidence-signal {
+  position: absolute;
+  z-index: 5;
+  right: 4px;
+  max-width: calc(100% - 8px);
+  padding: 2px 4px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(5, 17, 12, 0.84);
+  color: #e7f1ec;
+  font-size: calc(8px + var(--text-size-boost));
+  font-weight: 750;
+  line-height: 1.15;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+.market-condition-signal {
+  top: 4px;
+}
+.market-evidence-signal {
+  bottom: 4px;
+  color: #bcd0c6;
+}
 .market-heat {
   position: absolute;
   z-index: 4;

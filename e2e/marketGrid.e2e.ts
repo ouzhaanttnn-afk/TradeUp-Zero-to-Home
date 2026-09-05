@@ -28,6 +28,18 @@ for (const width of [320, 430]) {
 
     const cards = page.locator(".market-grid .market-card");
     await expect(cards).toHaveCount(saved.listings.length);
+    await expect(
+      cards.first().locator(".market-condition-signal"),
+    ).toBeVisible();
+    await expect(
+      cards.first().locator(".market-evidence-signal"),
+    ).toBeVisible();
+    await expect(cards.first().locator(".market-condition-signal")).toHaveText(
+      `%${saved.listings[0].instance.condition}`,
+    );
+    await expect(
+      cards.first().locator(".market-evidence-signal"),
+    ).toContainText("Bilgi");
     const boxes = await cards.evaluateAll((items) =>
       items.slice(0, 9).map((item) => {
         const box = item.getBoundingClientRect();
@@ -49,6 +61,27 @@ for (const width of [320, 430]) {
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth),
     ).toBe(width);
+    const firstVisual = await cards
+      .first()
+      .locator(".product-art")
+      .boundingBox();
+    const firstSignals = await cards
+      .first()
+      .locator(".market-condition-signal, .market-evidence-signal")
+      .evaluateAll((items) =>
+        items.map((item) => item.getBoundingClientRect()),
+      );
+    expect(firstVisual).not.toBeNull();
+    for (const signalBox of firstSignals) {
+      expect(signalBox.left).toBeGreaterThanOrEqual(firstVisual!.x);
+      expect(signalBox.right).toBeLessThanOrEqual(
+        firstVisual!.x + firstVisual!.width,
+      );
+      expect(signalBox.top).toBeGreaterThanOrEqual(firstVisual!.y);
+      expect(signalBox.bottom).toBeLessThanOrEqual(
+        firstVisual!.y + firstVisual!.height,
+      );
+    }
 
     await page.screenshot({
       path: testInfo.outputPath(`market-grid-${width}.png`),

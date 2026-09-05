@@ -970,10 +970,18 @@ export default function App() {
                     onClick={() => selectListing(item.id)}
                     aria-label={`${item.instance.family.name}, fiyat ${money(item.priceMinor)}, kondisyon yüzde ${item.instance.condition}, ${itemSignal.text}. İlan detaylarını aç`}
                   >
-                    <ProductVisual
-                      instance={item.instance}
-                      className="product-art"
-                    />
+                    <div className="market-visual-frame">
+                      <ProductVisual
+                        instance={item.instance}
+                        className="product-art"
+                      />
+                      <span className="market-condition-signal">
+                        %{item.instance.condition}
+                      </span>
+                      <span className="market-evidence-signal">
+                        Bilgi {evidenceLabel(item.instance.evidenceConfidence)}
+                      </span>
+                    </div>
                     <span className={`market-heat market-heat--${risk.level}`}>
                       {risk.text}
                     </span>
