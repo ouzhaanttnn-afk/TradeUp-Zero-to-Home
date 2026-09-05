@@ -40,6 +40,7 @@ import { useGameStore } from "./stores/gameStore";
 import { Icon, type IconName } from "./ui/Icon";
 import { evidencePresentation } from "./ui/evidencePresentation";
 import { ownershipPresentation } from "./ui/ownershipPresentation";
+import { simplifyLegacyPlayerCopy } from "./ui/playerLanguage";
 
 type Tab = "market" | "follow" | "portfolio" | "journey";
 type PortfolioSegment = "inventory" | "preparation" | "listings";
@@ -355,9 +356,9 @@ export default function App() {
             </div>
           </div>
           <p className="owned-facts">
-            Kanıt: {evidenceLabel(item.instance.evidenceConfidence)}
+            Bilgi güveni: {evidenceLabel(item.instance.evidenceConfidence)}
             <span aria-hidden="true">·</span>
-            Likidite: %
+            Satış hızı: %
             {Math.round(
               (item.instance.family.liquidity +
                 item.instance.liquidityBonusBps / 10_000) *
@@ -386,7 +387,7 @@ export default function App() {
                         ? `+${action.conditionGain} kondisyon`
                         : action.kind === "TEST"
                           ? `+%${Math.round(action.confidenceGain * 100)} güven`
-                          : `+%${Math.round(action.liquidityGainBps / 100)} likidite`}
+                          : `+%${Math.round(action.liquidityGainBps / 100)} satış hızı`}
                     </small>
                   </button>
                 ))
@@ -413,7 +414,7 @@ export default function App() {
                   {money(item.bookCostMinor)}
                 </small>
                 <small>
-                  Dengeli ilana göre vazgeçilen tahmini premium{" "}
+                  Dengeli ilana göre kaçırılan tahmini ek kazanç{" "}
                   {money(quote.estimatedPremiumGivenUpMinor)}
                 </small>
                 <button
@@ -585,7 +586,7 @@ export default function App() {
                         <span>%{item.instance.condition} kondisyon</span>
                         {categoryLevel >= 1 ? (
                           <span>
-                            Likidite %
+                            Satış hızı %
                             {Math.round(item.instance.family.liquidity * 100)}
                           </span>
                         ) : null}
@@ -620,11 +621,11 @@ export default function App() {
                 </span>
                 <h3>Henüz takip yok</h3>
                 <p>
-                  Bir ilanı takip et. Pazar okuryazarlığın Lv3 olduğunda family
-                  alarmı da kurabilirsin.
+                  Bir ilanı takip et. Pazar deneyimin Lv3 olduğunda ürün alarmı
+                  da kurabilirsin.
                 </p>
                 <button onClick={() => navigate("market")}>
-                  Pazardan family seç
+                  Pazardan ürün seç
                 </button>
               </div>
             ) : null}
@@ -657,7 +658,7 @@ export default function App() {
               ))}
             </div>
             {game.follow.savedSearches.length ? (
-              <h3 className="module-title">Family alarmları</h3>
+              <h3 className="module-title">Ürün alarmları</h3>
             ) : null}
             <div className="follow-stack">
               {game.follow.savedSearches.map((search) => {
@@ -669,13 +670,13 @@ export default function App() {
                   <article className="follow-card" key={search.id}>
                     <div>
                       <small>KAYITLI ARAMA · {matches.length} EŞLEŞME</small>
-                      <h3>{family?.name ?? "Bilinmeyen family"}</h3>
+                      <h3>{family?.name ?? "Bilinmeyen ürün grubu"}</h3>
                       <p>
                         En çok {money(search.maxPriceMinor)} · min. %
-                        {search.minCondition} kondisyon · kanıt{" "}
+                        {search.minCondition} kondisyon · bilgi{" "}
                         {search.evidencePreference === "CHECKED"
-                          ? "kontrollü"
-                          : "farketmez"}
+                          ? "kontrol edilmiş"
+                          : "fark etmez"}
                       </p>
                     </div>
                     <div className="inline-actions">
@@ -1089,12 +1090,13 @@ export default function App() {
               </section>
             ) : null}
             <section className="score-card">
-              <small>GERÇEKLEŞEN KÂR</small>
+              <small>TAMAMLANAN SATIŞ KÂRI</small>
               <strong className={game.realizedProfitMinor < 0 ? "loss" : ""}>
                 {money(game.realizedProfitMinor)}
               </strong>
               <p>
-                Nakit, aktif varlık değeri ve gerçekleşen kâr ayrı hesaplanır.
+                Elindeki nakit, ürünlerinin değeri ve tamamlanan satış kârı ayrı
+                gösterilir.
               </p>
             </section>
             <div className="metric-grid">
@@ -1103,32 +1105,32 @@ export default function App() {
                 <b>{money(game.cashMinor)}</b>
               </div>
               <div>
-                <span>Net worth</span>
+                <span>Tahmini toplam servet</span>
                 <b>{money(total)}</b>
               </div>
               <div>
-                <span>Portföy piyasa değeri</span>
+                <span>Ürünlerin tahmini değeri</span>
                 <b>{money(portfolioMarketValue)}</b>
               </div>
               <div>
-                <span>Aktif book cost</span>
+                <span>Ürünlere harcanan toplam</span>
                 <b>{money(activeBookCostMinor(game))}</b>
               </div>
               <div>
-                <span>Gerçekleşmemiş tahmin</span>
+                <span>Ürünlerde tahmini fark</span>
                 <b className={unrealizedEstimate < 0 ? "loss" : ""}>
                   {money(unrealizedEstimate)}
                 </b>
               </div>
               <div>
-                <span>Likidite oranı</span>
+                <span>Servetin nakit payı</span>
                 <b>%{total ? Math.round((game.cashMinor / total) * 100) : 0}</b>
               </div>
             </div>
             <section className="expertise-card">
               <div className="expertise-heading">
                 <div>
-                  <small>PAZAR OKURYAZARLIĞI</small>
+                  <small>PAZAR DENEYİMİ</small>
                   <h3>Lv{marketLevel}</h3>
                 </div>
                 <span>
@@ -1147,9 +1149,9 @@ export default function App() {
               </div>
               <p>
                 {marketLevel < 3
-                  ? "Lv3: family alarmları ve trend özeti"
+                  ? "Lv3: ürün alarmları ve fiyat eğilimi"
                   : marketLevel < 6
-                    ? "Lv6: kanıt güveni ve kusur ihtimali"
+                    ? "Lv6: bilgi güveni ve kusur ihtimali"
                     : "Bilgi araçların kararını netleştirir; fiyat bonusu vermez."}
               </p>
               <div className="category-levels">
@@ -1242,7 +1244,7 @@ export default function App() {
                     <small>
                       {event.atGameMin}. OYUN DK · {event.group}
                     </small>
-                    <b>{event.label}</b>
+                    <b>{simplifyLegacyPlayerCopy(event.label)}</b>
                     {event.buyPriceMinor !== undefined &&
                     event.sellPriceMinor !== undefined ? (
                       <p>
@@ -1367,15 +1369,15 @@ export default function App() {
                     )
                   }
                 >
-                  Family alarmı kur
+                  Ürün alarmı kur
                 </button>
               ) : (
-                <span>Family alarmı Lv3'te açılır</span>
+                <span>Ürün alarmı Lv3'te açılır</span>
               )}
             </div>
             <div className="band">
               <div>
-                <span>Tahmini piyasa bandı</span>
+                <span>Tahmini fiyat aralığı</span>
                 <b>
                   {money(
                     listingEstimateBand(
@@ -1426,7 +1428,7 @@ export default function App() {
                 <b>%{selected.instance.condition}</b>
               </div>
               <div>
-                <span>Kanıt güveni</span>
+                <span>Bilgi güveni</span>
                 <b>{evidenceLabel(selected.instance.evidenceConfidence)}</b>
               </div>
               <div>
@@ -1439,7 +1441,7 @@ export default function App() {
             </div>
             <div className="evidence-panel">
               <small>
-                KANIT DOSYASI · GÜVEN %
+                ÜRÜN KONTROLLERİ · GÜVEN %
                 {Math.round(selected.instance.evidenceConfidence * 100)}
               </small>
               {selected.instance.evidence.map((record) => {
@@ -1503,8 +1505,8 @@ export default function App() {
             {comparing ? (
               <div className="compare-stack">
                 <h3>
-                  Aynı family · {comparableListings(game, selected.id).length}{" "}
-                  ilan
+                  Aynı ürün grubu ·{" "}
+                  {comparableListings(game, selected.id).length} ilan
                 </h3>
                 {comparisonRows(comparableListings(game, selected.id)).map(
                   (row) => (

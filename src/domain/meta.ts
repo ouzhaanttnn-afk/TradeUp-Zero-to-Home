@@ -113,7 +113,7 @@ export function gainExpertise(
         `expertise:market:${nextMarketLevel}`,
         "EXPERTISE_MILESTONE",
         "MILESTONES",
-        `Pazar okuryazarlığı Lv${nextMarketLevel} oldu`,
+        `Pazar deneyimi Lv${nextMarketLevel} oldu`,
       ),
     );
   }

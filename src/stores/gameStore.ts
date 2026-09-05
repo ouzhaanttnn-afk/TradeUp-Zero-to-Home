@@ -675,7 +675,7 @@ export const useGameStore = create<Store>((set, get) => ({
     set({
       game: stampAndPersist(next),
       notice:
-        next === game ? "Bu arama zaten kayıtlı." : "Family alarmı kaydedildi.",
+        next === game ? "Bu arama zaten kayıtlı." : "Ürün alarmı kaydedildi.",
     });
   },
   removeSearch: (searchId) => {
