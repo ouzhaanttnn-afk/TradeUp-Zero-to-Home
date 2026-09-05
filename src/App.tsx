@@ -47,6 +47,7 @@ import {
 } from "./ui/journeyPresentation";
 import { ownershipPresentation } from "./ui/ownershipPresentation";
 import { simplifyLegacyPlayerCopy } from "./ui/playerLanguage";
+import { saleHistoryCopy } from "./ui/saleHistory";
 
 type Tab = "market" | "follow" | "portfolio" | "journey";
 type PortfolioSegment = "inventory" | "preparation" | "listings";
@@ -1288,6 +1289,7 @@ export default function App() {
                   game.gameTimeMin,
                   event.atGameMin,
                 );
+                const saleCopy = saleHistoryCopy(event);
                 return (
                   <article
                     className={`timeline-event ${eventState.tone}`}
@@ -1304,14 +1306,7 @@ export default function App() {
                         <span>{eventState.ageLabel}</span>
                       </div>
                       <b>{simplifyLegacyPlayerCopy(event.label)}</b>
-                      {event.buyPriceMinor !== undefined &&
-                      event.sellPriceMinor !== undefined ? (
-                        <p>
-                          Alış {money(event.buyPriceMinor)} · Satış{" "}
-                          {money(event.sellPriceMinor)} · Kâr{" "}
-                          {money(event.realizedProfitMinor ?? 0)}
-                        </p>
-                      ) : null}
+                      {saleCopy ? <p>{saleCopy}</p> : null}
                     </div>
                     {event.amountMinor !== undefined ? (
                       <em>{money(event.amountMinor)}</em>
