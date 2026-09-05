@@ -1,4 +1,33 @@
-import type { GameState, OwnedAsset, PreparationKind } from "./models";
+import type {
+  GameState,
+  OwnedAsset,
+  PreparationKind,
+  PreparationDefinition,
+} from "./models";
+
+export function preparationOutcome(
+  asset: OwnedAsset,
+  definition: PreparationDefinition,
+) {
+  return {
+    condition: Math.min(
+      asset.instance.family.conditionCap,
+      asset.instance.condition + definition.conditionGain,
+    ),
+    fairValueMinor: Math.round(
+      (asset.instance.fairValueMinor * (10_000 + definition.valueGainBps)) /
+        10_000,
+    ),
+    evidenceConfidence: Math.min(
+      1,
+      asset.instance.evidenceConfidence + definition.confidenceGain,
+    ),
+    liquidityBonusBps:
+      asset.instance.liquidityBonusBps + definition.liquidityGainBps,
+    accessoryComplete:
+      definition.kind === "COMPLETE" ? true : asset.instance.accessoryComplete,
+  };
+}
 
 export const preparationDefinition = (
   asset: OwnedAsset,
@@ -115,22 +144,7 @@ export function completeDuePreparations(
       if (!definition) return asset;
       const instance = {
         ...asset.instance,
-        condition: Math.min(
-          asset.instance.family.conditionCap,
-          asset.instance.condition + definition.conditionGain,
-        ),
-        fairValueMinor: Math.round(
-          (asset.instance.fairValueMinor * (10_000 + definition.valueGainBps)) /
-            10_000,
-        ),
-        evidenceConfidence: Math.min(
-          1,
-          asset.instance.evidenceConfidence + definition.confidenceGain,
-        ),
-        liquidityBonusBps:
-          asset.instance.liquidityBonusBps + definition.liquidityGainBps,
-        accessoryComplete:
-          pending.kind === "COMPLETE" ? true : asset.instance.accessoryComplete,
+        ...preparationOutcome(asset, definition),
         preparationHistory: asset.instance.preparationHistory.map((record) =>
           record.id === pending.id
             ? { ...record, state: "COMPLETE" as const }

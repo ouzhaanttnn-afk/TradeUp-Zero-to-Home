@@ -49,6 +49,7 @@ import { ownershipPresentation } from "./ui/ownershipPresentation";
 import { simplifyLegacyPlayerCopy } from "./ui/playerLanguage";
 import { saleHistoryCopy } from "./ui/saleHistory";
 import { formatEstimate, wealthPresentation } from "./ui/wealthPresentation";
+import { preparationPresentation } from "./ui/preparationPresentation";
 
 type Tab = "market" | "follow" | "portfolio" | "journey";
 type PortfolioSegment = "inventory" | "preparation" | "listings";
@@ -385,14 +386,10 @@ export default function App() {
                     onClick={() => prepare(item.id, action.kind)}
                   >
                     {action.label} <b>{money(action.costMinor)}</b>
-                    <small>
-                      {action.durationMin} dk ·{" "}
-                      {action.kind === "CLEAN"
-                        ? `+${action.conditionGain} kondisyon`
-                        : action.kind === "TEST"
-                          ? `+%${Math.round(action.confidenceGain * 100)} güven`
-                          : `+%${Math.round(action.liquidityGainBps / 100)} satış hızı`}
-                    </small>
+                    <small>Süre: {action.durationMin} dk</small>
+                    {preparationPresentation(item, action).map((effect) => (
+                      <small key={effect}>{effect}</small>
+                    ))}
                   </button>
                 ))
             : null}
