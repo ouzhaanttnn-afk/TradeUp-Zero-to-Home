@@ -1,10 +1,7 @@
 const CACHE = "tradeup-v3";
+const PRECACHE = ["/", "/manifest.webmanifest"];
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches
-      .open(CACHE)
-      .then((cache) => cache.addAll(["/", "/manifest.webmanifest"])),
-  );
+  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(PRECACHE)));
 });
 self.addEventListener("activate", (event) => {
   event.waitUntil(

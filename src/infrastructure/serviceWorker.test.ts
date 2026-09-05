@@ -4,10 +4,10 @@ import { runInNewContext } from "node:vm";
 import { describe, expect, it, vi } from "vitest";
 
 const source = readFileSync(
-  new URL("../../public/sw.js", import.meta.url),
+  new URL("./serviceWorker.js", import.meta.url),
   "utf8",
 );
-function worker() {
+function worker(workerSource = source) {
   const handlers: Record<string, (event: unknown) => void> = {};
   const values = new Map<string, Response>();
   const cache = {
@@ -23,7 +23,7 @@ function worker() {
     delete: vi.fn(async () => true),
   };
   const fetch = vi.fn(async () => new Response("online"));
-  runInNewContext(source, {
+  runInNewContext(workerSource, {
     self: {
       location: { origin: "https://tradeup.test" },
       addEventListener: (type: string, handler: (event: unknown) => void) => {
@@ -60,6 +60,37 @@ function worker() {
   return { handlers, values, cache, caches, fetch, request };
 }
 describe("offline worker", () => {
+  it("installs all build-provided resources before completing installation", async () => {
+    const paths = [
+      "/",
+      "/assets/game-123.js",
+      "/assets/game-123.css",
+      "/assets/product-123.png",
+    ];
+    const app = worker(
+      source.replace('["/", "/manifest.webmanifest"]', JSON.stringify(paths)),
+    );
+    let completion: Promise<unknown> | undefined;
+    app.handlers.install({
+      waitUntil: (promise: Promise<unknown>) => {
+        completion = promise;
+      },
+    });
+    await completion;
+    expect(app.cache.addAll.mock.calls).toEqual([[paths]]);
+  });
+
+  it("fails installation if required files cannot be cached", async () => {
+    const app = worker();
+    app.cache.addAll.mockRejectedValue(new Error("incomplete download"));
+    let completion: Promise<unknown> | undefined;
+    app.handlers.install({
+      waitUntil: (promise: Promise<unknown>) => {
+        completion = promise;
+      },
+    });
+    await expect(completion).rejects.toThrow("incomplete download");
+  });
   it("deletes only older TradeUp caches", async () => {
     const app = worker();
     let completion: Promise<unknown> | undefined;
