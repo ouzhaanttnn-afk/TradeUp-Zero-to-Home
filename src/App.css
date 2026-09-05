@@ -532,6 +532,85 @@ main {
   gap: 10px;
   box-shadow: 0 7px 22px rgba(0, 0, 0, 0.13);
 }
+.owned-copy {
+  min-width: 0;
+}
+.owned-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.owned-title-row h3 {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.asset-state {
+  flex: 0 0 auto;
+  padding: 4px 7px;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  color: #b7cdc2;
+  background: rgba(255, 255, 255, 0.045);
+  font-size: calc(8px + var(--text-size-boost));
+  font-weight: 800;
+  line-height: 1.2;
+}
+.asset-state.available,
+.asset-state.complete {
+  color: #9de9bd;
+  border-color: rgba(105, 226, 162, 0.28);
+  background: rgba(105, 226, 162, 0.08);
+}
+.asset-state.working,
+.asset-state.pending {
+  color: #f1cf8d;
+  border-color: rgba(228, 181, 78, 0.3);
+  background: rgba(228, 181, 78, 0.08);
+}
+.asset-state.listed,
+.asset-state.reserved {
+  color: #b7d9ca;
+  border-color: rgba(127, 176, 153, 0.28);
+  background: rgba(127, 176, 153, 0.09);
+}
+.owned-metrics {
+  display: grid;
+  grid-template-columns: 0.82fr 1.18fr;
+  gap: 6px;
+  margin-top: 10px;
+}
+.owned-metrics div {
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid rgba(137, 193, 164, 0.08);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.025);
+}
+.owned-metrics span,
+.owned-metrics b {
+  display: block;
+}
+.owned-metrics span {
+  color: #789286;
+  font-size: calc(8px + var(--text-size-boost));
+}
+.owned-metrics b {
+  margin-top: 3px;
+  font-size: calc(11px + var(--text-size-boost));
+  overflow-wrap: anywhere;
+}
+.listing-metrics {
+  grid-template-columns: repeat(3, 1fr);
+}
+.owned-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+}
 .owned-icon {
   font-size: calc(30px + var(--text-size-boost));
 }
@@ -919,7 +998,8 @@ nav .active .nav-icon {
   .app-shell.large-text .inspection-actions,
   .app-shell.large-text .sheet-actions,
   .app-shell.large-text .sell-actions,
-  .app-shell.large-text .metric-grid {
+  .app-shell.large-text .metric-grid,
+  .app-shell.large-text .owned-metrics {
     grid-template-columns: 1fr;
   }
   .app-shell.large-text .details {

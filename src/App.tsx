@@ -39,6 +39,7 @@ import { HOME_GOAL_MINOR, money, signal, signedMoney, wealth } from "./game";
 import { useGameStore } from "./stores/gameStore";
 import { Icon, type IconName } from "./ui/Icon";
 import { evidencePresentation } from "./ui/evidencePresentation";
+import { ownershipPresentation } from "./ui/ownershipPresentation";
 
 type Tab = "market" | "follow" | "portfolio" | "journey";
 type PortfolioSegment = "inventory" | "preparation" | "listings";
@@ -327,26 +328,41 @@ export default function App() {
     showPreparation: boolean,
   ) => {
     const quote = quoteAssetExit(item);
+    const ownershipState = ownershipPresentation(item.state);
     return (
       <article
         className="owned"
         key={`${showPreparation ? "prep" : "stock"}:${item.id}`}
       >
         <ProductVisual instance={item.instance} className="owned-icon" />
-        <div>
-          <h3>{item.instance.family.name}</h3>
-          <p>
-            Defter maliyeti {money(item.bookCostMinor)} · Tahmini çıkış{" "}
-            {money(quote.quickSaleMinor)}–{money(quote.balancedAskingMinor)}
-          </p>
-          <p>
-            Kanıt {evidenceLabel(item.instance.evidenceConfidence)} · Likidite %
+        <div className="owned-copy">
+          <div className="owned-title-row">
+            <h3>{item.instance.family.name}</h3>
+            <span className={`asset-state ${ownershipState.tone}`}>
+              {ownershipState.label}
+            </span>
+          </div>
+          <div className="owned-metrics">
+            <div>
+              <span>Defter maliyeti</span>
+              <b>{money(item.bookCostMinor)}</b>
+            </div>
+            <div>
+              <span>Tahmini çıkış</span>
+              <b>
+                {money(quote.quickSaleMinor)}–{money(quote.balancedAskingMinor)}
+              </b>
+            </div>
+          </div>
+          <p className="owned-facts">
+            Kanıt: {evidenceLabel(item.instance.evidenceConfidence)}
+            <span aria-hidden="true">·</span>
+            Likidite: %
             {Math.round(
               (item.instance.family.liquidity +
                 item.instance.liquidityBonusBps / 10_000) *
                 100,
-            )}{" "}
-            · {item.state}
+            )}
           </p>
         </div>
         <div className="sell-actions">
@@ -803,36 +819,57 @@ export default function App() {
                 ? inventory.map((item) => renderInventoryCard(item, true))
                 : null}
               {portfolioSegment === "listings"
-                ? playerListings.map(({ listing: playerListing, asset }) => (
-                    <article className="owned" key={playerListing.id}>
-                      <ProductVisual
-                        instance={asset.instance}
-                        className="owned-icon"
-                      />
-                      <div>
-                        <h3>{asset.instance.family.name}</h3>
-                        <p>
-                          Defter maliyeti {money(asset.bookCostMinor)} · İlan{" "}
-                          {money(playerListing.askingPriceMinor)} · İlgi %
-                          {playerListing.interest}
-                        </p>
-                      </div>
-                      <div className="sell-actions">
-                        <button
-                          onClick={() => withdrawListing(playerListing.id)}
-                        >
-                          İlanı geri çek
-                        </button>
-                      </div>
-                    </article>
-                  ))
+                ? playerListings.map(({ listing: playerListing, asset }) => {
+                    const ownershipState = ownershipPresentation(asset.state);
+                    return (
+                      <article className="owned" key={playerListing.id}>
+                        <ProductVisual
+                          instance={asset.instance}
+                          className="owned-icon"
+                        />
+                        <div className="owned-copy">
+                          <div className="owned-title-row">
+                            <h3>{asset.instance.family.name}</h3>
+                            <span
+                              className={`asset-state ${ownershipState.tone}`}
+                            >
+                              {ownershipState.label}
+                            </span>
+                          </div>
+                          <div className="owned-metrics listing-metrics">
+                            <div>
+                              <span>Defter maliyeti</span>
+                              <b>{money(asset.bookCostMinor)}</b>
+                            </div>
+                            <div>
+                              <span>İlan fiyatı</span>
+                              <b>{money(playerListing.askingPriceMinor)}</b>
+                            </div>
+                            <div>
+                              <span>İlgi</span>
+                              <b>%{playerListing.interest}</b>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="sell-actions">
+                          <button
+                            onClick={() => withdrawListing(playerListing.id)}
+                          >
+                            İlanı geri çek
+                          </button>
+                        </div>
+                      </article>
+                    );
+                  })
                 : null}
             </div>
             {portfolioSegment === "listings" &&
             !playerListings.length &&
             !game.buyerOffers.length ? (
               <div className="empty">
-                <span>▱</span>
+                <span className="empty-icon">
+                  <Icon name="portfolio" />
+                </span>
                 <h3>Aktif ilanın yok</h3>
                 <p>
                   Envanter segmentinden bir varlık seçip dengeli fiyatla
