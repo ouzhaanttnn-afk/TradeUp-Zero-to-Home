@@ -23,7 +23,7 @@ export type {
   TransactionJournalEntry,
 } from "./domain/models";
 export { families } from "./content/families";
-export const SAVE_VERSION = 10;
+export const SAVE_VERSION = 11;
 export const HOME_GOAL_MINOR = 350_000_000;
 
 const attributeDefinitionSchema = z.object({
@@ -346,6 +346,7 @@ const accessibilitySchema = z.object({
   hapticsEnabled: z.boolean(),
   reducedMotion: z.boolean(),
   largeText: z.boolean(),
+  soundLevel: z.enum(["OFF", "LOW", "NORMAL"]),
 });
 const rewardTransactionSchema = z.object({
   id: z.string(),
@@ -805,6 +806,7 @@ export const initialState = (
       hapticsEnabled: true,
       reducedMotion: false,
       largeText: false,
+      soundLevel: "LOW",
     },
     monetization: createDefaultMonetizationState(0),
     ftue: {

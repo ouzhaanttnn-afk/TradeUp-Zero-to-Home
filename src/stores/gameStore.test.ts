@@ -5,6 +5,9 @@ vi.mock("@capacitor/haptics", () => ({
   Haptics: { notification: vi.fn(() => Promise.resolve()) },
   NotificationType: { Success: "SUCCESS", Warning: "WARNING" },
 }));
+vi.mock("../infrastructure/audio", () => ({
+  playFeedbackSound: vi.fn(() => Promise.resolve()),
+}));
 vi.mock("../services/persistence", () => ({
   clearGame: vi.fn(() => Promise.resolve()),
   loadGame: vi.fn(),
@@ -16,12 +19,14 @@ vi.mock("../services/persistence", () => ({
 
 import { initialState } from "../game";
 import { quoteAssetExit, reconcileJournal } from "../domain/economy";
+import { playFeedbackSound } from "../infrastructure/audio";
 import { loadGameWithStatus } from "../services/persistence";
 import { useGameStore } from "./gameStore";
 
 describe("accessibility preferences", () => {
   beforeEach(() => {
     vi.mocked(Haptics.notification).mockClear();
+    vi.mocked(playFeedbackSound).mockClear();
     useGameStore.setState({
       game: initialState(0, "SANDBOX"),
       ready: true,
@@ -57,6 +62,25 @@ describe("accessibility preferences", () => {
 
     expect(useGameStore.getState().game.accessibility.largeText).toBe(true);
     expect(useGameStore.getState().notice).toBe("Büyük metin görünümü açıldı.");
+  });
+
+  it("keeps semantic audio silent when the sound level is off", () => {
+    useGameStore.getState().setSoundLevel("OFF");
+    const game = useGameStore.getState().game;
+
+    useGameStore.getState().buy(game.listings[0], game.cashMinor + 1);
+
+    expect(playFeedbackSound).not.toHaveBeenCalled();
+    expect(useGameStore.getState().notice).toContain("nakit eksik");
+  });
+
+  it("routes enabled feedback through the semantic audio adapter", () => {
+    useGameStore.getState().setSoundLevel("NORMAL");
+    const game = useGameStore.getState().game;
+
+    useGameStore.getState().buy(game.listings[0], game.cashMinor + 1);
+
+    expect(playFeedbackSound).toHaveBeenCalledWith("WARNING", "NORMAL");
   });
 });
 

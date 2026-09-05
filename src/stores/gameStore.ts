@@ -21,6 +21,7 @@ import {
   setAnalyticsEnabled,
   trackAnalytics,
 } from "../infrastructure/analytics";
+import { playFeedbackSound, type FeedbackSound } from "../infrastructure/audio";
 import {
   dismissFtueStage,
   isFtueActive,
@@ -92,6 +93,7 @@ type Store = {
   setHaptics: (enabled: boolean) => void;
   setReducedMotion: (enabled: boolean) => void;
   setLargeText: (enabled: boolean) => void;
+  setSoundLevel: (level: GameState["accessibility"]["soundLevel"]) => void;
   dismissCoach: () => void;
   reset: () => Promise<void>;
 };
@@ -101,6 +103,13 @@ const buzz = (state: GameState, success = false) => {
   void Haptics.notification({
     type: success ? NotificationType.Success : NotificationType.Warning,
   }).catch(() => undefined);
+};
+
+const sound = (state: GameState, event: FeedbackSound) => {
+  if (state.accessibility.soundLevel === "OFF") return;
+  void playFeedbackSound(event, state.accessibility.soundLevel).catch(
+    () => undefined,
+  );
 };
 
 let saveQueue = Promise.resolve();
@@ -251,6 +260,7 @@ export const useGameStore = create<Store>((set, get) => ({
           : "Bu ilan artık satın alınamıyor.";
       set({ notice });
       buzz(game);
+      sound(game, "WARNING");
       return false;
     }
     const purchasedAssetId = `asset:${item.id}`;
@@ -276,6 +286,7 @@ export const useGameStore = create<Store>((set, get) => ({
       ),
     });
     buzz(game, true);
+    sound(game, "PURCHASE");
     return true;
   },
   offer: (item) => {
@@ -351,6 +362,7 @@ export const useGameStore = create<Store>((set, get) => ({
       notice: worldNotice(progressed, fallback),
     });
     buzz(game);
+    sound(game, "OFFER");
   },
   sell: (item, quick) => {
     const game = get().game;
@@ -372,6 +384,7 @@ export const useGameStore = create<Store>((set, get) => ({
     if (!result.ok) {
       set({ notice: "Bu ürün artık satılamıyor." });
       buzz(game);
+      sound(game, "WARNING");
       return;
     }
     const withMeta = recordCompletedSaleMeta(
@@ -388,7 +401,9 @@ export const useGameStore = create<Store>((set, get) => ({
         `${item.instance.family.name} ${money(saleMinor)} fiyatına satıldı.`,
       ),
     });
-    buzz(game, true);
+    const profitable = saleMinor >= item.bookCostMinor;
+    buzz(game, profitable);
+    sound(game, profitable ? "SALE_PROFIT" : "SALE_LOSS");
   },
   list: (item, askingPriceMinor) => {
     const game = get().game;
@@ -405,6 +420,7 @@ export const useGameStore = create<Store>((set, get) => ({
     if (!result.ok) {
       set({ notice: "Bu ürün ilana çıkarılamıyor." });
       buzz(game);
+      sound(game, "WARNING");
       return;
     }
     let next = recordFtueListing(result.state, item.id);
@@ -437,6 +453,7 @@ export const useGameStore = create<Store>((set, get) => ({
     if (!result.ok) {
       set({ notice: "İlan geri çekilemedi." });
       buzz(game);
+      sound(game, "WARNING");
       return;
     }
     const progressed = progressBy(
@@ -469,6 +486,7 @@ export const useGameStore = create<Store>((set, get) => ({
     if (!result.ok) {
       set({ notice: "Bu teklif artık kabul edilemiyor." });
       buzz(game);
+      sound(game, "WARNING");
       return;
     }
     const ftueProgressed =
@@ -489,7 +507,13 @@ export const useGameStore = create<Store>((set, get) => ({
         `Alıcı teklifi kabul edildi: ${money(buyerOffer.amountMinor)}.`,
       ),
     });
-    buzz(game, true);
+    const soldAsset = game.ownedAssets.find(
+      (item) => item.id === listing.ownedAssetId,
+    );
+    const profitable =
+      buyerOffer.amountMinor >= (soldAsset?.bookCostMinor ?? 0);
+    buzz(game, profitable);
+    sound(game, profitable ? "SALE_PROFIT" : "SALE_LOSS");
   },
   inspect: (listingId, kind) => {
     const game = get().game;
@@ -697,6 +721,18 @@ export const useGameStore = create<Store>((set, get) => ({
       notice: enabled
         ? "Büyük metin görünümü açıldı."
         : "Standart metin görünümü açıldı.",
+    });
+  },
+  setSoundLevel: (level) => {
+    const game = get().game;
+    const label =
+      level === "OFF" ? "kapalı" : level === "LOW" ? "düşük" : "normal";
+    set({
+      game: stampAndPersist({
+        ...game,
+        accessibility: { ...game.accessibility, soundLevel: level },
+      }),
+      notice: `Ses seviyesi ${label} olarak ayarlandı.`,
     });
   },
   dismissCoach: () => {

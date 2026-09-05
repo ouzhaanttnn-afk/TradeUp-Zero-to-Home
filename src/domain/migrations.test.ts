@@ -63,7 +63,7 @@ describe("save migration", () => {
     };
 
     const state = validateState(migrateStateToCurrent(legacy));
-    expect(state.version).toBe(10);
+    expect(state.version).toBe(11);
     expect(state.cashMinor).toBe(150_000);
     expect(state.ownedAssets[0]).toMatchObject({
       id: "owned-1",
@@ -111,7 +111,7 @@ describe("save migration", () => {
 
     const state = validateState(migrateStateToCurrent(v3));
     expect(state).toMatchObject({
-      version: 10,
+      version: 11,
       gameTimeMin: 0,
       lastWallClockMs: 123_000,
       cashMinor: 42_000,
@@ -149,7 +149,7 @@ describe("save migration", () => {
     delete v6.analytics;
     const state = validateState(migrateStateToCurrent(v6));
 
-    expect(state.version).toBe(10);
+    expect(state.version).toBe(11);
     expect(state.expertise).toMatchObject({
       marketXp: 90,
       categoryXp: { Elektronik: 90 },
@@ -181,11 +181,12 @@ describe("save migration", () => {
 
     const state = validateState(migrateStateToCurrent(v8));
 
-    expect(state.version).toBe(10);
+    expect(state.version).toBe(11);
     expect(state.accessibility).toEqual({
       hapticsEnabled: true,
       reducedMotion: false,
       largeText: false,
+      soundLevel: "LOW",
     });
     expect(state.transactionJournal).toEqual(current.transactionJournal);
     expect(reconcileJournal(state)).toEqual({
@@ -209,6 +210,30 @@ describe("save migration", () => {
       hapticsEnabled: false,
       reducedMotion: true,
       largeText: false,
+      soundLevel: "LOW",
+    });
+    expect(state.transactionJournal).toEqual(current.transactionJournal);
+  });
+
+  it("adds calm default audio without overwriting v10 preferences", () => {
+    const current = initialState(4_000, "SANDBOX");
+    const v10: Record<string, unknown> = {
+      ...current,
+      version: 10,
+      accessibility: {
+        hapticsEnabled: false,
+        reducedMotion: true,
+        largeText: true,
+      },
+    };
+
+    const state = validateState(migrateStateToCurrent(v10));
+
+    expect(state.accessibility).toEqual({
+      hapticsEnabled: false,
+      reducedMotion: true,
+      largeText: true,
+      soundLevel: "LOW",
     });
     expect(state.transactionJournal).toEqual(current.transactionJournal);
   });

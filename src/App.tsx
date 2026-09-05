@@ -24,7 +24,11 @@ import {
   nextExpertiseThreshold,
   savedSearchMatches,
 } from "./domain/meta";
-import type { CareerEventGroup, ItemInstance } from "./domain/models";
+import type {
+  AccessibilityPreferences,
+  CareerEventGroup,
+  ItemInstance,
+} from "./domain/models";
 import { activeMarketListings, npcRiskSignal } from "./domain/world";
 import { HOME_GOAL_MINOR, money, signal, wealth } from "./game";
 import { useGameStore } from "./stores/gameStore";
@@ -44,6 +48,18 @@ const sellerLabel = {
 
 const evidenceLabel = (confidence: number) =>
   confidence >= 0.72 ? "Yüksek" : confidence >= 0.46 ? "Orta" : "Düşük";
+
+type SoundLevel = AccessibilityPreferences["soundLevel"];
+const soundLevelLabel: Record<SoundLevel, string> = {
+  OFF: "Kapalı",
+  LOW: "Düşük",
+  NORMAL: "Normal",
+};
+const nextSoundLevel: Record<SoundLevel, SoundLevel> = {
+  OFF: "LOW",
+  LOW: "NORMAL",
+  NORMAL: "OFF",
+};
 
 function ProductVisual({
   instance,
@@ -128,6 +144,7 @@ export default function App() {
     setHaptics,
     setReducedMotion,
     setLargeText,
+    setSoundLevel,
     reset,
   } = useGameStore();
 
@@ -723,6 +740,19 @@ export default function App() {
                     {game.accessibility.largeText
                       ? "Büyük · standart"
                       : "Standart · büyüt"}
+                  </button>
+                </div>
+                <div>
+                  <span>Ses seviyesi</span>
+                  <button
+                    aria-label={`Ses seviyesi: ${soundLevelLabel[game.accessibility.soundLevel]}. Değiştir`}
+                    onClick={() =>
+                      setSoundLevel(
+                        nextSoundLevel[game.accessibility.soundLevel],
+                      )
+                    }
+                  >
+                    {soundLevelLabel[game.accessibility.soundLevel]} · değiştir
                   </button>
                 </div>
                 <div>

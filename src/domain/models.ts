@@ -389,6 +389,7 @@ export type AccessibilityPreferences = {
   hapticsEnabled: boolean;
   reducedMotion: boolean;
   largeText: boolean;
+  soundLevel: "OFF" | "LOW" | "NORMAL";
 };
 
 export type Negotiation = {
