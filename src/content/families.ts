@@ -214,7 +214,7 @@ const seeds: Seed[] = [
   [
     "handheld",
     "PocketArc El Konsolu",
-    "prd_console",
+    "prd_handheld",
     210_000,
     "Oyun",
     ["Sürüm", "Pil", "Şarj cihazı"],
@@ -232,7 +232,7 @@ const seeds: Seed[] = [
   [
     "game_collection",
     "Retro Oyun Seti",
-    "prd_console",
+    "prd_game_collection",
     150_000,
     "Oyun",
     ["Platform", "Adet", "Kutulu"],
@@ -286,7 +286,7 @@ const seeds: Seed[] = [
   [
     "compact_phone",
     "Nova Mini Telefon",
-    "prd_phone",
+    "prd_compact_phone",
     540_000,
     "Telefon",
     ["Model", "Pil sağlığı", "Şarj cihazı"],
@@ -295,7 +295,7 @@ const seeds: Seed[] = [
   [
     "tablet",
     "Atlas Tab",
-    "prd_phone",
+    "prd_tablet",
     760_000,
     "Telefon",
     ["Model", "Depolama", "Kalem"],
@@ -304,7 +304,7 @@ const seeds: Seed[] = [
   [
     "smartwatch",
     "Mira Akıllı Saat",
-    "prd_watch",
+    "prd_smartwatch",
     310_000,
     "Telefon",
     ["Model", "Pil sağlığı", "Kordon"],

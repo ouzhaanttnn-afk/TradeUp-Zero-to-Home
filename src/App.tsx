@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { App as CapacitorApp } from "@capacitor/app";
 import "./App.css";
-import { assetFor } from "./assets";
+import { assetFor, visualTreatmentFor } from "./assets";
 import { familyById } from "./content/families";
 import {
   activeBookCostMinor,
@@ -24,7 +24,7 @@ import {
   nextExpertiseThreshold,
   savedSearchMatches,
 } from "./domain/meta";
-import type { CareerEventGroup } from "./domain/models";
+import type { CareerEventGroup, ItemInstance } from "./domain/models";
 import { activeMarketListings, npcRiskSignal } from "./domain/world";
 import { HOME_GOAL_MINOR, money, signal, wealth } from "./game";
 import { useGameStore } from "./stores/gameStore";
@@ -44,6 +44,52 @@ const sellerLabel = {
 
 const evidenceLabel = (confidence: number) =>
   confidence >= 0.72 ? "Yüksek" : confidence >= 0.46 ? "Orta" : "Düşük";
+
+function ProductVisual({
+  instance,
+  className,
+  alt = "",
+}: {
+  instance: ItemInstance;
+  className: string;
+  alt?: string;
+}) {
+  const visual = visualTreatmentFor(instance);
+  return (
+    <div
+      className={`${className} product-visual product-visual--${visual.conditionBand}${
+        visual.fallback ? " product-visual--fallback" : ""
+      }`}
+    >
+      <img src={assetFor(instance.family.assetKey)} alt={alt} />
+      <span className="condition-overlay" aria-hidden="true" />
+      {visual.revealedDefect ? (
+        <span
+          className="visual-badge visual-badge--defect"
+          aria-label="Doğrulanmış kusur"
+        >
+          !
+        </span>
+      ) : null}
+      {visual.missingAccessory ? (
+        <span
+          className="visual-badge visual-badge--accessory"
+          aria-label="Eksik aksesuar"
+        >
+          −
+        </span>
+      ) : null}
+      {visual.verifiedEvidence ? (
+        <span
+          className="visual-badge visual-badge--verified"
+          aria-label="Kanıt doğrulandı"
+        >
+          ✓
+        </span>
+      ) : null}
+    </div>
+  );
+}
 
 export default function App() {
   const [tab, setTab] = useState<Tab>("market");
@@ -182,9 +228,7 @@ export default function App() {
         className="owned"
         key={`${showPreparation ? "prep" : "stock"}:${item.id}`}
       >
-        <div className="owned-icon">
-          <img src={assetFor(item.instance.family.assetKey)} alt="" />
-        </div>
+        <ProductVisual instance={item.instance} className="owned-icon" />
         <div>
           <h3>{item.instance.family.name}</h3>
           <p>
@@ -341,12 +385,10 @@ export default function App() {
                     key={item.id}
                     onClick={() => selectListing(item.id)}
                   >
-                    <div className="product-art">
-                      <img
-                        src={assetFor(item.instance.family.assetKey)}
-                        alt=""
-                      />
-                    </div>
+                    <ProductVisual
+                      instance={item.instance}
+                      className="product-art"
+                    />
                     <div className="listing-copy">
                       <div className="meta">
                         <span>
@@ -411,9 +453,10 @@ export default function App() {
                   key={item.id}
                   onClick={() => selectListing(item.id)}
                 >
-                  <div className="product-art">
-                    <img src={assetFor(item.instance.family.assetKey)} alt="" />
-                  </div>
+                  <ProductVisual
+                    instance={item.instance}
+                    className="product-art"
+                  />
                   <div className="listing-copy">
                     <small>CANLI · %{item.instance.condition} kondisyon</small>
                     <h3>{item.instance.family.name}</h3>
@@ -559,12 +602,10 @@ export default function App() {
               {portfolioSegment === "listings"
                 ? playerListings.map(({ listing: playerListing, asset }) => (
                     <article className="owned" key={playerListing.id}>
-                      <div className="owned-icon">
-                        <img
-                          src={assetFor(asset.instance.family.assetKey)}
-                          alt=""
-                        />
-                      </div>
+                      <ProductVisual
+                        instance={asset.instance}
+                        className="owned-icon"
+                      />
                       <div>
                         <h3>{asset.instance.family.name}</h3>
                         <p>
@@ -887,12 +928,11 @@ export default function App() {
             >
               ×
             </button>
-            <div className="hero-art">
-              <img
-                src={assetFor(selected.instance.family.assetKey)}
-                alt={selected.instance.family.name}
-              />
-            </div>
+            <ProductVisual
+              instance={selected.instance}
+              className="hero-art"
+              alt={selected.instance.family.name}
+            />
             <small>
               {selected.instance.family.category} ·{" "}
               {sellerLabel[selected.seller]} satıcı

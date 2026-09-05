@@ -1,51 +1,184 @@
 {
-  "version": 1,
+  "version": 2,
   "fallbackKey": "prd_notebook",
   "assets": [
     {
       "assetKey": "prd_notebook",
       "familyId": "notebook",
-      "source": "../products/prd_notebook.png"
+      "source": "../products/prd_notebook.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_vinyl",
+      "familyId": "vinyl",
+      "source": "../products/prd_vinyl.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_book",
+      "familyId": "book",
+      "source": "../products/prd_book.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_sneaker",
+      "familyId": "sneaker",
+      "source": "../products/prd_sneaker.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_headset",
       "familyId": "headset",
-      "source": "../products/prd_headset.png"
+      "source": "../products/prd_headset.png",
+      "dedicated": true
     },
     {
-      "assetKey": "prd_watch",
-      "familyId": "watch",
-      "source": "../products/prd_watch.png"
+      "assetKey": "prd_speaker",
+      "familyId": "speaker",
+      "source": "../products/prd_speaker.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_turntable",
+      "familyId": "turntable",
+      "source": "../products/prd_turntable.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_record_player",
+      "familyId": "record_player",
+      "source": "../products/prd_record_player.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_desk",
+      "familyId": "desk",
+      "source": "../products/prd_desk.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_chair",
+      "familyId": "chair",
+      "fallbackSource": "../products/prd_desk.png",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_coffee",
+      "familyId": "coffee",
+      "fallbackSource": "../products/prd_desk.png",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_lamp",
+      "familyId": "lamp",
+      "fallbackSource": "../products/prd_desk.png",
+      "dedicated": false
     },
     {
       "assetKey": "prd_console",
       "familyId": "console",
-      "source": "../products/prd_console.png"
+      "source": "../products/prd_console.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_handheld",
+      "familyId": "handheld",
+      "fallbackSource": "../products/prd_console.png",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_controller",
+      "familyId": "controller",
+      "fallbackSource": "../products/prd_console.png",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_game_collection",
+      "familyId": "game_collection",
+      "fallbackSource": "../products/prd_console.png",
+      "dedicated": false
     },
     {
       "assetKey": "prd_guitar",
       "familyId": "guitar",
-      "source": "../products/prd_guitar.png"
+      "source": "../products/prd_guitar.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_keyboard",
+      "familyId": "keyboard",
+      "fallbackSource": "../products/prd_guitar.png",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_microphone",
+      "familyId": "microphone",
+      "fallbackSource": "../products/prd_guitar.png",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_pedal",
+      "familyId": "pedal",
+      "fallbackSource": "../products/prd_guitar.png",
+      "dedicated": false
     },
     {
       "assetKey": "prd_phone",
       "familyId": "phone",
-      "source": "../products/prd_phone.png"
+      "source": "../products/prd_phone.png",
+      "dedicated": true
     },
     {
-      "assetKey": "prd_laptop",
-      "familyId": "laptop",
-      "source": "../products/prd_laptop.png"
+      "assetKey": "prd_compact_phone",
+      "familyId": "compact_phone",
+      "fallbackSource": "../products/prd_phone.png",
+      "dedicated": false
     },
     {
-      "assetKey": "prd_camera",
-      "familyId": "camera",
-      "source": "../products/prd_camera.png"
+      "assetKey": "prd_tablet",
+      "familyId": "tablet",
+      "fallbackSource": "../products/prd_phone.png",
+      "dedicated": false
     },
     {
-      "assetKey": "prd_scooter",
-      "familyId": "scooter",
-      "source": "../products/prd_scooter.png"
+      "assetKey": "prd_smartwatch",
+      "familyId": "smartwatch",
+      "fallbackSource": "../products/prd_watch.png",
+      "dedicated": false
+    }
+  ],
+  "overlays": [
+    {
+      "overlayKey": "ovr_cond_used",
+      "kind": "condition",
+      "renderMode": "css",
+      "minimumCondition": 55,
+      "maximumCondition": 79
+    },
+    {
+      "overlayKey": "ovr_cond_worn",
+      "kind": "condition",
+      "renderMode": "css",
+      "minimumCondition": 0,
+      "maximumCondition": 54
+    },
+    {
+      "overlayKey": "ovr_def_revealed",
+      "kind": "defect",
+      "renderMode": "css",
+      "requiresRevealedDefect": true
+    },
+    {
+      "overlayKey": "bdg_acc_incomplete",
+      "kind": "accessory",
+      "renderMode": "css",
+      "requiresMissingAccessory": true
+    },
+    {
+      "overlayKey": "bdg_evd_verified",
+      "kind": "evidence",
+      "renderMode": "css",
+      "minimumConfidence": 0.72
     }
   ]
 }
