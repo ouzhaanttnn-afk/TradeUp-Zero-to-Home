@@ -644,6 +644,19 @@ export const useGameStore = create<Store>((set, get) => ({
       ? game.playerListings.find((item) => item.id === buyerOffer.listingId)
       : undefined;
     if (!buyerOffer || !listing) return;
+    if (
+      buyerOffer.expiresAtGameMin <= game.gameTimeMin ||
+      listing.expiresAtGameMin <= game.gameTimeMin ||
+      listing.state !== "ACTIVE"
+    ) {
+      set({
+        notice:
+          "Bu teklif artık kabul edilemiyor. Güncel teklifleri kontrol et.",
+      });
+      buzz(game);
+      sound(game, "WARNING");
+      return;
+    }
     const transactionId = `sale:buyer:${buyerOffer.id}`;
     const result = settleAssetSale(
       game,

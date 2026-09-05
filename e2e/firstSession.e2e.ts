@@ -1,14 +1,15 @@
 import { expect, test } from "@playwright/test";
 import type { GameState } from "../src/domain/models";
-import { reconcileJournal } from "../src/domain/economy";
+import { netWorthMinor, reconcileJournal } from "../src/domain/economy";
 
 for (const choice of [
-  { price: 140, condition: 55 },
-  { price: 150, condition: 83 },
+  { price: 140, condition: 55, withdraw: false },
+  { price: 150, condition: 83, withdraw: false },
+  { price: 140, condition: 55, withdraw: true },
 ]) {
-  test(`first session completes with the ${choice.price} TL listing and reconciled accounting`, async ({
+  test(`first session completes with the ${choice.price} TL listing${choice.withdraw ? " after withdrawal and reload" : ""} and reconciled accounting`, async ({
     page,
-  }) => {
+  }, testInfo) => {
     const readSave = () =>
       page.evaluate(async () => {
         const db = await new Promise<IDBDatabase>((resolve, reject) => {
@@ -79,6 +80,71 @@ for (const choice of [
     await page.getByRole("button", { name: /^İlan oluştur/ }).click();
     await stage("BUYER_SALE");
     await page.getByRole("tab", { name: "İlanlarım", exact: true }).click();
+    if (choice.withdraw) {
+      const listed = await readSave();
+      const assetId = listed.ftue.firstAssetId!;
+      const asset = listed.ownedAssets.find((item) => item.id === assetId)!;
+      const listingId = asset.currentListingId!;
+      await page
+        .getByRole("button", { name: "İlanı geri çek", exact: true })
+        .click();
+      await stage("LISTING");
+      await expect(
+        page.getByText("Aktif ilanın yok", { exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Teklifi kabul et", exact: true }),
+      ).toHaveCount(0);
+      const withdrawn = await readSave();
+      expect(withdrawn.cashMinor).toBe(listed.cashMinor);
+      expect(netWorthMinor(withdrawn)).toBe(netWorthMinor(listed));
+      expect(withdrawn.ownedAssets.find((item) => item.id === assetId)).toEqual(
+        {
+          ...asset,
+          state: "IN_INVENTORY",
+          currentListingId: undefined,
+        },
+      );
+      expect(
+        withdrawn.playerListings.find((item) => item.id === listingId)?.state,
+      ).toBe("WITHDRAWN");
+      expect(
+        withdrawn.buyerOffers.some((offer) => offer.listingId === listingId),
+      ).toBe(false);
+      await page.reload();
+      await expect(
+        page.getByRole("heading", { name: "Fırsat akışı" }),
+      ).toBeVisible();
+      await stage("LISTING");
+      const loaded = await readSave();
+      expect(loaded.transactionJournal).toEqual(withdrawn.transactionJournal);
+      expect(loaded.ownedAssets).toEqual(withdrawn.ownedAssets);
+      await page.getByRole("button", { name: "Portföy", exact: true }).click();
+      await page.getByRole("tab", { name: "Envanter", exact: true }).click();
+      await page.getByRole("button", { name: /^İlan oluştur/ }).click();
+      await stage("BUYER_SALE");
+      const relisted = await readSave();
+      const newListingId = relisted.ownedAssets.find(
+        (item) => item.id === assetId,
+      )!.currentListingId;
+      expect(newListingId).not.toBe(listingId);
+      expect(relisted.cashMinor).toBe(listed.cashMinor);
+      expect(netWorthMinor(relisted)).toBe(netWorthMinor(listed));
+      expect(
+        relisted.playerListings.filter((item) => item.ownedAssetId === assetId),
+      ).toHaveLength(2);
+      expect(
+        relisted.buyerOffers.filter(
+          (offer) => offer.listingId === newListingId,
+        ),
+      ).toHaveLength(1);
+      await page.getByRole("tab", { name: "İlanlarım", exact: true }).click();
+      await page.screenshot({
+        path: testInfo.outputPath("relisted-offer.png"),
+        fullPage: true,
+        animations: "disabled",
+      });
+    }
     await page
       .getByRole("button", { name: "Teklifi kabul et", exact: true })
       .click();
@@ -89,6 +155,20 @@ for (const choice of [
     )!;
     expect(firstAsset.state).toBe("SOLD_COMPLETE");
     expect(firstAsset.preparationCostMinor).toBeGreaterThan(0);
+    expect(
+      completed.transactionJournal.filter(
+        (entry) => entry.kind === "SALE" && entry.assetId === firstAsset.id,
+      ),
+    ).toHaveLength(1);
+    expect(
+      completed.buyerOffers.some((offer) =>
+        completed.playerListings.some(
+          (listing) =>
+            listing.id === offer.listingId &&
+            listing.ownedAssetId === firstAsset.id,
+        ),
+      ),
+    ).toBe(false);
     const sale = completed.transactionJournal.find(
       (entry) => entry.kind === "SALE" && entry.assetId === firstAsset.id,
     )!;

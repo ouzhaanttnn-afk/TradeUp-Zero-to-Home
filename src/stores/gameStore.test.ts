@@ -295,6 +295,83 @@ describe("stale sale confirmation", () => {
   });
 });
 
+describe("buyer offer settlement", () => {
+  beforeEach(() => {
+    useGameStore.setState({ game: initialState(0), ready: true, notice: "" });
+  });
+
+  it.each(["offer", "listing"] as const)(
+    "rejects an expired %s at the saved game-time boundary without changing accounting",
+    (expired) => {
+      const game = useGameStore.getState().game;
+      const offer = game.buyerOffers[0];
+      const listing = game.playerListings.find(
+        (item) => item.id === offer.listingId,
+      )!;
+      if (expired === "offer") offer.expiresAtGameMin = game.gameTimeMin;
+      else listing.expiresAtGameMin = game.gameTimeMin;
+      const restored = validateState(JSON.parse(JSON.stringify(game)));
+      useGameStore.setState({ game: restored });
+
+      useGameStore.getState().acceptBuyer(offer.id);
+
+      expect(useGameStore.getState().game).toBe(restored);
+      expect(useGameStore.getState().notice).toContain(
+        "artık kabul edilemiyor",
+      );
+      expect(reconcileJournal(restored)).toEqual({
+        cash: true,
+        activeBookCost: true,
+        realizedProfit: true,
+      });
+    },
+  );
+
+  it("cannot accept a withdrawn offer after save/load", () => {
+    const offer = useGameStore.getState().game.buyerOffers[0];
+    useGameStore.getState().withdrawListing(offer.listingId);
+    const restored = validateState(
+      JSON.parse(JSON.stringify(useGameStore.getState().game)),
+    );
+    useGameStore.setState({ game: restored });
+    useGameStore.getState().acceptBuyer(offer.id);
+    expect(useGameStore.getState().game).toBe(restored);
+    expect(restored.buyerOffers).toHaveLength(0);
+    expect(restored.ownedAssets[0].state).toBe("IN_INVENTORY");
+  });
+
+  it("accepts just before expiry and cannot repeat the sale after save/load", () => {
+    const game = useGameStore.getState().game;
+    const offer = game.buyerOffers[0];
+    offer.expiresAtGameMin = game.gameTimeMin + 1;
+    const asset = game.ownedAssets[0];
+    useGameStore.getState().acceptBuyer(offer.id);
+    const restored = validateState(
+      JSON.parse(JSON.stringify(useGameStore.getState().game)),
+    );
+    expect(restored.cashMinor).toBe(game.cashMinor + offer.amountMinor);
+    expect(restored.realizedProfitMinor).toBe(
+      game.realizedProfitMinor + offer.amountMinor - asset.bookCostMinor,
+    );
+    expect(restored.buyerOffers).toHaveLength(0);
+    expect(restored.playerListings[0].state).toBe("SOLD_COMPLETE");
+    useGameStore.setState({ game: restored });
+    useGameStore.getState().acceptBuyer(offer.id);
+    useGameStore.getState().acceptBuyer(offer.id);
+    expect(useGameStore.getState().game).toBe(restored);
+    expect(
+      restored.transactionJournal.filter(
+        (entry) => entry.kind === "SALE" && entry.assetId === asset.id,
+      ),
+    ).toHaveLength(1);
+    expect(reconcileJournal(restored)).toEqual({
+      cash: true,
+      activeBookCost: true,
+      realizedProfit: true,
+    });
+  });
+});
+
 describe("replayed commands", () => {
   beforeEach(() => {
     const game = initialState(0, "SANDBOX");

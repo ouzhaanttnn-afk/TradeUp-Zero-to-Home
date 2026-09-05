@@ -54,4 +54,8 @@ persistence, missing product images, comparison navigation, and offline reload.
 It also completes the first-session loop with both starting notebook choices,
 reconciling cash, book cost, realized profit and the journal after each stage
 and after reload. Automated completion is not evidence of player retention or comprehension.
+The withdrawal scenario reloads the saved game, relists the same asset and
+completes its sale, checking unchanged wealth/cost, preserved listing history,
+removed old offers and exactly one sale journal entry. Store tests also reject
+offers and listings at their expiry boundary and replay accepted offers after reload.
 `test:offline` runs only the offline scenario. These do not replace native-device QA.
