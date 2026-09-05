@@ -245,26 +245,26 @@
     {
       "assetKey": "prd_bass_guitar",
       "familyId": "bass_guitar",
-      "source": "fallback:fb_music",
-      "dedicated": false
+      "source": "../products/prd_bass_guitar.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_audio_interface",
       "familyId": "audio_interface",
-      "source": "fallback:fb_music",
-      "dedicated": false
+      "source": "../products/prd_audio_interface.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_drum_machine",
       "familyId": "drum_machine",
-      "source": "fallback:fb_music",
-      "dedicated": false
+      "source": "../products/prd_drum_machine.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_violin",
       "familyId": "violin",
-      "source": "fallback:fb_music",
-      "dedicated": false
+      "source": "../products/prd_violin.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_fold_phone",

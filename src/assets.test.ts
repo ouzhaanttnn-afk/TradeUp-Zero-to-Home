@@ -50,6 +50,10 @@ describe("asset manifest and visual treatments", () => {
     expect(hasDedicatedAsset("prd_side_table")).toBe(true);
     expect(hasDedicatedAsset("prd_rugged_phone")).toBe(true);
     expect(hasDedicatedAsset("prd_gaming_keyboard")).toBe(true);
+    expect(hasDedicatedAsset("prd_bass_guitar")).toBe(true);
+    expect(hasDedicatedAsset("prd_audio_interface")).toBe(true);
+    expect(hasDedicatedAsset("prd_drum_machine")).toBe(true);
+    expect(hasDedicatedAsset("prd_violin")).toBe(true);
   });
 
   it("returns a deterministic fallback for an unknown asset key", () => {

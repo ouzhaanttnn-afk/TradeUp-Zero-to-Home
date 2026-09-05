@@ -296,3 +296,49 @@ test("secondary expansion artwork loads without category fallbacks", async ({
       .toBe(true);
   }
 });
+
+test("final expansion artwork loads without category fallbacks", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const state = initialState(Date.now(), "SANDBOX");
+  const rows = [
+    ["bass_guitar", "Arda B4 Bas Gitar", "prd_bass_guitar"],
+    ["audio_interface", "Vox Ses Arayüzü", "prd_audio_interface"],
+    ["drum_machine", "Ritim Davul Makinesi", "prd_drum_machine"],
+    ["violin", "Ladin Öğrenci Kemanı", "prd_violin"],
+  ] as const;
+  const families = rows.map(([familyId]) => familyById(familyId));
+  if (families.some((family) => !family)) {
+    throw new Error("Final asset family is missing");
+  }
+  for (const [index, family] of families.entries()) {
+    if (!family) continue;
+    state.listings[index] = {
+      ...state.listings[index],
+      familyId: family.id,
+      instance: { ...state.listings[index].instance, family },
+    };
+  }
+
+  await page.goto("/");
+  await persistGame(page, validateState(state));
+  await page.reload();
+
+  for (const [, name, assetName] of rows) {
+    const card = page.locator(".market-card").filter({ hasText: name });
+    const visual = card.locator(".product-visual");
+    const image = visual.locator("img");
+    await expect(card).toHaveCount(1);
+    await expect(visual).not.toHaveClass(/product-visual--fallback/);
+    await expect(image).toHaveAttribute("src", new RegExp(assetName));
+    await expect
+      .poll(() =>
+        image.evaluate(
+          (element: HTMLImageElement) =>
+            element.complete && element.naturalWidth > 0,
+        ),
+      )
+      .toBe(true);
+  }
+});
