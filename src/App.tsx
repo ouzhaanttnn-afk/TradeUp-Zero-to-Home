@@ -744,12 +744,15 @@ export default function App() {
           <strong>{formatEstimate(estimates.total)}</strong>
         </div>
         {game.home.unlocked ? (
-          <button className="goal" onClick={() => navigate("journey")}>
+          <div
+            className="goal"
+            aria-label={`Ev yolculuğu yüzde ${homeProgress}`}
+          >
             <small>Ev yolculuğu · %{homeProgress}</small>
             <span>
               <i style={{ width: `${homeProgress}%` }} />
             </span>
-          </button>
+          </div>
         ) : null}
       </section>
 

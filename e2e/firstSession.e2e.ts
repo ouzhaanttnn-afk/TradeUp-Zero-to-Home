@@ -359,6 +359,13 @@ for (const choice of [
     expect(sale.realizedProfitDeltaMinor).toBeGreaterThan(0);
     expect(completed.home.unlocked).toBe(true);
     expect(
+      await page
+        .locator(".wallet")
+        .evaluate((element) =>
+          Math.round(element.getBoundingClientRect().height),
+        ),
+    ).toBeLessThanOrEqual(90);
+    expect(
       completed.analytics.events.filter(
         (event) => event.name === "offer_submitted",
       ).length,
