@@ -200,13 +200,6 @@
   width: 100%;
   min-height: 46px;
 }
-.decision-lock {
-  padding: 12px;
-  border-radius: 12px;
-  background: rgba(255, 196, 87, 0.1);
-  color: #f5d78d;
-  font-size: calc(0.82rem + var(--text-size-boost));
-}
 * {
   box-sizing: border-box;
 }
@@ -1874,6 +1867,25 @@ nav .active .nav-icon {
     rgba(6, 15, 11, 0.99) 36%
   );
   backdrop-filter: blur(16px);
+}
+.sheet-next {
+  width: 100%;
+}
+.sheet-step,
+.sheet-feedback {
+  margin: 0 0 10px;
+  font-size: calc(12px + var(--text-size-boost));
+  line-height: 1.5;
+  color: #c4d3ca;
+}
+.sheet-feedback {
+  color: #9aebbf;
+}
+.sheet-decision .inspection-actions {
+  margin: 0;
+}
+.sheet-decision .sheet-actions > button:only-child {
+  grid-column: 1 / -1;
 }
 .cash-shortfall p {
   margin-bottom: 8px;

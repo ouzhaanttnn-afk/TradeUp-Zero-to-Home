@@ -177,12 +177,25 @@ export default function App() {
   const [timelineFilter, setTimelineFilter] = useState<TimelineFilter>("ALL");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [comparing, setComparing] = useState(false);
+  const [purchaseFeedback, setPurchaseFeedback] = useState("");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [purchasesOpen, setPurchasesOpen] = useState(false);
   const [resetArmed, setResetArmed] = useState(false);
   const [quickSaleAssetId, setQuickSaleAssetId] = useState<string | null>(null);
   const [focusedAssetId, setFocusedAssetId] = useState<string | null>(null);
   const sheetCloseRef = useRef<HTMLButtonElement>(null);
+  const comparisonRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!comparing) return;
+    const frame = requestAnimationFrame(() =>
+      comparisonRef.current?.scrollIntoView({
+        block: "start",
+        behavior: "instant",
+      }),
+    );
+    return () => cancelAnimationFrame(frame);
+  }, [comparing, selectedId]);
   const {
     game,
     ready,
@@ -364,8 +377,40 @@ export default function App() {
   const selectListing = (listingId: string) => {
     setSelectedId(listingId);
     setComparing(false);
+    setPurchaseFeedback("");
     openListing(listingId);
   };
+  const toggleComparison = () => {
+    if (!selected) return;
+    const opening = !comparing;
+    setComparing(opening);
+    if (opening && comparableListings(game, selected.id).length >= 2)
+      markCompared(selected.id);
+  };
+  const renderInspectionActions = () => (
+    <div className="inspection-actions">
+      {Object.entries(inspectionOptions).map(([kind, option]) => (
+        <button
+          key={kind}
+          onClick={() => {
+            if (!selected) return;
+            inspect(selected.id, kind as keyof typeof inspectionOptions);
+            const result = useGameStore.getState();
+            setPurchaseFeedback(result.notice);
+            if (ftueActive && result.game.ftue.stage === "NEGOTIATION")
+              setComparing(false);
+          }}
+        >
+          {option.label}
+          <small>
+            {option.durationMin
+              ? `${option.durationMin} dk · pazar ilerler`
+              : "anında"}
+          </small>
+        </button>
+      ))}
+    </div>
+  );
   const navigate = (nextTab: Tab) => {
     setTab(nextTab);
     if (nextTab === "portfolio" && pendingBuyerOfferCount > 0)
@@ -394,6 +439,7 @@ export default function App() {
         acquired.id,
         isFtueActive(after) ? "preparation" : "inventory",
       );
+    else setPurchaseFeedback(useGameStore.getState().notice);
   };
   const listAndContinue = (item: (typeof inventory)[number], price: number) => {
     list(item, price);
@@ -1783,28 +1829,7 @@ export default function App() {
                   </p>
                 );
               })}
-              {!ftueActive || game.ftue.stage === "EVIDENCE" ? (
-                <div className="inspection-actions">
-                  {Object.entries(inspectionOptions).map(([kind, option]) => (
-                    <button
-                      key={kind}
-                      onClick={() =>
-                        inspect(
-                          selected.id,
-                          kind as keyof typeof inspectionOptions,
-                        )
-                      }
-                    >
-                      {option.label}
-                      <small>
-                        {option.durationMin
-                          ? `${option.durationMin} dk · pazar ilerler`
-                          : "anında"}
-                      </small>
-                    </button>
-                  ))}
-                </div>
-              ) : null}
+              {!ftueActive ? renderInspectionActions() : null}
               {canClaimReward("FAST_INSPECTION") ? (
                 <button
                   className="reward-cta"
@@ -1814,29 +1839,16 @@ export default function App() {
                   {rewardLabel("FAST_INSPECTION")}
                 </button>
               ) : null}
-              <button
-                className={
-                  ftueActive && game.ftue.stage === "COMPARE"
-                    ? "primary"
-                    : "secondary"
-                }
-                onClick={() => {
-                  const opening = !comparing;
-                  setComparing(opening);
-                  if (
-                    opening &&
-                    comparableListings(game, selected.id).length >= 2
-                  )
-                    markCompared(selected.id);
-                }}
-              >
-                {comparing
-                  ? "Karşılaştırmayı kapat"
-                  : "Benzer ilanlarla karşılaştır"}
-              </button>
+              {!ftueActive || game.ftue.stage !== "COMPARE" ? (
+                <button className="secondary" onClick={toggleComparison}>
+                  {comparing
+                    ? "Karşılaştırmayı kapat"
+                    : "Benzer ilanlarla karşılaştır"}
+                </button>
+              ) : null}
             </div>
             {comparing ? (
-              <div className="compare-stack">
+              <div className="compare-stack" ref={comparisonRef}>
                 <h3>Aynı ürün grubu · {comparables.length} ilan</h3>
                 {comparables.length < 2 ? (
                   <p>
@@ -1891,7 +1903,23 @@ export default function App() {
                 )}
               </div>
             ) : null}
-            <div className="sheet-decision">
+            <div
+              className="sheet-decision"
+              role="group"
+              aria-label="Satın alma adımları"
+            >
+              {purchaseFeedback ? (
+                <p className="sheet-feedback" role="status">
+                  {purchaseFeedback}
+                </p>
+              ) : null}
+              {(!ftueActive || game.ftue.stage === "NEGOTIATION") &&
+              offers === 1 &&
+              !negotiating?.closed ? (
+                <p className="sheet-step">
+                  ● ○ Son teklifin. Bu teklif reddedilirse görüşme kapanır.
+                </p>
+              ) : null}
               {(!ftueActive || game.ftue.stage === "NEGOTIATION") &&
               negotiating?.counterMinor ? (
                 <button
@@ -1925,13 +1953,16 @@ export default function App() {
                   <div className="sheet-actions">
                     <button
                       className={ftueActive ? "primary" : ""}
+                      disabled={offers === 0 || negotiating?.closed}
                       onClick={() =>
                         purchaseAndContinue(selected.id, () => offer(selected))
                       }
                     >
                       Pazarlık et{" "}
                       <small>
-                        {offers ? `${offers} hakkın var` : "Görüşme kapandı"}
+                        {offers && !negotiating?.closed
+                          ? `${offers} hakkın var`
+                          : "Görüşme kapandı"}
                       </small>
                     </button>
                     {!ftueActive ? (
@@ -1947,11 +1978,23 @@ export default function App() {
                   </div>
                 )
               ) : (
-                <p className="decision-lock">
-                  {game.ftue.stage === "COMPARE"
-                    ? "Önce benzer ilanların fiyatlarına bak."
-                    : "Pazarlıktan önce ürünü kontrol et."}
-                </p>
+                <>
+                  <p className="sheet-step">
+                    {game.ftue.stage === "COMPARE"
+                      ? "1 / 3 · Benzer ilanların fiyatlarına bak."
+                      : "2 / 3 · Ürünü nasıl kontrol edeceğini seç."}
+                  </p>
+                  {game.ftue.stage === "COMPARE" ? (
+                    <button
+                      className="primary sheet-next"
+                      onClick={toggleComparison}
+                    >
+                      Benzer ilanlarla karşılaştır
+                    </button>
+                  ) : game.ftue.stage === "EVIDENCE" ? (
+                    renderInspectionActions()
+                  ) : null}
+                </>
               )}
             </div>
           </section>

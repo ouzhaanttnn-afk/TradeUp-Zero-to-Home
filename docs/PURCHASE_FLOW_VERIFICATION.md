@@ -1,0 +1,28 @@
+# Satın alma akışı kontrolü — 5 Eylül 2026
+
+GDD v2.1 §36, §38 ve §39 kapsamındaki erişim ve geri bildirim düzeltmesi.
+Yeni mekanik, ekonomi ayarı veya ilk oturumu atlama eklenmedi.
+
+## Değişiklikler
+
+- İlk karşılaştırma, ürün kontrolü ve pazarlık aynı sabit alt işlem alanında sırayla görünür.
+- Karşılaştırma açılınca iki ilan kartının başlangıcına kaydırılır. İnceleme seçenekleri altta erişilebilir kalır.
+- İlk inceleme tamamlanınca karşılaştırma kapanır; pazarlık ve işlem sonucu görünür. Satın alma kendiliğinden başlatılmaz.
+- İnceleme ve satın alma girişiminin sonucu ürün penceresinin içinde gösterilir. Başka ilana geçince eski geri bildirim temizlenir.
+- Son teklif uyarısı gösterilir. Kapanmış görüşmenin teklif düğmesi kullanılamaz; haklar yenilenmez.
+- İlk oturum dışındaki mevcut liste fiyatıyla satın alma yolu korunur.
+
+## Doğrulama
+
+`pnpm test`, `pnpm lint`, `pnpm build` ve `pnpm exec playwright test` çalıştırılır.
+
+5 Eylül sonucu: 218 birim/entegrasyon testi ve 11 tarayıcı senaryosu geçti; lint ve production build başarılı.
+
+- İlk oturumun iki gerçek ürün seçimi; 320×640 büyük yazı, 390×844 büyük yazı ve 430×844 normal yazı.
+- İlk adımlarda doğrudan satın alma/pazarlık kapıları, düğmelerin tam görünürlüğü, karşılaştırmada iki ilan, envanter ve ilana geçiş.
+- İlanı geri çekme, yeniden listeleme, satış ve kayıt yükleme sonrasında nakit, maliyet ve kâr mutabakatı.
+- İki teklifi reddeden özel test ilanında son hak uyarısı, pencere içi yanıt, üçüncü teklifi engelleme ve yeniden yüklemede kapalı görüşmenin korunması.
+- Mevcut alıcı bekleme, eksik görsel, azaltılmış hareket, dokunsal geri bildirim ayarı ve çevrimdışı kayıt senaryoları.
+
+Ekran görüntüleri test çalıştırıldığında `test-results/` altında üretilir; bu klasör sürüm kontrolüne alınmaz.
+Kontroller masaüstü Chrome'un telefon boyutlu görünümündedir. Gerçek iOS/Android cihaz testi veya oyuncuların karar süresinde ölçülmüş iyileşme yerine geçmez.

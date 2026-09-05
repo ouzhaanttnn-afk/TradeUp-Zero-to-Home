@@ -43,7 +43,10 @@ for (const choice of [
     };
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
-    await page.setViewportSize({ width: choice.width, height: 844 });
+    await page.setViewportSize({
+      width: choice.width,
+      height: choice.width === 320 ? 640 : 844,
+    });
     const checkLayout = async () => {
       expect(
         await page.evaluate(() => {
@@ -70,7 +73,7 @@ for (const choice of [
     await page.goto("/");
     await page.getByRole("button", { name: "Teklifi kabul et · ₺420" }).click();
     await stage("COMPARE");
-    if (choice.withdraw) {
+    if (choice.withdraw || choice.width === 320) {
       await page.getByRole("button", { name: "Yolculuk", exact: true }).click();
       await page.getByRole("button", { name: "Ayarlar", exact: true }).click();
       await page
@@ -83,6 +86,25 @@ for (const choice of [
         name: `Kuzey Defteri, fiyat ₺${choice.price}, kondisyon yüzde ${choice.condition}, Piyasa fiyatı. İlan detaylarını aç`,
       })
       .click();
+    const purchaseSteps = page.getByRole("group", {
+      name: "Satın alma adımları",
+    });
+    await expect(
+      purchaseSteps.getByRole("button", {
+        name: "Benzer ilanlarla karşılaştır",
+        exact: true,
+      }),
+    ).toBeInViewport({ ratio: 1 });
+    await expect(page.getByRole("button", { name: /^Hemen al/ })).toHaveCount(
+      0,
+    );
+    await expect(
+      page.getByRole("button", { name: /^Pazarlık et/ }),
+    ).toHaveCount(0);
+    await page.screenshot({
+      path: testInfo.outputPath("purchase-compare.png"),
+      animations: "disabled",
+    });
     await page
       .getByRole("button", {
         name: "Benzer ilanlarla karşılaştır",
@@ -90,8 +112,33 @@ for (const choice of [
       })
       .click();
     await stage("EVIDENCE");
-    await page.getByRole("button", { name: /^Hızlı test/ }).click();
+    await expect(
+      page.getByRole("region", { name: "İlan 1", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("region", { name: "İlan 2", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /^Pazarlık et/ }),
+    ).toHaveCount(0);
+    for (const button of await purchaseSteps.getByRole("button").all())
+      await expect(button).toBeInViewport({ ratio: 1 });
+    await page.screenshot({
+      path: testInfo.outputPath("purchase-inspection.png"),
+      animations: "disabled",
+    });
+    await purchaseSteps.getByRole("button", { name: /^Hızlı test/ }).click();
     await stage("NEGOTIATION");
+    await expect(purchaseSteps.getByRole("status")).toContainText(
+      "Yeni kanıtlar",
+    );
+    await expect(
+      purchaseSteps.getByRole("button", { name: /^Pazarlık et/ }),
+    ).toBeInViewport({ ratio: 1 });
+    await expect(
+      page.getByRole("region", { name: "İlan 1", exact: true }),
+    ).toHaveCount(0);
+    await checkLayout();
     await page.getByRole("button", { name: /^Pazarlık et/ }).click();
     await expect
       .poll(
@@ -102,6 +149,19 @@ for (const choice of [
       )
       .toBe(1);
     if ((await readSave()).ftue.stage === "NEGOTIATION") {
+      await expect(purchaseSteps.getByRole("status")).toContainText(
+        /Satıcı|reddedildi/,
+      );
+      await expect(purchaseSteps).toContainText(
+        "Bu teklif reddedilirse görüşme kapanır.",
+      );
+      await expect(
+        purchaseSteps.getByRole("button", { name: /^Pazarlık et/ }),
+      ).toBeInViewport({ ratio: 1 });
+      await page.screenshot({
+        path: testInfo.outputPath("purchase-last-offer.png"),
+        animations: "disabled",
+      });
       await page.getByRole("button", { name: /^Pazarlık et/ }).click();
     }
     await stage("PREPARATION");
