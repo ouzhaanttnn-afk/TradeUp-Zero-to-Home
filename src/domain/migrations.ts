@@ -52,7 +52,11 @@ const createDefaultMonetizationState = (gameTimeMin: number) => ({
 function migrateFamily(value: unknown): Family {
   const source = record(value);
   const configured = familyById(string(source.id));
-  if (configured) return configured;
+  if (configured)
+    return {
+      ...configured,
+      name: string(source.name, configured.name),
+    };
   return {
     id: string(source.id, "legacy-family"),
     name: string(source.name, "Bilinmeyen ürün"),
