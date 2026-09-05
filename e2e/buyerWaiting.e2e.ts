@@ -158,6 +158,40 @@ for (const width of [320, 430]) {
     expect(offered.cashMinor).toBe(saved.cashMinor);
     expect(offered.transactionJournal).toEqual(saved.transactionJournal);
     await page
+      .getByRole("button", { name: "Teklifi reddet", exact: true })
+      .click();
+    await expect(page.locator(".nav-offer-count")).toHaveCount(0);
+    await expect(page.getByText("İlanın yayında kalıyor.")).toBeVisible();
+    await expect(waiting).toBeVisible();
+    const rejected = await readSave();
+    expect(rejected.buyerOffers).toEqual([]);
+    expect(rejected.playerListings[0].state).toBe("ACTIVE");
+    expect(rejected.ownedAssets[0].state).toBe("LISTED");
+    expect(rejected.cashMinor).toBe(offered.cashMinor);
+    expect(rejected.transactionJournal).toEqual(offered.transactionJournal);
+    expect(reconcileJournal(rejected)).toEqual({
+      cash: true,
+      activeBookCost: true,
+      realizedProfit: true,
+    });
+    await page.reload();
+    await page.getByRole("button", { name: "Portföy", exact: true }).click();
+    await page.getByRole("tab", { name: "İlanlarım", exact: true }).click();
+    await expect(
+      page.getByRole("button", { name: "Teklifi reddet", exact: true }),
+    ).toHaveCount(0);
+    await expect(waiting).toBeVisible();
+    expect((await readSave()).buyerOffers).toEqual([]);
+    for (
+      let minute = 0;
+      minute < 60 && (await page.locator(".nav-offer-count").count()) === 0;
+      minute++
+    ) {
+      await page.clock.runFor(60_000);
+    }
+    await expect(page.locator(".nav-offer-count")).toHaveText("1");
+    await expect(waiting).toHaveCount(0);
+    await page
       .getByRole("button", { name: "Teklifi kabul et", exact: true })
       .click();
     await expect(page.locator(".nav-offer-count")).toHaveCount(0);

@@ -226,6 +226,7 @@ export default function App() {
     list,
     withdrawListing,
     acceptBuyer,
+    rejectBuyer,
     inspect,
     prepare,
     openListing,
@@ -1323,6 +1324,11 @@ export default function App() {
                                     onClick={() => acceptBuyer(buyerOffer.id)}
                                   >
                                     Teklifi kabul et
+                                  </button>
+                                  <button
+                                    onClick={() => rejectBuyer(buyerOffer.id)}
+                                  >
+                                    Teklifi reddet
                                   </button>
                                 </div>
                               </div>

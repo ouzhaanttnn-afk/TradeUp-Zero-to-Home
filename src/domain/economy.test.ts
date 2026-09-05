@@ -13,6 +13,7 @@ import {
   quoteAssetExit,
   quoteAssetSale,
   reconcileJournal,
+  rejectBuyerOffer,
   settleAssetSale,
   withdrawPlayerListing,
 } from "./economy";
@@ -254,6 +255,41 @@ describe("canonical ownership and accounting", () => {
       expect(relisted.state.ownedAssets[0].state).toBe("LISTED");
       expect(relisted.state.playerListings).toHaveLength(2);
     }
+  });
+
+  it("rejects only the buyer offer while keeping the asset listed and accounting untouched", () => {
+    const state = purchasedState();
+    const asset = state.ownedAssets[0];
+    const listed = createPlayerListing(state, asset.id, 30_000, 20);
+    if (!listed.ok) throw new Error(listed.reason);
+    const listing = listed.state.playerListings[0];
+    const offered: GameState = {
+      ...listed.state,
+      buyerOffers: [
+        {
+          id: "offer:reject-test",
+          listingId: listing.id,
+          amountMinor: 28_000,
+          buyer: "Deniz",
+          expiresAtGameMin: 80,
+        },
+      ],
+    };
+    const beforeJournal = structuredClone(offered.transactionJournal);
+    const rejected = rejectBuyerOffer(offered, "offer:reject-test");
+    if (!rejected.ok) throw new Error(rejected.reason);
+
+    expect(rejected.state.buyerOffers).toEqual([]);
+    expect(rejected.state.playerListings[0]).toEqual(listing);
+    expect(rejected.state.ownedAssets[0].state).toBe("LISTED");
+    expect(rejected.state.ownedAssets[0].currentListingId).toBe(listing.id);
+    expect(rejected.state.cashMinor).toBe(offered.cashMinor);
+    expect(rejected.state.transactionJournal).toEqual(beforeJournal);
+    expect(reconcileJournal(rejected.state)).toEqual({
+      cash: true,
+      activeBookCost: true,
+      realizedProfit: true,
+    });
   });
 
   it("rejects duplicate ownership records during state validation", () => {

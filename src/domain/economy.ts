@@ -15,6 +15,7 @@ type EconomyFailureReason =
   | "LISTING_NOT_ACTIVE"
   | "ASSET_NOT_FOUND"
   | "ASSET_NOT_AVAILABLE"
+  | "BUYER_OFFER_NOT_FOUND"
   | "PLAYER_LISTING_NOT_FOUND"
   | "INVALID_AMOUNT";
 
@@ -360,6 +361,29 @@ export function withdrawPlayerListing(
           },
         ),
       ],
+    },
+  };
+}
+
+export function rejectBuyerOffer(
+  state: GameState,
+  offerId: string,
+): EconomyCommandResult {
+  const offer = state.buyerOffers.find((item) => item.id === offerId);
+  if (!offer) return { ok: false, state, reason: "BUYER_OFFER_NOT_FOUND" };
+  const listing = state.playerListings.find(
+    (item) => item.id === offer.listingId,
+  );
+  if (!listing || listing.state !== "ACTIVE") {
+    return { ok: false, state, reason: "PLAYER_LISTING_NOT_FOUND" };
+  }
+
+  return {
+    ok: true,
+    idempotent: false,
+    state: {
+      ...state,
+      buyerOffers: state.buyerOffers.filter((item) => item.id !== offerId),
     },
   };
 }

@@ -4,6 +4,7 @@ import {
   createPlayerListing,
   purchaseListing,
   quoteAssetExit,
+  rejectBuyerOffer,
   settleAssetSale,
   withdrawPlayerListing,
 } from "../domain/economy";
@@ -95,6 +96,7 @@ type Store = {
   list: (item: OwnedAsset, askingPriceMinor: number) => void;
   withdrawListing: (listingId: string) => void;
   acceptBuyer: (offerId: string) => void;
+  rejectBuyer: (offerId: string) => void;
   inspect: (listingId: string, kind: InspectionKind) => void;
   prepare: (assetId: string, kind: PreparationKind) => void;
   openListing: (listingId: string) => void;
@@ -712,6 +714,19 @@ export const useGameStore = create<Store>((set, get) => ({
       buyerOffer.amountMinor >= (soldAsset?.bookCostMinor ?? 0);
     buzz(game, profitable);
     sound(game, profitable ? "SALE_PROFIT" : "SALE_LOSS");
+  },
+  rejectBuyer: (offerId) => {
+    const game = get().game;
+    const buyerOffer = game.buyerOffers.find((item) => item.id === offerId);
+    const result = rejectBuyerOffer(game, offerId);
+    if (!result.ok) {
+      set({ notice: "Bu teklif artık aktif değil." });
+      return;
+    }
+    set({
+      game: stampAndPersist(result.state),
+      notice: `${buyerOffer?.buyer ?? "Alıcının"} teklifi reddedildi. İlanın yayında kalıyor.`,
+    });
   },
   inspect: (listingId, kind) => {
     const game = get().game;
