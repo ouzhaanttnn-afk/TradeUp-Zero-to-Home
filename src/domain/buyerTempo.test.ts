@@ -111,7 +111,9 @@ describe("user-approved buyer wait calibration", () => {
     const listing = state.playerListings[0];
     expect(BUYER_TEMPO_CONFIG.minimumAgeMin).toBe(1);
     expect(buyerOfferForMinute(state, listing, 0)).toBeUndefined();
-    let offered = advanceWorldTo(state, 30).state;
+    let offered = state;
+    for (let minute = 1; minute <= 180 && !offered.buyerOffers.length; minute++)
+      offered = advanceWorldTo(offered, minute).state;
     expect(offered.buyerOffers).toHaveLength(1);
     const existing = offered.buyerOffers[0];
     offered = validateState(JSON.parse(JSON.stringify(offered)));

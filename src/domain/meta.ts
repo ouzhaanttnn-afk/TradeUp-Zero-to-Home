@@ -1,7 +1,7 @@
 import { familyById } from "../content/families";
 import { trackAnalytics } from "../infrastructure/analytics";
 import { HOME_GOAL_MINOR } from "../game";
-import { META_CONFIG } from "./config";
+import { META_CONFIG, VALUATION_CONFIG } from "./config";
 import { netWorthMinor } from "./economy";
 import { markFirstSaleComplete } from "./monetization";
 import type {
@@ -348,6 +348,7 @@ export function recordCompletedSaleMeta(
       proceedsMinor,
       bookCostMinor: asset.bookCostMinor,
       realizedProfitMinor: profitMinor,
+      valuationRevision: VALUATION_CONFIG.revision,
     },
     transactionId,
   );

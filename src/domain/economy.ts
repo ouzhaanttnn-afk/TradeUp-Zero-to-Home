@@ -10,6 +10,7 @@ import type {
   TransactionKind,
 } from "./models";
 import { WORLD_CONFIG } from "./config";
+import { exitPricingBps } from "./valuation";
 
 type EconomyFailureReason =
   | "INSUFFICIENT_CASH"
@@ -76,10 +77,17 @@ export const quoteAssetSale = (asset: OwnedAsset, proceedsMinor: number) => ({
 });
 
 export const quoteAssetExit = (asset: OwnedAsset) => {
+  const pricing = exitPricingBps(asset.instance.fairValueMinor);
   const quickSaleMinor =
-    Math.round((asset.instance.fairValueMinor * 0.82) / 1_000) * 1_000;
+    Math.round(
+      (asset.instance.fairValueMinor * pricing.quickSaleBps) / 10_000 / 1_000,
+    ) * 1_000;
   const balancedAskingMinor =
-    Math.round((asset.instance.fairValueMinor * 1.05) / 1_000) * 1_000;
+    Math.round(
+      (asset.instance.fairValueMinor * pricing.balancedAskingBps) /
+        10_000 /
+        1_000,
+    ) * 1_000;
   return {
     quickSaleMinor,
     balancedAskingMinor,

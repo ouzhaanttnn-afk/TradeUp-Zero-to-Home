@@ -4,9 +4,9 @@ import { netWorthMinor, reconcileJournal } from "../src/domain/economy";
 import { money, signedMoney } from "../src/game";
 
 for (const choice of [
-  { price: 140, condition: 55, withdraw: false, width: 320 },
-  { price: 150, condition: 83, withdraw: false, width: 430 },
-  { price: 140, condition: 55, withdraw: true, width: 390 },
+  { price: 120, condition: 55, withdraw: false, width: 320 },
+  { price: 140, condition: 83, withdraw: false, width: 430 },
+  { price: 120, condition: 55, withdraw: true, width: 390 },
 ]) {
   test(`first session completes with the ${choice.price} TL listing${choice.withdraw ? " after withdrawal and reload" : ""} and reconciled accounting`, async ({
     page,
@@ -409,7 +409,7 @@ for (const choice of [
     if (choice.width === 320) {
       await page
         .getByRole("button", {
-          name: "Kuzey Defteri, fiyat ₺150, kondisyon yüzde 83, Piyasa fiyatı. İlan detaylarını aç",
+          name: "Kuzey Defteri, fiyat ₺140, kondisyon yüzde 83, Piyasa fiyatı. İlan detaylarını aç",
         })
         .click();
       await page.getByRole("button", { name: /^Hemen al/ }).click();
@@ -421,13 +421,13 @@ for (const choice of [
       ).toBeFocused();
       await expect
         .poll(async () => (await readSave()).cashMinor)
-        .toBe(loaded.cashMinor - 15_000);
+        .toBe(loaded.cashMinor - 14_000);
       await stage("COMPLETE");
       const purchased = await readSave();
       await page.getByRole("button", { name: /^Hemen sat/ }).click();
       await expect(
         page.getByRole("group", { name: "Hızlı satış onayı" }),
-      ).toContainText("Toplam harcaman ₺150");
+      ).toContainText("Toplam harcaman ₺140");
       await checkLayout();
       await page.getByRole("button", { name: "Vazgeç", exact: true }).click();
       expect((await readSave()).transactionJournal).toEqual(

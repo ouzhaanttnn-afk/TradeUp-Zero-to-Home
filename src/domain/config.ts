@@ -22,6 +22,51 @@ export const BUYER_TEMPO_CONFIG = {
   arrivalMultiplier: 2,
 } as const;
 
+// Calibrated against broad 2026 Turkish second-hand asking-price bands.
+// Family reference values remain fictional and brand-independent.
+export const VALUATION_CONFIG = {
+  revision: "tr-secondhand-2026-09-v1",
+  roundingMinor: 1_000,
+  conditionFloorBps: 5_200,
+  conditionCurveBps: 4_800,
+  conditionExponent: 1.35,
+  accessoryMissingBps: 9_300,
+  rarityBps: [10_000, 10_300, 10_700],
+  trendRangeBps: [9_700, 10_300],
+  ageRangeBps: [9_400, 10_200],
+  seasonBps: [9_700, 9_900, 10_100, 10_300],
+  attributeBps: {
+    Temel: 9_300,
+    Plus: 10_000,
+    Pro: 11_000,
+    booleanFalse: 9_700,
+    booleanTrue: 10_300,
+    numberMin: 9_600,
+    numberMax: 10_400,
+  },
+  sellerCenterBps: {
+    urgent: 9_000,
+    expert: 10_100,
+    uninformed: 9_800,
+    emotional: 11_100,
+    merchant: 10_600,
+    risky: 8_700,
+  },
+  urgencyDiscountMaxBps: 700,
+  listingNoiseLowTicketBps: 2_100,
+  listingNoiseHighTicketBps: 1_100,
+  highTicketMinor: 2_000_000,
+  fullCompressionMinor: 5_000_000,
+  sellerFloorBps: {
+    urgent: 7_600,
+    expert: 9_400,
+    uninformed: 7_200,
+    emotional: 10_200,
+    merchant: 9_600,
+    risky: 7_000,
+  },
+} as const;
+
 export const META_CONFIG = {
   expertiseLevelXp: [0, 30, 80, 150, 240, 350, 480, 630, 800, 990, 1_200],
   expertiseXp: {

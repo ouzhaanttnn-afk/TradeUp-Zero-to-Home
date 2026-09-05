@@ -11,7 +11,11 @@ import {
   settleAssetSale,
   withdrawPlayerListing,
 } from "../domain/economy";
-import { BUYER_TEMPO_CONFIG, WORLD_CONFIG } from "../domain/config";
+import {
+  BUYER_TEMPO_CONFIG,
+  VALUATION_CONFIG,
+  WORLD_CONFIG,
+} from "../domain/config";
 import { comparableListings, inspectListing } from "../domain/decision";
 import { startPreparation } from "../domain/preparation";
 import {
@@ -393,7 +397,11 @@ export const useGameStore = create<Store>((set, get) => ({
     next = trackAnalytics(
       next,
       "purchase_complete",
-      { familyId: item.familyId, priceMinor },
+      {
+        familyId: item.familyId,
+        priceMinor,
+        valuationRevision: VALUATION_CONFIG.revision,
+      },
       item.id,
     );
     const progressed = progressBy(next);
@@ -1002,7 +1010,13 @@ export const useGameStore = create<Store>((set, get) => ({
       next = trackAnalytics(
         next,
         "listing_impression",
-        { listingId, familyId: listing.familyId },
+        {
+          listingId,
+          familyId: listing.familyId,
+          priceMinor: listing.priceMinor,
+          condition: listing.instance.condition,
+          valuationRevision: VALUATION_CONFIG.revision,
+        },
         listingId,
       );
     }

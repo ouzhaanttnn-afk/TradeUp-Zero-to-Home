@@ -12,7 +12,7 @@ test.describe("missing product images", () => {
     await page.getByRole("button", { name: "Teklifi kabul et · ₺420" }).click();
     await page
       .getByRole("button", {
-        name: "Kuzey Defteri, fiyat ₺140, kondisyon yüzde 55, Piyasa fiyatı. İlan detaylarını aç",
+        name: "Kuzey Defteri, fiyat ₺120, kondisyon yüzde 55, Piyasa fiyatı. İlan detaylarını aç",
       })
       .click();
     const product = page.locator(".sheet img");
@@ -150,7 +150,7 @@ for (const width of [320, 390, 430]) {
     });
     await page
       .getByRole("button", {
-        name: "Kuzey Defteri, fiyat ₺140, kondisyon yüzde 55, Piyasa fiyatı. İlan detaylarını aç",
+        name: "Kuzey Defteri, fiyat ₺120, kondisyon yüzde 55, Piyasa fiyatı. İlan detaylarını aç",
       })
       .click();
     await expect(page.locator(".sheet-category")).toHaveText("Küçük Eşya");
@@ -169,7 +169,7 @@ for (const width of [320, 390, 430]) {
     await expect(page.locator(".compare-card")).toHaveCount(2);
     await checkLayout(page);
     await page.getByRole("button", { name: "İlan 2 detaylarını aç" }).click();
-    await expect(page.locator(".sheet")).toContainText("₺150");
+    await expect(page.locator(".sheet")).toContainText("₺140");
     await expect(page.locator(".compare-card")).toHaveCount(0);
     await checkLayout(page);
     await page.screenshot({

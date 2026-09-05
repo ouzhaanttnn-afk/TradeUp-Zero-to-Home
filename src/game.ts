@@ -1,6 +1,12 @@
 import { z } from "zod";
 import { families } from "./content/families";
 import { netWorthMinor } from "./domain/economy";
+import {
+  instanceFairValueMinor,
+  listingAskMinor,
+  referenceFactors,
+  sellerFloorMinor,
+} from "./domain/valuation";
 import type {
   AttributeDefinition,
   GameState,
@@ -594,6 +600,7 @@ function attributeValue(
 function instanceFor(
   family: (typeof families)[number],
   r: () => number,
+  marketCycle: number,
 ): ItemInstance {
   const condition = Math.round(48 + r() * 48);
   const variant = family.variants[Math.floor(r() * family.variants.length)];
@@ -611,29 +618,40 @@ function instanceFor(
         : 0),
     0,
   );
+  const attributes = family.attributes.map((definition) =>
+    attributeValue(definition, r()),
+  );
+  const evidenceConfidence = 0.22 + r() * 0.16;
+  const accessoryComplete = r() > 0.35;
+  const factors = referenceFactors(
+    family.id,
+    family.category,
+    marketCycle,
+    (evidenceConfidence - 0.22) / 0.16,
+  );
   return {
     family,
     variantId: variant.id,
-    fairValueMinor: Math.max(
-      1_000,
-      Math.round(
-        ((family.baseValueMinor * variant.valueFactorBps) / 10_000) *
-          (0.58 + condition / 230) *
-          (1 - penaltyBps / 10_000),
-      ),
-    ),
+    fairValueMinor: instanceFairValueMinor({
+      baseValueMinor: family.baseValueMinor,
+      variantBps: variant.valueFactorBps,
+      condition,
+      attributes,
+      accessoryComplete,
+      defectPenaltyBps: penaltyBps,
+      rarity: family.rarity,
+      ...factors,
+    }),
     condition,
-    attributes: family.attributes.map((definition) =>
-      attributeValue(definition, r()),
-    ),
+    attributes,
     evidence: family.evidence.map((definition, index) => ({
       definitionId: definition.id,
       status: index === 0 ? "VISIBLE" : "UNKNOWN",
     })),
     defects,
-    evidenceConfidence: 0.22 + r() * 0.16,
+    evidenceConfidence,
     liquidityBonusBps: 0,
-    accessoryComplete: r() > 0.35,
+    accessoryComplete,
     preparationHistory: [],
   };
 }
@@ -659,28 +677,32 @@ export function market(
       index < Math.ceil(count / 2)
         ? focus
         : cohort[(index - Math.ceil(count / 2) + 1) % cohort.length];
-    const instance = instanceFor(family, r);
-    const priceMinor = Math.max(
-      2_000,
-      Math.round((instance.fairValueMinor * (0.72 + r() * 0.56)) / 1_000) *
-        1_000,
+    const instance = instanceFor(family, r, cycle);
+    const noiseRoll = r();
+    const seller = (
+      [
+        "urgent",
+        "expert",
+        "uninformed",
+        "emotional",
+        "merchant",
+        "risky",
+      ] as SellerKind[]
+    )[Math.floor(r() * 6)];
+    const urgency = r();
+    const priceMinor = listingAskMinor(
+      instance.fairValueMinor,
+      seller,
+      urgency,
+      noiseRoll,
     );
     return {
       id: `${seed}-${cycle}-${index}`,
       familyId: family.id,
       instance,
       priceMinor,
-      seller: (
-        [
-          "urgent",
-          "expert",
-          "uninformed",
-          "emotional",
-          "merchant",
-          "risky",
-        ] as SellerKind[]
-      )[Math.floor(r() * 6)],
-      urgency: r(),
+      seller,
+      urgency,
       interest: Math.round(r() * 98),
       createdAtGameMin: gameTimeMin,
       expiresAtGameMin:
@@ -703,18 +725,10 @@ export function signal(item: Listing, expertiseLevel = 10) {
   return { text: "Piyasa fiyatı", cls: "neutral" };
 }
 export function sellerFloor(item: Listing) {
-  const factor = {
-    urgent: 0.76,
-    expert: 0.94,
-    uninformed: 0.72,
-    emotional: 1.02,
-    merchant: 0.96,
-    risky: 0.7,
-  }[item.seller];
-  return (
-    Math.round(
-      (item.instance.fairValueMinor * (factor + item.urgency * 0.06)) / 1_000,
-    ) * 1_000
+  return sellerFloorMinor(
+    item.instance.fairValueMinor,
+    item.seller,
+    item.urgency,
   );
 }
 export function playerOfferMinor(askingMinor: number, offerIndex: 1 | 2) {
@@ -838,7 +852,7 @@ export const initialState = (
   const notebook =
     families.find((family) => family.id === "notebook") ?? families[0];
   const instance = {
-    ...instanceFor(notebook, rng(seed + 101)),
+    ...instanceFor(notebook, rng(seed + 101), 0),
     condition: 64,
     fairValueMinor: 38_000,
     accessoryComplete: false,
