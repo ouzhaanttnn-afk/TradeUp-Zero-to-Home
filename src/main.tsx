@@ -10,4 +10,6 @@ createRoot(document.getElementById("root")!).render(
 );
 
 if ("serviceWorker" in navigator && import.meta.env.PROD)
-  void navigator.serviceWorker.register("/sw.js");
+  void navigator.serviceWorker.register("/sw.js").catch(() => {
+    // Restricted storage must not prevent online gameplay.
+  });

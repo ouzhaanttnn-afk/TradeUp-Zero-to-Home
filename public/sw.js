@@ -1,1 +1,59 @@
-const CACHE='tradeup-v2';self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/','/manifest.webmanifest']))));self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))));self.addEventListener('fetch',e=>{if(e.request.method==='GET')e.respondWith(fetch(e.request).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));return r}).catch(()=>caches.match(e.request)))})
+const CACHE = "tradeup-v3";
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches
+      .open(CACHE)
+      .then((cache) => cache.addAll(["/", "/manifest.webmanifest"])),
+  );
+});
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(
+          keys
+            .filter((key) => key.startsWith("tradeup-") && key !== CACHE)
+            .map((key) => caches.delete(key)),
+        ),
+      ),
+  );
+});
+self.addEventListener("fetch", (event) => {
+  const request = event.request;
+  if (
+    request.method !== "GET" ||
+    new URL(request.url).origin !== self.location.origin
+  )
+    return;
+  event.respondWith(
+    (async () => {
+      try {
+        const response = await fetch(request);
+        if (response.ok && response.type !== "opaque") {
+          const copy = response.clone();
+          event.waitUntil(
+            caches
+              .open(CACHE)
+              .then((cache) => cache.put(request, copy))
+              .catch(() => undefined),
+          );
+        }
+        return response;
+      } catch {
+        try {
+          const cache = await caches.open(CACHE);
+          const cached = await cache.match(request);
+          if (cached) return cached;
+          if (request.mode === "navigate") {
+            const shell = await cache.match("/");
+            if (shell) return shell;
+          }
+        } catch {
+          // Restricted storage must also produce a defined network error.
+        }
+        return Response.error();
+      }
+    })(),
+  );
+});
