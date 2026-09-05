@@ -269,8 +269,8 @@
     {
       "assetKey": "prd_fold_phone",
       "familyId": "fold_phone",
-      "source": "fallback:fb_phone",
-      "dedicated": false
+      "source": "../products/prd_fold_phone.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_rugged_phone",
