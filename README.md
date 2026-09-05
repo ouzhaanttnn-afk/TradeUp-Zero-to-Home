@@ -33,6 +33,8 @@ pnpm install
 pnpm dev
 pnpm lint
 pnpm test
+pnpm test:browser
+pnpm test:offline
 pnpm build
 pnpm cap:sync
 ```
@@ -45,3 +47,8 @@ cd android
 ```
 
 Never commit signing keys, passwords, API keys or store credentials. See `docs/RELEASE_CHECKLIST.md` for publisher-owned release steps.
+
+Browser tests require Chrome and use a separate temporary profile. `test:browser`
+checks 320/390/430 px layouts, large text, reduced motion, haptics preference
+persistence, missing product images, comparison navigation, and offline reload.
+`test:offline` runs only the offline scenario. These do not replace native-device QA.

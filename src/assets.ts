@@ -77,6 +77,9 @@ export const assetFor = (key: string, category?: string) =>
   (category ? categoryFallbacks[category] : undefined) ??
   notebook;
 
+export const fallbackAssetFor = (category: string) =>
+  categoryFallbacks[category] ?? categoryFallbacks["Küçük Eşya"];
+
 const dedicatedAssetKeys = new Set(
   assetManifest.assets
     .filter((entry) => entry.dedicated)

@@ -1,0 +1,126 @@
+import { expect, test, type Page } from "@playwright/test";
+
+test.describe("missing product images", () => {
+  test.use({ serviceWorkers: "block" });
+  test("uses an offline-safe category fallback without blocking trade", async ({
+    page,
+  }) => {
+    await page.route("**/assets/prd_*.png", (route) => route.abort());
+    await page.goto("/");
+    const startingImage = page.getByRole("img", { name: "Eski defter" });
+    await expect(startingImage).toHaveAttribute("src", /^data:image\/svg\+xml/);
+    await page.getByRole("button", { name: "Teklifi kabul et · ₺420" }).click();
+    await page
+      .getByRole("button", {
+        name: "Kuzey Defteri, fiyat ₺140, kondisyon yüzde 55, Piyasa fiyatı. İlan detaylarını aç",
+      })
+      .click();
+    const product = page.locator(".sheet img");
+    await expect(product).toHaveAttribute("src", /^data:image\/svg\+xml/);
+    await expect
+      .poll(() =>
+        product.evaluate(
+          (image: HTMLImageElement) => image.complete && image.naturalWidth > 0,
+        ),
+      )
+      .toBe(true);
+    await page
+      .getByRole("button", {
+        name: "Benzer ilanlarla karşılaştır",
+        exact: true,
+      })
+      .click();
+    await expect(page.locator(".compare-card")).toHaveCount(2);
+    await expect(
+      page.getByRole("region", { name: "Finans özeti" }),
+    ).toContainText("₺420");
+  });
+});
+
+async function checkLayout(page: Page) {
+  const issues = await page.evaluate(() => {
+    const issues: string[] = [];
+    if (document.documentElement.scrollWidth > innerWidth)
+      issues.push("page overflow");
+    for (const element of document.querySelectorAll<HTMLElement>(
+      ".sheet, .compare-card, .settings-card, button",
+    )) {
+      const rect = element.getBoundingClientRect();
+      if (!rect.width || !rect.height) continue;
+      if (element.scrollWidth > element.clientWidth + 1)
+        issues.push(
+          `overflow: ${element.className} ${element.textContent?.slice(0, 50)}`,
+        );
+      if (element.tagName === "BUTTON" && (rect.width < 44 || rect.height < 44))
+        issues.push(`small target: ${element.textContent}`);
+    }
+    return issues;
+  });
+  expect(issues).toEqual([]);
+}
+
+for (const width of [320, 390, 430]) {
+  test(`comparison and accessibility settings at ${width}px`, async ({
+    page,
+  }, testInfo) => {
+    await page.setViewportSize({ width, height: 844 });
+    const errors: string[] = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await page.goto("/");
+    await page.getByRole("button", { name: "Teklifi kabul et · ₺420" }).click();
+    await checkLayout(page);
+    await page.getByRole("button", { name: "Yolculuk", exact: true }).click();
+    await page.getByRole("button", { name: "Ayarlar", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Standart · büyüt", exact: true })
+      .click();
+    const motion = page
+      .locator(".settings-card > div")
+      .filter({ hasText: "Azaltılmış hareket" })
+      .getByRole("button");
+    if ((await motion.getAttribute("aria-pressed")) !== "true")
+      await motion.click();
+    const haptics = page
+      .locator(".settings-card > div")
+      .filter({ hasText: "Dokunsal geri bildirim" })
+      .getByRole("button");
+    if ((await haptics.getAttribute("aria-pressed")) !== "false")
+      await haptics.click();
+    await expect(page.locator(".app-shell")).toHaveClass(/large-text/);
+    await expect(page.locator(".app-shell")).toHaveClass(/reduced-motion/);
+    await checkLayout(page);
+    await page.reload();
+    await expect(page.locator(".app-shell")).toHaveClass(/large-text/);
+    await expect(page.locator(".app-shell")).toHaveClass(/reduced-motion/);
+    await page.getByRole("button", { name: "Yolculuk", exact: true }).click();
+    await page.getByRole("button", { name: "Ayarlar", exact: true }).click();
+    await expect(
+      page
+        .locator(".settings-card > div")
+        .filter({ hasText: "Dokunsal geri bildirim" })
+        .getByRole("button"),
+    ).toHaveAttribute("aria-pressed", "false");
+    await page.getByRole("button", { name: "Pazar", exact: true }).click();
+    await page
+      .getByRole("button", {
+        name: "Kuzey Defteri, fiyat ₺140, kondisyon yüzde 55, Piyasa fiyatı. İlan detaylarını aç",
+      })
+      .click();
+    await page
+      .getByRole("button", {
+        name: "Benzer ilanlarla karşılaştır",
+        exact: true,
+      })
+      .click();
+    await expect(page.locator(".compare-card")).toHaveCount(2);
+    await checkLayout(page);
+    await page.getByRole("button", { name: "İlan 2 detaylarını aç" }).click();
+    await expect(page.locator(".sheet")).toContainText("₺150");
+    await expect(page.locator(".compare-card")).toHaveCount(0);
+    await checkLayout(page);
+    await page.screenshot({
+      path: testInfo.outputPath(`comparison-${width}.png`),
+    });
+    expect(errors).toEqual([]);
+  });
+}

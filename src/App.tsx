@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { App as CapacitorApp } from "@capacitor/app";
 import "./App.css";
-import { assetFor, visualTreatmentFor } from "./assets";
+import { assetFor, fallbackAssetFor, visualTreatmentFor } from "./assets";
 import { familyById } from "./content/families";
 import {
   activeBookCostMinor,
@@ -132,6 +132,11 @@ function ProductVisual({
     >
       <img
         src={assetFor(instance.family.assetKey, instance.family.category)}
+        onError={(event) => {
+          const fallback = fallbackAssetFor(instance.family.category);
+          if (event.currentTarget.src !== fallback)
+            event.currentTarget.src = fallback;
+        }}
         alt={alt}
       />
       <span className="condition-overlay" aria-hidden="true" />
@@ -572,7 +577,15 @@ export default function App() {
               ) : null}
               {startingOffer ? (
                 <article className="starting-sale">
-                  <img src={assetFor("prd_notebook")} alt="Eski defter" />
+                  <img
+                    src={assetFor("prd_notebook")}
+                    alt="Eski defter"
+                    onError={(event) => {
+                      const fallback = fallbackAssetFor("Küçük Eşya");
+                      if (event.currentTarget.src !== fallback)
+                        event.currentTarget.src = fallback;
+                    }}
+                  />
                   <div>
                     <small>ECE'NİN TEKLİFİ</small>
                     <h3>Eski defter</h3>
