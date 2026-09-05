@@ -32,6 +32,7 @@ describe("asset manifest and visual treatments", () => {
     expect(hasDedicatedAsset("prd_robot_vacuum")).toBe(true);
     expect(hasDedicatedAsset("prd_camera_lens")).toBe(true);
     expect(hasDedicatedAsset("prd_fold_phone")).toBe(true);
+    expect(hasDedicatedAsset("prd_racing_wheel")).toBe(true);
   });
 
   it("returns a deterministic fallback for an unknown asset key", () => {

@@ -233,8 +233,8 @@
     {
       "assetKey": "prd_racing_wheel",
       "familyId": "racing_wheel",
-      "source": "fallback:fb_game",
-      "dedicated": false
+      "source": "../products/prd_racing_wheel.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_game_cartridge",
