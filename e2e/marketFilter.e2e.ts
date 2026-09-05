@@ -36,6 +36,21 @@ test("category filter narrows the market without adding vertical controls", asyn
   }, saved);
   await page.reload();
 
+  const refresh = page.getByRole("button", { name: "Pazarı yenile" });
+  await expect(refresh).toBeVisible();
+  await expect(page.locator("header").getByRole("button")).toHaveCount(0);
+  await expect(page.locator(".market-title-actions")).toContainText("ilan");
+  expect(
+    await refresh.evaluate((button) => {
+      const rect = button.getBoundingClientRect();
+      return rect.width === 44 && rect.height === 44;
+    }),
+  ).toBe(true);
+  await page.screenshot({
+    path: testInfo.outputPath("compact-market-refresh-320.png"),
+    animations: "disabled",
+  });
+
   const filters = page.getByRole("group", { name: "Pazar kategorileri" });
   await expect(filters).toBeVisible();
   await expect(filters.getByRole("button", { name: "Tümü" })).toHaveAttribute(
@@ -60,7 +75,7 @@ test("category filter narrows the market without adding vertical controls", asyn
   await expect(
     filters.getByRole("button", { name: category, exact: true }),
   ).toHaveAttribute("aria-pressed", "true");
-  await expect(page.locator(".section-title > span")).toHaveText(
+  await expect(page.locator(".market-listing-count")).toHaveText(
     `${categoryCount} ilan`,
   );
   expect(

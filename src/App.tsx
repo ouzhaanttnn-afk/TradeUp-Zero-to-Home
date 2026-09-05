@@ -728,15 +728,6 @@ export default function App() {
           <span className="eyebrow">TRADEUP</span>
           <h1>Zero to Home</h1>
         </div>
-        {!ftueActive && tab === "market" ? (
-          <button
-            className="icon-button"
-            onClick={scan}
-            aria-label="Pazarı tara"
-          >
-            <Icon name="refresh" />
-          </button>
-        ) : null}
       </header>
 
       <section className="wallet" aria-label="Finans özeti">
@@ -788,7 +779,20 @@ export default function App() {
                 <small>CANLI PAZAR</small>
                 <h2>Fırsat akışı</h2>
               </div>
-              <span>{visibleMarketListings.length} ilan</span>
+              <div className="market-title-actions">
+                <span className="market-listing-count">
+                  {visibleMarketListings.length} ilan
+                </span>
+                {!ftueActive ? (
+                  <button
+                    className="market-refresh"
+                    onClick={scan}
+                    aria-label="Pazarı yenile"
+                  >
+                    <Icon name="refresh" />
+                  </button>
+                ) : null}
+              </div>
             </div>
             {!ftueActive && marketCategoryOptions.length > 1 ? (
               <div

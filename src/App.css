@@ -362,9 +362,41 @@ main {
   font-size: calc(24px + var(--text-size-boost));
   letter-spacing: -0.7px;
 }
-.section-title > span {
+.section-title > span,
+.market-listing-count {
   font-size: calc(11px + var(--text-size-boost));
   color: #89a297;
+}
+.market-title-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.market-refresh {
+  position: relative;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  padding: 11px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #a8c4b5;
+}
+.market-refresh::before {
+  position: absolute;
+  inset: 5px;
+  content: "";
+  border: 1px solid #29473a;
+  border-radius: 12px;
+  background: rgba(16, 34, 26, 0.86);
+}
+.market-refresh svg {
+  position: relative;
+  z-index: 1;
+  width: 18px;
+  height: 18px;
 }
 .chips {
   display: flex;
