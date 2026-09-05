@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { families, initialState } from "./game";
+import { heroFamilies } from "./content/families";
 import {
   assetFor,
   hasDedicatedAsset,
@@ -8,12 +9,14 @@ import {
 } from "./assets";
 
 describe("asset manifest and visual treatments", () => {
-  it("registers one stable asset key for every hero family", () => {
-    expect(new Set(families.map((family) => family.assetKey)).size).toBe(24);
-    expect(registeredAssetKeys).toHaveLength(24);
+  it("registers every internal-alpha family while preserving the 24 dedicated heroes", () => {
+    expect(new Set(families.map((family) => family.assetKey)).size).toBe(60);
+    expect(registeredAssetKeys).toHaveLength(60);
     for (const family of families) {
       expect(registeredAssetKeys).toContain(family.assetKey);
-      expect(assetFor(family.assetKey)).toBeTruthy();
+      expect(assetFor(family.assetKey, family.category)).toBeTruthy();
+    }
+    for (const family of heroFamilies) {
       expect(hasDedicatedAsset(family.assetKey)).toBe(true);
     }
   });
@@ -21,6 +24,12 @@ describe("asset manifest and visual treatments", () => {
   it("returns a deterministic fallback for an unknown asset key", () => {
     expect(assetFor("missing-one")).toBe(assetFor("missing-two"));
     expect(assetFor("missing-one")).toBe(assetFor("prd_notebook"));
+    expect(assetFor("missing-camera", "Fotoğraf")).not.toBe(
+      assetFor("missing-computer", "Bilgisayar"),
+    );
+    expect(assetFor("missing-camera", "Fotoğraf")).toContain(
+      "data:image/svg+xml",
+    );
   });
 
   it("never reveals an unverified defect through the visual layer", () => {

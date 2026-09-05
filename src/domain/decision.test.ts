@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { families, initialState, market } from "../game";
+import { heroFamilies } from "../content/families";
 import {
   comparableListings,
   comparisonRows,
@@ -10,12 +11,16 @@ import { purchaseListing, reconcileJournal } from "./economy";
 import { completeDuePreparations, startPreparation } from "./preparation";
 
 describe("decision vertical slice", () => {
-  it("ships 24 deep data-driven hero families across six categories", () => {
-    expect(families).toHaveLength(24);
-    expect(new Set(families.map((family) => family.category))).toHaveLength(6);
+  it("keeps 24 deep hero families and scales internal alpha to sixty across eight categories", () => {
+    expect(heroFamilies).toHaveLength(24);
+    expect(families).toHaveLength(60);
+    expect(new Set(families.map((family) => family.category))).toHaveLength(8);
+    expect(new Set(families.map((family) => family.id)).size).toBe(60);
+    expect(new Set(families.map((family) => family.assetKey)).size).toBe(60);
     for (const family of families) {
       expect(family.attributes.length).toBeGreaterThanOrEqual(3);
       expect(family.evidence.length).toBeGreaterThanOrEqual(2);
+      expect(family.variants.length).toBeGreaterThanOrEqual(2);
       expect(family.defects.every((defect) => defect.riskSignal > 0)).toBe(
         true,
       );
@@ -37,6 +42,7 @@ describe("decision vertical slice", () => {
       ),
     );
     expect(Math.max(...counts)).toBeGreaterThanOrEqual(10);
+    expect(Math.max(...counts)).toBeLessThanOrEqual(20);
     const state = { ...initialState(0, "SANDBOX"), listings };
     const comparable = comparableListings(state, listings[0].id);
     expect(comparable.length).toBeGreaterThanOrEqual(2);

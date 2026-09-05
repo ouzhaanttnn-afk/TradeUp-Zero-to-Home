@@ -25,7 +25,10 @@ import pedal from "./assets/products/prd_pedal.png";
 import compactPhone from "./assets/products/prd_compact_phone.png";
 import tablet from "./assets/products/prd_tablet.png";
 import smartwatch from "./assets/products/prd_smartwatch.png";
-const manifest: Record<string, string> = {
+import camera from "./assets/products/prd_camera.png";
+import laptop from "./assets/products/prd_laptop.png";
+
+const dedicatedAssets: Record<string, string> = {
   prd_notebook: notebook,
   prd_headset: headset,
   prd_watch: watch,
@@ -51,8 +54,28 @@ const manifest: Record<string, string> = {
   prd_compact_phone: compactPhone,
   prd_tablet: tablet,
   prd_smartwatch: smartwatch,
+  prd_camera: camera,
+  prd_laptop: laptop,
 };
-export const assetFor = (key: string) => manifest[key] ?? notebook;
+
+const fallbackSvg = (category: string, symbol: string, color: string) =>
+  `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 384"><rect width="512" height="384" rx="48" fill="#10231b"/><circle cx="256" cy="192" r="128" fill="${color}" opacity=".16"/><text x="256" y="215" text-anchor="middle" font-family="system-ui,sans-serif" font-size="112" font-weight="800" fill="${color}">${symbol}</text><text x="256" y="330" text-anchor="middle" font-family="system-ui,sans-serif" font-size="24" font-weight="700" fill="#8fa69b">${category}</text></svg>`)}`;
+
+const categoryFallbacks: Record<string, string> = {
+  "Küçük Eşya": fallbackSvg("Küçük Eşya", "◇", "#f2c66d"),
+  Ses: fallbackSvg("Ses", "◉", "#6ddba0"),
+  "Ev/Yaşam": fallbackSvg("Ev/Yaşam", "⌂", "#e7b879"),
+  Oyun: fallbackSvg("Oyun", "✣", "#80b8ff"),
+  Müzik: fallbackSvg("Müzik", "♪", "#d59cff"),
+  Telefon: fallbackSvg("Telefon", "▯", "#75d5d0"),
+  Bilgisayar: fallbackSvg("Bilgisayar", "▣", "#8db8ff"),
+  Fotoğraf: fallbackSvg("Fotoğraf", "◫", "#ff9c83"),
+};
+
+export const assetFor = (key: string, category?: string) =>
+  dedicatedAssets[key] ??
+  (category ? categoryFallbacks[category] : undefined) ??
+  notebook;
 
 const dedicatedAssetKeys = new Set(
   assetManifest.assets

@@ -145,6 +145,222 @@
       "familyId": "smartwatch",
       "source": "../products/prd_smartwatch.png",
       "dedicated": true
+    },
+    {
+      "assetKey": "prd_watch",
+      "familyId": "mechanical_watch",
+      "source": "../products/prd_watch.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_fountain_pen",
+      "familyId": "fountain_pen",
+      "source": "fallback:fb_small_item",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_board_game",
+      "familyId": "board_game",
+      "source": "fallback:fb_small_item",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_vintage_lighter",
+      "familyId": "vintage_lighter",
+      "source": "fallback:fb_small_item",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_portable_radio",
+      "familyId": "portable_radio",
+      "source": "fallback:fb_audio",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_studio_monitor",
+      "familyId": "studio_monitor",
+      "source": "fallback:fb_audio",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_dac_amp",
+      "familyId": "dac_amp",
+      "source": "fallback:fb_audio",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_cassette_player",
+      "familyId": "cassette_player",
+      "source": "fallback:fb_audio",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_floor_lamp",
+      "familyId": "floor_lamp",
+      "source": "fallback:fb_home",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_side_table",
+      "familyId": "side_table",
+      "source": "fallback:fb_home",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_robot_vacuum",
+      "familyId": "robot_vacuum",
+      "source": "fallback:fb_home",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_stand_mixer",
+      "familyId": "stand_mixer",
+      "source": "fallback:fb_home",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_vr_headset",
+      "familyId": "vr_headset",
+      "source": "fallback:fb_game",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_gaming_keyboard",
+      "familyId": "gaming_keyboard",
+      "source": "fallback:fb_game",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_racing_wheel",
+      "familyId": "racing_wheel",
+      "source": "fallback:fb_game",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_game_cartridge",
+      "familyId": "game_cartridge",
+      "source": "fallback:fb_game",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_bass_guitar",
+      "familyId": "bass_guitar",
+      "source": "fallback:fb_music",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_audio_interface",
+      "familyId": "audio_interface",
+      "source": "fallback:fb_music",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_drum_machine",
+      "familyId": "drum_machine",
+      "source": "fallback:fb_music",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_violin",
+      "familyId": "violin",
+      "source": "fallback:fb_music",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_fold_phone",
+      "familyId": "fold_phone",
+      "source": "fallback:fb_phone",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_rugged_phone",
+      "familyId": "rugged_phone",
+      "source": "fallback:fb_phone",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_e_reader",
+      "familyId": "e_reader",
+      "source": "fallback:fb_phone",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_mobile_projector",
+      "familyId": "mobile_projector",
+      "source": "fallback:fb_phone",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_laptop",
+      "familyId": "laptop",
+      "source": "../products/prd_laptop.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_monitor",
+      "familyId": "monitor",
+      "source": "fallback:fb_computer",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_mini_pc",
+      "familyId": "mini_pc",
+      "source": "fallback:fb_computer",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_mechanical_keyboard",
+      "familyId": "mechanical_keyboard",
+      "source": "fallback:fb_computer",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_graphics_tablet",
+      "familyId": "graphics_tablet",
+      "source": "fallback:fb_computer",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_router",
+      "familyId": "router",
+      "source": "fallback:fb_computer",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_camera",
+      "familyId": "camera",
+      "source": "../products/prd_camera.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_camera_lens",
+      "familyId": "camera_lens",
+      "source": "fallback:fb_photo",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_instant_camera",
+      "familyId": "instant_camera",
+      "source": "fallback:fb_photo",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_tripod",
+      "familyId": "tripod",
+      "source": "fallback:fb_photo",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_camera_flash",
+      "familyId": "camera_flash",
+      "source": "fallback:fb_photo",
+      "dedicated": false
+    },
+    {
+      "assetKey": "prd_action_camera",
+      "familyId": "action_camera",
+      "source": "fallback:fb_photo",
+      "dedicated": false
     }
   ],
   "overlays": [

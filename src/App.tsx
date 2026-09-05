@@ -123,7 +123,10 @@ function ProductVisual({
         visual.fallback ? " product-visual--fallback" : ""
       }`}
     >
-      <img src={assetFor(instance.family.assetKey)} alt={alt} />
+      <img
+        src={assetFor(instance.family.assetKey, instance.family.category)}
+        alt={alt}
+      />
       <span className="condition-overlay" aria-hidden="true" />
       {visual.revealedDefect ? (
         <span
