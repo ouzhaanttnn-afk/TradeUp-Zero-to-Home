@@ -48,6 +48,7 @@ import {
 import { ownershipPresentation } from "./ui/ownershipPresentation";
 import { simplifyLegacyPlayerCopy } from "./ui/playerLanguage";
 import { saleHistoryCopy } from "./ui/saleHistory";
+import { formatEstimate, wealthPresentation } from "./ui/wealthPresentation";
 
 type Tab = "market" | "follow" | "portfolio" | "journey";
 type PortfolioSegment = "inventory" | "preparation" | "listings";
@@ -301,11 +302,7 @@ export default function App() {
       : undefined;
   const marketLevel = marketExpertiseLevel(game);
   const marketXpTarget = nextExpertiseThreshold(game.expertise.marketXp);
-  const portfolioMarketValue = activeOwnedAssets(game).reduce(
-    (sum, asset) => sum + asset.instance.fairValueMinor,
-    0,
-  );
-  const unrealizedEstimate = portfolioMarketValue - activeBookCostMinor(game);
+  const estimates = wealthPresentation(game);
   const homeProgress = Math.min(
     100,
     Math.floor((total / HOME_GOAL_MINOR) * 100),
@@ -493,7 +490,7 @@ export default function App() {
         </div>
         <div>
           <small>Tahmini net servet</small>
-          <strong>{money(total)}</strong>
+          <strong>{formatEstimate(estimates.total)}</strong>
         </div>
         {game.home.unlocked ? (
           <button className="goal" onClick={() => navigate("journey")}>
@@ -1156,11 +1153,11 @@ export default function App() {
               </div>
               <div>
                 <span>Toplam tahmini değer</span>
-                <b>{money(total)}</b>
+                <b>{formatEstimate(estimates.total)}</b>
               </div>
               <div>
-                <span>Ürünlerin bugünkü değeri</span>
-                <b>{money(portfolioMarketValue)}</b>
+                <span>Ürünlerin tahmini değeri</span>
+                <b>{formatEstimate(estimates.portfolio)}</b>
               </div>
               <div>
                 <span>Ürünlere harcanan toplam</span>
@@ -1168,13 +1165,15 @@ export default function App() {
               </div>
               <div>
                 <span>Ürünlerdeki tahmini fark</span>
-                <b className={unrealizedEstimate < 0 ? "loss" : ""}>
-                  {signedMoney(unrealizedEstimate)}
+                <b className={estimates.difference.highMinor < 0 ? "loss" : ""}>
+                  {formatEstimate(estimates.difference, true)}
                 </b>
               </div>
               <div>
                 <span>Toplam değerin nakit kısmı</span>
-                <b>%{total ? Math.round((game.cashMinor / total) * 100) : 0}</b>
+                <b>
+                  %{estimates.cashShare.low}–%{estimates.cashShare.high}
+                </b>
               </div>
             </div>
             <section className="expertise-card">
@@ -1229,9 +1228,16 @@ export default function App() {
                   <p>
                     {homeProgress < 50
                       ? "İlk kârlı satışınla hedef görünür oldu."
-                      : `Kalan servet mesafesi ${money(
-                          Math.max(0, HOME_GOAL_MINOR - total),
-                        )}. Ev alımı için hedefte nakit gerekecek.`}
+                      : `Kalan tahmini mesafe ${formatEstimate({
+                          lowMinor: Math.max(
+                            0,
+                            HOME_GOAL_MINOR - estimates.total.highMinor,
+                          ),
+                          highMinor: Math.max(
+                            0,
+                            HOME_GOAL_MINOR - estimates.total.lowMinor,
+                          ),
+                        })}. Ev alımı için hedefte nakit gerekecek.`}
                   </p>
                   <div className="xp-bar">
                     <i style={{ width: `${homeProgress}%` }} />

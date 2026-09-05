@@ -307,6 +307,7 @@ header h1 {
 }
 .wallet strong {
   font-size: calc(17px + var(--text-size-boost));
+  overflow-wrap: anywhere;
 }
 .goal {
   grid-column: 1/-1;

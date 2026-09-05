@@ -2,25 +2,27 @@ import type {
   AttributeDefinition,
   GameState,
   InspectionKind,
+  ItemInstance,
   Listing,
 } from "./models";
 
 const clamp01 = (value: number) => Math.max(0, Math.min(1, value));
 export function listingEstimateBand(listing: Listing, expertiseLevel = 0) {
+  return instanceEstimateBand(listing.instance, expertiseLevel);
+}
+
+export function instanceEstimateBand(
+  instance: ItemInstance,
+  expertiseLevel = 0,
+) {
   const expertiseNarrowing = Math.min(0.08, expertiseLevel * 0.008);
   const uncertainty =
-    0.3 -
-    clamp01(listing.instance.evidenceConfidence) * 0.14 -
-    expertiseNarrowing;
+    0.3 - clamp01(instance.evidenceConfidence) * 0.14 - expertiseNarrowing;
   return {
     lowMinor:
-      Math.round(
-        (listing.instance.fairValueMinor * (1 - uncertainty)) / 1_000,
-      ) * 1_000,
+      Math.round((instance.fairValueMinor * (1 - uncertainty)) / 1_000) * 1_000,
     highMinor:
-      Math.round(
-        (listing.instance.fairValueMinor * (1 + uncertainty)) / 1_000,
-      ) * 1_000,
+      Math.round((instance.fairValueMinor * (1 + uncertainty)) / 1_000) * 1_000,
   };
 }
 export function formatAttributeValue(
