@@ -596,10 +596,10 @@ main {
   gap: 6px;
 }
 .feed.market-grid {
-  grid-auto-rows: minmax(96px, auto);
+  grid-auto-rows: minmax(84px, auto);
 }
 .market-grid {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 3px;
 }
 .market-grid > .starting-sale,
@@ -613,14 +613,14 @@ main {
   align-items: stretch;
   gap: 3px;
   min-width: 0;
-  min-height: 98px;
-  padding: 3px;
+  min-height: 92px;
+  padding: 2px;
   overflow: hidden;
   border-radius: 13px;
 }
 .market-grid .product-art {
   width: 100%;
-  height: clamp(40px, 15vw, 52px);
+  height: clamp(36px, 13vw, 48px);
   aspect-ratio: auto;
   flex: 0 0 auto;
   border-radius: 9px;
@@ -700,7 +700,7 @@ main {
   min-height: 1.15em;
   margin: 1px 0 1px;
   overflow: hidden;
-  font-size: calc(7px + var(--text-size-boost));
+  font-size: calc(6px + var(--text-size-boost));
   line-height: 1.22;
   white-space: normal;
   -webkit-box-orient: vertical;
@@ -717,7 +717,7 @@ main {
 .market-price-row > strong {
   min-width: 0;
   overflow: hidden;
-  font-size: calc(10px + var(--text-size-boost));
+  font-size: calc(9px + var(--text-size-boost));
   text-overflow: ellipsis;
   color: #f4f8f6;
 }
@@ -762,15 +762,15 @@ main {
   display: grid;
   grid-template-columns: 54px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   text-align: left;
   width: 100%;
   border: 1px solid #20382e;
   border-radius: 16px;
-  padding: 7px;
+  padding: 6px;
   background: linear-gradient(115deg, #13241d, #0c1712);
   cursor: pointer;
-  min-height: 68px;
+  min-height: 62px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
 }
 @media (hover: hover) {
@@ -780,8 +780,8 @@ main {
   }
 }
 .product-art {
-  width: 54px;
-  height: 50px;
+  width: 49px;
+  height: 46px;
   border-radius: 13px;
   display: grid;
   place-items: center;
