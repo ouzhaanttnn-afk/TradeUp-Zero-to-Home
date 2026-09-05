@@ -37,6 +37,7 @@ import type {
 import { activeMarketListings, npcRiskSignal } from "./domain/world";
 import { HOME_GOAL_MINOR, money, signal, signedMoney, wealth } from "./game";
 import { useGameStore } from "./stores/gameStore";
+import { Icon, type IconName } from "./ui/Icon";
 
 type Tab = "market" | "follow" | "portfolio" | "journey";
 type PortfolioSegment = "inventory" | "preparation" | "listings";
@@ -455,7 +456,7 @@ export default function App() {
             onClick={scan}
             aria-label="Pazarı tara"
           >
-            ↻
+            <Icon name="refresh" />
           </button>
         ) : null}
       </header>
@@ -485,7 +486,7 @@ export default function App() {
       {showCoach ? (
         <aside className="coach" aria-label="İlk oturum rehberi">
           <button onClick={dismissCoach} aria-label="Rehberi kapat">
-            ×
+            <Icon name="close" />
           </button>
           <small>İLK İŞLEM · {ftueStageLabel[game.ftue.stage]}</small>
           <h2>{coach.title}</h2>
@@ -556,7 +557,10 @@ export default function App() {
                         <span>
                           {item.instance.family.category} · Lv{categoryLevel}
                         </span>
-                        <span>{watched ? "◆ Takipte" : risk.text}</span>
+                        <span className={watched ? "watch-state" : undefined}>
+                          {watched ? <Icon name="follow" /> : null}
+                          {watched ? "Takipte" : risk.text}
+                        </span>
                       </div>
                       <h3>{item.instance.family.name}</h3>
                       <div className="tags">
@@ -594,7 +598,9 @@ export default function App() {
             !game.follow.savedSearches.length &&
             !game.follow.missedOpportunities.length ? (
               <div className="empty">
-                <span>◇</span>
+                <span className="empty-icon">
+                  <Icon name="follow" />
+                </span>
                 <h3>Henüz takip yok</h3>
                 <p>
                   Bir ilanı takip et. Pazar okuryazarlığın Lv3 olduğunda family
@@ -746,7 +752,9 @@ export default function App() {
             </div>
             {portfolioSegment !== "listings" && !inventory.length ? (
               <div className="empty">
-                <span>□</span>
+                <span className="empty-icon">
+                  <Icon name="portfolio" />
+                </span>
                 <h3>Portföyün boş</h3>
                 <p>
                   Pazardan bir fırsat al; varlık hazırlık ve ilan aşamalarında
@@ -837,7 +845,9 @@ export default function App() {
             {portfolioSegment === "listings"
               ? game.buyerOffers.map((buyerOffer) => (
                   <article className="owned buyer-card" key={buyerOffer.id}>
-                    <div className="owned-icon handshake">◇</div>
+                    <div className="owned-icon handshake">
+                      <Icon name="offer" />
+                    </div>
                     <div>
                       <h3>{buyerOffer.buyer} teklif verdi</h3>
                       <p>
@@ -1118,7 +1128,9 @@ export default function App() {
             {game.home.unlocked ? (
               <section className="home-card">
                 <div className="home-silhouette" aria-hidden="true">
-                  <span>⌂</span>
+                  <span>
+                    <Icon name="home" />
+                  </span>
                 </div>
                 <div>
                   <small>EV YOLCULUĞU · %{homeProgress}</small>
@@ -1137,7 +1149,9 @@ export default function App() {
               </section>
             ) : (
               <section className="locked-home">
-                <span>⌂</span>
+                <span>
+                  <Icon name="home" />
+                </span>
                 <div>
                   <small>UZUN DÖNEM HEDEFİ</small>
                   <h3>Ev yolculuğu henüz görünmedi</h3>
@@ -1211,29 +1225,24 @@ export default function App() {
       </main>
 
       <nav aria-label="Ana bölümler">
-        {(["market", "follow", "portfolio", "journey"] as const).map((item) => (
+        {(
+          [
+            ["market", "home", "Pazar"],
+            ["follow", "follow", "Takip"],
+            ["portfolio", "portfolio", "Portföy"],
+            ["journey", "journey", "Yolculuk"],
+          ] as const satisfies ReadonlyArray<readonly [Tab, IconName, string]>
+        ).map(([item, icon, label]) => (
           <button
             className={tab === item ? "active" : ""}
             key={item}
             onClick={() => navigate(item)}
             aria-current={tab === item ? "page" : undefined}
           >
-            <span>
-              {item === "market"
-                ? "⌂"
-                : item === "follow"
-                  ? "◇"
-                  : item === "portfolio"
-                    ? "▣"
-                    : "↗"}
+            <span className="nav-icon">
+              <Icon name={icon} />
             </span>
-            {item === "market"
-              ? "Pazar"
-              : item === "follow"
-                ? "Takip"
-                : item === "portfolio"
-                  ? "Portföy"
-                  : "Yolculuk"}
+            <span className="nav-label">{label}</span>
           </button>
         ))}
       </nav>
@@ -1254,7 +1263,7 @@ export default function App() {
               onClick={() => setSelectedId(null)}
               aria-label="Kapat"
             >
-              ×
+              <Icon name="close" />
             </button>
             <ProductVisual
               instance={selected.instance}
@@ -1299,9 +1308,10 @@ export default function App() {
                 }
                 onClick={() => toggleWatch(selected.id)}
               >
+                <Icon name="follow" />
                 {game.follow.watchedListingIds.includes(selected.id)
-                  ? "◆ Takipten çıkar"
-                  : "◇ İlanı takip et"}
+                  ? "Takipten çıkar"
+                  : "İlanı takip et"}
               </button>
               {marketLevel >= 3 ? (
                 <button

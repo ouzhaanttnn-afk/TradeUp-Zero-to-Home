@@ -12,6 +12,13 @@
   --accent: #69e2a2;
   --muted: #91a99e;
   --shadow-card: 0 10px 28px rgba(0, 0, 0, 0.18);
+  font-variant-numeric: tabular-nums;
+}
+
+.icon {
+  display: block;
+  width: 1em;
+  height: 1em;
 }
 
 .evidence-panel {
@@ -232,6 +239,15 @@ header h1 {
   width: 44px;
   height: 44px;
   font-size: calc(23px + var(--text-size-boost));
+  display: grid;
+  place-items: center;
+  padding: 10px;
+}
+.icon-button svg,
+.close svg,
+.coach > button svg {
+  width: 100%;
+  height: 100%;
 }
 .wallet {
   margin: 0 14px;
@@ -376,6 +392,21 @@ main {
 .meta {
   justify-content: space-between;
 }
+.meta > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+.watch-state {
+  color: var(--accent);
+  font-weight: 700;
+}
+.watch-state svg {
+  width: 10px;
+  height: 10px;
+  fill: currentColor;
+}
 .tags b,
 .detail-price span {
   font-size: calc(9px + var(--text-size-boost));
@@ -418,8 +449,23 @@ main {
   border-radius: 18px;
   color: #a5b9af;
 }
-.empty > span {
+.empty > span:not(.empty-icon) {
   font-size: calc(46px + var(--text-size-boost));
+}
+.empty-icon {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  margin: 0 auto;
+  border: 1px solid var(--line-soft);
+  border-radius: 18px;
+  color: var(--accent);
+  background: rgba(105, 226, 162, 0.07);
+}
+.empty-icon svg {
+  width: 26px;
+  height: 26px;
 }
 .empty h3 {
   color: #fff;
@@ -578,13 +624,41 @@ nav button {
   align-items: center;
   gap: 3px;
   border-radius: 12px;
+  position: relative;
 }
-nav span {
-  font-size: calc(21px + var(--text-size-boost));
+.nav-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  transition: transform 140ms ease;
+}
+.nav-icon svg {
+  width: 22px;
+  height: 22px;
+}
+.nav-label {
+  font-size: calc(10px + var(--text-size-boost));
+  line-height: 1;
 }
 nav .active {
   color: #6ee5a3;
   background: rgba(105, 226, 162, 0.07);
+}
+nav .active::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  width: 28px;
+  height: 2px;
+  border-radius: 0 0 4px 4px;
+  background: var(--accent);
+  transform: translateX(-50%);
+  box-shadow: 0 3px 10px rgba(105, 226, 162, 0.45);
+}
+nav .active .nav-icon {
+  transform: translateY(-1px);
 }
 .scrim {
   position: fixed;
@@ -605,6 +679,16 @@ nav .active {
   padding: 14px 18px calc(24px + env(safe-area-inset-bottom));
   background: linear-gradient(180deg, #183127, #09140f);
   border-top: 1px solid #456a59;
+}
+.sheet-follow-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+.sheet-follow-actions button svg {
+  width: 16px;
+  height: 16px;
 }
 .grab {
   width: 42px;
