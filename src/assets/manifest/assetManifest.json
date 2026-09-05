@@ -239,8 +239,8 @@
     {
       "assetKey": "prd_game_cartridge",
       "familyId": "game_cartridge",
-      "source": "fallback:fb_game",
-      "dedicated": false
+      "source": "../products/prd_game_cartridge.png",
+      "dedicated": true
     },
     {
       "assetKey": "prd_bass_guitar",

@@ -11,7 +11,14 @@ test("expanded product families use dedicated mobile artwork", async ({
   const portableRadio = familyById("portable_radio");
   const fountainPen = familyById("fountain_pen");
   const floorLamp = familyById("floor_lamp");
-  if (!boardGame || !portableRadio || !fountainPen || !floorLamp) {
+  const gameCartridge = familyById("game_cartridge");
+  if (
+    !boardGame ||
+    !portableRadio ||
+    !fountainPen ||
+    !floorLamp ||
+    !gameCartridge
+  ) {
     throw new Error("Asset family is missing");
   }
   state.listings[0] = {
@@ -33,6 +40,11 @@ test("expanded product families use dedicated mobile artwork", async ({
     ...state.listings[3],
     familyId: floorLamp.id,
     instance: { ...state.listings[3].instance, family: floorLamp },
+  };
+  state.listings[4] = {
+    ...state.listings[4],
+    familyId: gameCartridge.id,
+    instance: { ...state.listings[4].instance, family: gameCartridge },
   };
   const saved = validateState(state);
 
@@ -64,6 +76,7 @@ test("expanded product families use dedicated mobile artwork", async ({
     ["Kıyı Cep Radyosu", "prd_portable_radio"],
     ["Dolma Kalem Seti", "prd_fountain_pen"],
     ["Ark Zemin Lambası", "prd_floor_lamp"],
+    ["Nadir Oyun Kartuşu", "prd_game_cartridge"],
   ] as const) {
     const card = page.locator(".market-card").filter({ hasText: name });
     const visual = card.locator(".product-visual");
@@ -88,6 +101,14 @@ test("expanded product families use dedicated mobile artwork", async ({
   ).toBe(true);
   await page.screenshot({
     path: testInfo.outputPath("expanded-product-assets-390.png"),
+    animations: "disabled",
+  });
+  await page
+    .locator(".market-card")
+    .filter({ hasText: "Nadir Oyun Kartuşu" })
+    .scrollIntoViewIfNeeded();
+  await page.screenshot({
+    path: testInfo.outputPath("game-cartridge-asset-390.png"),
     animations: "disabled",
   });
 });
