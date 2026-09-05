@@ -178,11 +178,13 @@ export default function App() {
   const {
     game,
     ready,
+    sessionActive,
     notice,
     storeProducts,
     monetizationBusy,
     hydrate,
-    flush,
+    pause,
+    resume,
     scan,
     tick,
     buy,
@@ -218,16 +220,16 @@ export default function App() {
     void hydrate();
   }, [hydrate]);
   useEffect(() => {
-    if (!ready) return undefined;
+    if (!ready || !sessionActive) return undefined;
     const timer = window.setInterval(tick, WORLD_CONFIG.activeTickMin * 60_000);
     return () => window.clearInterval(timer);
-  }, [ready, tick]);
+  }, [ready, sessionActive, tick]);
   useEffect(() => {
     let disposed = false;
     let removeListener: (() => Promise<void>) | undefined;
     void CapacitorApp.addListener("appStateChange", ({ isActive }) => {
-      if (isActive) void hydrate();
-      else void flush();
+      if (isActive) void resume();
+      else void pause();
     }).then((handle) => {
       if (disposed) void handle.remove();
       else removeListener = () => handle.remove();
@@ -236,7 +238,7 @@ export default function App() {
       disposed = true;
       if (removeListener) void removeListener();
     };
-  }, [flush, hydrate]);
+  }, [pause, resume]);
   useEffect(() => {
     if (!selectedId) return undefined;
     const previousFocus = document.activeElement as HTMLElement | null;

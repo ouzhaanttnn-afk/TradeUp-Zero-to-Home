@@ -44,6 +44,7 @@ import type {
 } from "../domain/models";
 import {
   advanceWorldTo,
+  advanceOffline,
   scanMarket,
   type WorldAdvanceResult,
 } from "../domain/world";
@@ -75,10 +76,13 @@ import {
 type Store = {
   game: GameState;
   ready: boolean;
+  sessionActive: boolean;
   notice: string;
   storeProducts: StoreProductMetadata[];
   monetizationBusy: boolean;
   hydrate: () => Promise<void>;
+  pause: () => Promise<void>;
+  resume: () => Promise<void>;
   flush: () => Promise<void>;
   scan: () => void;
   tick: () => void;
@@ -132,13 +136,20 @@ const sound = (state: GameState, event: FeedbackSound) => {
 
 let saveQueue = Promise.resolve();
 let persistenceSuspended = false;
+let hydration: Promise<void> | undefined;
 
 const enqueueSave = (state: GameState, wallClockMs: number) => {
-  if (persistenceSuspended) return;
+  if (persistenceSuspended) return Promise.resolve();
   saveQueue = saveQueue
     .catch(() => undefined)
     .then(() => saveGame(state, { nowWallMs: () => wallClockMs }));
-  void saveQueue.catch(() => undefined);
+  void saveQueue.catch(() => {
+    useGameStore.setState({
+      notice:
+        "İlerlemen cihaza kaydedilemedi. Uygulamayı kapatmadan önce depolama alanını kontrol et.",
+    });
+  });
+  return saveQueue;
 };
 
 const stampAndPersist = (state: GameState) => {
@@ -203,27 +214,67 @@ const progressBy = (state: GameState, minutes = 1) => {
 export const useGameStore = create<Store>((set, get) => ({
   game: initialState(systemTimeProvider.nowWallMs()),
   ready: false,
+  sessionActive: true,
   notice: "Piyasa canlı. İyi fırsatlar beklemez.",
   storeProducts: [],
   monetizationBusy: false,
-  hydrate: async () => {
+  hydrate: () => {
+    if (hydration) return hydration;
+    hydration = (async () => {
+      await saveQueue.catch(() => undefined);
+      const { state: game, recovery } = await loadGameWithStatus();
+      // Never overwrite an unreadable save with the temporary fallback career.
+      persistenceSuspended = recovery === "STORAGE_UNAVAILABLE";
+      const recoveryNotice =
+        recovery === "RECOVERED_BACKUP"
+          ? "Kayıt sorunu bulundu; son sağlam yedek geri yüklendi."
+          : recovery === "RESET_AFTER_CORRUPTION"
+            ? "Kayıt ve yedek okunamadı; hasarlı kayıt korundu ve yeni kariyer açıldı."
+            : recovery === "STORAGE_UNAVAILABLE"
+              ? "Cihaz kaydına erişilemiyor; ilerlemen bu oturumda saklanamayabilir."
+              : undefined;
+      set((current) => ({
+        game,
+        ready: true,
+        notice: recoveryNotice ?? current.notice,
+      }));
+      const refreshed = await refreshMonetization(
+        game,
+        getMonetizationAdapters(),
+        () => get().game,
+      );
+      set({
+        game: stampAndPersist(refreshed.state),
+        storeProducts: refreshed.products,
+      });
+    })().finally(() => {
+      hydration = undefined;
+    });
+    return hydration;
+  },
+  pause: async () => {
+    if (!get().sessionActive) return;
+    set({ sessionActive: false });
+    if (!get().ready) return;
+    const game = stampAndPersist(get().game);
+    set({ game });
     await saveQueue.catch(() => undefined);
-    const { state: game, recovery } = await loadGameWithStatus();
-    // Never overwrite an unreadable save with the temporary fallback career.
-    persistenceSuspended = recovery === "STORAGE_UNAVAILABLE";
-    const recoveryNotice =
-      recovery === "RECOVERED_BACKUP"
-        ? "Kayıt sorunu bulundu; son sağlam yedek geri yüklendi."
-        : recovery === "RESET_AFTER_CORRUPTION"
-          ? "Kayıt ve yedek okunamadı; hasarlı kayıt korundu ve yeni kariyer açıldı."
-          : recovery === "STORAGE_UNAVAILABLE"
-            ? "Cihaz kaydına erişilemiyor; ilerlemen bu oturumda saklanamayabilir."
-            : undefined;
-    set((current) => ({
-      game,
-      ready: true,
-      notice: recoveryNotice ?? current.notice,
-    }));
+  },
+  resume: async () => {
+    if (!get().ready) {
+      set({ sessionActive: true });
+      await get().hydrate();
+      return;
+    }
+    if (get().sessionActive) return;
+    const previous = get().game;
+    const result = advanceOffline(previous, systemTimeProvider.nowWallMs());
+    const game = withBuyerOfferAnalytics(previous, result.state);
+    set({
+      sessionActive: true,
+      game: stampAndPersist(game),
+      notice: worldNotice(result, "Kaldığın yerden devam ediyorsun."),
+    });
     const refreshed = await refreshMonetization(
       game,
       getMonetizationAdapters(),
@@ -236,16 +287,12 @@ export const useGameStore = create<Store>((set, get) => ({
   },
   flush: async () => {
     if (persistenceSuspended) return;
-    await saveQueue.catch(() => undefined);
     const state = get().game;
     const wallClockMs = Math.max(
       state.lastWallClockMs,
       systemTimeProvider.nowWallMs(),
     );
-    await saveGame(
-      { ...state, lastWallClockMs: wallClockMs },
-      { nowWallMs: () => wallClockMs },
-    );
+    await enqueueSave({ ...state, lastWallClockMs: wallClockMs }, wallClockMs);
   },
   scan: () => {
     const previous = get().game;
@@ -265,6 +312,7 @@ export const useGameStore = create<Store>((set, get) => ({
     });
   },
   tick: () => {
+    if (!get().sessionActive || !get().ready) return;
     const result = progressBy(get().game, WORLD_CONFIG.activeTickMin);
     const eventCount =
       result.summary.buyerOffers +

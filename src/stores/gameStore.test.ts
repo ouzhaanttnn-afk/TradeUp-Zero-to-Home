@@ -26,10 +26,109 @@ import {
 import { playFeedbackSound } from "../infrastructure/audio";
 import { loadGameWithStatus, saveGame } from "../services/persistence";
 import { useGameStore } from "./gameStore";
+import { systemTimeProvider } from "../infrastructure/time";
 import {
   configureMonetizationAdapters,
   unavailableMonetizationAdapters,
 } from "../services/monetization";
+
+describe("application lifecycle", () => {
+  it("coalesces concurrent startup loads", async () => {
+    await useGameStore.getState().flush();
+    const game = initialState(0, "SANDBOX");
+    let finish!: (value: { state: typeof game; recovery: "NONE" }) => void;
+    vi.mocked(loadGameWithStatus).mockClear();
+    vi.mocked(loadGameWithStatus).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        }),
+    );
+    const first = useGameStore.getState().hydrate();
+    const second = useGameStore.getState().hydrate();
+    expect(first).toBe(second);
+    await vi.waitFor(() => expect(loadGameWithStatus).toHaveBeenCalledTimes(1));
+    finish({ state: game, recovery: "NONE" });
+    await Promise.all([first, second]);
+  });
+
+  it("pauses active time and resumes the current session only once without disk reload", async () => {
+    await useGameStore.getState().flush();
+    const clock = vi
+      .spyOn(systemTimeProvider, "nowWallMs")
+      .mockReturnValue(1_000);
+    try {
+      const game = initialState(1_000, "SANDBOX");
+      game.ftue.stage = "COMPLETE";
+      useGameStore.setState({ game, ready: true, sessionActive: true });
+      vi.mocked(loadGameWithStatus).mockClear();
+      await useGameStore.getState().pause();
+      const paused = useGameStore.getState().game;
+      useGameStore.getState().tick();
+      expect(useGameStore.getState().game).toBe(paused);
+      clock.mockReturnValue(121_000);
+      await useGameStore.getState().pause();
+      expect(useGameStore.getState().game.lastWallClockMs).toBe(1_000);
+      await useGameStore.getState().resume();
+      const resumed = useGameStore.getState().game;
+      expect(resumed.gameTimeMin).toBe(paused.gameTimeMin + 2);
+      expect(resumed.monetization.lifetimeActivePlayMinutes).toBe(
+        paused.monetization.lifetimeActivePlayMinutes,
+      );
+      expect(loadGameWithStatus).not.toHaveBeenCalled();
+      await useGameStore.getState().resume();
+      expect(useGameStore.getState().game).toBe(resumed);
+      expect(reconcileJournal(resumed)).toEqual({
+        cash: true,
+        activeBookCost: true,
+        realizedProfit: true,
+      });
+    } finally {
+      clock.mockRestore();
+      useGameStore.setState({ sessionActive: true });
+    }
+  });
+
+  it("serializes flush with newer gameplay writes", async () => {
+    await useGameStore.getState().flush();
+    const game = initialState(0, "SANDBOX");
+    useGameStore.setState({ game, ready: true, sessionActive: true });
+    vi.mocked(saveGame).mockClear();
+    let finish!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    vi.mocked(saveGame).mockImplementationOnce(() => gate);
+    const flushing = useGameStore.getState().flush();
+    await vi.waitFor(() => expect(saveGame).toHaveBeenCalledTimes(1));
+    useGameStore.getState().tick();
+    const advanced = useGameStore.getState().game;
+    await Promise.resolve();
+    expect(saveGame).toHaveBeenCalledTimes(1);
+    finish();
+    await flushing;
+    await useGameStore.getState().flush();
+    expect(vi.mocked(saveGame).mock.calls.at(-1)?.[0].gameTimeMin).toBe(
+      advanced.gameTimeMin,
+    );
+  });
+
+  it("reports background write failure and retains the session on return", async () => {
+    await useGameStore.getState().flush();
+    const game = initialState(0, "SANDBOX");
+    useGameStore.setState({ game, ready: true, sessionActive: true });
+    vi.mocked(saveGame).mockRejectedValueOnce(new Error("disk full"));
+    await useGameStore.getState().pause();
+    expect(useGameStore.getState().notice).toContain("kaydedilemedi");
+    expect(useGameStore.getState().game.transactionJournal).toEqual(
+      game.transactionJournal,
+    );
+    await useGameStore.getState().resume();
+    expect(useGameStore.getState().game.transactionJournal).toEqual(
+      game.transactionJournal,
+    );
+  });
+});
 
 describe("delayed provider responses", () => {
   it.each(["hydrate", "openPurchases"] as const)(
