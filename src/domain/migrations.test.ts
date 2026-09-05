@@ -1,9 +1,34 @@
 import { describe, expect, it } from "vitest";
-import { initialState, validateState } from "../game";
+import { initialState, validateState, SAVE_VERSION } from "../game";
 import { reconcileJournal } from "./economy";
 import { migrateStateToCurrent } from "./migrations";
 
 describe("save migration", () => {
+  it("migrates v11 rights without resetting an earlier negotiated listing", () => {
+    const state = initialState(0, "SANDBOX");
+    const [first, second] = state.listings;
+    first.state = second.state = "NEGOTIATING";
+    const negotiation = {
+      listingId: second.id,
+      offersRemaining: 1,
+      sellerFloorMinor: 50_000,
+      closed: false,
+    };
+    const old = { ...state, version: 11, negotiation, negotiations: undefined };
+    const migrated = validateState(migrateStateToCurrent(old));
+    expect(migrated.negotiations[second.id]).toEqual(negotiation);
+    expect(migrated.negotiations[first.id]).toMatchObject({
+      offersRemaining: 0,
+      closed: true,
+    });
+    expect(migrated.transactionJournal).toEqual(state.transactionJournal);
+    expect(migrateStateToCurrent(migrated)).toEqual(migrated);
+    expect(reconcileJournal(migrated)).toEqual({
+      cash: true,
+      activeBookCost: true,
+      realizedProfit: true,
+    });
+  });
   it("recovers a v2 listed asset and preserves reconciled totals", () => {
     const family = {
       id: "phone",
@@ -63,7 +88,7 @@ describe("save migration", () => {
     };
 
     const state = validateState(migrateStateToCurrent(legacy));
-    expect(state.version).toBe(11);
+    expect(state.version).toBe(SAVE_VERSION);
     expect(state.cashMinor).toBe(150_000);
     expect(state.ownedAssets[0]).toMatchObject({
       id: "owned-1",
@@ -111,7 +136,7 @@ describe("save migration", () => {
 
     const state = validateState(migrateStateToCurrent(v3));
     expect(state).toMatchObject({
-      version: 11,
+      version: SAVE_VERSION,
       gameTimeMin: 0,
       lastWallClockMs: 123_000,
       cashMinor: 42_000,
@@ -149,7 +174,7 @@ describe("save migration", () => {
     delete v6.analytics;
     const state = validateState(migrateStateToCurrent(v6));
 
-    expect(state.version).toBe(11);
+    expect(state.version).toBe(SAVE_VERSION);
     expect(state.expertise).toMatchObject({
       marketXp: 90,
       categoryXp: { Elektronik: 90 },
@@ -181,7 +206,7 @@ describe("save migration", () => {
 
     const state = validateState(migrateStateToCurrent(v8));
 
-    expect(state.version).toBe(11);
+    expect(state.version).toBe(SAVE_VERSION);
     expect(state.accessibility).toEqual({
       hapticsEnabled: true,
       reducedMotion: false,

@@ -430,6 +430,7 @@ export type GameState = {
   playerListings: PlayerListing[];
   buyerOffers: BuyerOffer[];
   negotiation?: Negotiation;
+  negotiations: Record<string, Negotiation>;
   expertise: ExpertiseState;
   career: CareerEvent[];
   follow: FollowState;

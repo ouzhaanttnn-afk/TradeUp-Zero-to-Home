@@ -38,6 +38,11 @@ export const inventoryAssets = (state: Pick<GameState, "ownedAssets">) =>
     (asset) => asset.state === "IN_INVENTORY" || asset.state === "READY",
   );
 
+export const preparationAssets = (state: Pick<GameState, "ownedAssets">) =>
+  state.ownedAssets.filter((asset) =>
+    ["IN_INVENTORY", "READY", "PREPARING"].includes(asset.state),
+  );
+
 export const activePlayerListings = (
   state: Pick<GameState, "playerListings">,
 ) => state.playerListings.filter((listing) => listing.state === "ACTIVE");

@@ -8,6 +8,7 @@ import {
   activeOwnedAssets,
   activePlayerListings,
   inventoryAssets,
+  preparationAssets,
   quoteAssetExit,
 } from "./domain/economy";
 import {
@@ -270,6 +271,7 @@ export default function App() {
   const selected =
     marketListings.find((listing) => listing.id === selectedId) ?? null;
   const inventory = inventoryAssets(game);
+  const workshop = preparationAssets(game);
   const playerListings = activePlayerListings(game).flatMap((playerListing) => {
     const asset = game.ownedAssets.find(
       (item) => item.id === playerListing.ownedAssetId,
@@ -279,10 +281,12 @@ export default function App() {
   const watchedListings = marketListings.filter((listing) =>
     game.follow.watchedListingIds.includes(listing.id),
   );
-  const negotiating =
-    selected && game.negotiation?.listingId === selected.id
-      ? game.negotiation
-      : undefined;
+  const negotiating = selected
+    ? (game.negotiations[selected.id] ??
+      (game.negotiation?.listingId === selected.id
+        ? game.negotiation
+        : undefined))
+    : undefined;
   const offers = negotiating?.offersRemaining ?? 2;
   const ftueActive = isFtueActive(game);
   const premiumReward = hasPremiumEntitlement(game);
@@ -335,6 +339,15 @@ export default function App() {
   ) => {
     const quote = quoteAssetExit(item);
     const ownershipState = ownershipPresentation(item.state);
+    const pendingPreparation = item.instance.preparationHistory.find(
+      (record) => record.state === "IN_PROGRESS",
+    );
+    const availablePreparations = item.instance.family.preparation.filter(
+      (action) =>
+        item.instance.preparationHistory.filter(
+          (record) => record.kind === action.kind,
+        ).length < action.maxUses,
+    );
     return (
       <article
         className="owned"
@@ -372,26 +385,46 @@ export default function App() {
           </p>
         </div>
         <div className="sell-actions">
-          {showPreparation
-            ? item.instance.family.preparation
-                .filter(
-                  (action) =>
-                    item.instance.preparationHistory.filter(
-                      (record) => record.kind === action.kind,
-                    ).length < action.maxUses,
-                )
-                .map((action) => (
-                  <button
-                    key={action.kind}
-                    onClick={() => prepare(item.id, action.kind)}
-                  >
-                    {action.label} <b>{money(action.costMinor)}</b>
-                    <small>Süre: {action.durationMin} dk</small>
-                    {preparationPresentation(item, action).map((effect) => (
-                      <small key={effect}>{effect}</small>
-                    ))}
-                  </button>
-                ))
+          {showPreparation && item.state === "PREPARING" ? (
+            <p className="preparation-status" role="status">
+              {pendingPreparation ? (
+                <>
+                  {item.instance.family.preparation.find(
+                    (action) => action.kind === pendingPreparation.kind,
+                  )?.label ?? "Hazırlık"}{" "}
+                  devam ediyor ·{" "}
+                  {Math.max(
+                    0,
+                    pendingPreparation.completesAtGameMin - game.gameTimeMin,
+                  )}{" "}
+                  dk kaldı.
+                </>
+              ) : (
+                "Hazırlık işlem kaydı bulunamadı."
+              )}
+            </p>
+          ) : null}
+          {showPreparation &&
+          item.state !== "PREPARING" &&
+          !availablePreparations.length ? (
+            <p className="preparation-status">
+              Bu ürün için tüm hazırlıklar tamamlandı. Envanterden satışa
+              geçebilirsin.
+            </p>
+          ) : null}
+          {showPreparation && item.state !== "PREPARING"
+            ? availablePreparations.map((action) => (
+                <button
+                  key={action.kind}
+                  onClick={() => prepare(item.id, action.kind)}
+                >
+                  {action.label} <b>{money(action.costMinor)}</b>
+                  <small>Süre: {action.durationMin} dk</small>
+                  {preparationPresentation(item, action).map((effect) => (
+                    <small key={effect}>{effect}</small>
+                  ))}
+                </button>
+              ))
             : null}
           {!showPreparation && !ftueActive ? (
             quickSaleAssetId === item.id ? (
@@ -800,17 +833,31 @@ export default function App() {
                 ),
               )}
             </div>
-            {portfolioSegment !== "listings" && !inventory.length ? (
+            {portfolioSegment !== "listings" &&
+            !(portfolioSegment === "preparation"
+              ? workshop.length
+              : inventory.length) ? (
               <div className="empty">
                 <span className="empty-icon">
                   <Icon name="portfolio" />
                 </span>
-                <h3>Portföyün boş</h3>
+                <h3>
+                  {activeOwnedAssets(game).length
+                    ? "Bu bölümde ürün yok"
+                    : "Portföyün boş"}
+                </h3>
                 <p>
-                  Pazardan bir fırsat al; varlık hazırlık ve ilan aşamalarında
-                  burada kalır.
+                  {activeOwnedAssets(game).length
+                    ? "Ürünlerini Hazırlık ve İlanlarım bölümlerinde takip edebilirsin."
+                    : "Pazardan bir ürün alarak portföyünü oluşturabilirsin."}
                 </p>
-                <button onClick={() => navigate("market")}>Pazara git</button>
+                {workshop.some((asset) => asset.state === "PREPARING") ? (
+                  <button onClick={() => setPortfolioSegment("preparation")}>
+                    Hazırlığı gör
+                  </button>
+                ) : (
+                  <button onClick={() => navigate("market")}>Pazara git</button>
+                )}
               </div>
             ) : null}
             <div
@@ -849,7 +896,7 @@ export default function App() {
                 ? inventory.map((item) => renderInventoryCard(item, false))
                 : null}
               {portfolioSegment === "preparation"
-                ? inventory.map((item) => renderInventoryCard(item, true))
+                ? workshop.map((item) => renderInventoryCard(item, true))
                 : null}
               {portfolioSegment === "listings"
                 ? playerListings.map(({ listing: playerListing, asset }) => {

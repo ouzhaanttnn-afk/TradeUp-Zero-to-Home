@@ -506,19 +506,44 @@ export function migrateStateToV4(value: unknown): unknown {
 }
 
 export function migrateStateToCurrent(value: unknown): unknown {
-  return migrateStateToV11(
-    migrateStateToV10(
-      migrateStateToV9(
-        migrateStateToV8(
-          migrateStateToV7(
-            migrateStateToV6(
-              migrateStateToV5(migrateStateToV4(migrateStateToV3(value))),
+  return migrateStateToV12(
+    migrateStateToV11(
+      migrateStateToV10(
+        migrateStateToV9(
+          migrateStateToV8(
+            migrateStateToV7(
+              migrateStateToV6(
+                migrateStateToV5(migrateStateToV4(migrateStateToV3(value))),
+              ),
             ),
           ),
         ),
       ),
     ),
   );
+}
+
+export function migrateStateToV12(value: unknown): unknown {
+  const source = record(value);
+  if (integer(source.version) >= 12) return value;
+  const current = currentNegotiation(source.negotiation);
+  const negotiations: Record<string, Negotiation> = {};
+  // Older saves retain only the last negotiation. Do not grant fresh rights
+  // for other listings that are already marked as negotiated.
+  for (const value of array(source.listings)) {
+    const listing = record(value);
+    const id = string(listing.id);
+    if (listing.state === "NEGOTIATING" && id) {
+      negotiations[id] = {
+        listingId: id,
+        offersRemaining: 0,
+        sellerFloorMinor: 0,
+        closed: true,
+      };
+    }
+  }
+  if (current) negotiations[current.listingId] = current;
+  return { ...source, version: 12, negotiations };
 }
 
 export function migrateStateToV11(value: unknown): unknown {

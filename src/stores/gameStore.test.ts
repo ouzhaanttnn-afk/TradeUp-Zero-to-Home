@@ -225,6 +225,40 @@ describe("persistence recovery notice", () => {
 });
 
 describe("purchase negotiation rights", () => {
+  it("preserves each listing's two rights when switching between sellers and reloading", () => {
+    const game = initialState(0, "SANDBOX");
+    const listings = game.listings
+      .slice(0, 2)
+      .map((listing) => ({
+        ...listing,
+        priceMinor: 1_000,
+        instance: { ...listing.instance, fairValueMinor: 1_000_000 },
+      }));
+    game.listings = listings;
+    useGameStore.setState({ game, ready: true });
+    for (const listing of listings) useGameStore.getState().offer(listing);
+    const restored = validateState(
+      JSON.parse(JSON.stringify(useGameStore.getState().game)),
+    );
+    expect(restored.negotiations[listings[0].id].offersRemaining).toBe(1);
+    expect(restored.negotiations[listings[1].id].offersRemaining).toBe(1);
+    useGameStore.setState({ game: restored });
+    for (const listing of listings) useGameStore.getState().offer(listing);
+    const closed = useGameStore.getState().game;
+    for (const listing of listings) {
+      expect(closed.negotiations[listing.id]).toMatchObject({
+        offersRemaining: 0,
+        closed: true,
+      });
+      useGameStore.getState().offer(listing);
+      expect(useGameStore.getState().game).toBe(closed);
+    }
+    expect(reconcileJournal(closed)).toEqual({
+      cash: true,
+      activeBookCost: true,
+      realizedProfit: true,
+    });
+  });
   beforeEach(() => {
     useGameStore.setState({
       game: initialState(0, "SANDBOX"),

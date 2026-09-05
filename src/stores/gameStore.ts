@@ -347,14 +347,15 @@ export const useGameStore = create<Store>((set, get) => ({
       return;
     }
     const current =
-      game.negotiation?.listingId === item.id
+      game.negotiations[item.id] ??
+      (game.negotiation?.listingId === item.id
         ? game.negotiation
         : {
             listingId: item.id,
             offersRemaining: 2 as const,
             sellerFloorMinor: sellerFloor(currentListing),
             closed: false,
-          };
+          });
     if (current.closed || current.offersRemaining === 0) {
       set({ notice: "Görüşme kapandı." });
       return;
@@ -384,6 +385,14 @@ export const useGameStore = create<Store>((set, get) => ({
           offersRemaining: (current.offersRemaining - 1) as 0 | 1,
           closed: true,
         },
+        negotiations: {
+          ...offeredGame.negotiations,
+          [item.id]: {
+            ...current,
+            offersRemaining: (current.offersRemaining - 1) as 0 | 1,
+            closed: true,
+          },
+        },
       };
       set({ game: stampAndPersist(acceptedGame) });
       get().buy(currentListing, offerMinor);
@@ -399,6 +408,7 @@ export const useGameStore = create<Store>((set, get) => ({
     const negotiatingState: GameState = {
       ...offeredGame,
       negotiation,
+      negotiations: { ...offeredGame.negotiations, [item.id]: negotiation },
       listings: game.listings.map((listing) =>
         listing.id === item.id ? { ...listing, state: "NEGOTIATING" } : listing,
       ),

@@ -17,7 +17,8 @@ The binding product specification is
 - Two-player-offer negotiation with stable seller floor and counteroffers
 - Buy → inventory → listing/withdrawal → settlement loop with idempotent transactions
 - Diminishing, capped offline progress with a protected opportunity sample
-- Versioned IndexedDB persistence with an explicit v2 → … → v11 migration chain and recoverable backup
+- Versioned IndexedDB persistence with an explicit v2 → … → v12 migration chain and recoverable backup
+- Per-listing negotiation history that preserves remaining rights across navigation and reload
 - Ordered critical-save queue plus Capacitor background/resume synchronization
 - Career event history produced by canonical economic transactions
 - Data-driven fictional product families and `assetKey` manifest

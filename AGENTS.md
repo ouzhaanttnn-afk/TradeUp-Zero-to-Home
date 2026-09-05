@@ -34,7 +34,7 @@ Do not change mechanics, progression, economy, negotiation, rewarded ads, IAP, o
 
 ## Mandatory production order
 
-Work on only one package at a time. Complete it, commit it, and wait for the user's `Devam` before starting the next package.
+Follow the production order. Per the user's updated instruction, batch small related fixes into a complete work block, verify and commit them, and continue without requesting `Devam` after each small fix. Pause at meaningful phase boundaries or when a critical user decision is required.
 
 1. P0 — Economic integrity: unified OwnedAsset, book cost, journal, net worth, settlement tests.
 2. P0 — Deterministic world: injected clock, lifecycle tick, active NPC hazard, incremental arrivals.
@@ -56,6 +56,6 @@ For every package:
 4. Run `pnpm test`, `pnpm lint`, and `pnpm build`; fix all failures.
 5. Leave no visible fake button, TODO, placeholder control, dead control, or knowingly broken path.
 6. Reconcile journal totals with cash, active book cost, and realized profit after save/load and settlement flows.
-7. Commit the completed package and stop until `Devam`.
+7. Commit the completed work. Continue related small fixes within the authorized block; report at a meaningful phase boundary.
 
 The pure engine contract is mandatory: identical seed, game time, config, and command sequence must produce identical economic results on web, tests, and native. Before calling the vertical slice complete, satisfy the full Definition of Done and resilience tests in GDD v2.1, including core invariants, core-loop integration, WebView smoke, migration, 320–430 px layout, text scaling, reduced motion, haptics-off, and missing-asset fallback.

@@ -23,7 +23,7 @@ export type {
   TransactionJournalEntry,
 } from "./domain/models";
 export { families } from "./content/families";
-export const SAVE_VERSION = 11;
+export const SAVE_VERSION = 12;
 export const HOME_GOAL_MINOR = 350_000_000;
 
 const attributeDefinitionSchema = z.object({
@@ -435,6 +435,7 @@ const stateSchema = z
     playerListings: z.array(playerListingSchema),
     buyerOffers: z.array(buyerOfferSchema),
     negotiation: negotiationSchema.optional(),
+    negotiations: z.record(z.string(), negotiationSchema),
     expertise: expertiseSchema,
     career: z.array(careerEventSchema),
     follow: followSchema,
@@ -794,6 +795,7 @@ export const initialState = (
     listings: [],
     playerListings: [],
     buyerOffers: [],
+    negotiations: {},
     expertise: {
       marketXp: 0,
       categoryXp: {},

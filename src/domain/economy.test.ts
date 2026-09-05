@@ -8,11 +8,14 @@ import {
   createPlayerListing,
   netWorthMinor,
   purchaseListing,
+  preparationAssets,
+  inventoryAssets,
   quoteAssetExit,
   reconcileJournal,
   settleAssetSale,
   withdrawPlayerListing,
 } from "./economy";
+import { startPreparation, completeDuePreparations } from "./preparation";
 
 function purchasedState(): GameState {
   const state = initialState(0, "SANDBOX");
@@ -27,6 +30,35 @@ function purchasedState(): GameState {
 }
 
 describe("canonical ownership and accounting", () => {
+  it("keeps an in-progress preparation visible after save/load and returns it to inventory on completion", () => {
+    const before = purchasedState();
+    const asset = before.ownedAssets[0];
+    const started = startPreparation(before, asset.id, "CLEAN");
+    if (!started.ok) throw new Error(started.reason);
+    const restored = validateState(JSON.parse(JSON.stringify(started.state)));
+    expect(inventoryAssets(restored)).toHaveLength(0);
+    expect(preparationAssets(restored).map((item) => item.id)).toEqual([
+      asset.id,
+    ]);
+    const completed = completeDuePreparations(
+      restored,
+      restored.gameTimeMin + started.durationMin,
+    );
+    expect(inventoryAssets(completed).map((item) => item.id)).toEqual([
+      asset.id,
+    ]);
+    expect(preparationAssets(completed).map((item) => item.id)).toEqual([
+      asset.id,
+    ]);
+    expect(reconcileJournal(completed)).toEqual({
+      cash: true,
+      activeBookCost: true,
+      realizedProfit: true,
+    });
+    const listed = createPlayerListing(completed, asset.id, 30_000, 20);
+    if (!listed.ok) throw new Error(listed.reason);
+    expect(preparationAssets(listed.state)).toHaveLength(0);
+  });
   it("quotes quick-sale proceeds, full-book-cost profit and forgone premium before settlement", () => {
     const state = purchasedState();
     const asset = {
