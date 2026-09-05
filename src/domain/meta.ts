@@ -113,7 +113,7 @@ export function gainExpertise(
         `expertise:market:${nextMarketLevel}`,
         "EXPERTISE_MILESTONE",
         "MILESTONES",
-        `Pazar deneyimi Lv${nextMarketLevel} oldu`,
+        `Pazar deneyimi Seviye ${nextMarketLevel} oldu`,
       ),
     );
   }
@@ -124,7 +124,7 @@ export function gainExpertise(
         `expertise:${family.category}:${nextCategoryLevel}`,
         "EXPERTISE_MILESTONE",
         "MILESTONES",
-        `${family.category} uzmanlığı Lv${nextCategoryLevel} oldu`,
+        `${family.category} uzmanlığı Seviye ${nextCategoryLevel} oldu`,
         { familyId: family.id, assetKey: family.assetKey },
       ),
     );

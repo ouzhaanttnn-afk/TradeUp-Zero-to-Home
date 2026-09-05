@@ -691,6 +691,62 @@ main {
   line-height: 1.5;
   color: #aac0b5;
 }
+.journey-score {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      circle at 92% 8%,
+      rgba(112, 231, 165, 0.16),
+      transparent 36%
+    ),
+    linear-gradient(140deg, #214f3d, #11231b);
+}
+.journey-score.loss {
+  border-color: #6a423d;
+  background:
+    radial-gradient(
+      circle at 92% 8%,
+      rgba(255, 134, 125, 0.12),
+      transparent 36%
+    ),
+    linear-gradient(140deg, #382723, #171b17);
+}
+.journey-score-heading,
+.journey-block-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.journey-score-heading span {
+  padding: 5px 8px;
+  border: 1px solid rgba(180, 227, 201, 0.18);
+  border-radius: 999px;
+  color: #a8c4b5;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: calc(9px + var(--text-size-boost));
+  white-space: nowrap;
+}
+.journey-block-heading {
+  align-items: end;
+  margin: 22px 3px 9px;
+}
+.journey-block-heading small,
+.timeline-header small {
+  color: #69d99c;
+  font-size: calc(9px + var(--text-size-boost));
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.journey-block-heading h3 {
+  margin-top: 3px;
+  font-size: calc(16px + var(--text-size-boost));
+}
+.journey-block-heading > span {
+  color: #849c90;
+  font-size: calc(10px + var(--text-size-boost));
+}
 .stats {
   display: grid;
   gap: 8px;
@@ -1452,6 +1508,9 @@ nav .active .nav-icon {
   align-items: end;
   gap: 10px;
 }
+.timeline-header > div {
+  min-width: 0;
+}
 .expertise-heading h3 {
   margin-top: 2px;
   font-size: calc(27px + var(--text-size-boost));
@@ -1515,6 +1574,7 @@ nav .active .nav-icon {
   opacity: 0.72;
 }
 .timeline-header h3 {
+  margin-top: 3px;
   font-size: calc(15px + var(--text-size-boost));
 }
 .timeline-filters {
@@ -1529,11 +1589,29 @@ nav .active .nav-icon {
 }
 .timeline article {
   display: grid;
-  grid-template-columns: 12px minmax(0, 1fr) auto;
-  gap: 9px;
-  padding: 13px;
-  border-radius: 13px;
-  background: #101d18;
+  grid-template-columns: 14px minmax(0, 1fr) auto;
+  gap: 10px;
+  padding: 14px 13px;
+  border: 1px solid rgba(114, 176, 143, 0.1);
+  border-radius: 14px;
+  background: linear-gradient(135deg, #112019, #0d1813);
+}
+.timeline-rail {
+  display: flex;
+  justify-content: center;
+  align-self: stretch;
+  position: relative;
+}
+.timeline-rail::after {
+  content: "";
+  position: absolute;
+  top: 16px;
+  bottom: -23px;
+  width: 1px;
+  background: rgba(103, 191, 145, 0.2);
+}
+.timeline article:last-child .timeline-rail::after {
+  display: none;
 }
 .timeline-dot {
   width: 8px;
@@ -1542,6 +1620,41 @@ nav .active .nav-icon {
   border-radius: 50%;
   background: #64dfa0;
   box-shadow: 0 0 0 4px rgba(100, 223, 160, 0.1);
+}
+.timeline-event.record .timeline-dot {
+  background: #e8c66d;
+  box-shadow: 0 0 0 4px rgba(232, 198, 109, 0.1);
+}
+.timeline-event.home .timeline-dot {
+  background: #9dc6ff;
+  box-shadow: 0 0 0 4px rgba(157, 198, 255, 0.1);
+}
+.timeline-event-copy {
+  min-width: 0;
+}
+.timeline-meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.timeline-kind {
+  padding: 3px 6px;
+  border-radius: 999px;
+  color: #91dfb4 !important;
+  background: rgba(105, 217, 156, 0.09);
+  font-weight: 800;
+}
+.timeline-event.record .timeline-kind {
+  color: #e8c66d !important;
+  background: rgba(232, 198, 109, 0.09);
+}
+.timeline-event.home .timeline-kind {
+  color: #aacdff !important;
+  background: rgba(157, 198, 255, 0.09);
+}
+.timeline-meta > span {
+  color: #71897e;
+  font-size: calc(8px + var(--text-size-boost));
 }
 .timeline article small,
 .timeline article b,
@@ -1566,6 +1679,21 @@ nav .active .nav-icon {
   font-size: calc(10px + var(--text-size-boost));
   font-style: normal;
   white-space: nowrap;
+}
+@media (max-width: 350px) {
+  .journey-score-heading {
+    display: grid;
+  }
+  .journey-score-heading span {
+    justify-self: start;
+  }
+  .timeline article {
+    grid-template-columns: 12px minmax(0, 1fr);
+  }
+  .timeline article em {
+    grid-column: 2;
+    justify-self: start;
+  }
 }
 .handshake {
   display: grid;

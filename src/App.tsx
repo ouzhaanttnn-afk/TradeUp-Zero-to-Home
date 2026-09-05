@@ -30,7 +30,6 @@ import {
 } from "./domain/monetization";
 import type {
   AccessibilityPreferences,
-  CareerEventGroup,
   ItemInstance,
   MonetizationProductId,
 } from "./domain/models";
@@ -40,12 +39,17 @@ import { useGameStore } from "./stores/gameStore";
 import { Icon, type IconName } from "./ui/Icon";
 import { evidencePresentation } from "./ui/evidencePresentation";
 import { missedOpportunityPresentation } from "./ui/followPresentation";
+import {
+  careerEventPresentation,
+  completedSalesPresentation,
+  timelineFilterLabel,
+  type TimelineFilter,
+} from "./ui/journeyPresentation";
 import { ownershipPresentation } from "./ui/ownershipPresentation";
 import { simplifyLegacyPlayerCopy } from "./ui/playerLanguage";
 
 type Tab = "market" | "follow" | "portfolio" | "journey";
 type PortfolioSegment = "inventory" | "preparation" | "listings";
-type TimelineFilter = "ALL" | CareerEventGroup;
 
 const sellerLabel = {
   urgent: "Acilci",
@@ -314,6 +318,7 @@ export default function App() {
         .toReversed(),
     [game.career, timelineFilter],
   );
+  const completedSales = completedSalesPresentation(game.realizedProfitMinor);
 
   const selectListing = (listingId: string) => {
     setSelectedId(listingId);
@@ -574,7 +579,8 @@ export default function App() {
                     <div className="listing-copy">
                       <div className="meta">
                         <span>
-                          {item.instance.family.category} · Lv{categoryLevel}
+                          {item.instance.family.category} · Seviye{" "}
+                          {categoryLevel}
                         </span>
                         <span className={watched ? "watch-state" : undefined}>
                           {watched ? <Icon name="follow" /> : null}
@@ -622,8 +628,8 @@ export default function App() {
                 </span>
                 <h3>Henüz takip yok</h3>
                 <p>
-                  Bir ilanı takip et. Pazar deneyimin Lv3 olduğunda ürün alarmı
-                  da kurabilirsin.
+                  Bir ilanı takip et. Pazar deneyimin Seviye 3 olduğunda ürün
+                  alarmı da kurabilirsin.
                 </p>
                 <button onClick={() => navigate("market")}>
                   Pazardan ürün seç
@@ -1120,27 +1126,39 @@ export default function App() {
                 ) : null}
               </section>
             ) : null}
-            <section className="score-card">
-              <small>TAMAMLANAN SATIŞ KÂRI</small>
+            <section
+              className={`score-card journey-score ${completedSales.tone}`}
+            >
+              <div className="journey-score-heading">
+                <small>{completedSales.label}</small>
+                <span>Gerçekleşen sonuç</span>
+              </div>
               <strong className={game.realizedProfitMinor < 0 ? "loss" : ""}>
                 {money(game.realizedProfitMinor)}
               </strong>
               <p>
-                Elindeki nakit, ürünlerinin değeri ve tamamlanan satış kârı ayrı
-                gösterilir.
+                Bu tutar yalnız tamamlanan satışlardan gelir; elindeki ürünlerin
+                tahmini değeri aşağıda ayrı gösterilir.
               </p>
             </section>
-            <div className="metric-grid">
+            <div className="journey-block-heading">
+              <div>
+                <small>PARAN VE ÜRÜNLERİN</small>
+                <h3>Bugünkü durum</h3>
+              </div>
+              <span>{activeOwnedAssets(game).length} ürün</span>
+            </div>
+            <div className="metric-grid journey-metrics">
               <div>
                 <span>Nakit</span>
                 <b>{money(game.cashMinor)}</b>
               </div>
               <div>
-                <span>Tahmini toplam servet</span>
+                <span>Toplam tahmini değer</span>
                 <b>{money(total)}</b>
               </div>
               <div>
-                <span>Ürünlerin tahmini değeri</span>
+                <span>Ürünlerin bugünkü değeri</span>
                 <b>{money(portfolioMarketValue)}</b>
               </div>
               <div>
@@ -1148,13 +1166,13 @@ export default function App() {
                 <b>{money(activeBookCostMinor(game))}</b>
               </div>
               <div>
-                <span>Ürünlerde tahmini fark</span>
+                <span>Ürünlerdeki tahmini fark</span>
                 <b className={unrealizedEstimate < 0 ? "loss" : ""}>
-                  {money(unrealizedEstimate)}
+                  {signedMoney(unrealizedEstimate)}
                 </b>
               </div>
               <div>
-                <span>Servetin nakit payı</span>
+                <span>Toplam değerin nakit kısmı</span>
                 <b>%{total ? Math.round((game.cashMinor / total) * 100) : 0}</b>
               </div>
             </div>
@@ -1162,10 +1180,10 @@ export default function App() {
               <div className="expertise-heading">
                 <div>
                   <small>PAZAR DENEYİMİ</small>
-                  <h3>Lv{marketLevel}</h3>
+                  <h3>Seviye {marketLevel}</h3>
                 </div>
                 <span>
-                  {game.expertise.marketXp} / {marketXpTarget} XP
+                  {game.expertise.marketXp} / {marketXpTarget} deneyim
                 </span>
               </div>
               <div className="xp-bar">
@@ -1180,9 +1198,9 @@ export default function App() {
               </div>
               <p>
                 {marketLevel < 3
-                  ? "Lv3: ürün alarmları ve fiyat eğilimi"
+                  ? "Seviye 3: ürün alarmları ve fiyat eğilimi"
                   : marketLevel < 6
-                    ? "Lv6: bilgi güveni ve kusur ihtimali"
+                    ? "Seviye 6: bilgi güveni ve kusur ihtimali"
                     : "Bilgi araçların kararını netleştirir; fiyat bonusu vermez."}
               </p>
               <div className="category-levels">
@@ -1190,8 +1208,9 @@ export default function App() {
                   .sort((left, right) => right[1] - left[1])
                   .map(([category, xp]) => (
                     <span key={category}>
-                      {category} · Lv{categoryExpertiseLevel(game, category)}{" "}
-                      <small>{xp} XP</small>
+                      {category} · Seviye{" "}
+                      {categoryExpertiseLevel(game, category)}{" "}
+                      <small>{xp} deneyim</small>
                     </span>
                   ))}
               </div>
@@ -1234,8 +1253,11 @@ export default function App() {
               </section>
             )}
             <div className="timeline-header">
-              <h3>Kariyer zaman çizelgesi</h3>
-              <span>{game.career.length} anlamlı olay</span>
+              <div>
+                <small>KİŞİSEL KAYITLARIN</small>
+                <h3>Kariyer hikâyen</h3>
+              </div>
+              <span>{game.career.length} önemli an</span>
             </div>
             <div className="chips timeline-filters">
               {(
@@ -1246,15 +1268,7 @@ export default function App() {
                   key={filter}
                   onClick={() => setTimelineFilter(filter)}
                 >
-                  {filter === "ALL"
-                    ? "Tümü"
-                    : filter === "FIRSTS"
-                      ? "İlkler"
-                      : filter === "RECORDS"
-                        ? "Rekorlar"
-                        : filter === "MILESTONES"
-                          ? "Eşikler"
-                          : "Ev yolculuğu"}
+                  {timelineFilterLabel(filter)}
                 </button>
               ))}
             </div>
@@ -1268,28 +1282,43 @@ export default function App() {
               </div>
             ) : null}
             <div className="timeline">
-              {timeline.map((event) => (
-                <article key={event.id}>
-                  <div className="timeline-dot" />
-                  <div>
-                    <small>
-                      {event.atGameMin}. OYUN DK · {event.group}
-                    </small>
-                    <b>{simplifyLegacyPlayerCopy(event.label)}</b>
-                    {event.buyPriceMinor !== undefined &&
-                    event.sellPriceMinor !== undefined ? (
-                      <p>
-                        Alış {money(event.buyPriceMinor)} · Satış{" "}
-                        {money(event.sellPriceMinor)} · Kâr{" "}
-                        {money(event.realizedProfitMinor ?? 0)}
-                      </p>
+              {timeline.map((event) => {
+                const eventState = careerEventPresentation(
+                  event.group,
+                  game.gameTimeMin,
+                  event.atGameMin,
+                );
+                return (
+                  <article
+                    className={`timeline-event ${eventState.tone}`}
+                    key={event.id}
+                  >
+                    <div className="timeline-rail" aria-hidden="true">
+                      <span className="timeline-dot" />
+                    </div>
+                    <div className="timeline-event-copy">
+                      <div className="timeline-meta">
+                        <small className="timeline-kind">
+                          {eventState.label}
+                        </small>
+                        <span>{eventState.ageLabel}</span>
+                      </div>
+                      <b>{simplifyLegacyPlayerCopy(event.label)}</b>
+                      {event.buyPriceMinor !== undefined &&
+                      event.sellPriceMinor !== undefined ? (
+                        <p>
+                          Alış {money(event.buyPriceMinor)} · Satış{" "}
+                          {money(event.sellPriceMinor)} · Kâr{" "}
+                          {money(event.realizedProfitMinor ?? 0)}
+                        </p>
+                      ) : null}
+                    </div>
+                    {event.amountMinor !== undefined ? (
+                      <em>{money(event.amountMinor)}</em>
                     ) : null}
-                  </div>
-                  {event.amountMinor !== undefined ? (
-                    <em>{money(event.amountMinor)}</em>
-                  ) : null}
-                </article>
-              ))}
+                  </article>
+                );
+              })}
             </div>
           </>
         ) : null}
@@ -1403,7 +1432,7 @@ export default function App() {
                   Ürün alarmı kur
                 </button>
               ) : (
-                <span>Ürün alarmı Lv3'te açılır</span>
+                <span>Ürün alarmı Seviye 3'te açılır</span>
               )}
             </div>
             <div className="band">

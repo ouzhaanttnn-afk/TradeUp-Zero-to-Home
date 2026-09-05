@@ -22,7 +22,7 @@ describe("player-facing language", () => {
 
   it("simplifies labels already stored in older career history", () => {
     expect(simplifyLegacyPlayerCopy("Pazar okuryazarlığı Lv3 oldu")).toBe(
-      "Pazar deneyimi Lv3 oldu",
+      "Pazar deneyimi Seviye 3 oldu",
     );
   });
 });

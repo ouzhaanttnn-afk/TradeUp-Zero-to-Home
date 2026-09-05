@@ -3,8 +3,9 @@ const legacyTerms: ReadonlyArray<readonly [string, string]> = [
 ];
 
 export function simplifyLegacyPlayerCopy(value: string) {
-  return legacyTerms.reduce(
+  const simplified = legacyTerms.reduce(
     (copy, [technical, simple]) => copy.replaceAll(technical, simple),
     value,
   );
+  return simplified.replace(/\bLv\s?(\d+)\b/g, "Seviye $1");
 }
