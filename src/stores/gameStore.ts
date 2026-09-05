@@ -37,7 +37,9 @@ import {
 import { advanceRewardState } from "../domain/monetization";
 import type {
   InspectionKind,
+  MonetizationProductId,
   PreparationKind,
+  RewardPlacementId,
   SavedSearch,
 } from "../domain/models";
 import {
@@ -55,6 +57,15 @@ import {
   type OwnedAsset,
 } from "../game";
 import { systemTimeProvider } from "../infrastructure/time";
+import type { StoreProductMetadata } from "../infrastructure/monetization";
+import {
+  getMonetizationAdapters,
+  openPrivacyOptions,
+  purchaseStoreProduct,
+  refreshMonetization,
+  restoreStoreProducts,
+  runRewardedAction,
+} from "../services/monetization";
 import {
   clearGame,
   loadGameWithStatus,
@@ -65,6 +76,8 @@ type Store = {
   game: GameState;
   ready: boolean;
   notice: string;
+  storeProducts: StoreProductMetadata[];
+  monetizationBusy: boolean;
   hydrate: () => Promise<void>;
   flush: () => Promise<void>;
   scan: () => void;
@@ -94,6 +107,11 @@ type Store = {
   setReducedMotion: (enabled: boolean) => void;
   setLargeText: (enabled: boolean) => void;
   setSoundLevel: (level: GameState["accessibility"]["soundLevel"]) => void;
+  openPurchases: () => Promise<void>;
+  purchaseProduct: (productId: MonetizationProductId) => Promise<void>;
+  restorePurchases: () => Promise<void>;
+  showPrivacyOptions: () => Promise<void>;
+  claimReward: (placementId: RewardPlacementId) => Promise<void>;
   dismissCoach: () => void;
   reset: () => Promise<void>;
 };
@@ -184,6 +202,8 @@ export const useGameStore = create<Store>((set, get) => ({
   game: initialState(systemTimeProvider.nowWallMs()),
   ready: false,
   notice: "Piyasa canlı. İyi fırsatlar beklemez.",
+  storeProducts: [],
+  monetizationBusy: false,
   hydrate: async () => {
     await saveQueue.catch(() => undefined);
     const { state: game, recovery } = await loadGameWithStatus();
@@ -200,6 +220,14 @@ export const useGameStore = create<Store>((set, get) => ({
       ready: true,
       notice: recoveryNotice ?? current.notice,
     }));
+    const refreshed = await refreshMonetization(
+      game,
+      getMonetizationAdapters(),
+    );
+    set({
+      game: stampAndPersist(refreshed.state),
+      storeProducts: refreshed.products,
+    });
   },
   flush: async () => {
     await saveQueue.catch(() => undefined);
@@ -733,6 +761,151 @@ export const useGameStore = create<Store>((set, get) => ({
         accessibility: { ...game.accessibility, soundLevel: level },
       }),
       notice: `Ses seviyesi ${label} olarak ayarlandı.`,
+    });
+  },
+  openPurchases: async () => {
+    if (get().monetizationBusy) return;
+    const game = trackAnalytics(
+      get().game,
+      "iap_opened",
+      {},
+      `store:${get().game.gameTimeMin}`,
+    );
+    set({ monetizationBusy: true });
+    const refreshed = await refreshMonetization(
+      game,
+      getMonetizationAdapters(),
+    );
+    set({
+      game: stampAndPersist(refreshed.state),
+      storeProducts: refreshed.products,
+      monetizationBusy: false,
+      notice: refreshed.storeAvailable
+        ? "Mağaza fiyatları güncellendi."
+        : "Mağaza şu anda kullanılamıyor; satın alma kapalı.",
+    });
+  },
+  purchaseProduct: async (productId) => {
+    if (get().monetizationBusy) return;
+    const metadata = get().storeProducts.find(
+      (product) => product.productId === productId && product.available,
+    );
+    if (!metadata?.localizedPrice) {
+      set({ notice: "Mağaza fiyatı yüklenmeden satın alma başlatılamaz." });
+      return;
+    }
+    const before = trackAnalytics(
+      get().game,
+      "iap_purchase_started",
+      { productId },
+      `purchase-start:${productId}:${get().game.gameTimeMin}`,
+    );
+    set({ monetizationBusy: true });
+    const result = await purchaseStoreProduct(
+      before,
+      productId,
+      getMonetizationAdapters().billing,
+    );
+    const next =
+      result.status === "OWNED"
+        ? trackAnalytics(
+            result.state,
+            "iap_purchase_completed",
+            { productId },
+            `purchase-complete:${productId}`,
+          )
+        : result.state;
+    const message = {
+      OWNED: "Satın alma doğrulandı ve kalıcı olarak açıldı.",
+      PENDING:
+        "Ödeme beklemede. Uygulamaya döndüğünde tekrar kontrol edilecek.",
+      CANCELLED: "Satın alma iptal edildi; herhangi bir hak verilmedi.",
+      FAILED: "Satın alma doğrulanamadı; herhangi bir hak verilmedi.",
+    }[result.status];
+    set({
+      game: stampAndPersist(next),
+      monetizationBusy: false,
+      notice: message,
+    });
+  },
+  restorePurchases: async () => {
+    if (get().monetizationBusy) return;
+    const before = trackAnalytics(
+      get().game,
+      "iap_restore_started",
+      {},
+      `restore-start:${get().game.gameTimeMin}`,
+    );
+    set({ monetizationBusy: true });
+    const result = await restoreStoreProducts(
+      before,
+      getMonetizationAdapters().billing,
+    );
+    const next = result.failed
+      ? result.state
+      : trackAnalytics(
+          result.state,
+          "iap_restore_completed",
+          { entitlementCount: result.synced },
+          `restore-complete:${result.state.gameTimeMin}:${result.synced}`,
+        );
+    set({
+      game: stampAndPersist(next),
+      monetizationBusy: false,
+      notice: result.failed
+        ? "Satın almalar geri yüklenemedi. Bağlantını kontrol edip tekrar dene."
+        : result.synced
+          ? `${result.synced} mağaza hakkı doğrulandı.`
+          : "Geri yüklenecek doğrulanmış satın alma bulunamadı.",
+    });
+  },
+  showPrivacyOptions: async () => {
+    const opened = await openPrivacyOptions(getMonetizationAdapters().consent);
+    set({
+      notice: opened
+        ? "Gizlilik seçenekleri açıldı."
+        : "Gizlilik seçenekleri bu cihazda kullanılamıyor.",
+    });
+  },
+  claimReward: async (placementId) => {
+    if (get().monetizationBusy) return;
+    const state = get().game;
+    const premium = state.monetization.entitlements.some(
+      (entry) =>
+        entry.entitlementId === "premium_lifetime" && entry.status === "OWNED",
+    );
+    set({ monetizationBusy: true });
+    const result = await runRewardedAction(
+      state,
+      placementId,
+      premium ? "premium" : "ad",
+      getMonetizationAdapters().rewarded,
+    );
+    const eventName =
+      result.status === "APPLIED"
+        ? premium
+          ? "premium_claim_used"
+          : "reward_applied"
+        : result.status === "CANCELLED"
+          ? "reward_closed_early"
+          : "reward_request_failed";
+    const next = trackAnalytics(
+      result.state,
+      eventName,
+      { placementId, status: result.status },
+      `${placementId}:${result.status}:${state.gameTimeMin}`,
+    );
+    set({
+      game: stampAndPersist(next),
+      monetizationBusy: false,
+      notice:
+        result.status === "APPLIED"
+          ? "İsteğe bağlı hızlandırma uygulandı."
+          : result.status === "CANCELLED"
+            ? "Video erken kapatıldı; hak ve limit kullanılmadı."
+            : result.status === "INELIGIBLE"
+              ? "Bu hızlandırma şu anda uygun değil."
+              : "Video yüklenemedi; hak ve limit kullanılmadı.",
     });
   },
   dismissCoach: () => {

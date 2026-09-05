@@ -115,6 +115,15 @@ export const deniedConsentAdapter: ConsentAdapter = {
   async openPrivacyOptions() {},
 };
 
+export const unavailableConsentAdapter: ConsentAdapter = {
+  async refresh() {
+    throw new Error("CONSENT_UNAVAILABLE");
+  },
+  async openPrivacyOptions() {
+    throw new Error("PRIVACY_OPTIONS_UNAVAILABLE");
+  },
+};
+
 export const unavailableRewardedAdAdapter: RewardedAdAdapter = {
   async show() {
     return { status: "FAILED", reason: "PROVIDER" };

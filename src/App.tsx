@@ -24,10 +24,15 @@ import {
   nextExpertiseThreshold,
   savedSearchMatches,
 } from "./domain/meta";
+import {
+  getRewardEligibility,
+  hasPremiumEntitlement,
+} from "./domain/monetization";
 import type {
   AccessibilityPreferences,
   CareerEventGroup,
   ItemInstance,
+  MonetizationProductId,
 } from "./domain/models";
 import { activeMarketListings, npcRiskSignal } from "./domain/world";
 import { HOME_GOAL_MINOR, money, signal, wealth } from "./game";
@@ -60,6 +65,47 @@ const nextSoundLevel: Record<SoundLevel, SoundLevel> = {
   LOW: "NORMAL",
   NORMAL: "OFF",
 };
+
+const storeCopy: Record<
+  MonetizationProductId,
+  { title: string; detail: string }
+> = {
+  tradeup_premium_lifetime: {
+    title: "TradeUp Premium",
+    detail: "Uygun hızlandırmaları video izlemeden kullan; limitler değişmez.",
+  },
+  tradeup_theme_night_market: {
+    title: "Gece Pazarı teması",
+    detail: "Yalnız arayüz görünümünü kişiselleştirir.",
+  },
+  tradeup_theme_workshop: {
+    title: "Endüstriyel Atölye teması",
+    detail: "Yalnız arayüz görünümünü kişiselleştirir.",
+  },
+  tradeup_home_styles_01: {
+    title: "Ev stilleri paketi",
+    detail: "Ev finali için üç görsel stil; ilerlemeye para eklemez.",
+  },
+};
+
+const rewardCopy = {
+  MARKET_SCOUT: {
+    ad: "Yakındaki ilanları tara · Video",
+    premium: "Premium tarama hakkını kullan",
+  },
+  FAST_INSPECTION: {
+    ad: "İncelemeyi şimdi bitir · Video",
+    premium: "İncelemeyi şimdi bitir",
+  },
+  FAST_PREPARATION: {
+    ad: "Hazırlığı şimdi bitir · Video",
+    premium: "Hazırlığı şimdi bitir",
+  },
+  LISTING_REACH: {
+    ad: "İlanı bir kez öne çıkar · Video",
+    premium: "Premium erişim hakkını kullan",
+  },
+} as const;
 
 function ProductVisual({
   instance,
@@ -115,11 +161,14 @@ export default function App() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [comparing, setComparing] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [purchasesOpen, setPurchasesOpen] = useState(false);
   const [resetArmed, setResetArmed] = useState(false);
   const {
     game,
     ready,
     notice,
+    storeProducts,
+    monetizationBusy,
     hydrate,
     flush,
     scan,
@@ -145,6 +194,11 @@ export default function App() {
     setReducedMotion,
     setLargeText,
     setSoundLevel,
+    openPurchases,
+    purchaseProduct,
+    restorePurchases,
+    showPrivacyOptions,
+    claimReward,
     reset,
   } = useGameStore();
 
@@ -198,6 +252,13 @@ export default function App() {
       : undefined;
   const offers = negotiating?.offersRemaining ?? 2;
   const ftueActive = isFtueActive(game);
+  const premiumReward = hasPremiumEntitlement(game);
+  const rewardProviderAvailable =
+    premiumReward || game.monetization.consent.canRequestAds;
+  const canClaimReward = (placementId: keyof typeof rewardCopy) =>
+    rewardProviderAvailable && getRewardEligibility(game, placementId).ok;
+  const rewardLabel = (placementId: keyof typeof rewardCopy) =>
+    rewardCopy[placementId][premiumReward ? "premium" : "ad"];
   const coach = ftueCopy[game.ftue.stage];
   const showCoach =
     ftueActive && !game.ftue.dismissedStages.includes(game.ftue.stage);
@@ -374,6 +435,15 @@ export default function App() {
               <span>{marketListings.length} ilan</span>
             </div>
             <div className="feed">
+              {!selected && canClaimReward("MARKET_SCOUT") ? (
+                <button
+                  className="reward-cta"
+                  disabled={monetizationBusy}
+                  onClick={() => void claimReward("MARKET_SCOUT")}
+                >
+                  {rewardLabel("MARKET_SCOUT")}
+                </button>
+              ) : null}
               {startingOffer ? (
                 <article className="starting-sale">
                   <img src={assetFor("prd_notebook")} alt="Eski defter" />
@@ -615,6 +685,26 @@ export default function App() {
               </div>
             ) : null}
             <div className="inventory-grid">
+              {portfolioSegment === "preparation" &&
+              canClaimReward("FAST_PREPARATION") ? (
+                <button
+                  className="reward-cta"
+                  disabled={monetizationBusy}
+                  onClick={() => void claimReward("FAST_PREPARATION")}
+                >
+                  {rewardLabel("FAST_PREPARATION")}
+                </button>
+              ) : null}
+              {portfolioSegment === "listings" &&
+              canClaimReward("LISTING_REACH") ? (
+                <button
+                  className="reward-cta"
+                  disabled={monetizationBusy}
+                  onClick={() => void claimReward("LISTING_REACH")}
+                >
+                  {rewardLabel("LISTING_REACH")}
+                </button>
+              ) : null}
               {portfolioSegment === "inventory"
                 ? inventory.map((item) => renderInventoryCard(item, false))
                 : null}
@@ -768,6 +858,82 @@ export default function App() {
                   Karar olayları yalnız yerel kuyrukta tutulur; kişisel bilgi
                   içermez. Kapatmak kuyruğu temizler.
                 </p>
+                <button
+                  className="secondary"
+                  aria-expanded={purchasesOpen}
+                  onClick={() => {
+                    const next = !purchasesOpen;
+                    setPurchasesOpen(next);
+                    if (next) void openPurchases();
+                  }}
+                >
+                  Satın Almalar ve Görünüm
+                </button>
+                {purchasesOpen ? (
+                  <section
+                    className="purchase-panel"
+                    aria-label="Satın Almalar ve Görünüm"
+                  >
+                    <div className="purchase-list">
+                      {(Object.keys(storeCopy) as MonetizationProductId[]).map(
+                        (productId) => {
+                          const metadata = storeProducts.find(
+                            (product) => product.productId === productId,
+                          );
+                          const entitlement =
+                            game.monetization.entitlements.find(
+                              (entry) => entry.productId === productId,
+                            );
+                          const owned = entitlement?.status === "OWNED";
+                          const pending = entitlement?.status === "PENDING";
+                          return (
+                            <article key={productId}>
+                              <div>
+                                <strong>{storeCopy[productId].title}</strong>
+                                <p>{storeCopy[productId].detail}</p>
+                              </div>
+                              {owned || pending ? (
+                                <span className="entitlement-state">
+                                  {owned ? "Sahipsin" : "Ödeme beklemede"}
+                                </span>
+                              ) : metadata ? (
+                                <button
+                                  disabled={monetizationBusy}
+                                  onClick={() =>
+                                    void purchaseProduct(productId)
+                                  }
+                                >
+                                  Satın al · {metadata.localizedPrice}
+                                </button>
+                              ) : (
+                                <span className="store-unavailable">
+                                  Fiyat yüklenemedi
+                                </span>
+                              )}
+                            </article>
+                          );
+                        },
+                      )}
+                    </div>
+                    <p>
+                      Fiyatlar doğrudan cihaz mağazasından gelir. Satın alımlar
+                      kalıcıdır; oyun parası veya pazar avantajı vermez.
+                    </p>
+                    <button
+                      className="secondary"
+                      disabled={monetizationBusy}
+                      onClick={() => void restorePurchases()}
+                    >
+                      Satın Almaları Geri Yükle
+                    </button>
+                    <button
+                      className="text-button"
+                      onClick={() => void showPrivacyOptions()}
+                    >
+                      Gizlilik Seçenekleri
+                    </button>
+                  </section>
+                ) : null}
                 <button
                   className={resetArmed ? "danger-confirm" : "secondary"}
                   onClick={() => {
@@ -1167,6 +1333,15 @@ export default function App() {
                     </button>
                   ))}
                 </div>
+              ) : null}
+              {canClaimReward("FAST_INSPECTION") ? (
+                <button
+                  className="reward-cta"
+                  disabled={monetizationBusy}
+                  onClick={() => void claimReward("FAST_INSPECTION")}
+                >
+                  {rewardLabel("FAST_INSPECTION")}
+                </button>
               ) : null}
               <button
                 className="primary"

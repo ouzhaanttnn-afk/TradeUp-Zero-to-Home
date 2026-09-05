@@ -971,6 +971,50 @@ nav .active {
 .settings-card .text-button {
   margin-top: 6px;
 }
+.purchase-panel {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #274036;
+}
+.purchase-list {
+  display: grid;
+  gap: 8px;
+}
+.purchase-list article {
+  display: grid;
+  gap: 8px;
+  padding: 11px;
+  border: 1px solid #274036;
+  border-radius: 12px;
+  background: #101d18;
+}
+.purchase-list strong {
+  font-size: calc(12px + var(--text-size-boost));
+}
+.purchase-list p {
+  margin-top: 3px;
+}
+.purchase-list button {
+  width: 100%;
+}
+.entitlement-state,
+.store-unavailable {
+  color: #69d99c;
+  font-size: calc(11px + var(--text-size-boost));
+  font-weight: 800;
+}
+.store-unavailable {
+  color: #8fa69b;
+}
+.reward-cta {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #8b7130;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3a3218, #201d12);
+  color: #ffe39a;
+  font-weight: 800;
+}
 .danger-confirm {
   color: #ffc0bb;
   border-color: #7a3935 !important;
