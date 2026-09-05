@@ -55,6 +55,7 @@ import {
   sellerLabel,
 } from "./ui/comparisonPresentation";
 import { preparationPresentation } from "./ui/preparationPresentation";
+import { listingActivity } from "./ui/listingActivity";
 
 type Tab = "market" | "follow" | "portfolio" | "journey";
 type PortfolioSegment = "inventory" | "preparation" | "listings";
@@ -297,8 +298,24 @@ export default function App() {
     const asset = game.ownedAssets.find(
       (item) => item.id === playerListing.ownedAssetId,
     );
-    return asset ? [{ listing: playerListing, asset }] : [];
+    return asset
+      ? [
+          {
+            listing: playerListing,
+            asset,
+            activity: listingActivity(
+              playerListing,
+              game.buyerOffers,
+              game.gameTimeMin,
+            ),
+          },
+        ]
+      : [];
   });
+  const pendingBuyerOfferCount = playerListings.reduce(
+    (count, entry) => count + entry.activity.offers.length,
+    0,
+  );
   const watchedListings = marketListings.filter((listing) =>
     game.follow.watchedListingIds.includes(listing.id),
   );
@@ -351,6 +368,8 @@ export default function App() {
   };
   const navigate = (nextTab: Tab) => {
     setTab(nextTab);
+    if (nextTab === "portfolio" && pendingBuyerOfferCount > 0)
+      setPortfolioSegment("listings");
     if (nextTab === "journey") openJourney();
   };
   const showOwnedAsset = (assetId: string, segment: PortfolioSegment) => {
@@ -1009,51 +1028,70 @@ export default function App() {
                 ? workshop.map((item) => renderInventoryCard(item, true))
                 : null}
               {portfolioSegment === "listings"
-                ? playerListings.map(({ listing: playerListing, asset }) => {
-                    const ownershipState = ownershipPresentation(asset.state);
-                    return (
-                      <article
-                        className="owned"
-                        key={playerListing.id}
-                        id={`owned-${asset.id}`}
-                        tabIndex={-1}
-                        aria-label={asset.instance.family.name}
-                      >
-                        <ProductVisual
-                          instance={asset.instance}
-                          className="owned-icon"
-                        />
-                        <div className="owned-copy">
-                          <div className="owned-title-row">
-                            <h3>{asset.instance.family.name}</h3>
-                            <span
-                              className={`asset-state ${ownershipState.tone}`}
+                ? playerListings.map(
+                    ({ listing: playerListing, asset, activity }) => {
+                      const ownershipState = ownershipPresentation(asset.state);
+                      return (
+                        <article
+                          className="owned"
+                          key={playerListing.id}
+                          id={`owned-${asset.id}`}
+                          tabIndex={-1}
+                          aria-label={asset.instance.family.name}
+                        >
+                          <ProductVisual
+                            instance={asset.instance}
+                            className="owned-icon"
+                          />
+                          <div className="owned-copy">
+                            <div className="owned-title-row">
+                              <h3>{asset.instance.family.name}</h3>
+                              <span
+                                className={`asset-state ${ownershipState.tone}`}
+                              >
+                                {ownershipState.label}
+                              </span>
+                            </div>
+                            <div className="owned-metrics listing-metrics">
+                              <div>
+                                <span>Toplam harcaman</span>
+                                <b>{money(asset.bookCostMinor)}</b>
+                              </div>
+                              <div>
+                                <span>İlan fiyatı</span>
+                                <b>{money(playerListing.askingPriceMinor)}</b>
+                              </div>
+                              <div>
+                                <span>İlgi</span>
+                                <b>%{playerListing.interest}</b>
+                              </div>
+                            </div>
+                          </div>
+                          {activity.waiting ? (
+                            <div
+                              className="listing-wait"
+                              role="group"
+                              aria-label="İlan durumu"
                             >
-                              {ownershipState.label}
-                            </span>
-                          </div>
-                          <div className="owned-metrics listing-metrics">
-                            <div>
-                              <span>Toplam harcaman</span>
-                              <b>{money(asset.bookCostMinor)}</b>
+                              <h4>İlanın yayında</h4>
+                              <p>
+                                {activity.ageLabel} · Alıcı teklifi bekleniyor.
+                              </p>
+                              <p>
+                                Teklifler anında gelmeyebilir. Bu ekranda
+                                beklemek zorunda değilsin.
+                              </p>
+                              <div className="sell-actions">
+                                <button
+                                  className="primary"
+                                  onClick={() => navigate("market")}
+                                >
+                                  Pazara göz at
+                                </button>
+                              </div>
                             </div>
-                            <div>
-                              <span>İlan fiyatı</span>
-                              <b>{money(playerListing.askingPriceMinor)}</b>
-                            </div>
-                            <div>
-                              <span>İlgi</span>
-                              <b>%{playerListing.interest}</b>
-                            </div>
-                          </div>
-                        </div>
-                        {game.buyerOffers
-                          .filter(
-                            (offer) =>
-                              offer.listingId === playerListing.id &&
-                              offer.expiresAtGameMin > game.gameTimeMin,
-                          )
-                          .map((buyerOffer) => {
+                          ) : null}
+                          {activity.offers.map((buyerOffer) => {
                             const sale = quoteAssetSale(
                               asset,
                               buyerOffer.amountMinor,
@@ -1106,26 +1144,27 @@ export default function App() {
                               </div>
                             );
                           })}
-                        <div className="sell-actions">
-                          <button
-                            onClick={() => {
-                              withdrawListing(playerListing.id);
-                              if (
-                                useGameStore
-                                  .getState()
-                                  .game.ownedAssets.find(
-                                    (item) => item.id === asset.id,
-                                  )?.state === "IN_INVENTORY"
-                              )
-                                showOwnedAsset(asset.id, "inventory");
-                            }}
-                          >
-                            İlanı geri çek
-                          </button>
-                        </div>
-                      </article>
-                    );
-                  })
+                          <div className="sell-actions">
+                            <button
+                              onClick={() => {
+                                withdrawListing(playerListing.id);
+                                if (
+                                  useGameStore
+                                    .getState()
+                                    .game.ownedAssets.find(
+                                      (item) => item.id === asset.id,
+                                    )?.state === "IN_INVENTORY"
+                                )
+                                  showOwnedAsset(asset.id, "inventory");
+                              }}
+                            >
+                              İlanı geri çek
+                            </button>
+                          </div>
+                        </article>
+                      );
+                    },
+                  )
                 : null}
             </div>
             {portfolioSegment === "listings" &&
@@ -1547,12 +1586,28 @@ export default function App() {
             className={tab === item ? "active" : ""}
             key={item}
             onClick={() => navigate(item)}
+            aria-label={label}
+            aria-describedby={
+              item === "portfolio" && pendingBuyerOfferCount > 0
+                ? "pending-buyer-offers"
+                : undefined
+            }
             aria-current={tab === item ? "page" : undefined}
           >
             <span className="nav-icon">
               <Icon name={icon} />
             </span>
             <span className="nav-label">{label}</span>
+            {item === "portfolio" && pendingBuyerOfferCount > 0 ? (
+              <>
+                <span className="nav-offer-count" aria-hidden="true">
+                  {pendingBuyerOfferCount}
+                </span>
+                <span id="pending-buyer-offers" className="sr-only">
+                  {pendingBuyerOfferCount} alıcı teklifi bekliyor
+                </span>
+              </>
+            ) : null}
           </button>
         ))}
       </nav>

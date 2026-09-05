@@ -65,3 +65,10 @@ profit against saved accounting, the return-to-product shortcut after reload,
 and access to optional preparations. The 320 px flow also verifies direct
 purchase and optional preparation after onboarding, plus cancelling a quick sale.
 `test:offline` runs only the offline scenario. These do not replace native-device QA.
+
+Buyer-wait browser tests cover 320 px large text and 430 px layouts. They load a
+normal saved listing, return to the market without changing game time or money,
+advance the browser clock through the real game interval, and verify that a
+generated offer replaces the waiting message and appears in the portfolio badge.
+Opening Portföy leads to İlanlarım when offers are pending; acceptance removes the
+badge and reconciles the journal. Elapsed listing age is not an arrival countdown.
