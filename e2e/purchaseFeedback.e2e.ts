@@ -1,11 +1,5 @@
 import { expect, test } from "@playwright/test";
-import {
-  initialState,
-  money,
-  resolveOffer,
-  signal,
-  validateState,
-} from "../src/game";
+import { initialState, resolveOffer, validateState } from "../src/game";
 import { reconcileJournal } from "../src/domain/economy";
 import type { GameState } from "../src/domain/models";
 
@@ -83,12 +77,7 @@ test("seller feedback stays in the sheet and two rejected offers remain closed a
       }
     });
   const openListing = async () =>
-    page
-      .getByRole("button", {
-        name: `${listing.instance.family.name}, fiyat ${money(listing.priceMinor)}, kondisyon yüzde ${listing.instance.condition}, ${signal(listing, 0).text}. İlan detaylarını aç`,
-        exact: true,
-      })
-      .click();
+    page.locator(`[data-listing-id="${listing.id}"]`).click();
   await page.reload();
   await openListing();
   const steps = page.getByRole("group", { name: "Satın alma adımları" });

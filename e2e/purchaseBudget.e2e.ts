@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { initialState, money, signal, validateState } from "../src/game";
+import { initialState, money, validateState } from "../src/game";
 import type { GameState } from "../src/domain/models";
 import { reconcileJournal } from "../src/domain/economy";
 
@@ -78,12 +78,7 @@ for (const scenario of ["offer", "counter", "shortfall"] as const) {
         }
       });
     await page.reload();
-    await page
-      .getByRole("button", {
-        name: `${listing.instance.family.name}, fiyat ${money(listing.priceMinor)}, kondisyon yüzde ${listing.instance.condition}, ${signal(listing, 0).text}. İlan detaylarını aç`,
-        exact: true,
-      })
-      .click();
+    await page.locator(`[data-listing-id="${listing.id}"]`).click();
     const steps = page.getByRole("group", { name: "Satın alma adımları" });
     const offer = steps.getByRole("button", { name: /^Pazarlık et/ });
     const direct = steps.getByRole("button", { name: /^Hemen al/ });

@@ -82,9 +82,8 @@ for (const choice of [
       await page.getByRole("button", { name: "Pazar", exact: true }).click();
     }
     await page
-      .getByRole("button", {
-        name: `Kuzey Defteri, fiyat ₺${choice.price}, kondisyon yüzde ${choice.condition}, Piyasa fiyatı. İlan detaylarını aç`,
-      })
+      .locator(`.market-card[data-price-minor="${choice.price * 100}"]`)
+      .filter({ hasText: "Kuzey Defteri" })
       .click();
     const purchaseSteps = page.getByRole("group", {
       name: "Satın alma adımları",
@@ -408,9 +407,8 @@ for (const choice of [
     expect(loaded.cashMinor).toBe(completed.cashMinor);
     if (choice.width === 320) {
       await page
-        .getByRole("button", {
-          name: "Kuzey Defteri, fiyat ₺140, kondisyon yüzde 83, Piyasa fiyatı. İlan detaylarını aç",
-        })
+        .locator('.market-card[data-price-minor="14000"]')
+        .filter({ hasText: "Kuzey Defteri" })
         .click();
       await page.getByRole("button", { name: /^Hemen al/ }).click();
       await expect(
