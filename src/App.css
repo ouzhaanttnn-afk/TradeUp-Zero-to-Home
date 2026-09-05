@@ -675,6 +675,70 @@ main {
   color: #082116 !important;
   border-color: #5ee6a0 !important;
 }
+.owned:focus-visible {
+  outline: 2px solid #69d99c;
+  outline-offset: 3px;
+}
+.owned {
+  scroll-margin-block: 16px 100px;
+}
+.preparation-options,
+.buyer-offer {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+.preparation-options summary {
+  min-height: 44px;
+  padding: 12px 0;
+  font-size: calc(12px + var(--text-size-boost));
+  cursor: pointer;
+}
+.preparation-options summary:focus-visible {
+  outline: 2px solid #69d99c;
+  outline-offset: 2px;
+}
+.preparation-options ~ .primary {
+  grid-column: 1 / -1;
+}
+.buyer-offer {
+  padding-top: 14px;
+  border-top: 1px solid #365247;
+}
+.buyer-offer h4 {
+  margin: 0 0 10px;
+  font-size: calc(14px + var(--text-size-boost));
+}
+.sale-breakdown {
+  margin: 0;
+  display: grid;
+  gap: 8px;
+  font-size: calc(13px + var(--text-size-boost));
+}
+.sale-breakdown > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+}
+.sale-breakdown dd {
+  margin: 0;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+.buyer-offer > p {
+  margin: 12px 0;
+  font-size: calc(11px + var(--text-size-boost));
+}
+.coach > .coach-next {
+  position: static;
+  width: auto;
+  height: auto;
+  min-height: 44px;
+  margin-top: 10px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: calc(13px + var(--text-size-boost));
+}
 .score-card {
   padding: 22px;
   border-radius: 20px;

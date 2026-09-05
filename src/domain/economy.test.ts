@@ -11,6 +11,7 @@ import {
   preparationAssets,
   inventoryAssets,
   quoteAssetExit,
+  quoteAssetSale,
   reconcileJournal,
   settleAssetSale,
   withdrawPlayerListing,
@@ -30,6 +31,31 @@ function purchasedState(): GameState {
 }
 
 describe("canonical ownership and accounting", () => {
+  it.each([15_000, 20_000, 30_000])(
+    "previews the same profit as settlement for %s minor-unit proceeds",
+    (proceeds) => {
+      const state = purchasedState();
+      const asset = state.ownedAssets[0];
+      const quote = quoteAssetSale(asset, proceeds);
+      expect(quote).toEqual({
+        proceedsMinor: proceeds,
+        bookCostMinor: 20_000,
+        profitMinor: proceeds - 20_000,
+      });
+      const sold = settleAssetSale(
+        state,
+        asset.id,
+        proceeds,
+        `sale:preview:${proceeds}`,
+        20,
+      );
+      if (!sold.ok) throw new Error(sold.reason);
+      expect(sold.state.realizedProfitMinor - state.realizedProfitMinor).toBe(
+        quote.profitMinor,
+      );
+      expect(sold.state.cashMinor - state.cashMinor).toBe(quote.proceedsMinor);
+    },
+  );
   it("keeps an in-progress preparation visible after save/load and returns it to inventory on completion", () => {
     const before = purchasedState();
     const asset = before.ownedAssets[0];

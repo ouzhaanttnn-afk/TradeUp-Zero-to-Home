@@ -1,11 +1,12 @@
 import { expect, test } from "@playwright/test";
 import type { GameState } from "../src/domain/models";
 import { netWorthMinor, reconcileJournal } from "../src/domain/economy";
+import { money, signedMoney } from "../src/game";
 
 for (const choice of [
-  { price: 140, condition: 55, withdraw: false },
-  { price: 150, condition: 83, withdraw: false },
-  { price: 140, condition: 55, withdraw: true },
+  { price: 140, condition: 55, withdraw: false, width: 320 },
+  { price: 150, condition: 83, withdraw: false, width: 430 },
+  { price: 140, condition: 55, withdraw: true, width: 390 },
 ]) {
   test(`first session completes with the ${choice.price} TL listing${choice.withdraw ? " after withdrawal and reload" : ""} and reconciled accounting`, async ({
     page,
@@ -42,9 +43,41 @@ for (const choice of [
     };
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
+    await page.setViewportSize({ width: choice.width, height: 844 });
+    const checkLayout = async () => {
+      expect(
+        await page.evaluate(() => {
+          const problems: string[] = [];
+          if (document.documentElement.scrollWidth > innerWidth)
+            problems.push("page overflow");
+          for (const element of document.querySelectorAll<HTMLElement>(
+            ".owned, button, summary",
+          )) {
+            const rect = element.getBoundingClientRect();
+            if (!rect.width || !rect.height) continue;
+            if (element.scrollWidth > element.clientWidth + 1)
+              problems.push(`overflow: ${element.textContent}`);
+            if (
+              (element.tagName === "BUTTON" || element.tagName === "SUMMARY") &&
+              (rect.height < 44 || rect.width < 44)
+            )
+              problems.push(`small target: ${element.textContent}`);
+          }
+          return problems;
+        }),
+      ).toEqual([]);
+    };
     await page.goto("/");
     await page.getByRole("button", { name: "Teklifi kabul et · ₺420" }).click();
     await stage("COMPARE");
+    if (choice.withdraw) {
+      await page.getByRole("button", { name: "Yolculuk", exact: true }).click();
+      await page.getByRole("button", { name: "Ayarlar", exact: true }).click();
+      await page
+        .getByRole("button", { name: "Standart · büyüt", exact: true })
+        .click();
+      await page.getByRole("button", { name: "Pazar", exact: true }).click();
+    }
     await page
       .getByRole("button", {
         name: `Kuzey Defteri, fiyat ₺${choice.price}, kondisyon yüzde ${choice.condition}, Piyasa fiyatı. İlan detaylarını aç`,
@@ -72,14 +105,39 @@ for (const choice of [
       await page.getByRole("button", { name: /^Pazarlık et/ }).click();
     }
     await stage("PREPARATION");
-    await page.getByRole("button", { name: "Portföy", exact: true }).click();
-    await page.getByRole("tab", { name: "Hazırlık", exact: true }).click();
+    await expect(
+      page.getByRole("tab", { name: "Hazırlık", exact: true }),
+    ).toHaveAttribute("aria-selected", "true");
+    await expect(
+      page.getByRole("article", { name: "Kuzey Defteri", exact: true }),
+    ).toBeFocused();
+    await checkLayout();
     await page.getByRole("button", { name: /Temizle/ }).click();
     await stage("LISTING");
-    await page.getByRole("tab", { name: "Envanter", exact: true }).click();
+    await expect(
+      page.getByRole("tab", { name: "Hazırlık", exact: true }),
+    ).toHaveAttribute("aria-selected", "true");
+    await expect(
+      page.getByText("Diğer hazırlıklar", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Ürününe dön", exact: true }),
+    ).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /^Test et/ })).toHaveCount(0);
+    await page.getByText("Diğer hazırlıklar", { exact: true }).click();
+    await expect(page.getByRole("button", { name: /^Test et/ })).toBeVisible();
+    await page.getByText("Diğer hazırlıklar", { exact: true }).click();
+    await checkLayout();
+    await page.screenshot({
+      path: testInfo.outputPath("ready-to-list.png"),
+      fullPage: true,
+      animations: "disabled",
+    });
     await page.getByRole("button", { name: /^İlan oluştur/ }).click();
     await stage("BUYER_SALE");
-    await page.getByRole("tab", { name: "İlanlarım", exact: true }).click();
+    await expect(
+      page.getByRole("tab", { name: "İlanlarım", exact: true }),
+    ).toHaveAttribute("aria-selected", "true");
     if (choice.withdraw) {
       const listed = await readSave();
       const assetId = listed.ftue.firstAssetId!;
@@ -90,8 +148,8 @@ for (const choice of [
         .click();
       await stage("LISTING");
       await expect(
-        page.getByText("Aktif ilanın yok", { exact: true }),
-      ).toBeVisible();
+        page.getByRole("tab", { name: "Envanter", exact: true }),
+      ).toHaveAttribute("aria-selected", "true");
       await expect(
         page.getByRole("button", { name: "Teklifi kabul et", exact: true }),
       ).toHaveCount(0);
@@ -119,8 +177,9 @@ for (const choice of [
       const loaded = await readSave();
       expect(loaded.transactionJournal).toEqual(withdrawn.transactionJournal);
       expect(loaded.ownedAssets).toEqual(withdrawn.ownedAssets);
-      await page.getByRole("button", { name: "Portföy", exact: true }).click();
-      await page.getByRole("tab", { name: "Envanter", exact: true }).click();
+      await page
+        .getByRole("button", { name: "Ürününe dön", exact: true })
+        .click();
       await page.getByRole("button", { name: /^İlan oluştur/ }).click();
       await stage("BUYER_SALE");
       const relisted = await readSave();
@@ -138,13 +197,44 @@ for (const choice of [
           (offer) => offer.listingId === newListingId,
         ),
       ).toHaveLength(1);
-      await page.getByRole("tab", { name: "İlanlarım", exact: true }).click();
+      await expect(
+        page.getByRole("tab", { name: "İlanlarım", exact: true }),
+      ).toHaveAttribute("aria-selected", "true");
       await page.screenshot({
         path: testInfo.outputPath("relisted-offer.png"),
         fullPage: true,
         animations: "disabled",
       });
     }
+    const beforeSale = await readSave();
+    const assetBeforeSale = beforeSale.ownedAssets.find(
+      (asset) => asset.id === beforeSale.ftue.firstAssetId,
+    )!;
+    const offerBeforeSale = beforeSale.buyerOffers.find(
+      (offer) => offer.listingId === assetBeforeSale.currentListingId,
+    )!;
+    const productCard = page.getByRole("article", {
+      name: assetBeforeSale.instance.family.name,
+      exact: true,
+    });
+    const offerPanel = productCard.getByRole("group", {
+      name: `${offerBeforeSale.buyer} alıcı teklifi`,
+    });
+    await expect(offerPanel).toContainText(
+      `Alacağın tutar${money(offerBeforeSale.amountMinor)}`,
+    );
+    await expect(offerPanel).toContainText(
+      `Toplam harcaman${money(assetBeforeSale.bookCostMinor)}`,
+    );
+    await expect(offerPanel).toContainText(
+      `Kârın${signedMoney(offerBeforeSale.amountMinor - assetBeforeSale.bookCostMinor)}`,
+    );
+    await checkLayout();
+    await page.screenshot({
+      path: testInfo.outputPath("sale-summary.png"),
+      fullPage: true,
+      animations: "disabled",
+    });
     await page
       .getByRole("button", { name: "Teklifi kabul et", exact: true })
       .click();
@@ -190,6 +280,55 @@ for (const choice of [
     const loaded = await readSave();
     expect(loaded.transactionJournal).toEqual(completed.transactionJournal);
     expect(loaded.cashMinor).toBe(completed.cashMinor);
+    if (choice.width === 320) {
+      await page
+        .getByRole("button", {
+          name: "Kuzey Defteri, fiyat ₺150, kondisyon yüzde 83, Piyasa fiyatı. İlan detaylarını aç",
+        })
+        .click();
+      await page.getByRole("button", { name: /^Hemen al/ }).click();
+      await expect(
+        page.getByRole("tab", { name: "Envanter", exact: true }),
+      ).toHaveAttribute("aria-selected", "true");
+      await expect(
+        page.getByRole("article", { name: "Kuzey Defteri", exact: true }),
+      ).toBeFocused();
+      await expect
+        .poll(async () => (await readSave()).cashMinor)
+        .toBe(loaded.cashMinor - 15_000);
+      await stage("COMPLETE");
+      const purchased = await readSave();
+      await page.getByRole("button", { name: /^Hemen sat/ }).click();
+      await expect(
+        page.getByRole("group", { name: "Hızlı satış onayı" }),
+      ).toContainText("Toplam harcaman ₺150");
+      await checkLayout();
+      await page.getByRole("button", { name: "Vazgeç", exact: true }).click();
+      expect((await readSave()).transactionJournal).toEqual(
+        purchased.transactionJournal,
+      );
+      await page
+        .getByRole("button", { name: "Ürünü hazırla", exact: true })
+        .click();
+      await expect(
+        page.getByRole("tab", { name: "Hazırlık", exact: true }),
+      ).toHaveAttribute("aria-selected", "true");
+      // Preparation stays optional after the first session; navigation must not charge a fee.
+      await page.getByRole("button", { name: /^İlan oluştur/ }).click();
+      await expect(
+        page.getByRole("tab", { name: "İlanlarım", exact: true }),
+      ).toHaveAttribute("aria-selected", "true");
+      await expect
+        .poll(
+          async () =>
+            (await readSave()).playerListings.filter(
+              (listing) => listing.state === "ACTIVE",
+            ).length,
+        )
+        .toBe(1);
+      expect((await readSave()).cashMinor).toBe(purchased.cashMinor);
+      await stage("COMPLETE");
+    }
     expect(errors).toEqual([]);
   });
 }

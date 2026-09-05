@@ -134,7 +134,7 @@ export function recordFtueWithdrawal(
 export const ftueStageLabel: Record<FtueStage, string> = {
   STARTING_SALE: "BAŞLANGIÇ SATIŞI",
   COMPARE: "KARŞILAŞTIR",
-  EVIDENCE: "KANIT",
+  EVIDENCE: "ÜRÜNÜ KONTROL ET",
   NEGOTIATION: "PAZARLIK",
   PREPARATION: "HAZIRLIK",
   LISTING: "İLAN",
@@ -145,34 +145,34 @@ export const ftueStageLabel: Record<FtueStage, string> = {
 export const ftueCopy: Record<FtueStage, { title: string; body: string }> = {
   STARTING_SALE: {
     title: "İlk sermayeni çıkar",
-    body: "Eski defterin için gerçek bir alıcı teklifi geldi. Satış tamamlanınca kâr nakde dönüşür.",
+    body: "Eski defterini sat. Kazandığın parayla ilk ürününü alabilirsin.",
   },
   COMPARE: {
     title: "Fiyat tek başına yetmez",
-    body: "Üç ilandan ikisi aynı aile. Birini açıp benzerlerini karşılaştır; kondisyon ve kanıt farkını oku.",
+    body: "İki benzer defter var. Fiyatlarına ve durumlarına bak, hangisini alacağına sen karar ver.",
   },
   EVIDENCE: {
-    title: "İddiayı kontrol et",
-    body: "Bir kanıt şüpheli olabilir. Fotoğraf, satıcı sorusu veya hızlı test ile belirsizliği azalt.",
+    title: "Ürün anlatıldığı gibi mi?",
+    body: "Fotoğrafa bak, satıcıya sor ya da hızlı test yap. Bir kontrol seç.",
   },
   NEGOTIATION: {
     title: "İki teklif hakkın var",
-    body: "Seçtiğin üründe pazarlık yap. Satıcının cevabı ek hak tüketmez; oyuncu teklifleri iki hakla sınırlıdır.",
+    body: "Daha iyi bir fiyat iste. En fazla iki teklif verebilirsin.",
   },
   PREPARATION: {
     title: "Ürüne değer ekle",
-    body: "Envanterde temizle, test et veya eksikleri tamamla. Maliyet defter değerine eklenir.",
+    body: "Temizle, test et veya eksiklerini tamamla. Ücreti ve etkisini görüp birini seç.",
   },
   LISTING: {
-    title: "Kâr için listele",
-    body: "Hazırladığın ürünü dengeli fiyatla ilana koy. İlan fiyatı maliyet değildir; kâr satışta hesaplanır.",
+    title: "Satışa çıkar",
+    body: "Ürünün hazır. İlanını oluştur, alıcı tekliflerini değerlendir.",
   },
   BUYER_SALE: {
-    title: "Alıcı teklifini değerlendir",
-    body: "İlanına teklif geldi. Gelir, defter maliyetini aşıyorsa satış gerçek kâr üretir.",
+    title: "Teklif geldi",
+    body: "Ne harcadın, ne kazanacaksın? Teklifi incele; satıp satmamaya sen karar ver.",
   },
   COMPLETE: {
     title: "İlk döngü tamamlandı",
-    body: "Compare, kanıt, pazarlık, hazırlık ve satış artık serbest rotanda birlikte çalışıyor.",
+    body: "Artık yeni fırsatlar arayabilir, ürünlerini hazırlayıp satabilirsin.",
   },
 };

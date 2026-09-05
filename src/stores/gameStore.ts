@@ -777,7 +777,7 @@ export const useGameStore = create<Store>((set, get) => ({
       game: stampAndPersist(recordFtuePreparation(progressed.state, assetId)),
       notice: worldNotice(
         progressed,
-        "Hazırlık tamamlandı; maliyet defter değerine işlendi.",
+        "Hazırlık tamamlandı. Ücreti ürünün toplam harcamasına eklendi.",
       ),
     });
   },

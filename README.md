@@ -58,4 +58,10 @@ The withdrawal scenario reloads the saved game, relists the same asset and
 completes its sale, checking unchanged wealth/cost, preserved listing history,
 removed old offers and exactly one sale journal entry. Store tests also reject
 offers and listings at their expiry boundary and replay accepted offers after reload.
+The first-session tests now use the direct purchase → preparation → listing →
+offer handoffs without manual portfolio-tab navigation, at 320/390/430 px
+(including large text). They check the on-screen proceeds, total spending and
+profit against saved accounting, the return-to-product shortcut after reload,
+and access to optional preparations. The 320 px flow also verifies direct
+purchase and optional preparation after onboarding, plus cancelling a quick sale.
 `test:offline` runs only the offline scenario. These do not replace native-device QA.

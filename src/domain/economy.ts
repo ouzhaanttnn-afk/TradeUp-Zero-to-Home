@@ -64,6 +64,12 @@ export const netWorthMinor = (
 export const activeBookCostMinor = (state: Pick<GameState, "ownedAssets">) =>
   activeOwnedAssets(state).reduce((sum, asset) => sum + asset.bookCostMinor, 0);
 
+export const quoteAssetSale = (asset: OwnedAsset, proceedsMinor: number) => ({
+  proceedsMinor,
+  bookCostMinor: asset.bookCostMinor,
+  profitMinor: proceedsMinor - asset.bookCostMinor,
+});
+
 export const quoteAssetExit = (asset: OwnedAsset) => {
   const quickSaleMinor =
     Math.round((asset.instance.fairValueMinor * 0.82) / 1_000) * 1_000;
@@ -72,7 +78,7 @@ export const quoteAssetExit = (asset: OwnedAsset) => {
   return {
     quickSaleMinor,
     balancedAskingMinor,
-    quickSaleProfitMinor: quickSaleMinor - asset.bookCostMinor,
+    quickSaleProfitMinor: quoteAssetSale(asset, quickSaleMinor).profitMinor,
     estimatedPremiumGivenUpMinor: Math.max(
       0,
       balancedAskingMinor - quickSaleMinor,
@@ -381,7 +387,7 @@ export function settleAssetSale(
     return { ok: false, state, reason: "PLAYER_LISTING_NOT_FOUND" };
   }
 
-  const profitMinor = proceedsMinor - asset.bookCostMinor;
+  const { profitMinor } = quoteAssetSale(asset, proceedsMinor);
   return {
     ok: true,
     idempotent: false,

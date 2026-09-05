@@ -10,6 +10,7 @@ import {
   inventoryAssets,
   preparationAssets,
   quoteAssetExit,
+  quoteAssetSale,
 } from "./domain/economy";
 import {
   comparableListings,
@@ -179,6 +180,7 @@ export default function App() {
   const [purchasesOpen, setPurchasesOpen] = useState(false);
   const [resetArmed, setResetArmed] = useState(false);
   const [quickSaleAssetId, setQuickSaleAssetId] = useState<string | null>(null);
+  const [focusedAssetId, setFocusedAssetId] = useState<string | null>(null);
   const sheetCloseRef = useRef<HTMLButtonElement>(null);
   const {
     game,
@@ -261,6 +263,16 @@ export default function App() {
     };
   }, [selectedId]);
 
+  useEffect(() => {
+    if (tab !== "portfolio" || !focusedAssetId) return;
+    const frame = window.requestAnimationFrame(() => {
+      const card = document.getElementById(`owned-${focusedAssetId}`);
+      card?.focus({ preventScroll: true });
+      card?.scrollIntoView({ block: "nearest", behavior: "instant" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [tab, portfolioSegment, focusedAssetId]);
+
   const total = wealth(game);
   const marketListings = activeMarketListings(game);
   const impressionKey = marketListings.map((listing) => listing.id).join("|");
@@ -341,6 +353,52 @@ export default function App() {
     setTab(nextTab);
     if (nextTab === "journey") openJourney();
   };
+  const showOwnedAsset = (assetId: string, segment: PortfolioSegment) => {
+    setSelectedId(null);
+    setComparing(false);
+    setQuickSaleAssetId(null);
+    setFocusedAssetId(assetId);
+    setPortfolioSegment(segment);
+    setTab("portfolio");
+  };
+  const purchaseAndContinue = (listingId: string, command: () => unknown) => {
+    const before = useGameStore.getState().game;
+    command();
+    const after = useGameStore.getState().game;
+    const acquired = after.ownedAssets.find(
+      (asset) =>
+        asset.sourceListingId === listingId &&
+        !before.ownedAssets.some((previous) => previous.id === asset.id),
+    );
+    if (acquired)
+      showOwnedAsset(
+        acquired.id,
+        isFtueActive(after) ? "preparation" : "inventory",
+      );
+  };
+  const listAndContinue = (item: (typeof inventory)[number], price: number) => {
+    list(item, price);
+    const updated = useGameStore
+      .getState()
+      .game.ownedAssets.find((asset) => asset.id === item.id);
+    if (updated?.state === "LISTED") showOwnedAsset(item.id, "listings");
+  };
+  const firstAsset = game.ownedAssets.find(
+    (asset) => asset.id === game.ftue.firstAssetId,
+  );
+  const coachSegment: PortfolioSegment | undefined =
+    game.ftue.stage === "PREPARATION" ||
+    (game.ftue.stage === "LISTING" && firstAsset?.state === "PREPARING")
+      ? "preparation"
+      : game.ftue.stage === "LISTING"
+        ? "inventory"
+        : game.ftue.stage === "BUYER_SALE"
+          ? "listings"
+          : undefined;
+  const atCoachDestination =
+    tab === "portfolio" &&
+    (portfolioSegment === coachSegment ||
+      (game.ftue.stage === "LISTING" && portfolioSegment === "preparation"));
 
   const renderInventoryCard = (
     item: (typeof inventory)[number],
@@ -360,6 +418,9 @@ export default function App() {
     return (
       <article
         className="owned"
+        id={`owned-${item.id}`}
+        tabIndex={-1}
+        aria-label={item.instance.family.name}
         key={`${showPreparation ? "prep" : "stock"}:${item.id}`}
       >
         <ProductVisual instance={item.instance} className="owned-icon" />
@@ -372,11 +433,11 @@ export default function App() {
           </div>
           <div className="owned-metrics">
             <div>
-              <span>Defter maliyeti</span>
+              <span>Toplam harcaman</span>
               <b>{money(item.bookCostMinor)}</b>
             </div>
             <div>
-              <span>Tahmini çıkış</span>
+              <span>Tahmini satış</span>
               <b>
                 {money(quote.quickSaleMinor)}–{money(quote.balancedAskingMinor)}
               </b>
@@ -417,24 +478,43 @@ export default function App() {
           item.state !== "PREPARING" &&
           !availablePreparations.length ? (
             <p className="preparation-status">
-              Bu ürün için tüm hazırlıklar tamamlandı. Envanterden satışa
-              geçebilirsin.
+              Hazırlık tamam. Ürününü satışa çıkarabilirsin.
             </p>
           ) : null}
-          {showPreparation && item.state !== "PREPARING"
-            ? availablePreparations.map((action) => (
-                <button
-                  key={action.kind}
-                  onClick={() => prepare(item.id, action.kind)}
-                >
-                  {action.label} <b>{money(action.costMinor)}</b>
-                  <small>Süre: {action.durationMin} dk</small>
-                  {preparationPresentation(item, action).map((effect) => (
-                    <small key={effect}>{effect}</small>
-                  ))}
-                </button>
-              ))
-            : null}
+          {showPreparation &&
+          item.state !== "PREPARING" &&
+          availablePreparations.length > 0 ? (
+            <details
+              className="preparation-options"
+              open={
+                !item.instance.preparationHistory.some(
+                  (record) => record.state === "COMPLETE",
+                )
+              }
+            >
+              <summary>
+                {item.instance.preparationHistory.some(
+                  (record) => record.state === "COMPLETE",
+                )
+                  ? "Diğer hazırlıklar"
+                  : "Nasıl hazırlamak istersin?"}
+              </summary>
+              <div className="sell-actions">
+                {availablePreparations.map((action) => (
+                  <button
+                    key={action.kind}
+                    onClick={() => prepare(item.id, action.kind)}
+                  >
+                    {action.label} <b>{money(action.costMinor)}</b>
+                    <small>Süre: {action.durationMin} dk</small>
+                    {preparationPresentation(item, action).map((effect) => (
+                      <small key={effect}>{effect}</small>
+                    ))}
+                  </button>
+                ))}
+              </div>
+            </details>
+          ) : null}
           {!showPreparation && !ftueActive ? (
             quickSaleAssetId === item.id ? (
               <div
@@ -453,7 +533,7 @@ export default function App() {
                   </span>
                 </strong>
                 <small>
-                  Gelir {money(quote.quickSaleMinor)} · Defter maliyeti{" "}
+                  Satış tutarı {money(quote.quickSaleMinor)} · Toplam harcaman{" "}
                   {money(item.bookCostMinor)}
                 </small>
                 <small>
@@ -478,7 +558,7 @@ export default function App() {
               </div>
             ) : (
               <button onClick={() => setQuickSaleAssetId(item.id)}>
-                Hızlı çık · net{" "}
+                Hemen sat · net{" "}
                 <b
                   className={quote.quickSaleProfitMinor < 0 ? "loss" : "profit"}
                 >
@@ -487,14 +567,19 @@ export default function App() {
               </button>
             )
           ) : null}
-          {!showPreparation &&
+          {(item.state === "IN_INVENTORY" || item.state === "READY") &&
           quickSaleAssetId !== item.id &&
           (!ftueActive || game.ftue.stage === "LISTING") ? (
             <button
               className="primary"
-              onClick={() => list(item, quote.balancedAskingMinor)}
+              onClick={() => listAndContinue(item, quote.balancedAskingMinor)}
             >
               İlan oluştur <b>{money(quote.balancedAskingMinor)}</b>
+            </button>
+          ) : null}
+          {!showPreparation && availablePreparations.length > 0 ? (
+            <button onClick={() => showOwnedAsset(item.id, "preparation")}>
+              Ürünü hazırla
             </button>
           ) : null}
         </div>
@@ -552,6 +637,14 @@ export default function App() {
           <small>İLK İŞLEM · {ftueStageLabel[game.ftue.stage]}</small>
           <h2>{coach.title}</h2>
           <p>{coach.body}</p>
+          {firstAsset && coachSegment && !atCoachDestination ? (
+            <button
+              className="coach-next"
+              onClick={() => showOwnedAsset(firstAsset.id, coachSegment)}
+            >
+              Ürününe dön
+            </button>
+          ) : null}
         </aside>
       ) : null}
 
@@ -590,7 +683,7 @@ export default function App() {
                     <small>ECE'NİN TEKLİFİ</small>
                     <h3>Eski defter</h3>
                     <p>
-                      Nakit 0 · Defter maliyeti 0 · Satış kârı{" "}
+                      Harcaman yok · Satıştan kazanacağın{" "}
                       {money(startingOffer.amountMinor)}
                     </p>
                     <button
@@ -821,10 +914,10 @@ export default function App() {
           <>
             <div className="section-title">
               <div>
-                <small>TEK SAHİPLİK AKIŞI</small>
+                <small>ÜRÜNLERİN</small>
                 <h2>Portföy</h2>
               </div>
-              <span>{activeOwnedAssets(game).length} varlık</span>
+              <span>{activeOwnedAssets(game).length} ürün</span>
             </div>
             <div
               className="segments"
@@ -919,7 +1012,13 @@ export default function App() {
                 ? playerListings.map(({ listing: playerListing, asset }) => {
                     const ownershipState = ownershipPresentation(asset.state);
                     return (
-                      <article className="owned" key={playerListing.id}>
+                      <article
+                        className="owned"
+                        key={playerListing.id}
+                        id={`owned-${asset.id}`}
+                        tabIndex={-1}
+                        aria-label={asset.instance.family.name}
+                      >
                         <ProductVisual
                           instance={asset.instance}
                           className="owned-icon"
@@ -935,7 +1034,7 @@ export default function App() {
                           </div>
                           <div className="owned-metrics listing-metrics">
                             <div>
-                              <span>Defter maliyeti</span>
+                              <span>Toplam harcaman</span>
                               <b>{money(asset.bookCostMinor)}</b>
                             </div>
                             <div>
@@ -948,9 +1047,78 @@ export default function App() {
                             </div>
                           </div>
                         </div>
+                        {game.buyerOffers
+                          .filter(
+                            (offer) =>
+                              offer.listingId === playerListing.id &&
+                              offer.expiresAtGameMin > game.gameTimeMin,
+                          )
+                          .map((buyerOffer) => {
+                            const sale = quoteAssetSale(
+                              asset,
+                              buyerOffer.amountMinor,
+                            );
+                            return (
+                              <div
+                                className="buyer-offer"
+                                key={buyerOffer.id}
+                                role="group"
+                                aria-label={`${buyerOffer.buyer} alıcı teklifi`}
+                              >
+                                <h4>{buyerOffer.buyer} teklif verdi</h4>
+                                <dl className="sale-breakdown">
+                                  <div>
+                                    <dt>Alacağın tutar</dt>
+                                    <dd>{money(sale.proceedsMinor)}</dd>
+                                  </div>
+                                  <div>
+                                    <dt>Toplam harcaman</dt>
+                                    <dd>{money(sale.bookCostMinor)}</dd>
+                                  </div>
+                                  <div
+                                    className={
+                                      sale.profitMinor < 0 ? "loss" : "profit"
+                                    }
+                                  >
+                                    <dt>
+                                      {sale.profitMinor < 0
+                                        ? "Zararın"
+                                        : sale.profitMinor > 0
+                                          ? "Kârın"
+                                          : "Kâr / zarar"}
+                                    </dt>
+                                    <dd>{signedMoney(sale.profitMinor)}</dd>
+                                  </div>
+                                </dl>
+                                <p>
+                                  {buyerOffer.expiresAtGameMin -
+                                    game.gameTimeMin}{" "}
+                                  oyun dakikası içinde karar ver.
+                                </p>
+                                <div className="sell-actions">
+                                  <button
+                                    className="primary"
+                                    onClick={() => acceptBuyer(buyerOffer.id)}
+                                  >
+                                    Teklifi kabul et
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
                         <div className="sell-actions">
                           <button
-                            onClick={() => withdrawListing(playerListing.id)}
+                            onClick={() => {
+                              withdrawListing(playerListing.id);
+                              if (
+                                useGameStore
+                                  .getState()
+                                  .game.ownedAssets.find(
+                                    (item) => item.id === asset.id,
+                                  )?.state === "IN_INVENTORY"
+                              )
+                                showOwnedAsset(asset.id, "inventory");
+                            }}
                           >
                             İlanı geri çek
                           </button>
@@ -968,38 +1136,18 @@ export default function App() {
                   <Icon name="portfolio" />
                 </span>
                 <h3>Aktif ilanın yok</h3>
-                <p>
-                  Envanter segmentinden bir varlık seçip dengeli fiyatla
-                  listele.
-                </p>
-                <button onClick={() => setPortfolioSegment("inventory")}>
-                  Envantere dön
+                <p>Bir ürününü seçip satışa çıkar.</p>
+                <button
+                  onClick={() =>
+                    inventory.length
+                      ? setPortfolioSegment("inventory")
+                      : navigate("market")
+                  }
+                >
+                  {inventory.length ? "Ürünlerini gör" : "Pazara dön"}
                 </button>
               </div>
             ) : null}
-            {portfolioSegment === "listings"
-              ? game.buyerOffers.map((buyerOffer) => (
-                  <article className="owned buyer-card" key={buyerOffer.id}>
-                    <div className="owned-icon handshake">
-                      <Icon name="offer" />
-                    </div>
-                    <div>
-                      <h3>{buyerOffer.buyer} teklif verdi</h3>
-                      <p>
-                        {money(buyerOffer.amountMinor)} · Teklif süresi sınırlı
-                      </p>
-                    </div>
-                    <div className="sell-actions">
-                      <button
-                        className="primary"
-                        onClick={() => acceptBuyer(buyerOffer.id)}
-                      >
-                        Teklifi kabul et
-                      </button>
-                    </div>
-                  </article>
-                ))
-              : null}
           </>
         ) : null}
 
@@ -1612,7 +1760,11 @@ export default function App() {
                 </button>
               ) : null}
               <button
-                className="primary"
+                className={
+                  ftueActive && game.ftue.stage === "COMPARE"
+                    ? "primary"
+                    : "secondary"
+                }
                 onClick={() => {
                   const opening = !comparing;
                   setComparing(opening);
@@ -1690,8 +1842,9 @@ export default function App() {
                 <button
                   className="counter-offer"
                   onClick={() => {
-                    if (buy(selected, negotiating.counterMinor))
-                      setSelectedId(null);
+                    purchaseAndContinue(selected.id, () =>
+                      buy(selected, negotiating.counterMinor),
+                    );
                   }}
                 >
                   Karşı teklifi kabul et · {money(negotiating.counterMinor)}
@@ -1707,15 +1860,20 @@ export default function App() {
                       onClick={() => {
                         setSelectedId(null);
                         navigate("portfolio");
-                        setPortfolioSegment("listings");
+                        setPortfolioSegment("inventory");
                       }}
                     >
-                      Portföyden çıkış planla
+                      Satabileceğin ürünleri gör
                     </button>
                   </div>
                 ) : (
                   <div className="sheet-actions">
-                    <button onClick={() => offer(selected)}>
+                    <button
+                      className={ftueActive ? "primary" : ""}
+                      onClick={() =>
+                        purchaseAndContinue(selected.id, () => offer(selected))
+                      }
+                    >
                       Pazarlık et{" "}
                       <small>
                         {offers ? `${offers} hakkın var` : "Görüşme kapandı"}
@@ -1725,7 +1883,7 @@ export default function App() {
                       <button
                         className="primary"
                         onClick={() => {
-                          if (buy(selected)) setSelectedId(null);
+                          purchaseAndContinue(selected.id, () => buy(selected));
                         }}
                       >
                         Hemen al <small>{money(selected.priceMinor)}</small>
@@ -1735,7 +1893,9 @@ export default function App() {
                 )
               ) : (
                 <p className="decision-lock">
-                  Karar sırası: karşılaştır → kanıtı kontrol et → pazarlık.
+                  {game.ftue.stage === "COMPARE"
+                    ? "Önce benzer ilanların fiyatlarına bak."
+                    : "Pazarlıktan önce ürünü kontrol et."}
                 </p>
               )}
             </div>
