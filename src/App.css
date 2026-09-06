@@ -7,8 +7,8 @@
   --surface-0: #081410;
   --surface-1: #0e1a14;
   --surface-2: #12241b;
-  --line-soft: rgba(137, 193, 164, 0.12);
-  --line-strong: rgba(137, 230, 180, 0.3);
+  --line-soft: rgba(137, 193, 164, 0.1);
+  --line-strong: rgba(137, 230, 180, 0.24);
   --accent: #69e2a2;
   --muted: #91a99e;
   --shadow-card: 0 8px 20px rgba(0, 0, 0, 0.13);
@@ -248,8 +248,8 @@ button:disabled {
   margin: auto;
   background: linear-gradient(
     180deg,
-    rgba(17, 36, 28, 0.78),
-    rgba(5, 11, 8, 0.96)
+    rgba(16, 34, 27, 0.82),
+    rgba(7, 14, 11, 0.96)
   );
   padding-bottom: calc(88px + env(safe-area-inset-bottom));
   position: relative;
@@ -333,16 +333,16 @@ button:disabled {
   background:
     radial-gradient(
       circle at 82% 9%,
-      rgba(255, 210, 118, 0.28),
+    rgba(255, 210, 118, 0.2),
       transparent 28%
     ),
     radial-gradient(
       circle at 5% 48%,
-      rgba(186, 125, 30, 0.2),
+    rgba(186, 125, 30, 0.14),
       transparent 36%
     ),
-    linear-gradient(145deg, rgba(214, 170, 72, 0.14), rgba(95, 68, 26, 0.07));
-  opacity: calc(var(--home-gold-progress) * 0.32);
+    linear-gradient(145deg, rgba(214, 170, 72, 0.1), rgba(95, 68, 26, 0.05));
+  opacity: calc(var(--home-gold-progress) * 0.24);
   transition:
     opacity 1.4s ease,
     filter 1.4s ease;
@@ -365,8 +365,8 @@ button:disabled {
     filter: brightness(1);
   }
   38% {
-    opacity: calc(0.12 + var(--home-gold-progress) * 0.28);
-    filter: brightness(1.25) saturate(1.12);
+    opacity: calc(0.08 + var(--home-gold-progress) * 0.22);
+    filter: brightness(1.12) saturate(1.04);
   }
   100% {
     opacity: calc(var(--home-gold-progress) * 0.58);
@@ -380,8 +380,8 @@ button:disabled {
   }
   38% {
     box-shadow:
-      0 0 46px rgba(230, 181, 76, 0.2),
-      inset 0 0 22px rgba(230, 181, 76, 0.05);
+      0 0 40px rgba(230, 181, 76, 0.14),
+      inset 0 0 18px rgba(230, 181, 76, 0.04);
   }
 }
 .app-shell.large-text {
@@ -582,8 +582,8 @@ main {
   scroll-snap-type: x proximity;
   background: linear-gradient(
     180deg,
-    rgba(7, 22, 16, 0.93) 72%,
-    rgba(6, 19, 14, 0.84)
+    rgba(8, 23, 16, 0.9) 72%,
+    rgba(7, 20, 14, 0.78)
   );
   backdrop-filter: blur(10px);
 }
@@ -771,12 +771,12 @@ main {
   background: linear-gradient(115deg, #15261e, #0d1610);
   cursor: pointer;
   min-height: 74px;
-  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.09);
 }
 @media (hover: hover) {
   .listing:hover {
     border-color: var(--line-strong);
-    background: linear-gradient(115deg, #193028, #102118);
+    background: linear-gradient(115deg, #192a23, #0f1d17);
   }
 }
 .product-art {
