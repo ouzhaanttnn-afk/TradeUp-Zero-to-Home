@@ -700,7 +700,7 @@ main {
   min-height: 1.15em;
   margin: 1px 0 1px;
   overflow: hidden;
-  font-size: calc(9px + var(--text-size-boost));
+  font-size: calc(8px + var(--text-size-boost));
   line-height: 1.22;
   white-space: normal;
   -webkit-box-orient: vertical;
@@ -717,7 +717,7 @@ main {
 .market-price-row > strong {
   min-width: 0;
   overflow: hidden;
-  font-size: calc(12px + var(--text-size-boost));
+  font-size: calc(11px + var(--text-size-boost));
   text-overflow: ellipsis;
   color: #f4f8f6;
 }
@@ -792,7 +792,7 @@ main {
   min-width: 0;
 }
 .listing h3 {
-  font-size: calc(12px + var(--text-size-boost));
+  font-size: calc(11px + var(--text-size-boost));
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
