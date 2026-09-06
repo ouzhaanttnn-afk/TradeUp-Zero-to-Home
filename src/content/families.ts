@@ -742,6 +742,36 @@ const scaledSeeds: Seed[] = [
     ["Köşe aşınması", "Fermuar testi"],
     1,
   ],
+  [
+    "cordless_vacuum",
+    "Koleksiyon Kablosuz Süpürge",
+    "prd_cordless_vacuum",
+    910_000,
+    "Ev/Yaşam",
+    ["Pil ömrü", "Süpürme modu", "Dikiş"],
+    ["Fırça durumu", "Filtre testi"],
+    2,
+  ],
+  [
+    "handheld_vacuum",
+    "Koleksiyon El Süpürgesi",
+    "prd_handheld_vacuum",
+    370_000,
+    "Ev/Yaşam",
+    ["Güç", "Şarj süresi", "Nozül"],
+    ["Filtre durumu", "Motor testi"],
+    1,
+  ],
+  [
+    "stick_vacuum",
+    "Koleksiyon Dikey Süpürge",
+    "prd_stick_vacuum",
+    1_250_000,
+    "Ev/Yaşam",
+    ["Çekiş", "Pil kapasitesi", "Navigasyon"],
+    ["Çıkıntı kaydı", "Dokunmatik test"],
+    3,
+  ],
 ].map(
   (
     [

@@ -10,8 +10,10 @@ import {
 
 describe("asset manifest and visual treatments", () => {
   it("registers a dedicated asset for every internal-alpha family", () => {
-    expect(new Set(families.map((family) => family.assetKey)).size).toBe(64);
-    expect(registeredAssetKeys).toHaveLength(64);
+    expect(new Set(families.map((family) => family.assetKey)).size).toBe(
+      families.length,
+    );
+    expect(registeredAssetKeys).toHaveLength(families.length);
     for (const family of families) {
       expect(registeredAssetKeys).toContain(family.assetKey);
       expect(assetFor(family.assetKey, family.category)).toBeTruthy();

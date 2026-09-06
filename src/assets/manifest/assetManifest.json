@@ -213,6 +213,24 @@
       "dedicated": true
     },
     {
+      "assetKey": "prd_cordless_vacuum",
+      "familyId": "cordless_vacuum",
+      "source": "../products/prd_cordless_vacuum.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_handheld_vacuum",
+      "familyId": "handheld_vacuum",
+      "source": "../products/prd_handheld_vacuum.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_stick_vacuum",
+      "familyId": "stick_vacuum",
+      "source": "../products/prd_stick_vacuum.png",
+      "dedicated": true
+    },
+    {
       "assetKey": "prd_stand_mixer",
       "familyId": "stand_mixer",
       "source": "../products/prd_stand_mixer.png",
