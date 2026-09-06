@@ -4,14 +4,14 @@
   background: #07100d;
   font-synthesis: none;
   color-scheme: dark;
-  --surface-0: #07100d;
-  --surface-1: #0d1b15;
-  --surface-2: #13241d;
-  --line-soft: rgba(137, 193, 164, 0.16);
+  --surface-0: #081410;
+  --surface-1: #0e1a14;
+  --surface-2: #12241b;
+  --line-soft: rgba(137, 193, 164, 0.12);
   --line-strong: rgba(137, 230, 180, 0.3);
   --accent: #69e2a2;
   --muted: #91a99e;
-  --shadow-card: 0 10px 28px rgba(0, 0, 0, 0.18);
+  --shadow-card: 0 8px 20px rgba(0, 0, 0, 0.13);
   font-variant-numeric: tabular-nums;
 }
 
@@ -254,7 +254,7 @@ button:disabled {
   padding-bottom: calc(88px + env(safe-area-inset-bottom));
   position: relative;
   overflow-x: clip;
-  box-shadow: 0 0 70px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 0 44px rgba(0, 0, 0, 0.32);
 }
 .startup-shell {
   --text-size-boost: 0px;
@@ -333,16 +333,16 @@ button:disabled {
   background:
     radial-gradient(
       circle at 82% 9%,
-      rgba(255, 215, 116, 0.52),
+      rgba(255, 210, 118, 0.28),
       transparent 28%
     ),
     radial-gradient(
       circle at 5% 48%,
-      rgba(186, 125, 30, 0.34),
+      rgba(186, 125, 30, 0.2),
       transparent 36%
     ),
-    linear-gradient(145deg, rgba(226, 174, 68, 0.25), rgba(91, 54, 11, 0.1));
-  opacity: calc(var(--home-gold-progress) * 0.58);
+    linear-gradient(145deg, rgba(214, 170, 72, 0.14), rgba(95, 68, 26, 0.07));
+  opacity: calc(var(--home-gold-progress) * 0.32);
   transition:
     opacity 1.4s ease,
     filter 1.4s ease;
@@ -365,8 +365,8 @@ button:disabled {
     filter: brightness(1);
   }
   38% {
-    opacity: calc(0.2 + var(--home-gold-progress) * 0.38);
-    filter: brightness(1.55) saturate(1.35);
+    opacity: calc(0.12 + var(--home-gold-progress) * 0.28);
+    filter: brightness(1.25) saturate(1.12);
   }
   100% {
     opacity: calc(var(--home-gold-progress) * 0.58);
@@ -380,8 +380,8 @@ button:disabled {
   }
   38% {
     box-shadow:
-      0 0 58px rgba(230, 181, 76, 0.34),
-      inset 0 0 34px rgba(230, 181, 76, 0.08);
+      0 0 46px rgba(230, 181, 76, 0.2),
+      inset 0 0 22px rgba(230, 181, 76, 0.05);
   }
 }
 .app-shell.large-text {
@@ -582,10 +582,10 @@ main {
   scroll-snap-type: x proximity;
   background: linear-gradient(
     180deg,
-    rgba(5, 18, 12, 0.98) 72%,
-    rgba(5, 18, 12, 0.86)
+    rgba(7, 22, 16, 0.93) 72%,
+    rgba(6, 19, 14, 0.84)
   );
-  backdrop-filter: blur(14px);
+  backdrop-filter: blur(10px);
 }
 .market-filters button {
   flex: 0 0 auto;
@@ -596,7 +596,7 @@ main {
   gap: 6px;
 }
 .feed.market-grid {
-  grid-auto-rows: minmax(118px, auto);
+  grid-auto-rows: minmax(96px, auto);
 }
 .market-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -767,16 +767,16 @@ main {
   width: 100%;
   border: 1px solid #20382e;
   border-radius: 16px;
-  padding: 8px;
-  background: linear-gradient(115deg, #13241d, #0c1712);
+  padding: 6px;
+  background: linear-gradient(115deg, #15261e, #0d1610);
   cursor: pointer;
   min-height: 74px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.1);
 }
 @media (hover: hover) {
   .listing:hover {
     border-color: var(--line-strong);
-    background: linear-gradient(115deg, #173026, #0e1c16);
+    background: linear-gradient(115deg, #193028, #102118);
   }
 }
 .product-art {
