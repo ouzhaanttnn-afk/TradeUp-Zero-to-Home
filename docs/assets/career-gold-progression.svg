@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+  <title id="title">TradeUp servet ve altın arka plan ilerlemesi</title>
+  <desc id="desc">Beş bin liradan ev satın alımına kadar arka planın yüzde 5'ten yüzde 100'e altınlaşmasını gösterir.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#071b14"/><stop offset="1" stop-color="#123225"/></linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#a86e18"/><stop offset="0.5" stop-color="#f3d67b"/><stop offset="1" stop-color="#fff0af"/></linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="1200" height="520" rx="36" fill="url(#bg)"/>
+  <text x="60" y="70" fill="#f5fff9" font-family="system-ui,sans-serif" font-size="30" font-weight="800">EV YOLCULUĞU · ARKA PLAN IŞIĞI</text>
+  <text x="60" y="106" fill="#8eb6a2" font-family="system-ui,sans-serif" font-size="18">Servet yükseldikçe zümrüt atmosfer altın ışıkla kademeli olarak birleşir.</text>
+  <rect x="60" y="165" width="1080" height="32" rx="16" fill="#173d2d"/>
+  <rect x="60" y="165" width="994" height="32" rx="16" fill="url(#gold)" opacity=".92" filter="url(#glow)"/>
+  <g font-family="system-ui,sans-serif" text-anchor="middle">
+    <g transform="translate(114 181)"><circle r="13" fill="#f3d67b"/><text y="62" fill="#fff" font-size="18" font-weight="700">₺5 bin</text><text y="88" fill="#dcb96a" font-size="17">%5</text></g>
+    <g transform="translate(330 181)"><circle r="13" fill="#f3d67b"/><text y="62" fill="#fff" font-size="18" font-weight="700">₺875 bin</text><text y="88" fill="#dcb96a" font-size="17">%22</text></g>
+    <g transform="translate(546 181)"><circle r="13" fill="#f3d67b"/><text y="62" fill="#fff" font-size="18" font-weight="700">₺1,75 M</text><text y="88" fill="#dcb96a" font-size="17">%42</text></g>
+    <g transform="translate(762 181)"><circle r="13" fill="#f3d67b"/><text y="62" fill="#fff" font-size="18" font-weight="700">₺2,625 M</text><text y="88" fill="#dcb96a" font-size="17">%65</text></g>
+    <g transform="translate(913 181)"><circle r="13" fill="#f3d67b"/><text y="62" fill="#fff" font-size="18" font-weight="700">₺3 M</text><text y="88" fill="#dcb96a" font-size="17">%77,1</text></g>
+    <g transform="translate(1032 181)"><circle r="13" fill="#f3d67b"/><text y="62" fill="#fff" font-size="18" font-weight="700">₺3,15 M</text><text y="88" fill="#dcb96a" font-size="17">%82</text></g>
+    <g transform="translate(1140 181)"><circle r="16" fill="#fff0af" filter="url(#glow)"/><text x="-28" y="126" fill="#fff" font-size="18" font-weight="800">₺3,5 M</text><text x="-28" y="152" fill="#fff0af" font-size="17">%92</text></g>
+  </g>
+  <g transform="translate(60 360)" font-family="system-ui,sans-serif">
+    <rect width="1080" height="108" rx="24" fill="#0c241a" stroke="#3d6c55"/>
+    <text x="28" y="38" fill="#8eb6a2" font-size="16" font-weight="700">EV SATIN ALINDIĞINDA</text>
+    <text x="28" y="78" fill="#fff" font-size="27" font-weight="800">Altın atmosfer %100'e tamamlanır.</text>
+    <circle cx="1016" cy="54" r="32" fill="#f3d67b" filter="url(#glow)"/>
+    <text x="1016" y="61" fill="#392608" font-size="18" font-weight="900" text-anchor="middle">%100</text>
+  </g>
+</svg>

@@ -102,6 +102,38 @@ import utilityAtv from "./assets/products/prd_utility_atv.png";
 import compactHatchback from "./assets/products/prd_compact_hatchback.png";
 import executiveSedan from "./assets/products/prd_executive_sedan.png";
 import cargoVan from "./assets/products/prd_cargo_van.png";
+import electricKettle from "./assets/products/prd_electric_kettle.png";
+import blenderSet from "./assets/products/prd_blender_set.png";
+import steamIron from "./assets/products/prd_steam_iron.png";
+import dehumidifier from "./assets/products/prd_dehumidifier.png";
+import bluetoothSpeaker from "./assets/products/prd_bluetooth_speaker.png";
+import podcastMicrophone from "./assets/products/prd_podcast_microphone.png";
+import noiseCancelEarbuds from "./assets/products/prd_noise_cancel_earbuds.png";
+import stereoReceiver from "./assets/products/prd_stereo_receiver.png";
+import officeKeyboardMouse from "./assets/products/prd_office_keyboard_mouse.png";
+import usbDock from "./assets/products/prd_usb_dock.png";
+import portableMonitor from "./assets/products/prd_portable_monitor.png";
+import miniNas from "./assets/products/prd_mini_nas.png";
+import ringLight from "./assets/products/prd_ring_light.png";
+import instantPrinter from "./assets/products/prd_instant_printer.png";
+import cameraBackpack from "./assets/products/prd_camera_backpack.png";
+import lightMeter from "./assets/products/prd_light_meter.png";
+import woodenPuzzleSet from "./assets/products/prd_wooden_puzzle_set.png";
+import tabletopMiniatures from "./assets/products/prd_tabletop_miniatures.png";
+import danceMat from "./assets/products/prd_dance_mat.png";
+import captureCard from "./assets/products/prd_capture_card.png";
+import kalimba from "./assets/products/prd_kalimba.png";
+import digitalMetronome from "./assets/products/prd_digital_metronome.png";
+import electronicDrumPad from "./assets/products/prd_electronic_drum_pad.png";
+import altoSaxophone from "./assets/products/prd_alto_saxophone.png";
+import hairStyler from "./assets/products/prd_hair_styler.png";
+import leatherJacket from "./assets/products/prd_leather_jacket.png";
+import travelBackpack from "./assets/products/prd_travel_backpack.png";
+import skinCareDevice from "./assets/products/prd_skin_care_device.png";
+import woodenChessSet from "./assets/products/prd_wooden_chess_set.png";
+import mechanicalDeskClock from "./assets/products/prd_mechanical_desk_clock.png";
+import precisionToolSet from "./assets/products/prd_precision_tool_set.png";
+import brassCompass from "./assets/products/prd_brass_compass.png";
 
 const dedicatedAssets: Record<string, string> = {
   prd_notebook: notebook,
@@ -206,6 +238,38 @@ const dedicatedAssets: Record<string, string> = {
   prd_compact_hatchback: compactHatchback,
   prd_executive_sedan: executiveSedan,
   prd_cargo_van: cargoVan,
+  prd_electric_kettle: electricKettle,
+  prd_blender_set: blenderSet,
+  prd_steam_iron: steamIron,
+  prd_dehumidifier: dehumidifier,
+  prd_bluetooth_speaker: bluetoothSpeaker,
+  prd_podcast_microphone: podcastMicrophone,
+  prd_noise_cancel_earbuds: noiseCancelEarbuds,
+  prd_stereo_receiver: stereoReceiver,
+  prd_office_keyboard_mouse: officeKeyboardMouse,
+  prd_usb_dock: usbDock,
+  prd_portable_monitor: portableMonitor,
+  prd_mini_nas: miniNas,
+  prd_ring_light: ringLight,
+  prd_instant_printer: instantPrinter,
+  prd_camera_backpack: cameraBackpack,
+  prd_light_meter: lightMeter,
+  prd_wooden_puzzle_set: woodenPuzzleSet,
+  prd_tabletop_miniatures: tabletopMiniatures,
+  prd_dance_mat: danceMat,
+  prd_capture_card: captureCard,
+  prd_kalimba: kalimba,
+  prd_digital_metronome: digitalMetronome,
+  prd_electronic_drum_pad: electronicDrumPad,
+  prd_alto_saxophone: altoSaxophone,
+  prd_hair_styler: hairStyler,
+  prd_leather_jacket: leatherJacket,
+  prd_travel_backpack: travelBackpack,
+  prd_skin_care_device: skinCareDevice,
+  prd_wooden_chess_set: woodenChessSet,
+  prd_mechanical_desk_clock: mechanicalDeskClock,
+  prd_precision_tool_set: precisionToolSet,
+  prd_brass_compass: brassCompass,
 };
 
 const fallbackSvg = (category: string, symbol: string, color: string) =>

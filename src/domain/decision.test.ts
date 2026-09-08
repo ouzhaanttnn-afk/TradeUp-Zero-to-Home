@@ -3,6 +3,7 @@ import { families, initialState, market } from "../game";
 import {
   heroFamilies,
   mediumBudgetFamilies,
+  starterExpansionFamilies,
   vehicleFamilies,
 } from "../content/families";
 import {
@@ -101,6 +102,25 @@ describe("decision vertical slice", () => {
       expect(family.baseValueMinor).toBeGreaterThanOrEqual(180_000);
       expect(family.baseValueMinor).toBeLessThanOrEqual(950_000);
       expect([1, 2]).toContain(family.tier);
+    }
+  });
+
+  it("adds 32 more starter and mid-tier products with bounded prices", () => {
+    expect(families).toHaveLength(137);
+    expect(starterExpansionFamilies).toHaveLength(32);
+    expect(
+      new Set(starterExpansionFamilies.map((family) => family.id)).size,
+    ).toBe(32);
+    expect(
+      new Set(starterExpansionFamilies.map((family) => family.assetKey)).size,
+    ).toBe(32);
+    expect(
+      new Set(starterExpansionFamilies.map((family) => family.category)).size,
+    ).toBe(8);
+    for (const family of starterExpansionFamilies) {
+      expect(family.baseValueMinor).toBeGreaterThanOrEqual(45_000);
+      expect(family.baseValueMinor).toBeLessThanOrEqual(850_000);
+      expect([0, 1, 2]).toContain(family.tier);
     }
   });
 
