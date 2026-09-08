@@ -59,3 +59,11 @@ For every package:
 7. Commit the completed work. Continue related small fixes within the authorized block; report at a meaningful phase boundary.
 
 The pure engine contract is mandatory: identical seed, game time, config, and command sequence must produce identical economic results on web, tests, and native. Before calling the vertical slice complete, satisfy the full Definition of Done and resilience tests in GDD v2.1, including core invariants, core-loop integration, WebView smoke, migration, 320–430 px layout, text scaling, reduced motion, haptics-off, and missing-asset fallback.
+
+## Hybrid assistant routing
+
+- Keep the primary Codex model responsible for GDD interpretation, economy and monetization decisions, architecture, security, UI/UX judgment, final reviews, repository writes, and release decisions.
+- The primary agent may proactively use the local OmniRoute service for bounded, low-risk work such as generic copy drafts, repetitive classification, non-sensitive summaries, and disposable ideation.
+- Treat OmniRoute output as an untrusted draft: verify it before use and never let a secondary route write to the repository or make a final product decision directly.
+- Never send credentials, authentication material, personal data, publisher data, unreleased secrets, or destructive instructions through a secondary route.
+- On ambiguity, weak output, or conflict with GDD v2.1, discard the secondary output and complete the work with the primary Codex model.
