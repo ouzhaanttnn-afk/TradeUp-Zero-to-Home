@@ -12,7 +12,6 @@ import { App as CapacitorApp } from "@capacitor/app";
 import "./App.css";
 import { assetFor, fallbackAssetFor } from "./assets";
 import { familyById } from "./content/families";
-import { avatars, freeAvatars } from "./content/avatars";
 import {
   activeBookCostMinor,
   activeOwnedAssets,
@@ -43,7 +42,6 @@ import {
   getRewardEligibility,
   hasPremiumEntitlement,
 } from "./domain/monetization";
-import type { AvatarId } from "./domain/models";
 import { activeMarketListings, npcRiskSignal } from "./domain/world";
 import {
   HOME_GOAL_MINOR,
@@ -90,12 +88,12 @@ import {
 import { homeAtmosphereStage, homeGoldPercent } from "./ui/homeAtmosphere";
 import { marketScanRefillStatus, shortDuration } from "./ui/marketScan";
 import { recoveryPlan } from "./ui/recoveryPlan";
-import { ownsAnimatedAvatars as hasAnimatedAvatars } from "./domain/profile";
 import { ProductVisual } from "./ui/ProductVisual";
 import { MarketListingCard } from "./ui/MarketListingCard";
 import { AvatarPortrait } from "./ui/AvatarPortrait";
 
 const SettingsPanel = lazy(() => import("./ui/SettingsPanel"));
+const ProfileOnboarding = lazy(() => import("./ui/ProfileOnboarding"));
 
 type Tab = "market" | "follow" | "portfolio" | "journey";
 type PortfolioSegment = "inventory" | "preparation" | "listings";
@@ -179,10 +177,6 @@ export default function App() {
     useState<PlayerOfferMode>("BALANCED");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsReturnTab, setSettingsReturnTab] = useState<Tab>("market");
-  const [onboardingName, setOnboardingName] = useState("");
-  const [avatarDraft, setAvatarDraft] = useState<AvatarId>("pazar-kasifi");
-  const [onboardingRestoreRequested, setOnboardingRestoreRequested] =
-    useState(false);
   const [quickSaleAssetId, setQuickSaleAssetId] = useState<string | null>(null);
   const [manualListingAssetId, setManualListingAssetId] = useState<
     string | null
@@ -493,111 +487,17 @@ export default function App() {
 
   if (!ready) return <StartupSkeleton />;
 
-  const ownsAnimatedAvatars = hasAnimatedAvatars(game);
-
   if (!game.profile.onboardingComplete) {
     return (
-      <main
-        className={`profile-onboarding${game.accessibility.reducedMotion ? " reduced-motion" : ""}`}
-      >
-        <div className="onboarding-atmosphere" aria-hidden="true" />
-        <section
-          className="onboarding-card"
-          aria-labelledby="profile-onboarding-title"
-        >
-          <header className="onboarding-brand">
-            <span className="brand-mark" aria-hidden="true">
-              ↑
-            </span>
-            <span>
-              <small>TRADEUP · YENİ KARİYER</small>
-              <b>Zero to Home</b>
-            </span>
-          </header>
-          <div className="onboarding-copy">
-            <span>OYUNCU PROFİLİ</span>
-            <h1 id="profile-onboarding-title">Pazara kendi tarzınla gir.</h1>
-            <p>Adını belirle, seni temsil edecek karakteri seç.</p>
-          </div>
-          <label className="onboarding-name">
-            <span>Oyuncu adı</span>
-            <input
-              autoFocus
-              autoComplete="nickname"
-              maxLength={20}
-              value={onboardingName}
-              placeholder="Örn. Pazar Ustası"
-              onChange={(event) => setOnboardingName(event.target.value)}
-            />
-            <small>{onboardingName.trim().length}/20</small>
-          </label>
-          <fieldset className="avatar-picker avatar-picker--onboarding">
-            <legend>
-              {ownsAnimatedAvatars ? "Karakterin" : "Ücretsiz karakterin"}
-            </legend>
-            <div className="avatar-options">
-              {(ownsAnimatedAvatars ? avatars : freeAvatars).map((avatar) => (
-                <button
-                  key={avatar.id}
-                  type="button"
-                  aria-pressed={avatarDraft === avatar.id}
-                  aria-label={`${avatar.name}, ${avatar.role}`}
-                  onClick={() => setAvatarDraft(avatar.id)}
-                >
-                  <AvatarPortrait avatarId={avatar.id} />
-                  <span>
-                    <b>{avatar.name}</b>
-                    <small>{avatar.role}</small>
-                  </span>
-                  <i aria-hidden="true">✓</i>
-                </button>
-              ))}
-            </div>
-          </fieldset>
-          {!ownsAnimatedAvatars ? (
-            <div
-              className="premium-avatar-preview"
-              aria-label="Canlı avatar ön izlemesi"
-            >
-              <div>
-                <span>CANLI KOLEKSİYON</span>
-                <b>Hareketli avatarlar</b>
-                <small>Yalnız görünüm · oynanış avantajı yok</small>
-              </div>
-              <div className="premium-avatar-stack" aria-hidden="true">
-                {avatars.slice(3).map((avatar) => (
-                  <AvatarPortrait key={avatar.id} avatarId={avatar.id} />
-                ))}
-              </div>
-              <span className="premium-avatar-status">Yakında</span>
-            </div>
-          ) : null}
-          <button
-            className="primary onboarding-start"
-            disabled={!onboardingName.trim()}
-            onClick={() =>
-              completeProfileOnboarding(onboardingName, avatarDraft)
-            }
-          >
-            Kariyere başla <span aria-hidden="true">→</span>
-          </button>
-          <button
-            className="onboarding-restore"
-            disabled={monetizationBusy}
-            onClick={() => {
-              setOnboardingRestoreRequested(true);
-              void restorePurchases();
-            }}
-          >
-            Satın alımları geri yükle
-          </button>
-          {onboardingRestoreRequested ? (
-            <p className="onboarding-restore-status" role="status">
-              {monetizationBusy ? "Mağaza kontrol ediliyor…" : notice}
-            </p>
-          ) : null}
-        </section>
-      </main>
+      <Suspense fallback={<StartupSkeleton />}>
+        <ProfileOnboarding
+          game={game}
+          monetizationBusy={monetizationBusy}
+          notice={notice}
+          onComplete={completeProfileOnboarding}
+          onRestorePurchases={restorePurchases}
+        />
+      </Suspense>
     );
   }
 
