@@ -15,9 +15,9 @@ describe("semantic audio feedback", () => {
 
     await playFeedbackSound("SALE_PROFIT", "LOW", player);
 
-    expect(player).toHaveBeenCalledTimes(2);
+    expect(player).toHaveBeenCalledTimes(3);
     expect(player.mock.calls.map(([tone]) => tone.frequencyHz)).toEqual([
-      520, 660,
+      440, 554, 659,
     ]);
     expect(player.mock.calls.every(([, gain]) => gain === 0.025)).toBe(true);
   });

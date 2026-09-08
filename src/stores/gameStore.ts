@@ -428,6 +428,7 @@ export const useGameStore = create<Store>((set, get) => ({
       result.summary.npcSales +
       result.summary.marketExpirations +
       result.summary.playerListingExpirations;
+    if (result.summary.buyerOffers > 0) sound(get().game, "OFFER");
     set((current) => ({
       game: stampAndPersist(rechargedState),
       notice: eventCount
@@ -745,6 +746,7 @@ export const useGameStore = create<Store>((set, get) => ({
         `${item.instance.family.name} ilana çıktı. Alıcılar aranıyor.`,
       ),
     });
+    sound(game, "LISTING");
   },
   reviseListing: (listingId, askingPriceMinor) => {
     const game = get().game;
@@ -781,6 +783,7 @@ export const useGameStore = create<Store>((set, get) => ({
         `${asset?.instance.family.name ?? "Ürün"} için yeni fiyat ${money(askingPriceMinor)}.`,
       ),
     });
+    sound(game, "LISTING");
   },
   withdrawListing: (listingId) => {
     const game = get().game;

@@ -732,7 +732,7 @@ export default function App() {
     );
     return (
       <article
-        className="owned"
+        className={`owned${focusedAssetId === item.id ? " owned--focused" : ""}`}
         id={`owned-${item.id}`}
         tabIndex={-1}
         aria-label={item.instance.family.name}
@@ -1076,7 +1076,7 @@ export default function App() {
         ) : null}
       </section>
 
-      <div className="notice" role="status">
+      <div className="notice" role="status" key={notice}>
         {notice}
       </div>
       {showCoachHere ? (
@@ -1617,7 +1617,7 @@ export default function App() {
                       const ownershipState = ownershipPresentation(asset.state);
                       return (
                         <article
-                          className="owned owned--listing"
+                          className={`owned owned--listing${focusedAssetId === asset.id ? " owned--focused" : ""}`}
                           key={playerListing.id}
                           id={`owned-${asset.id}`}
                           tabIndex={-1}

@@ -1,21 +1,40 @@
 import type { AccessibilityPreferences } from "../domain/models";
 
 export type FeedbackSound =
-  "OFFER" | "PURCHASE" | "SALE_PROFIT" | "SALE_LOSS" | "WARNING";
+  "OFFER" | "PURCHASE" | "LISTING" | "SALE_PROFIT" | "SALE_LOSS" | "WARNING";
 
 type SoundLevel = AccessibilityPreferences["soundLevel"];
-type Tone = { frequencyHz: number; durationMs: number };
+type Tone = {
+  frequencyHz: number;
+  durationMs: number;
+  waveform?: OscillatorType;
+  attackMs?: number;
+};
 export type TonePlayer = (tone: Tone, gain: number) => Promise<void>;
 
 const patterns: Record<FeedbackSound, Tone[]> = {
-  OFFER: [{ frequencyHz: 420, durationMs: 45 }],
-  PURCHASE: [{ frequencyHz: 520, durationMs: 70 }],
-  SALE_PROFIT: [
-    { frequencyHz: 520, durationMs: 65 },
-    { frequencyHz: 660, durationMs: 90 },
+  OFFER: [
+    { frequencyHz: 392, durationMs: 42, waveform: "triangle" },
+    { frequencyHz: 523, durationMs: 72, attackMs: 9 },
   ],
-  SALE_LOSS: [{ frequencyHz: 240, durationMs: 110 }],
-  WARNING: [{ frequencyHz: 300, durationMs: 65 }],
+  PURCHASE: [
+    { frequencyHz: 330, durationMs: 38, waveform: "triangle" },
+    { frequencyHz: 587, durationMs: 78, attackMs: 8 },
+  ],
+  LISTING: [
+    { frequencyHz: 360, durationMs: 38, waveform: "triangle" },
+    { frequencyHz: 480, durationMs: 62, attackMs: 7 },
+  ],
+  SALE_PROFIT: [
+    { frequencyHz: 440, durationMs: 48, waveform: "triangle" },
+    { frequencyHz: 554, durationMs: 58, waveform: "triangle" },
+    { frequencyHz: 659, durationMs: 92, attackMs: 8 },
+  ],
+  SALE_LOSS: [
+    { frequencyHz: 280, durationMs: 62, waveform: "triangle" },
+    { frequencyHz: 220, durationMs: 105, waveform: "triangle" },
+  ],
+  WARNING: [{ frequencyHz: 300, durationMs: 68, waveform: "triangle" }],
 };
 
 let sharedContext: AudioContext | undefined;
@@ -27,9 +46,14 @@ const webAudioTonePlayer: TonePlayer = async (tone, gain) => {
 
   const oscillator = sharedContext.createOscillator();
   const volume = sharedContext.createGain();
-  oscillator.type = "sine";
+  oscillator.type = tone.waveform ?? "sine";
   oscillator.frequency.value = tone.frequencyHz;
-  volume.gain.setValueAtTime(gain, sharedContext.currentTime);
+  const attackSeconds = (tone.attackMs ?? 5) / 1_000;
+  volume.gain.setValueAtTime(0.0001, sharedContext.currentTime);
+  volume.gain.exponentialRampToValueAtTime(
+    gain,
+    sharedContext.currentTime + attackSeconds,
+  );
   volume.gain.exponentialRampToValueAtTime(
     0.0001,
     sharedContext.currentTime + tone.durationMs / 1_000,
