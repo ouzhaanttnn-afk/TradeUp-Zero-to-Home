@@ -1819,7 +1819,7 @@ nav .active .nav-icon {
   margin-bottom: 11px;
 }
 .hero-art {
-  height: 180px;
+  height: 138px;
   border-radius: 20px;
   background: radial-gradient(circle, #315b48, #12251d);
   display: grid;
@@ -1855,8 +1855,8 @@ nav .active .nav-icon {
   letter-spacing: 0.11em;
 }
 .sheet-title h2 {
-  font-size: calc(22px + var(--text-size-boost));
-  margin: 4px 0 7px;
+  font-size: calc(20px + var(--text-size-boost));
+  margin: 2px 0 4px;
   letter-spacing: -0.45px;
 }
 .detail-price {
@@ -1876,12 +1876,12 @@ nav .active .nav-icon {
   letter-spacing: 0.1em;
 }
 .detail-price strong {
-  font-size: calc(29px + var(--text-size-boost));
+  font-size: calc(25px + var(--text-size-boost));
 }
 .band,
 .details {
-  margin-top: 12px;
-  padding: 11px;
+  margin-top: 8px;
+  padding: 9px;
   border-radius: 13px;
   border: 1px solid rgba(137, 193, 164, 0.08);
   background: rgba(8, 24, 17, 0.76);
@@ -3435,7 +3435,42 @@ nav .active .nav-icon {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 7px;
-  margin-top: 12px;
+  margin-top: 7px;
+}
+.evidence-panel {
+  padding: 0 !important;
+  overflow: hidden;
+}
+.evidence-toggle {
+  display: flex;
+  width: 100%;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 11px;
+  border: 0;
+  border-radius: 13px;
+  background: transparent;
+  color: #d9e7df;
+  text-align: left;
+}
+.evidence-toggle > span:first-child {
+  display: grid;
+  gap: 2px;
+}
+.evidence-toggle small {
+  color: #76dca4;
+  font-size: calc(7px + var(--text-size-boost));
+  letter-spacing: 0.1em;
+}
+.evidence-toggle > span:last-child {
+  color: #8eb6a1;
+  font-size: 20px;
+}
+.evidence-content {
+  padding: 0 11px 11px;
+  border-top: 1px solid rgba(144, 207, 175, 0.1);
 }
 .sheet-follow-actions > span {
   display: grid;

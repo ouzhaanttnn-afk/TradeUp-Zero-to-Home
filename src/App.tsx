@@ -261,6 +261,7 @@ export default function App() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [comparing, setComparing] = useState(false);
   const [purchaseFeedback, setPurchaseFeedback] = useState("");
+  const [evidenceExpanded, setEvidenceExpanded] = useState(false);
   const [purchaseOfferMode, setPurchaseOfferMode] =
     useState<PlayerOfferMode>("BALANCED");
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -615,6 +616,7 @@ export default function App() {
     setComparing(false);
     setPurchaseFeedback("");
     setPurchaseOfferMode("BALANCED");
+    setEvidenceExpanded(isFtueActive(game));
     openListing(listingId);
   };
   const toggleComparison = () => {
@@ -2703,43 +2705,63 @@ export default function App() {
                   </b>
                 </div>
               </div>
-              <div className="evidence-panel">
-                <small>
-                  ÜRÜN KONTROLLERİ · GÜVEN %
-                  {Math.round(selected.instance.evidenceConfidence * 100)}
-                </small>
-                {selected.instance.evidence.map((record) => {
-                  const definition = selected.instance.family.evidence.find(
-                    (item) => item.id === record.definitionId,
-                  );
-                  const evidenceState = evidencePresentation(record.status);
-                  return (
-                    <p className="evidence-row" key={record.definitionId}>
-                      <b>{definition?.label}</b>
-                      <span className={`evidence-state ${evidenceState.tone}`}>
-                        {evidenceState.label}
-                      </span>
-                    </p>
-                  );
-                })}
-                {!ftueActive ? renderInspectionActions() : null}
-                {canClaimReward("FAST_INSPECTION") ? (
-                  <button
-                    className="reward-cta"
-                    disabled={monetizationBusy}
-                    onClick={() => void claimReward("FAST_INSPECTION")}
-                  >
-                    {rewardLabel("FAST_INSPECTION")}
-                  </button>
+              <section className="evidence-panel">
+                <button
+                  className="evidence-toggle"
+                  aria-expanded={evidenceExpanded || ftueActive}
+                  onClick={() =>
+                    !ftueActive && setEvidenceExpanded((expanded) => !expanded)
+                  }
+                >
+                  <span>
+                    <small>ÜRÜN KONTROLLERİ</small>
+                    <b>
+                      Bilgi güveni %
+                      {Math.round(selected.instance.evidenceConfidence * 100)}
+                    </b>
+                  </span>
+                  <span aria-hidden="true">
+                    {evidenceExpanded || ftueActive ? "−" : "+"}
+                  </span>
+                </button>
+                {evidenceExpanded || ftueActive ? (
+                  <div className="evidence-content">
+                    {selected.instance.evidence.map((record) => {
+                      const definition = selected.instance.family.evidence.find(
+                        (item) => item.id === record.definitionId,
+                      );
+                      const evidenceState = evidencePresentation(record.status);
+                      return (
+                        <p className="evidence-row" key={record.definitionId}>
+                          <b>{definition?.label}</b>
+                          <span
+                            className={`evidence-state ${evidenceState.tone}`}
+                          >
+                            {evidenceState.label}
+                          </span>
+                        </p>
+                      );
+                    })}
+                    {!ftueActive ? renderInspectionActions() : null}
+                    {canClaimReward("FAST_INSPECTION") ? (
+                      <button
+                        className="reward-cta"
+                        disabled={monetizationBusy}
+                        onClick={() => void claimReward("FAST_INSPECTION")}
+                      >
+                        {rewardLabel("FAST_INSPECTION")}
+                      </button>
+                    ) : null}
+                    {!ftueActive || game.ftue.stage !== "COMPARE" ? (
+                      <button className="secondary" onClick={toggleComparison}>
+                        {comparing
+                          ? "Karşılaştırmayı kapat"
+                          : "Benzer ilanlarla karşılaştır"}
+                      </button>
+                    ) : null}
+                  </div>
                 ) : null}
-                {!ftueActive || game.ftue.stage !== "COMPARE" ? (
-                  <button className="secondary" onClick={toggleComparison}>
-                    {comparing
-                      ? "Karşılaştırmayı kapat"
-                      : "Benzer ilanlarla karşılaştır"}
-                  </button>
-                ) : null}
-              </div>
+              </section>
               {comparing ? (
                 <div className="compare-stack" ref={comparisonRef}>
                   <h3>Aynı ürün grubu · {comparables.length} ilan</h3>
