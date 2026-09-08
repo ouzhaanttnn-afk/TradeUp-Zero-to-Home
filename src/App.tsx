@@ -7,7 +7,7 @@ import {
 } from "react";
 import { App as CapacitorApp } from "@capacitor/app";
 import "./App.css";
-import { assetFor, fallbackAssetFor, visualTreatmentFor } from "./assets";
+import { assetFor, fallbackAssetFor } from "./assets";
 import { familyById } from "./content/families";
 import { avatarById, avatars, freeAvatars } from "./content/avatars";
 import {
@@ -43,7 +43,6 @@ import {
 import type {
   AccessibilityPreferences,
   AvatarId,
-  ItemInstance,
   MonetizationProductId,
 } from "./domain/models";
 import { activeMarketListings, npcRiskSignal } from "./domain/world";
@@ -94,6 +93,7 @@ import { homeAtmosphereStage, homeGoldPercent } from "./ui/homeAtmosphere";
 import { marketScanRefillStatus, shortDuration } from "./ui/marketScan";
 import { recoveryPlan } from "./ui/recoveryPlan";
 import { ownsAnimatedAvatars as hasAnimatedAvatars } from "./domain/profile";
+import { ProductVisual } from "./ui/ProductVisual";
 
 type Tab = "market" | "follow" | "portfolio" | "journey";
 type PortfolioSegment = "inventory" | "preparation" | "listings";
@@ -199,65 +199,6 @@ const rewardCopy = {
     premium: "Premium erişim hakkını kullan",
   },
 } as const;
-
-function ProductVisual({
-  instance,
-  className,
-  alt = "",
-  priority = false,
-}: {
-  instance: ItemInstance;
-  className: string;
-  alt?: string;
-  priority?: boolean;
-}) {
-  const visual = visualTreatmentFor(instance);
-  return (
-    <div
-      className={`${className} product-visual product-visual--${visual.conditionBand}${
-        visual.fallback ? " product-visual--fallback" : ""
-      }`}
-    >
-      <img
-        src={assetFor(instance.family.assetKey, instance.family.category)}
-        loading={priority ? "eager" : "lazy"}
-        decoding="async"
-        fetchPriority={priority ? "high" : "auto"}
-        onError={(event) => {
-          const fallback = fallbackAssetFor(instance.family.category);
-          if (event.currentTarget.src !== fallback)
-            event.currentTarget.src = fallback;
-        }}
-        alt={alt}
-      />
-      <span className="condition-overlay" aria-hidden="true" />
-      {visual.revealedDefect ? (
-        <span
-          className="visual-badge visual-badge--defect"
-          aria-label="Doğrulanmış kusur"
-        >
-          !
-        </span>
-      ) : null}
-      {visual.missingAccessory ? (
-        <span
-          className="visual-badge visual-badge--accessory"
-          aria-label="Eksik aksesuar"
-        >
-          −
-        </span>
-      ) : null}
-      {visual.verifiedEvidence ? (
-        <span
-          className="visual-badge visual-badge--verified"
-          aria-label="Kanıt doğrulandı"
-        >
-          ✓
-        </span>
-      ) : null}
-    </div>
-  );
-}
 
 function AvatarPortrait({
   avatarId,
@@ -1458,18 +1399,14 @@ export default function App() {
                       <span className="market-condition-signal">
                         %{item.instance.condition}
                       </span>
-                      <span className="market-evidence-signal">
-                        Bilgi {evidenceLabel(item.instance.evidenceConfidence)}{" "}
-                        ·{" "}
-                        {listingAgeLabel(
-                          item.createdAtGameMin,
-                          game.gameTimeMin,
-                        )}
-                      </span>
                     </div>
-                    <span className={`market-heat market-heat--${risk.level}`}>
-                      {risk.text}
-                    </span>
+                    {risk.level !== "low" ? (
+                      <span
+                        className={`market-heat market-heat--${risk.level}`}
+                      >
+                        {risk.text}
+                      </span>
+                    ) : null}
                     <div className="listing-copy">
                       <small className="market-category">
                         {item.instance.family.category} · Sv. {categoryLevel}

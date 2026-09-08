@@ -923,8 +923,7 @@ main {
   position: relative;
   flex: 0 0 auto;
 }
-.market-condition-signal,
-.market-evidence-signal {
+.market-condition-signal {
   position: absolute;
   z-index: 5;
   right: 4px;
@@ -944,10 +943,6 @@ main {
 }
 .market-condition-signal {
   top: 4px;
-}
-.market-evidence-signal {
-  bottom: 4px;
-  color: #bcd0c6;
 }
 .market-heat {
   position: absolute;
@@ -4384,7 +4379,6 @@ main {
 }
 
 .market-condition-signal,
-.market-evidence-signal,
 .market-heat {
   border-color: rgba(212, 239, 225, 0.16);
   background: rgba(3, 13, 8, 0.78);

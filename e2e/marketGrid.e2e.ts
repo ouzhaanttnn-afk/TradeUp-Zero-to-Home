@@ -33,9 +33,9 @@ for (const width of [320, 430]) {
     await expect(
       cards.first().locator(".market-condition-signal"),
     ).toBeVisible();
-    await expect(
-      cards.first().locator(".market-evidence-signal"),
-    ).toBeVisible();
+    await expect(cards.first().locator(".market-evidence-signal")).toHaveCount(
+      0,
+    );
     await expect(cards.first().locator(".market-condition-signal")).toHaveText(
       `%${saved.listings[0].instance.condition}`,
     );
@@ -47,12 +47,7 @@ for (const width of [320, 430]) {
       "loading",
       "lazy",
     );
-    await expect(
-      cards.first().locator(".market-evidence-signal"),
-    ).toContainText("Bilgi");
-    await expect(
-      cards.first().locator(".market-evidence-signal"),
-    ).toContainText("Yeni");
+    await expect(cards.first()).toHaveAttribute("aria-label", /bilgi güveni/);
     const boxes = await cards.evaluateAll((items) =>
       items.slice(0, 9).map((item) => {
         const box = item.getBoundingClientRect();
@@ -80,7 +75,7 @@ for (const width of [320, 430]) {
       .boundingBox();
     const firstSignals = await cards
       .first()
-      .locator(".market-condition-signal, .market-evidence-signal")
+      .locator(".market-condition-signal")
       .evaluateAll((items) =>
         items.map((item) => item.getBoundingClientRect()),
       );
