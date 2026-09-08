@@ -1,5 +1,5 @@
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 
@@ -39,6 +39,16 @@ export const deliveryBudgetViolation = (
 
 // https://vite.dev/config/
 export default defineConfig({
+  test: {
+    coverage: {
+      thresholds: {
+        statements: 65,
+        branches: 50,
+        functions: 60,
+        lines: 65,
+      },
+    },
+  },
   plugins: [
     react(),
     {

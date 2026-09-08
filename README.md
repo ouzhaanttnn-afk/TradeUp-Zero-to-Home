@@ -56,6 +56,9 @@ Never commit signing keys, passwords, API keys or store credentials. See `docs/R
 Browser tests require Chrome and use a separate temporary profile. `test:browser`
 checks 320/390/430 px layouts, large text, reduced motion, haptics preference
 persistence, missing product images, comparison navigation, and offline reload.
+`test:coverage` runs the full deterministic unit suite, including the 100-seed
+career simulation, and enforces baseline statement, branch, function and line
+coverage so test depth cannot silently regress.
 It also completes the first-session loop with both starting notebook choices,
 reconciling cash, book cost, realized profit and the journal after each stage
 and after reload. Automated completion is not evidence of player retention or comprehension.
