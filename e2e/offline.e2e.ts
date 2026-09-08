@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { completeFirstLaunch } from "./helpers";
 
 test("first install caches game resources and preserves a sale across offline reload", async ({
   page,
@@ -7,6 +8,7 @@ test("first install caches game resources and preserves a sale across offline re
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/");
+  await completeFirstLaunch(page);
   await expect(
     page.getByRole("button", { name: "Teklifi kabul et · ₺420" }),
   ).toBeVisible();

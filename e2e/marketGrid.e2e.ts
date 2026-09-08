@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { completeFirstLaunch } from "./helpers";
 import { initialState, validateState } from "../src/game";
 
 for (const width of [320, 430]) {
@@ -10,6 +11,7 @@ for (const width of [320, 430]) {
     saved.accessibility.reducedMotion = true;
 
     await page.goto("/");
+    await completeFirstLaunch(page);
     await page.evaluate(async (state) => {
       const db = await new Promise<IDBDatabase>((resolve, reject) => {
         const request = indexedDB.open("tradeup", 1);

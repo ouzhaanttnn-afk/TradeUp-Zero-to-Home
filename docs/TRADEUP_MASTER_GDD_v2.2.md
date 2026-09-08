@@ -1,6 +1,6 @@
 # TRADEUP: ZERO TO HOME
-## Master Game Design Document + Implementation Contract — v2.1
-**Studio Nostos • Monetization-Locked Production Candidate • 04.09.2026**
+## Master Game Design Document + Implementation Contract — v2.2
+**Studio Nostos • Profile & Cosmetic Avatar Revision • 08.09.2026**
 
 
 ---
@@ -8,7 +8,7 @@
 <!-- PAGE 1 -->
 
 # 01. TRADEUP: ZERO TO HOME
-> Mihenk’ten sonraki ana proje • Monetization-Locked Production Candidate • v2.1
+> Mihenk’ten sonraki ana proje • Profile & Cosmetic Avatar Revision • v2.2
 
 > Fırsatı gör. Değeri doğrula. Nakit yarat. Kendi yolunla evine ulaş.
 
@@ -16,7 +16,7 @@
 | --- | --- |
 | Sahibi | Studio Nostos / Alper |
 | Belge türü | Master Game Design Document + Implementation Contract |
-| Sürüm | v2.1 • Monetization & Production Lock • 04.09.2026 |
+| Sürüm | v2.2 • Profile & Cosmetic Avatar Revision • 08.09.2026 |
 | Öncelik | Mihenk sonrası büyük ana proje |
 | Platform | iOS + Android • dikey 9:16 • tek elle oynanabilir |
 | Repo anlık görüntüsü | ouzhaanttnn-afk/TradeUp-Zero-to-Home • main @ 7cf94c5 |
@@ -43,14 +43,14 @@
 ## Tek cümlelik oyun
 > **[KİLİTLİ] Tek cümlelik oyun:** Oyuncu, sürekli değişen ikinci el pazarında eksik bilgiyi okuyup aynı ürüne ait ilanları karşılaştırır; iki teklif hakkıyla pazarlık eder, satın aldığı ürüne bilgi ve hazırlık ekleyerek değer yaratır, nakdini korur ve gerçek işlemlerinden oluşan kişisel bir servet hikâyesiyle kendi evine ulaşır.
 
-v2.1, v2.0’ın karar derinliği ve ekonomik doğruluk omurgasını korur; buna ek olarak gerçek para ürünlerini, rewarded reklam yerleşimlerini, entitlement akışını, mağaza/politika guardrail’lerini ve üretim dondurma protokolünü kilitler. Bu nedenle kodlama sırasında yeni mekanik kararı alınmaz; yalnız belgeye uyumlu bug düzeltmesi ve tanımlı aralıkta sayısal kalibrasyon yapılır.
+v2.2, v2.1’in karar derinliği, ekonomik doğruluk ve reklam omurgasını aynen korur. Kullanıcının 08.09.2026 tarihli açık onayıyla ilk açılış profil kurulumu, ücretsiz statik avatarlar ve yalnız kozmetik canlı avatar paketi eklenmiştir. Bu sınırlı revizyon dışında kodlama sırasında yeni mekanik kararı alınmaz; yalnız belgeye uyumlu bug düzeltmesi ve tanımlı aralıkta sayısal kalibrasyon yapılır.
 
 ## Belgeyi okuma kuralı
 - Her ekonomik hareket append-only işlem günlüğüyle izlenir; oyuncu varlığı sessizce yok olmaz.
 - Her görünür buton çalışır. Sahte filtre, ölü sekme, TODO alanı veya yalnızca gösteriş için sayaç bulunmaz.
 - Final görsel asset eksikliği gameplay’i durdurmaz; manifest, placeholder ve fallback zorunludur.
 - Runtime yapay zekâ, para veya oyun sonucunun hakemi değildir; deterministik motor tek otoritedir.
-- v2.1 tasarım dondurması sonrası kodlama sırasında yeni gameplay, IAP veya reklam mekaniği eklenmez; belirsizlikte daha az avantajlı ve daha az müdahaleci çözüm uygulanır.
+- v2.2 tasarım dondurması sonrası kodlama sırasında yeni gameplay, IAP veya reklam mekaniği eklenmez; belirsizlikte daha az avantajlı ve daha az müdahaleci çözüm uygulanır.
 
 
 ---
@@ -585,7 +585,7 @@ hâlâ oyuncu varlığıdır; yalnız SoldComplete sahipliği kapatır.
 Her ekonomik aksiyon `TransactionJournalEntry` üretir: purchase, preparation, fee, listing, reservation, sale, refund, reward. UI’daki bakiye ve raporlar state üzerinde serbest hesaplar yazmak yerine bu kayıtlarla uzlaştırılır. Böylece yanlış kâr, kaybolan ürün ve iki kez verilen reward erken yakalanır.
 
 ## Mevcut prototip düzeltmesi
-> **[P0] Mevcut prototip düzeltmesi:** Şu an aktif ilana çıkan ürün servet hesabından kayboluyor ve buyer offer satış kârı ilan fiyatına göre hesaplanıyor. v2.1 implementasyonunun ilk işi unified OwnedAsset + cost basis + journal düzeltmesidir.
+> **[P0] Mevcut prototip düzeltmesi:** Şu an aktif ilana çıkan ürün servet hesabından kayboluyor ve buyer offer satış kârı ilan fiyatına göre hesaplanıyor. v2.2 implementasyonunun ilk işi unified OwnedAsset + cost basis + journal düzeltmesidir.
 
 
 ---
@@ -999,11 +999,13 @@ Görevler varsa “3 reklam izle” veya “10 rastgele ürün al” şeklinde o
 | `tradeup_theme_night_market` | Non-consumable | USD 1.99 eşdeğeri | `theme_night_market` | Gece Pazarı uygulama kabuğu, portföy zemini, satış damgaları ve uyumlu ses/haptik sunumu. |
 | `tradeup_theme_workshop` | Non-consumable | USD 1.99 eşdeğeri | `theme_workshop` | Endüstriyel Atölye kabuğu, portföy zemini, işlem kartı çerçeveleri ve satış damgaları. |
 | `tradeup_home_styles_01` | Non-consumable | USD 2.99 eşdeğeri | `home_styles_01` | Ev satın alındığında seçilebilen üç iç mekân stili, timeline zemini ve final sunum varyasyonları. Ev ilerlemesine para eklemez. |
+| `tradeup_animated_avatars_01` | Non-consumable | USD 2.99 eşdeğeri | `animated_avatars_01` | Profil ve ana kabukta kullanılabilen üç canlı avatar. Hareket, parıltı ve karakter sunumu dışında gameplay, ekonomi, şans veya ilerleme avantajı vermez. |
 
 \* Mağaza, bölgesel fiyatı ve vergiyi kendi sisteminden gösterir. Bu rakamlar v1.0 ürün konumlandırmasını kilitler; kod fiyat yazmaz.
 
 ## Kozmetik bütünlük
 - Ücretli temalar yalnız uygulama kabuğu, portföy alanı, milestone sunumu, profil ve ev görünümünü değiştirir.
+- Canlı avatarlar sabit bir pakettir; rastgele kutu, gacha veya ayrı ayrı consumable satış yoktur. `reducedMotion = true` olduğunda hareket durur ve avatar okunaklı statik portre olarak kalır.
 - Ürün fotoğrafı, kozmetik kondisyon, çatlak/kir overlay’i, risk rengi, evidence badge’i ve fiyat sinyali ücretli temayla değiştirilemez. Ticari karar okunabilirliği herkes için aynıdır.
 - Ücretli içerik oyuncuya daha temiz ürün, daha yüksek condition puanı veya ücretsiz hazırlık sağlamaz.
 
@@ -1068,6 +1070,8 @@ Global cap placement cap’lerinin toplamından önce uygulanır. Oyuncu aynı g
 
 ## Mağaza UX sözleşmesi
 - Mağaza her zaman **Ayarlar → Satın Almalar ve Görünüm** altında erişilebilir; böylece inceleme ve restore yolu gizlenmez.
+- İlk temiz açılışta ekonomi başlamadan önce tek seferlik profil kurulumu gösterilir. Oyuncu 1–20 karakterlik adını ve üç ücretsiz statik avatardan birini seçer. Mevcut kayıtlar bu ekrana zorla döndürülmez; avatar daha sonra Ayarlar’dan değiştirilebilir.
+- Üç canlı avatar ilk kurulumda yalnız kilitli ön izleme olarak gösterilebilir; fiyat mağaza metadata’sı olmadan yazılmaz ve satın alma zorlanmaz. Doğrulanmış `animated_avatars_01` entitlement’ı varsa seçilebilir. Restore yolu ilk kurulumda da erişilebilir kalır.
 - Yolculuk/Portföy içindeki kozmetik kısayollar ilk satıştan sonra açılır. İlk 20 aktif dakikada satın alma promosyon kartı gösterilmez.
 - `tradeup_premium_lifetime` tanıtımı ancak oyuncu üçüncü rewarded videoyu tamamladığında veya 120 aktif oyun dakikasına ulaştığında bir kez gösterilebilir; tekrar gösterim en erken 7 rolling gün sonra ve yalnız kullanıcı kapattıysa mümkündür.
 - Kayıp, zarar, missed opportunity, düşük cash, recovery, reddedilen pazarlık veya ev finali sonrasında IAP teklifi gösterilmez.
@@ -1139,7 +1143,7 @@ REQUESTED/AD_LOADED/AD_STARTED -> CANCELLED | FAILED
 Default değerler Codex’in uygulayacağı kesin başlangıç değerleridir. Kalibrasyon zarfı yalnız soft-launch verisiyle config/store console üzerinden kullanılabilir; yeni ekran, reward türü, entitlement veya ekonomi kuralı eklemek için kullanılamaz.
 
 ## Üretim dondurma protokolü
-> **[KİLİTLİ] v2.1 tasarım dondurması:** Bu belge onaylandıktan sonra v1.0 yayınlanana kadar yeni gameplay, reklam placement’ı, IAP türü, premium para, görev sistemi, pazarlık hakkı veya ekonomi katmanı eklenmez. Kodlama sırasında yalnız aşağıdaki değişiklik sınıfları kabul edilir:
+> **[KİLİTLİ] v2.2 tasarım dondurması:** Bu belge onaylandıktan sonra v1.0 yayınlanana kadar yeni gameplay, reklam placement’ı, IAP türü, premium para, görev sistemi, pazarlık hakkı veya ekonomi katmanı eklenmez. Kodlama sırasında yalnız aşağıdaki değişiklik sınıfları kabul edilir:
 
 1. Belgedeki davranışı doğru uygulamayan bug’ın düzeltilmesi.
 2. Crash, veri kaybı, erişilebilirlik, mağaza reddi veya güvenlik sorununun giderilmesi.
@@ -1159,7 +1163,7 @@ Dijital ürünler yalnız StoreKit / Google Play Billing ile satılır. Restore,
 <!-- PAGE 38 -->
 
 # 35. Mobil Bilgi Mimarisi
-> v2.1, mevcut dört ekranı daha tutarlı bir dört sekmeli yapıya dönüştürür.
+> v2.2, mevcut dört ekranı daha tutarlı bir dört sekmeli yapıya dönüştürür.
 
 | Alt sekme | İçerik | Ana CTA |
 | --- | --- | --- |
@@ -1302,7 +1306,7 @@ Ses assetleri GDD’de semantic event hook olarak tanımlanır; gameplay ses dos
 <!-- PAGE 43 -->
 
 # 40. İçerik Kapsamı Düzeltmesi
-> v1.0’daki yüzlerce family hedefi uzun vade içindir; v2.1 kaliteyi kanıtlamadan içerik şişirmeyi durdurur.
+> v1.0’daki yüzlerce family hedefi uzun vade içindir; v2.2 kaliteyi kanıtlamadan içerik şişirmeyi durdurur.
 
 | Faz | Kategori | ProductFamily | Same-family ilan | Amaç |
 | --- | --- | --- | --- | --- |
@@ -1574,7 +1578,7 @@ Bu eşikler sektör garantisi değil, Studio Nostos’un karar kapılarıdır. �
 3. P1 — Karar vertical slice: compare, evidence/inspection, 24 deep family, preparation actions.
 4. P1 — İlk oturum: scripted başlangıç defteri, gerçek seçim, pazarlık, listeleme ve ilk kâr.
 5. P2 — Meta: expertise, Takip, career timeline, home reveal ve analytics event contract.
-6. P3 — Monetizasyon foundation: Billing/entitlement/consent/rewarded adapter, dört placement ve dört non-consumable SKU; sandbox/test kimlikleriyle tamamlanır, production serving kalite kapısından sonra feature flag ile açılır.
+6. P3 — Monetizasyon foundation: Billing/entitlement/consent/rewarded adapter, dört placement ve beş non-consumable SKU; sandbox/test kimlikleriyle tamamlanır, production serving kalite kapısından sonra feature flag ile açılır.
 7. P4 — İçerik ölçeği: yalnız vertical slice ve monetizasyon güvenliği testleri geçtikten sonra data/asset family genişlemesi.
 
 ## Mihenk’ten aktarılacaklar
@@ -1605,13 +1609,13 @@ Bu eşikler sektör garantisi değil, Studio Nostos’un karar kapılarıdır. �
 - Yalnız `MARKET_SCOUT`, `FAST_INSPECTION`, `FAST_PREPARATION` ve `LISTING_REACH` rewarded placement’ları vardır; iki teklif kuralını veya fair value bilgisini değiştiren reklam yoktur.
 - Rewarded CTA ilk 20 aktif dakika ve ilk satış öncesi görünmez; rolling 24s cap=8, session cap=4 ve 90 sn cooldown testlerle doğrulanır.
 - Premium entitlement aynı reward payload/cap yolunu videosuz kullanır; daha fazla hak, daha iyi sonuç veya market bias üretmez.
-- Dört non-consumable SKU store metadata’sından fiyatlanır; purchase, pending, cancel, restore, refund/revoke ve offline entitlement senaryoları geçer.
+- Beş non-consumable SKU store metadata’sından fiyatlanır; purchase, pending, cancel, restore, refund/revoke ve offline entitlement senaryoları geçer.
 - ATT/consent reddi gameplay’i kilitlemez; izin/consent olmadan ad request yapılmaz ve normal bekleme yolu çalışır.
 - Ücretli tema ürün kondisyonunu, defect/evidence overlay’ini, risk sinyalini veya ekonomik sonucu değiştirmez.
 - Production build’de test ad unit, sandbox product ID, sahte indirim, hard-coded mağaza fiyatı ve harici dijital checkout bulunmaz.
 - Soft launch; sayfa 48’deki kalite kapıları geçmeden takvim gerekçesiyle başlatılmaz.
 
-> MASTER DIRECTIVE: Bu v2.1 belgeyi tek source of truth kabul et. Önce ekonomik gerçeği ve deterministik pazarı düzelt; ardından Compare + Evidence + tam iki haklı pazarlık + Preparation + Sale zincirini 24 derin family ile tamamla. Sonra yalnız sayfa 34–37’de tanımlı dört rewarded placement’ı, dört non-consumable SKU’yu, entitlement/consent/restore akışını aynen uygula. Yeni mekanik, ekstra teklif, premium para, cash pack, zorunlu reklam, ikinci görüş, garantili fırsat veya görünmez büyük kusur icat etme. Asset eksikliğini blocker yapma. Her fazda testleri çalıştır; Definition of Done geçmeden build’i tamamlandı sayma. Kullanıcının “devam” komutu sıradaki faza geçiştir, tasarımı yeniden açma.
+> MASTER DIRECTIVE: Bu v2.2 belgeyi tek source of truth kabul et. Önce ekonomik gerçeği ve deterministik pazarı düzelt; ardından Compare + Evidence + tam iki haklı pazarlık + Preparation + Sale zincirini 24 derin family ile tamamla. Sonra yalnız sayfa 34–37’de tanımlı dört rewarded placement’ı ve beş non-consumable SKU’yu, entitlement/consent/restore akışını aynen uygula. Yeni mekanik, ekstra teklif, premium para, cash pack, zorunlu reklam, ikinci görüş, garantili fırsat veya görünmez büyük kusur icat etme. Asset eksikliğini blocker yapma. Her fazda testleri çalıştır; Definition of Done geçmeden build’i tamamlandı sayma. Kullanıcının “devam” komutu sıradaki faza geçiştir, tasarımı yeniden açma.
 
 | R&D referansları | Kullanım amacı |
 | --- | --- |
@@ -1621,5 +1625,5 @@ Bu eşikler sektör garantisi değil, Studio Nostos’un karar kapılarıdır. �
 | Bid Wars / mobil auction kümesi | Kısa oturum ve okunaklı karar |
 | Mevcut TradeUp repo + v1.0 GDD | Teknik gerçek, kilitli kararlar ve gap audit |
 
-## v2.1 karar özeti
-> **[BELGE SONU] v2.1 karar özeti:** TradeUp; karşılaştırma, kanıt, likidite, tam iki teklif ve değer ekleme üzerinden oyuncunun kendi ticaret hikâyesini kurduğu mobil pazar simülasyonudur. Gelir modeli, yalnız açıkça seçilen zaman kolaylıkları ve karar okunabilirliğini bozmayan kalıcı kozmetiklerden oluşur; bu belge sonrası v1.0’a kadar mekanik tasarım dondurulmuştur.
+## v2.2 karar özeti
+> **[BELGE SONU] v2.2 karar özeti:** TradeUp; karşılaştırma, kanıt, likidite, tam iki teklif ve değer ekleme üzerinden oyuncunun kendi ticaret hikâyesini kurduğu mobil pazar simülasyonudur. İlk açılış profili ve ücretsiz avatar seçimi oyuncu kimliğini kurar; canlı avatar paketi yalnız sunumu kişiselleştirir. Gelir modeli, yalnız açıkça seçilen zaman kolaylıkları ve karar okunabilirliğini bozmayan kalıcı kozmetiklerden oluşur; bu belge sonrası v1.0’a kadar mekanik tasarım dondurulmuştur.

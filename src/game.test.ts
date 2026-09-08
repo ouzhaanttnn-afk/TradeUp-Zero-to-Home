@@ -8,6 +8,14 @@ import {
 } from "./game";
 
 describe("deterministic economy", () => {
+  it("requires profile setup only for a clean first-session career", () => {
+    expect(initialState().profile).toMatchObject({
+      avatarId: "pazar-kasifi",
+      onboardingComplete: false,
+    });
+    expect(initialState(0, "SANDBOX").profile.onboardingComplete).toBe(true);
+  });
+
   it("replays the same market values for the same seed and cycle", () => {
     const a = market(42, 500_000, 3).map((item) => [
       item.familyId,

@@ -9,6 +9,7 @@ import { App as CapacitorApp } from "@capacitor/app";
 import "./App.css";
 import { assetFor, fallbackAssetFor, visualTreatmentFor } from "./assets";
 import { familyById } from "./content/families";
+import { avatarById, avatars, freeAvatars } from "./content/avatars";
 import {
   activeBookCostMinor,
   activeOwnedAssets,
@@ -41,6 +42,7 @@ import {
 } from "./domain/monetization";
 import type {
   AccessibilityPreferences,
+  AvatarId,
   ItemInstance,
   MonetizationProductId,
 } from "./domain/models";
@@ -91,6 +93,7 @@ import {
 import { homeAtmosphereStage, homeGoldPercent } from "./ui/homeAtmosphere";
 import { marketScanRefillStatus, shortDuration } from "./ui/marketScan";
 import { recoveryPlan } from "./ui/recoveryPlan";
+import { ownsAnimatedAvatars as hasAnimatedAvatars } from "./domain/profile";
 
 type Tab = "market" | "follow" | "portfolio" | "journey";
 type PortfolioSegment = "inventory" | "preparation" | "listings";
@@ -172,6 +175,10 @@ const storeCopy: Record<
     title: "Ev stilleri paketi",
     detail: "Ev finali için üç görsel stil; ilerlemeye para eklemez.",
   },
+  tradeup_animated_avatars_01: {
+    title: "Canlı avatar koleksiyonu",
+    detail: "Üç hareketli profil görünümü; yalnız kozmetiktir.",
+  },
 };
 
 const rewardCopy = {
@@ -252,6 +259,33 @@ function ProductVisual({
   );
 }
 
+function AvatarPortrait({
+  avatarId,
+  className = "",
+}: {
+  avatarId: AvatarId;
+  className?: string;
+}) {
+  const avatar = avatarById(avatarId);
+  return (
+    <span
+      className={`avatar-portrait avatar-motion--${avatar.motion} ${className}`.trim()}
+      aria-hidden="true"
+    >
+      <span className="avatar-aura" />
+      <b className="avatar-fallback">{avatar.name.slice(0, 1)}</b>
+      <img
+        src={avatar.image}
+        alt=""
+        draggable={false}
+        onError={(event) => {
+          event.currentTarget.hidden = true;
+        }}
+      />
+    </span>
+  );
+}
+
 export default function App() {
   const [tab, setTab] = useState<Tab>("market");
   const [portfolioSegment, setPortfolioSegment] =
@@ -268,6 +302,10 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsReturnTab, setSettingsReturnTab] = useState<Tab>("market");
   const [profileDraft, setProfileDraft] = useState("");
+  const [onboardingName, setOnboardingName] = useState("");
+  const [avatarDraft, setAvatarDraft] = useState<AvatarId>("pazar-kasifi");
+  const [onboardingRestoreRequested, setOnboardingRestoreRequested] =
+    useState(false);
   const [purchasesOpen, setPurchasesOpen] = useState(false);
   const [resetArmed, setResetArmed] = useState(false);
   const [quickSaleAssetId, setQuickSaleAssetId] = useState<string | null>(null);
@@ -338,6 +376,8 @@ export default function App() {
     setLargeText,
     setSoundLevel,
     setProfileName,
+    setProfileAvatar,
+    completeProfileOnboarding,
     openPurchases,
     purchaseProduct,
     restorePurchases,
@@ -612,6 +652,114 @@ export default function App() {
   const completedSales = completedSalesPresentation(game.realizedProfitMinor);
 
   if (!ready) return <StartupSkeleton />;
+
+  const ownsAnimatedAvatars = hasAnimatedAvatars(game);
+
+  if (!game.profile.onboardingComplete) {
+    return (
+      <main
+        className={`profile-onboarding${game.accessibility.reducedMotion ? " reduced-motion" : ""}`}
+      >
+        <div className="onboarding-atmosphere" aria-hidden="true" />
+        <section
+          className="onboarding-card"
+          aria-labelledby="profile-onboarding-title"
+        >
+          <header className="onboarding-brand">
+            <span className="brand-mark" aria-hidden="true">
+              ↑
+            </span>
+            <span>
+              <small>TRADEUP · YENİ KARİYER</small>
+              <b>Zero to Home</b>
+            </span>
+          </header>
+          <div className="onboarding-copy">
+            <span>OYUNCU PROFİLİ</span>
+            <h1 id="profile-onboarding-title">Pazara kendi tarzınla gir.</h1>
+            <p>Adını belirle, seni temsil edecek karakteri seç.</p>
+          </div>
+          <label className="onboarding-name">
+            <span>Oyuncu adı</span>
+            <input
+              autoFocus
+              autoComplete="nickname"
+              maxLength={20}
+              value={onboardingName}
+              placeholder="Örn. Pazar Ustası"
+              onChange={(event) => setOnboardingName(event.target.value)}
+            />
+            <small>{onboardingName.trim().length}/20</small>
+          </label>
+          <fieldset className="avatar-picker avatar-picker--onboarding">
+            <legend>
+              {ownsAnimatedAvatars ? "Karakterin" : "Ücretsiz karakterin"}
+            </legend>
+            <div className="avatar-options">
+              {(ownsAnimatedAvatars ? avatars : freeAvatars).map((avatar) => (
+                <button
+                  key={avatar.id}
+                  type="button"
+                  aria-pressed={avatarDraft === avatar.id}
+                  aria-label={`${avatar.name}, ${avatar.role}`}
+                  onClick={() => setAvatarDraft(avatar.id)}
+                >
+                  <AvatarPortrait avatarId={avatar.id} />
+                  <span>
+                    <b>{avatar.name}</b>
+                    <small>{avatar.role}</small>
+                  </span>
+                  <i aria-hidden="true">✓</i>
+                </button>
+              ))}
+            </div>
+          </fieldset>
+          {!ownsAnimatedAvatars ? (
+            <div
+              className="premium-avatar-preview"
+              aria-label="Canlı avatar ön izlemesi"
+            >
+              <div>
+                <span>CANLI KOLEKSİYON</span>
+                <b>Hareketli avatarlar</b>
+                <small>Yalnız görünüm · oynanış avantajı yok</small>
+              </div>
+              <div className="premium-avatar-stack" aria-hidden="true">
+                {avatars.slice(3).map((avatar) => (
+                  <AvatarPortrait key={avatar.id} avatarId={avatar.id} />
+                ))}
+              </div>
+              <span className="premium-avatar-status">Yakında</span>
+            </div>
+          ) : null}
+          <button
+            className="primary onboarding-start"
+            disabled={!onboardingName.trim()}
+            onClick={() =>
+              completeProfileOnboarding(onboardingName, avatarDraft)
+            }
+          >
+            Kariyere başla <span aria-hidden="true">→</span>
+          </button>
+          <button
+            className="onboarding-restore"
+            disabled={monetizationBusy}
+            onClick={() => {
+              setOnboardingRestoreRequested(true);
+              void restorePurchases();
+            }}
+          >
+            Satın alımları geri yükle
+          </button>
+          {onboardingRestoreRequested ? (
+            <p className="onboarding-restore-status" role="status">
+              {monetizationBusy ? "Mağaza kontrol ediliyor…" : notice}
+            </p>
+          ) : null}
+        </section>
+      </main>
+    );
+  }
 
   const selectListing = (listingId: string) => {
     setSelectedId(listingId);
@@ -1046,14 +1194,10 @@ export default function App() {
           aria-label="Ayarlar"
           onClick={openSettingsPanel}
         >
-          <span className="profile-monogram" aria-hidden="true">
-            {game.profile.displayName
-              .split(/\s+/)
-              .slice(0, 2)
-              .map((part) => part[0])
-              .join("")
-              .toLocaleUpperCase("tr-TR")}
-          </span>
+          <AvatarPortrait
+            avatarId={game.profile.avatarId}
+            className="profile-header-avatar"
+          />
           <Icon name="settings" />
         </button>
       </header>
@@ -1954,14 +2098,10 @@ export default function App() {
                     );
                   }}
                 >
-                  <span className="profile-avatar" aria-hidden="true">
-                    {(profileDraft || game.profile.displayName)
-                      .split(/\s+/)
-                      .slice(0, 2)
-                      .map((part) => part[0])
-                      .join("")
-                      .toLocaleUpperCase("tr-TR")}
-                  </span>
+                  <AvatarPortrait
+                    avatarId={game.profile.avatarId}
+                    className="profile-avatar"
+                  />
                   <div className="profile-identity">
                     <span className="profile-kicker">
                       Pazar seviyesi {marketLevel}
@@ -2014,6 +2154,33 @@ export default function App() {
                     </span>
                   </div>
                 </form>
+                <fieldset className="avatar-picker avatar-picker--settings">
+                  <legend>Profil avatarı</legend>
+                  <div className="avatar-options">
+                    {avatars.map((avatar) => {
+                      const locked = avatar.premium && !ownsAnimatedAvatars;
+                      return (
+                        <button
+                          key={avatar.id}
+                          type="button"
+                          disabled={locked}
+                          aria-pressed={game.profile.avatarId === avatar.id}
+                          aria-label={`${avatar.name}${locked ? ", canlı avatar paketi gerekli" : ""}`}
+                          onClick={() => setProfileAvatar(avatar.id)}
+                        >
+                          <AvatarPortrait avatarId={avatar.id} />
+                          <span>
+                            <b>{avatar.name}</b>
+                            <small>
+                              {locked ? "Canlı · Yakında" : avatar.role}
+                            </small>
+                          </span>
+                          {locked ? <i aria-hidden="true">◇</i> : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </fieldset>
                 <section
                   className="settings-section"
                   aria-labelledby="experience-settings-title"

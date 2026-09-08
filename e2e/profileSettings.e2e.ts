@@ -5,6 +5,9 @@ test("profile and settings stay accessible from the mobile game header", async (
 }, testInfo) => {
   await page.setViewportSize({ width: 320, height: 640 });
   await page.goto("/");
+  await page.getByLabel("Oyuncu adı").fill("Yeni Tüccar");
+  await page.getByRole("button", { name: /Pazar Kaşifi/ }).click();
+  await page.getByRole("button", { name: "Kariyere başla" }).click();
   await page.screenshot({
     path: testInfo.outputPath("game-header-320.png"),
     animations: "disabled",
@@ -24,7 +27,7 @@ test("profile and settings stay accessible from the mobile game header", async (
   await dialog
     .getByRole("button", { name: "Satın Almalar ve Görünüm" })
     .click();
-  await expect(dialog.locator(".purchase-list article")).toHaveCount(4);
+  await expect(dialog.locator(".purchase-list article")).toHaveCount(5);
   await expect(dialog).toContainText("Yakında");
   await expect(dialog).not.toContainText("Fiyat yüklenemedi");
   expect(

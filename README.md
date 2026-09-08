@@ -3,7 +3,7 @@
 Portrait-first marketplace / flipping simulation built from the unified production GDD.
 
 The binding product specification is
-[`docs/TRADEUP_MASTER_GDD_v2.1.md`](docs/TRADEUP_MASTER_GDD_v2.1.md).
+[`docs/TRADEUP_MASTER_GDD_v2.2.md`](docs/TRADEUP_MASTER_GDD_v2.2.md).
 
 ## Implemented foundation
 

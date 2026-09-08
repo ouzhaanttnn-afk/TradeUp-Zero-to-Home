@@ -520,18 +520,20 @@ export function migrateStateToV4(value: unknown): unknown {
 }
 
 export function migrateStateToCurrent(value: unknown): unknown {
-  return migrateStateToV15(
-    migrateStateToV14(
-      migrateStateToV13(
-        migrateStateToV12(
-          migrateStateToV11(
-            migrateStateToV10(
-              migrateStateToV9(
-                migrateStateToV8(
-                  migrateStateToV7(
-                    migrateStateToV6(
-                      migrateStateToV5(
-                        migrateStateToV4(migrateStateToV3(value)),
+  return migrateStateToV16(
+    migrateStateToV15(
+      migrateStateToV14(
+        migrateStateToV13(
+          migrateStateToV12(
+            migrateStateToV11(
+              migrateStateToV10(
+                migrateStateToV9(
+                  migrateStateToV8(
+                    migrateStateToV7(
+                      migrateStateToV6(
+                        migrateStateToV5(
+                          migrateStateToV4(migrateStateToV3(value)),
+                        ),
                       ),
                     ),
                   ),
@@ -543,6 +545,25 @@ export function migrateStateToCurrent(value: unknown): unknown {
       ),
     ),
   );
+}
+
+export function migrateStateToV16(value: unknown): unknown {
+  const source = record(value);
+  if (integer(source.version) >= 16) return value;
+  const profile = record(source.profile);
+  return {
+    ...source,
+    version: 16,
+    profile: {
+      ...profile,
+      displayName:
+        string(profile.displayName, "Yeni Tüccar").trim().slice(0, 20) ||
+        "Yeni Tüccar",
+      avatarId: "pazar-kasifi",
+      // Existing players must not be interrupted by a new first-run screen.
+      onboardingComplete: true,
+    },
+  };
 }
 
 export function migrateStateToV15(value: unknown): unknown {

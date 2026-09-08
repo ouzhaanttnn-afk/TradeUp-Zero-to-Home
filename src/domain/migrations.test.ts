@@ -28,7 +28,11 @@ describe("save migration", () => {
     const state = validateState(migrateStateToCurrent(v12));
 
     expect(state.version).toBe(SAVE_VERSION);
-    expect(state.profile).toEqual({ displayName: "Yeni Tüccar" });
+    expect(state.profile).toEqual({
+      displayName: "Yeni Tüccar",
+      avatarId: "pazar-kasifi",
+      onboardingComplete: true,
+    });
     expect(state.transactionJournal).toEqual(current.transactionJournal);
     expect(reconcileJournal(state)).toEqual({
       cash: true,

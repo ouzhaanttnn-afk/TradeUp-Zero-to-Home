@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { completeFirstLaunch } from "./helpers";
 import { initialState, validateState } from "../src/game";
 import type { GameState } from "../src/domain/models";
 import {
@@ -37,6 +38,7 @@ for (const width of [320, 430]) {
     if (!listing.ok) throw new Error(listing.reason);
     const saved = validateState(listing.state);
     await page.goto("/");
+    await completeFirstLaunch(page);
     await expect(
       page.getByRole("heading", { name: "Fırsat akışı" }),
     ).toBeVisible();

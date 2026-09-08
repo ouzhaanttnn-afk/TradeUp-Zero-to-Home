@@ -50,7 +50,9 @@ import {
   advanceRewardState,
   rechargeMarketScanCredits,
 } from "../domain/monetization";
+import { isAnimatedAvatar, ownsAnimatedAvatars } from "../domain/profile";
 import type {
+  AvatarId,
   InspectionKind,
   MonetizationProductId,
   PreparationKind,
@@ -135,6 +137,8 @@ type Store = {
   setLargeText: (enabled: boolean) => void;
   setSoundLevel: (level: GameState["accessibility"]["soundLevel"]) => void;
   setProfileName: (displayName: string) => void;
+  setProfileAvatar: (avatarId: AvatarId) => void;
+  completeProfileOnboarding: (displayName: string, avatarId: AvatarId) => void;
   openPurchases: () => Promise<void>;
   purchaseProduct: (productId: MonetizationProductId) => Promise<void>;
   restorePurchases: () => Promise<void>;
@@ -1219,6 +1223,45 @@ export const useGameStore = create<Store>((set, get) => ({
         profile: { ...game.profile, displayName: normalized },
       }),
       notice: "Profil adı kaydedildi.",
+    });
+  },
+  setProfileAvatar: (avatarId) => {
+    const game = get().game;
+    const premiumAvatar = isAnimatedAvatar(avatarId);
+    const ownsPremiumAvatars = ownsAnimatedAvatars(game);
+    if (premiumAvatar && !ownsPremiumAvatars) {
+      set({ notice: "Canlı avatar paketi bu avatar için gerekli." });
+      return;
+    }
+    set({
+      game: stampAndPersist({
+        ...game,
+        profile: { ...game.profile, avatarId },
+      }),
+      notice: "Profil avatarı değiştirildi.",
+    });
+  },
+  completeProfileOnboarding: (displayName, avatarId) => {
+    const normalized = displayName.trim().replace(/\s+/g, " ").slice(0, 20);
+    if (!normalized) {
+      set({ notice: "Oyuncu adı boş bırakılamaz." });
+      return;
+    }
+    const game = get().game;
+    const premiumAvatar = isAnimatedAvatar(avatarId);
+    const ownsPremiumAvatars = ownsAnimatedAvatars(game);
+    const safeAvatarId =
+      premiumAvatar && !ownsPremiumAvatars ? "pazar-kasifi" : avatarId;
+    set({
+      game: stampAndPersist({
+        ...game,
+        profile: {
+          displayName: normalized,
+          avatarId: safeAvatarId,
+          onboardingComplete: true,
+        },
+      }),
+      notice: `Hoş geldin, ${normalized}. İlk fırsatın hazır.`,
     });
   },
   openPurchases: async () => {

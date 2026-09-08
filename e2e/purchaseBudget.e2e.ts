@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { completeFirstLaunch } from "./helpers";
 import { initialState, money, validateState } from "../src/game";
 import type { GameState } from "../src/domain/models";
 import { reconcileJournal } from "../src/domain/economy";
@@ -37,6 +38,7 @@ for (const scenario of ["offer", "counter", "shortfall"] as const) {
     }
     const saved = validateState(initial);
     await page.goto("/");
+    await completeFirstLaunch(page);
     await expect(
       page.getByRole("heading", { name: "Fırsat akışı" }),
     ).toBeVisible();

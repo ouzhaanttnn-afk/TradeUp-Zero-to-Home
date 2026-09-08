@@ -2,8 +2,8 @@
 
 ## Binding source of truth
 
-- `docs/TRADEUP_MASTER_GDD_v2.1.md` is the only binding product and design source of truth.
-- If code, README files, older documents, comments, or assumptions conflict with GDD v2.1, GDD v2.1 wins.
+- `docs/TRADEUP_MASTER_GDD_v2.2.md` is the only binding product and design source of truth.
+- If code, README files, older documents, comments, or assumptions conflict with GDD v2.2, GDD v2.2 wins.
 - In ambiguity, choose the simpler, less advantageous, less intrusive implementation that changes neither the economy nor monetization.
 - Do not silently add deferred ideas to a working build.
 
@@ -20,6 +20,7 @@
 - Keep the four-tab portrait shell: Pazar, Takip, Portföy, Yolculuk. Envanter, Hazırlık, and İlanlarım are Portföy segments. Respect safe areas, 320–430 px widths, text scaling, reduced motion, haptics-off, and missing-asset fallback.
 - Assets are not a gameplay blocker. Follow: manifest and placeholder, 24 hero families, condition/evidence overlays, then measured expansion.
 - Approved 2026-09-08 scan amendment: the player has 25 active market scans; each manual refresh consumes one. Credits regenerate from 0 to 25 over 30 real minutes (one per 72 seconds), including validated offline time. At zero, `MARKET_SCOUT` restores exactly 25 through an explicit rewarded choice or the premium bypass with unchanged caps/cooldown. Natural market flow never stops, credits never exceed 25, clock rollback grants nothing, and no currency/wealth event may automatically show an ad.
+- Approved GDD v2.2 profile amendment: a clean first launch asks for a 1–20 character player name and one of three free static avatars before FTUE. Existing saves migrate as already onboarded. `tradeup_animated_avatars_01` is the fifth permanent SKU and grants exactly three animated profile avatars; it is cosmetic-only, store-priced, restorable, and must stop moving under reduced motion.
 
 ## Scope freeze
 
@@ -42,7 +43,7 @@ Follow the production order. Per the user's updated instruction, complete, verif
 3. P1 — Decision vertical slice: compare, evidence/inspection, 24 deep families, preparation actions.
 4. P1 — First session: scripted starting notebook, real choice, negotiation, listing, first profit.
 5. P2 — Meta: expertise, Takip, career timeline, home reveal, analytics event contract.
-6. P3 — Monetization foundation: billing, entitlement, consent and rewarded adapters; exactly four placements and four non-consumable SKUs; sandbox/test identities first, production behind its quality gate.
+6. P3 — Monetization foundation: billing, entitlement, consent and rewarded adapters; exactly four placements and five non-consumable SKUs; sandbox/test identities first, production behind its quality gate.
 7. P4 — Content scale only after vertical-slice and monetization-safety tests pass.
 
 Standing authorization covers the next in-scope packages in order; it does not reopen product design.
@@ -59,7 +60,7 @@ For every package:
 6. Reconcile journal totals with cash, active book cost, and realized profit after save/load and settlement flows.
 7. Commit the completed work. Continue related small fixes within the authorized block; report at a meaningful phase boundary.
 
-The pure engine contract is mandatory: identical seed, game time, config, and command sequence must produce identical economic results on web, tests, and native. Before calling the vertical slice complete, satisfy the full Definition of Done and resilience tests in GDD v2.1, including core invariants, core-loop integration, WebView smoke, migration, 320–430 px layout, text scaling, reduced motion, haptics-off, and missing-asset fallback.
+The pure engine contract is mandatory: identical seed, game time, config, and command sequence must produce identical economic results on web, tests, and native. Before calling the vertical slice complete, satisfy the full Definition of Done and resilience tests in GDD v2.2, including core invariants, core-loop integration, WebView smoke, migration, 320–430 px layout, text scaling, reduced motion, haptics-off, and missing-asset fallback.
 
 ## Hybrid assistant routing
 
@@ -67,4 +68,4 @@ The pure engine contract is mandatory: identical seed, game time, config, and co
 - The primary agent may proactively use the local OmniRoute service for bounded, low-risk work such as generic copy drafts, repetitive classification, non-sensitive summaries, and disposable ideation.
 - Treat OmniRoute output as an untrusted draft: verify it before use and never let a secondary route write to the repository or make a final product decision directly.
 - Never send credentials, authentication material, personal data, publisher data, unreleased secrets, or destructive instructions through a secondary route.
-- On ambiguity, weak output, or conflict with GDD v2.1, discard the secondary output and complete the work with the primary Codex model.
+- On ambiguity, weak output, or conflict with GDD v2.2, discard the secondary output and complete the work with the primary Codex model.

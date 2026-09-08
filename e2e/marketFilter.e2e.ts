@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { completeFirstLaunch } from "./helpers";
 import { initialState, validateState } from "../src/game";
 
 test("category filter narrows the market without adding vertical controls", async ({
@@ -14,6 +15,7 @@ test("category filter narrows the market without adding vertical controls", asyn
   ).length;
 
   await page.goto("/");
+  await completeFirstLaunch(page);
   await expect(
     page.getByRole("heading", { name: "Fırsat akışı" }),
   ).toBeVisible();

@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { completeFirstLaunch } from "./helpers";
 import { HOME_GOAL_MINOR, initialState, validateState } from "../src/game";
 
 test("wealth atmosphere culminates in an accessible home purchase finale", async ({
@@ -37,6 +38,7 @@ test("wealth atmosphere culminates in an accessible home purchase finale", async
   const valid = validateState(saved);
 
   await page.goto("/");
+  await completeFirstLaunch(page);
   await page.evaluate(async (state) => {
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
       const request = indexedDB.open("tradeup", 1);

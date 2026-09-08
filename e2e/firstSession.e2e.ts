@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { completeFirstLaunch } from "./helpers";
 import type { GameState } from "../src/domain/models";
 import { netWorthMinor, reconcileJournal } from "../src/domain/economy";
 import { money, signedMoney } from "../src/game";
@@ -71,6 +72,7 @@ for (const choice of [
       ).toEqual([]);
     };
     await page.goto("/");
+    await completeFirstLaunch(page);
     await page.getByRole("button", { name: "Teklifi kabul et · ₺420" }).click();
     await stage("COMPARE");
     if (choice.withdraw || choice.width === 320) {

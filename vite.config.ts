@@ -6,6 +6,15 @@ import { createHash } from "node:crypto";
 export const shouldPrecacheBuildAsset = (path: string) =>
   !path.endsWith(".map") && !/\.(?:avif|jpe?g|png|webp)$/i.test(path);
 
+export const avatarPrecachePaths = [
+  "/assets/avatars/pazar-kasifi.webp",
+  "/assets/avatars/atolye-ustasi.webp",
+  "/assets/avatars/koleksiyon-uzmani.webp",
+  "/assets/avatars/neon-araci.webp",
+  "/assets/avatars/altin-vizyoner.webp",
+  "/assets/avatars/gece-analisti.webp",
+] as const;
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
@@ -24,6 +33,7 @@ export default defineConfig({
           "/icon-192.png",
           "/icon-512.png",
           "/favicon.svg",
+          ...avatarPrecachePaths,
           ...Object.keys(bundle)
             .filter(shouldPrecacheBuildAsset)
             .map((path) => `/${path}`),

@@ -9,6 +9,7 @@ import type {
   RewardActionTransaction,
   RewardPlacementId,
 } from "./models";
+import { isAnimatedAvatar } from "./profile";
 import { MONETIZATION_CONFIG } from "./config";
 
 type RewardRequestReason =
@@ -560,7 +561,10 @@ export const setRewardEntitlement = (
           ? "theme_workshop"
           : productId === MONETIZATION_CONFIG.products.homeStyles.productId
             ? "home_styles_01"
-            : null;
+            : productId ===
+                MONETIZATION_CONFIG.products.animatedAvatars.productId
+              ? "animated_avatars_01"
+              : null;
 
   if (!entitlementId) return state;
 
@@ -608,8 +612,12 @@ export const syncVerifiedEntitlement = (
     (product) => product.productId === productId,
   )?.entitlementId;
   if (!entitlementId) return state;
+  const premiumAvatarSelected = isAnimatedAvatar(state.profile.avatarId);
   return {
     ...state,
+    ...(entitlementId === "animated_avatars_01" && premiumAvatarSelected
+      ? { profile: { ...state.profile, avatarId: "pazar-kasifi" as const } }
+      : {}),
     monetization: {
       ...state.monetization,
       entitlements: [

@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { completeFirstLaunch } from "./helpers";
 import { familyById } from "../src/content/families";
 import { initialState, validateState, type GameState } from "../src/game";
 
@@ -131,6 +132,7 @@ test("expanded product families use dedicated mobile artwork", async ({
   const saved = validateState(state);
 
   await page.goto("/");
+  await completeFirstLaunch(page);
   await expect(
     page.getByRole("heading", { name: "Fırsat akışı" }),
   ).toBeVisible();
@@ -266,6 +268,7 @@ test("secondary expansion artwork loads without category fallbacks", async ({
   }
 
   await page.goto("/");
+  await completeFirstLaunch(page);
   await persistGame(page, validateState(state));
   await page.reload();
 
@@ -333,6 +336,7 @@ test("final expansion artwork loads without category fallbacks", async ({
   }
 
   await page.goto("/");
+  await completeFirstLaunch(page);
   await persistGame(page, validateState(state));
   await page.reload();
 

@@ -233,4 +233,28 @@ describe("monetization reward eligibility", () => {
       ),
     ).toBe(false);
   });
+
+  it("grants and safely revokes the cosmetic animated-avatar entitlement", () => {
+    const base = initialState(0, "SANDBOX");
+    const owned = syncVerifiedEntitlement(
+      base,
+      "tradeup_animated_avatars_01",
+      "OWNED",
+      "ios",
+    );
+    expect(owned.monetization.entitlements[0]).toMatchObject({
+      entitlementId: "animated_avatars_01",
+      status: "OWNED",
+    });
+    owned.profile.avatarId = "gece-analisti";
+
+    const revoked = syncVerifiedEntitlement(
+      owned,
+      "tradeup_animated_avatars_01",
+      "REVOKED",
+      "ios",
+    );
+    expect(revoked.profile.avatarId).toBe("pazar-kasifi");
+    expect(revoked.monetization.entitlements[0].status).toBe("REVOKED");
+  });
 });

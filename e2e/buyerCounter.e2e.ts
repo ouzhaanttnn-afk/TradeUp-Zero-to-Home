@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { completeFirstLaunch } from "./helpers";
 import type { GameState } from "../src/domain/models";
 import {
   buyerCounterMinor,
@@ -68,6 +69,7 @@ test("a buyer counter becomes one persisted final offer with no message chain", 
   });
 
   await page.goto("/");
+  await completeFirstLaunch(page);
   await page.evaluate(async (state) => {
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
       const request = indexedDB.open("tradeup", 1);

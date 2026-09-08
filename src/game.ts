@@ -29,7 +29,7 @@ export type {
   TransactionJournalEntry,
 } from "./domain/models";
 export { families } from "./content/families";
-export const SAVE_VERSION = 15;
+export const SAVE_VERSION = 16;
 export const HOME_GOAL_MINOR = 350_000_000;
 
 const attributeDefinitionSchema = z.object({
@@ -369,6 +369,15 @@ const accessibilitySchema = z.object({
 });
 const profileSchema = z.object({
   displayName: z.string().trim().min(1).max(20),
+  avatarId: z.enum([
+    "pazar-kasifi",
+    "atolye-ustasi",
+    "koleksiyon-uzmani",
+    "neon-araci",
+    "altin-vizyoner",
+    "gece-analisti",
+  ]),
+  onboardingComplete: z.boolean(),
 });
 const rewardTransactionSchema = z.object({
   id: z.string(),
@@ -890,7 +899,11 @@ export const initialState = (
       largeText: false,
       soundLevel: "LOW",
     },
-    profile: { displayName: "Yeni Tüccar" },
+    profile: {
+      displayName: "Yeni Tüccar",
+      avatarId: "pazar-kasifi",
+      onboardingComplete: mode === "SANDBOX",
+    },
     monetization: createDefaultMonetizationState(0, lastWallClockMs),
     ftue: {
       stage: mode === "FTUE" ? "STARTING_SALE" : "COMPLETE",

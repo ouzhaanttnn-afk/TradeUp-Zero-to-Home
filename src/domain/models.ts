@@ -300,13 +300,15 @@ export type MonetizationProductId =
   | "tradeup_premium_lifetime"
   | "tradeup_theme_night_market"
   | "tradeup_theme_workshop"
-  | "tradeup_home_styles_01";
+  | "tradeup_home_styles_01"
+  | "tradeup_animated_avatars_01";
 
 export type EntitlementId =
   | "premium_lifetime"
   | "theme_night_market"
   | "theme_workshop"
-  | "home_styles_01";
+  | "home_styles_01"
+  | "animated_avatars_01";
 
 export type EntitlementStatus = "PENDING" | "OWNED" | "REVOKED";
 
@@ -401,8 +403,18 @@ export type AccessibilityPreferences = {
   soundLevel: "OFF" | "LOW" | "NORMAL";
 };
 
+export type AvatarId =
+  | "pazar-kasifi"
+  | "atolye-ustasi"
+  | "koleksiyon-uzmani"
+  | "neon-araci"
+  | "altin-vizyoner"
+  | "gece-analisti";
+
 export type PlayerProfile = {
   displayName: string;
+  avatarId: AvatarId;
+  onboardingComplete: boolean;
 };
 
 export type Negotiation = {

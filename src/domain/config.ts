@@ -101,6 +101,10 @@ export const MONETIZATION_CONFIG = {
       productId: "tradeup_home_styles_01" as const,
       entitlementId: "home_styles_01" as const,
     },
+    {
+      productId: "tradeup_animated_avatars_01" as const,
+      entitlementId: "animated_avatars_01" as const,
+    },
   ],
   reward: {
     rollingWindowHours: 24,
@@ -145,6 +149,11 @@ export const MONETIZATION_CONFIG = {
     homeStyles: {
       productId: "tradeup_home_styles_01" as const,
       entitlementId: "home_styles_01" as const,
+      platform: "web" as const,
+    },
+    animatedAvatars: {
+      productId: "tradeup_animated_avatars_01" as const,
+      entitlementId: "animated_avatars_01" as const,
       platform: "web" as const,
     },
   },

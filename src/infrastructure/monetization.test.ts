@@ -17,10 +17,10 @@ const products: StoreProductMetadata[] = MONETIZATION_CONFIG.productCatalog.map(
 );
 
 describe("monetization provider contracts", () => {
-  it("loads exactly the four locked products from provider metadata", async () => {
+  it("loads only the locked products from provider metadata", async () => {
     const adapter = createSandboxBillingAdapter({ products });
     const loaded = await adapter.loadProducts();
-    expect(loaded).toHaveLength(4);
+    expect(loaded).toHaveLength(5);
     expect(loaded.map((product) => product.productId)).toEqual(
       MONETIZATION_CONFIG.productCatalog.map((product) => product.productId),
     );

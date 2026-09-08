@@ -555,6 +555,48 @@ describe("accessibility preferences", () => {
     );
     expect(useGameStore.getState().notice).toBe("Profil adı kaydedildi.");
   });
+
+  it("completes first-launch profile setup without changing the economy", () => {
+    const game = initialState(0);
+    useGameStore.setState({ game, ready: true, notice: "" });
+    const journal = structuredClone(game.transactionJournal);
+
+    useGameStore
+      .getState()
+      .completeProfileOnboarding("  Fırsat   Avcısı ", "atolye-ustasi");
+
+    expect(useGameStore.getState().game.profile).toEqual({
+      displayName: "Fırsat Avcısı",
+      avatarId: "atolye-ustasi",
+      onboardingComplete: true,
+    });
+    expect(useGameStore.getState().game.transactionJournal).toEqual(journal);
+  });
+
+  it("keeps premium avatars locked until their entitlement is owned", () => {
+    useGameStore.getState().setProfileAvatar("neon-araci");
+    expect(useGameStore.getState().game.profile.avatarId).toBe("pazar-kasifi");
+
+    const game = useGameStore.getState().game;
+    useGameStore.setState({
+      game: {
+        ...game,
+        monetization: {
+          ...game.monetization,
+          entitlements: [
+            {
+              productId: "tradeup_animated_avatars_01",
+              entitlementId: "animated_avatars_01",
+              status: "OWNED",
+              platform: "ios",
+            },
+          ],
+        },
+      },
+    });
+    useGameStore.getState().setProfileAvatar("neon-araci");
+    expect(useGameStore.getState().game.profile.avatarId).toBe("neon-araci");
+  });
 });
 
 describe("persistence recovery notice", () => {

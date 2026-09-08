@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { completeFirstLaunch } from "./helpers";
 
 test.describe("missing product images", () => {
   test.use({ serviceWorkers: "block" });
@@ -7,6 +8,7 @@ test.describe("missing product images", () => {
   }) => {
     await page.route("**/assets/prd_*.png", (route) => route.abort());
     await page.goto("/");
+    await completeFirstLaunch(page);
     const startingImage = page.getByRole("img", { name: "Eski defter" });
     await expect(startingImage).toHaveAttribute("src", /^data:image\/svg\+xml/);
     await page.getByRole("button", { name: "Teklifi kabul et · ₺420" }).click();
@@ -102,6 +104,7 @@ for (const width of [320, 390, 430]) {
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto("/");
+    await completeFirstLaunch(page);
     await page.getByRole("button", { name: "Teklifi kabul et · ₺420" }).click();
     await checkMarketGrid(page);
     await checkLayout(page);
