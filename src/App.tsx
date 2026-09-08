@@ -1625,7 +1625,7 @@ export default function App() {
               >
                 <div className="settings-sheet-heading">
                   <div>
-                    <small>OYUNCU MERKEZİ</small>
+                    <small>HESABIM</small>
                     <h2 id="settings-title">Profil ve Ayarlar</h2>
                   </div>
                   <button
@@ -1655,15 +1655,20 @@ export default function App() {
                       .join("")
                       .toLocaleUpperCase("tr-TR")}
                   </span>
-                  <label>
-                    <span>Oyuncu adı</span>
-                    <input
-                      value={profileDraft}
-                      maxLength={20}
-                      autoComplete="nickname"
-                      onChange={(event) => setProfileDraft(event.target.value)}
-                    />
-                  </label>
+                  <div className="profile-identity">
+                    <span className="profile-kicker">
+                      Pazar seviyesi {marketLevel}
+                    </span>
+                    <label>
+                      <span>Oyuncu adı</span>
+                      <input
+                        value={profileDraft}
+                        maxLength={20}
+                        autoComplete="nickname"
+                        onChange={(event) => setProfileDraft(event.target.value)}
+                      />
+                    </label>
+                  </div>
                   <button
                     className="primary"
                     disabled={
@@ -1685,7 +1690,7 @@ export default function App() {
                       <b>{marketLevel}</b>
                     </span>
                     <span>
-                      <small>Tamamlanan satış</small>
+                      <small>Satış</small>
                       <b>
                         {
                           game.transactionJournal.filter(
@@ -1695,7 +1700,7 @@ export default function App() {
                       </b>
                     </span>
                     <span>
-                      <small>Ev yolculuğu</small>
+                      <small>Ev hedefi</small>
                       <b>%{homeProgress}</b>
                     </span>
                   </div>
@@ -1705,45 +1710,59 @@ export default function App() {
                   aria-labelledby="experience-settings-title"
                 >
                   <div className="settings-section-heading">
+                    <span className="settings-heading-icon" aria-hidden="true">
+                      <Icon name="settings" />
+                    </span>
                     <div>
                       <h3 id="experience-settings-title">Oyun deneyimi</h3>
-                      <p>Görünüm, ses ve erişilebilirlik</p>
+                      <p>Sana uygun oyun hissi</p>
                     </div>
                   </div>
                   <div className="settings-row">
-                    <span>
+                    <span className="settings-row-icon" aria-hidden="true">
+                      <Icon name="haptics" />
+                    </span>
+                    <span className="settings-row-copy">
                       <b>Dokunsal geri bildirim</b>
                       <small>Önemli kararlarda titreşim</small>
                     </span>
                     <button
-                      className="settings-toggle"
+                      className="settings-switch"
                       aria-pressed={game.accessibility.hapticsEnabled}
+                      aria-label={`Dokunsal tepki: ${game.accessibility.hapticsEnabled ? "Açık" : "Kapalı"}`}
                       onClick={() =>
                         setHaptics(!game.accessibility.hapticsEnabled)
                       }
                     >
-                      {game.accessibility.hapticsEnabled ? "Açık" : "Kapalı"}
+                      <span aria-hidden="true" />
                     </button>
                   </div>
                   <div className="settings-row">
-                    <span>
+                    <span className="settings-row-icon" aria-hidden="true">
+                      <Icon name="motion" />
+                    </span>
+                    <span className="settings-row-copy">
                       <b>Azaltılmış hareket</b>
                       <small>Geçişleri ve parlamaları sakinleştirir</small>
                     </span>
                     <button
-                      className="settings-toggle"
+                      className="settings-switch"
                       aria-pressed={game.accessibility.reducedMotion}
+                      aria-label={`Azaltılmış hareket: ${game.accessibility.reducedMotion ? "Açık" : "Kapalı"}`}
                       onClick={() =>
                         setReducedMotion(!game.accessibility.reducedMotion)
                       }
                     >
-                      {game.accessibility.reducedMotion ? "Açık" : "Kapalı"}
+                      <span aria-hidden="true" />
                     </button>
                   </div>
                   <div className="settings-row">
-                    <span>
+                    <span className="settings-row-icon" aria-hidden="true">
+                      <Icon name="text" />
+                    </span>
+                    <span className="settings-row-copy">
                       <b>Metin boyutu</b>
-                      <small>Arayüz okunabilirliği</small>
+                      <small>Okuma rahatlığı</small>
                     </span>
                     <button
                       className="settings-value"
@@ -1756,7 +1775,10 @@ export default function App() {
                     </button>
                   </div>
                   <div className="settings-row">
-                    <span>
+                    <span className="settings-row-icon" aria-hidden="true">
+                      <Icon name="sound" />
+                    </span>
+                    <span className="settings-row-copy">
                       <b>Ses seviyesi</b>
                       <small>Efektlerin yüksekliği</small>
                     </span>
@@ -1773,21 +1795,26 @@ export default function App() {
                     </button>
                   </div>
                   <div className="settings-row">
-                    <span>
+                    <span className="settings-row-icon" aria-hidden="true">
+                      <Icon name="analytics" />
+                    </span>
+                    <span className="settings-row-copy">
                       <b>İsteğe bağlı analitik</b>
                       <small>Kişisel bilgi içermez</small>
                     </span>
                     <button
-                      className="settings-toggle"
+                      className="settings-switch"
                       aria-pressed={game.analytics.enabled}
+                      aria-label={`İsteğe bağlı analitik: ${game.analytics.enabled ? "Açık" : "Kapalı"}`}
                       onClick={() => setAnalytics(!game.analytics.enabled)}
                     >
-                      {game.analytics.enabled ? "Açık" : "Kapalı"}
+                      <span aria-hidden="true" />
                     </button>
                   </div>
                 </section>
                 <button
-                  className="secondary"
+                  className="settings-link-card"
+                  aria-label="Satın Almalar ve Görünüm"
                   aria-expanded={purchasesOpen}
                   onClick={() => {
                     const next = !purchasesOpen;
@@ -1795,7 +1822,14 @@ export default function App() {
                     if (next) void openPurchases();
                   }}
                 >
-                  Satın Almalar ve Görünüm
+                  <span className="settings-link-icon" aria-hidden="true">
+                    <Icon name="store" />
+                  </span>
+                  <span>
+                    <b>Satın almalar &amp; görünüm</b>
+                    <small>Kalıcı paketler ve geri yükleme</small>
+                  </span>
+                  <i aria-hidden="true">{purchasesOpen ? "−" : "+"}</i>
                 </button>
                 {purchasesOpen ? (
                   <section
@@ -1874,28 +1908,32 @@ export default function App() {
                     </div>
                   </section>
                 ) : null}
-                <button
-                  className={resetArmed ? "danger-confirm" : "secondary"}
-                  onClick={() => {
-                    if (resetArmed) {
-                      setResetArmed(false);
-                      setSettingsOpen(false);
-                      void reset();
-                    } else setResetArmed(true);
-                  }}
-                >
-                  {resetArmed
-                    ? "Tüm kariyeri kalıcı olarak sıfırla"
-                    : "Kariyeri sıfırlama seçenekleri"}
-                </button>
-                {resetArmed ? (
+                <section className="settings-danger-zone" aria-label="Kayıt yönetimi">
+                  <div>
+                    <b>Kayıt yönetimi</b>
+                    <small>Bu işlem geri alınamaz.</small>
+                  </div>
                   <button
-                    className="text-button"
-                    onClick={() => setResetArmed(false)}
+                    className={resetArmed ? "danger-confirm" : "text-button"}
+                    onClick={() => {
+                      if (resetArmed) {
+                        setResetArmed(false);
+                        setSettingsOpen(false);
+                        void reset();
+                      } else setResetArmed(true);
+                    }}
                   >
-                    Vazgeç
+                    {resetArmed ? "Kalıcı olarak sıfırla" : "Kariyeri sıfırla"}
                   </button>
-                ) : null}
+                  {resetArmed ? (
+                    <button
+                      className="text-button"
+                      onClick={() => setResetArmed(false)}
+                    >
+                      Vazgeç
+                    </button>
+                  ) : null}
+                </section>
               </section>
             ) : null}
             <section
