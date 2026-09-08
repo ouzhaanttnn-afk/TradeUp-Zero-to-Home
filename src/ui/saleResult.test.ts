@@ -24,6 +24,7 @@ describe("latest sale result", () => {
       proceedsMinor: 25_000,
       bookCostMinor: 20_000,
       profitMinor: 5_000,
+      cause: "Kârın ana nedeni: satış fiyatı toplam harcamanı ₺50 aştı.",
     });
   });
 

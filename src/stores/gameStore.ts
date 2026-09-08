@@ -33,6 +33,7 @@ import {
   trackAnalytics,
 } from "../infrastructure/analytics";
 import { playFeedbackSound, type FeedbackSound } from "../infrastructure/audio";
+import { saleDecisionCause } from "../ui/decisionCause";
 import {
   dismissFtueStage,
   isFtueActive,
@@ -655,11 +656,12 @@ export const useGameStore = create<Store>((set, get) => ({
       transactionId,
     );
     const progressed = progressBy(withMeta);
+    const cause = saleDecisionCause(currentAsset, saleMinor);
     set({
       game: stampAndPersist(progressed.state),
       notice: worldNotice(
         progressed,
-        `${currentAsset.instance.family.name} ${money(saleMinor)} fiyatına satıldı.`,
+        `${currentAsset.instance.family.name} ${money(saleMinor)} fiyatına satıldı. ${cause}`,
       ),
     });
     const profitable = saleMinor >= currentAsset.bookCostMinor;

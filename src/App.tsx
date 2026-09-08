@@ -72,6 +72,7 @@ import {
 } from "./ui/comparisonPresentation";
 import { preparationPresentation } from "./ui/preparationPresentation";
 import { listingActivity } from "./ui/listingActivity";
+import { purchaseDecisionCause } from "./ui/decisionCause";
 import {
   ALL_MARKET_CATEGORIES,
   filterMarketListings,
@@ -752,6 +753,12 @@ export default function App() {
                 100,
             )}
           </p>
+          {focusedAssetId === item.id ? (
+            <p className="decision-cause" role="status">
+              <b>Karar özeti</b>
+              <span>{purchaseDecisionCause(game, item)}</span>
+            </p>
+          ) : null}
         </div>
         <div className="sell-actions">
           {showPreparation && item.state === "PREPARING" ? (
@@ -1781,6 +1788,10 @@ export default function App() {
                         <dd>{signedMoney(latestSale.profitMinor)}</dd>
                       </div>
                     </dl>
+                    <p className="decision-cause">
+                      <b>Sonuç özeti</b>
+                      <span>{latestSale.cause}</span>
+                    </p>
                     <p>Yeni fırsat için paran hazır: {money(game.cashMinor)}</p>
                   </div>
                   <button

@@ -1098,6 +1098,24 @@ main {
   gap: 4px;
   align-items: center;
 }
+.decision-cause {
+  display: grid;
+  gap: 2px;
+  padding: 7px 9px;
+  border-left: 2px solid #d7b96d;
+  border-radius: 0 9px 9px 0;
+  background: rgba(215, 185, 109, 0.07);
+  line-height: 1.35;
+}
+.decision-cause b {
+  color: #e2c77f;
+  font-size: calc(8px + var(--text-size-boost));
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.decision-cause span {
+  color: #bdcbc4;
+}
 .owned-icon {
   align-self: stretch;
   min-height: 72px;

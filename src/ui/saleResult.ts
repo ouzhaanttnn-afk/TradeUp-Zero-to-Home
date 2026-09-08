@@ -1,4 +1,5 @@
 import type { GameState } from "../domain/models";
+import { saleDecisionCause } from "./decisionCause";
 
 export function latestSaleResult(state: GameState) {
   const entry = state.transactionJournal
@@ -13,5 +14,6 @@ export function latestSaleResult(state: GameState) {
     proceedsMinor: entry.cashDeltaMinor,
     bookCostMinor: -entry.costBasisDeltaMinor,
     profitMinor: entry.realizedProfitDeltaMinor,
+    cause: saleDecisionCause(asset, entry.cashDeltaMinor),
   };
 }

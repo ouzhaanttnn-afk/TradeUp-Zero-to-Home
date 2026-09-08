@@ -209,6 +209,8 @@ export function purchaseListing(
           {
             sourceListingId: currentListing.id,
             familyId: currentListing.familyId,
+            askingPriceMinor: currentListing.priceMinor,
+            purchasePriceMinor,
           },
         ),
       ],
