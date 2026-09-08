@@ -5,919 +5,919 @@
     {
       "assetKey": "prd_notebook",
       "familyId": "notebook",
-      "source": "../products/prd_notebook.png",
+      "source": "../products/prd_notebook.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_vinyl",
       "familyId": "vinyl",
-      "source": "../products/prd_vinyl.png",
+      "source": "../products/prd_vinyl.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_book",
       "familyId": "book",
-      "source": "../products/prd_book.png",
+      "source": "../products/prd_book.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_sneaker",
       "familyId": "sneaker",
-      "source": "../products/prd_sneaker.png",
+      "source": "../products/prd_sneaker.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_headset",
       "familyId": "headset",
-      "source": "../products/prd_headset.png",
+      "source": "../products/prd_headset.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_speaker",
       "familyId": "speaker",
-      "source": "../products/prd_speaker.png",
+      "source": "../products/prd_speaker.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_turntable",
       "familyId": "turntable",
-      "source": "../products/prd_turntable.png",
+      "source": "../products/prd_turntable.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_record_player",
       "familyId": "record_player",
-      "source": "../products/prd_record_player.png",
+      "source": "../products/prd_record_player.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_desk",
       "familyId": "desk",
-      "source": "../products/prd_desk.png",
+      "source": "../products/prd_desk.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_chair",
       "familyId": "chair",
-      "source": "../products/prd_chair.png",
+      "source": "../products/prd_chair.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_coffee",
       "familyId": "coffee",
-      "source": "../products/prd_coffee.png",
+      "source": "../products/prd_coffee.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_lamp",
       "familyId": "lamp",
-      "source": "../products/prd_lamp.png",
+      "source": "../products/prd_lamp.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_console",
       "familyId": "console",
-      "source": "../products/prd_console.png",
+      "source": "../products/prd_console.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_handheld",
       "familyId": "handheld",
-      "source": "../products/prd_handheld.png",
+      "source": "../products/prd_handheld.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_controller",
       "familyId": "controller",
-      "source": "../products/prd_controller.png",
+      "source": "../products/prd_controller.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_game_collection",
       "familyId": "game_collection",
-      "source": "../products/prd_game_collection.png",
+      "source": "../products/prd_game_collection.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_guitar",
       "familyId": "guitar",
-      "source": "../products/prd_guitar.png",
+      "source": "../products/prd_guitar.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_keyboard",
       "familyId": "keyboard",
-      "source": "../products/prd_keyboard.png",
+      "source": "../products/prd_keyboard.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_microphone",
       "familyId": "microphone",
-      "source": "../products/prd_microphone.png",
+      "source": "../products/prd_microphone.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_pedal",
       "familyId": "pedal",
-      "source": "../products/prd_pedal.png",
+      "source": "../products/prd_pedal.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_phone",
       "familyId": "phone",
-      "source": "../products/prd_phone.png",
+      "source": "../products/prd_phone.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_compact_phone",
       "familyId": "compact_phone",
-      "source": "../products/prd_compact_phone.png",
+      "source": "../products/prd_compact_phone.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_tablet",
       "familyId": "tablet",
-      "source": "../products/prd_tablet.png",
+      "source": "../products/prd_tablet.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_smartwatch",
       "familyId": "smartwatch",
-      "source": "../products/prd_smartwatch.png",
+      "source": "../products/prd_smartwatch.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_watch",
       "familyId": "mechanical_watch",
-      "source": "../products/prd_watch.png",
+      "source": "../products/prd_watch.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_fountain_pen",
       "familyId": "fountain_pen",
-      "source": "../products/prd_fountain_pen.png",
+      "source": "../products/prd_fountain_pen.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_board_game",
       "familyId": "board_game",
-      "source": "../products/prd_board_game.png",
+      "source": "../products/prd_board_game.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_vintage_lighter",
       "familyId": "vintage_lighter",
-      "source": "../products/prd_vintage_lighter.png",
+      "source": "../products/prd_vintage_lighter.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_portable_radio",
       "familyId": "portable_radio",
-      "source": "../products/prd_portable_radio.png",
+      "source": "../products/prd_portable_radio.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_studio_monitor",
       "familyId": "studio_monitor",
-      "source": "../products/prd_studio_monitor.png",
+      "source": "../products/prd_studio_monitor.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_dac_amp",
       "familyId": "dac_amp",
-      "source": "../products/prd_dac_amp.png",
+      "source": "../products/prd_dac_amp.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_cassette_player",
       "familyId": "cassette_player",
-      "source": "../products/prd_cassette_player.png",
+      "source": "../products/prd_cassette_player.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_floor_lamp",
       "familyId": "floor_lamp",
-      "source": "../products/prd_floor_lamp.png",
+      "source": "../products/prd_floor_lamp.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_side_table",
       "familyId": "side_table",
-      "source": "../products/prd_side_table.png",
+      "source": "../products/prd_side_table.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_robot_vacuum",
       "familyId": "robot_vacuum",
-      "source": "../products/prd_robot_vacuum.png",
+      "source": "../products/prd_robot_vacuum.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_cordless_vacuum",
       "familyId": "cordless_vacuum",
-      "source": "../products/prd_cordless_vacuum.png",
+      "source": "../products/prd_cordless_vacuum.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_handheld_vacuum",
       "familyId": "handheld_vacuum",
-      "source": "../products/prd_handheld_vacuum.png",
+      "source": "../products/prd_handheld_vacuum.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_stick_vacuum",
       "familyId": "stick_vacuum",
-      "source": "../products/prd_stick_vacuum.png",
+      "source": "../products/prd_stick_vacuum.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_stand_mixer",
       "familyId": "stand_mixer",
-      "source": "../products/prd_stand_mixer.png",
+      "source": "../products/prd_stand_mixer.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_vr_headset",
       "familyId": "vr_headset",
-      "source": "../products/prd_vr_headset.png",
+      "source": "../products/prd_vr_headset.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_gaming_keyboard",
       "familyId": "gaming_keyboard",
-      "source": "../products/prd_gaming_keyboard.png",
+      "source": "../products/prd_gaming_keyboard.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_racing_wheel",
       "familyId": "racing_wheel",
-      "source": "../products/prd_racing_wheel.png",
+      "source": "../products/prd_racing_wheel.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_game_cartridge",
       "familyId": "game_cartridge",
-      "source": "../products/prd_game_cartridge.png",
+      "source": "../products/prd_game_cartridge.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_bass_guitar",
       "familyId": "bass_guitar",
-      "source": "../products/prd_bass_guitar.png",
+      "source": "../products/prd_bass_guitar.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_audio_interface",
       "familyId": "audio_interface",
-      "source": "../products/prd_audio_interface.png",
+      "source": "../products/prd_audio_interface.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_drum_machine",
       "familyId": "drum_machine",
-      "source": "../products/prd_drum_machine.png",
+      "source": "../products/prd_drum_machine.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_violin",
       "familyId": "violin",
-      "source": "../products/prd_violin.png",
+      "source": "../products/prd_violin.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_fold_phone",
       "familyId": "fold_phone",
-      "source": "../products/prd_fold_phone.png",
+      "source": "../products/prd_fold_phone.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_rugged_phone",
       "familyId": "rugged_phone",
-      "source": "../products/prd_rugged_phone.png",
+      "source": "../products/prd_rugged_phone.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_e_reader",
       "familyId": "e_reader",
-      "source": "../products/prd_e_reader.png",
+      "source": "../products/prd_e_reader.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_mobile_projector",
       "familyId": "mobile_projector",
-      "source": "../products/prd_mobile_projector.png",
+      "source": "../products/prd_mobile_projector.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_laptop",
       "familyId": "laptop",
-      "source": "../products/prd_laptop.png",
+      "source": "../products/prd_laptop.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_monitor",
       "familyId": "monitor",
-      "source": "../products/prd_monitor.png",
+      "source": "../products/prd_monitor.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_mini_pc",
       "familyId": "mini_pc",
-      "source": "../products/prd_mini_pc.png",
+      "source": "../products/prd_mini_pc.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_mechanical_keyboard",
       "familyId": "mechanical_keyboard",
-      "source": "../products/prd_mechanical_keyboard.png",
+      "source": "../products/prd_mechanical_keyboard.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_graphics_tablet",
       "familyId": "graphics_tablet",
-      "source": "../products/prd_graphics_tablet.png",
+      "source": "../products/prd_graphics_tablet.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_router",
       "familyId": "router",
-      "source": "../products/prd_router.png",
+      "source": "../products/prd_router.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_camera",
       "familyId": "camera",
-      "source": "../products/prd_camera.png",
+      "source": "../products/prd_camera.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_camera_lens",
       "familyId": "camera_lens",
-      "source": "../products/prd_camera_lens.png",
+      "source": "../products/prd_camera_lens.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_instant_camera",
       "familyId": "instant_camera",
-      "source": "../products/prd_instant_camera.png",
+      "source": "../products/prd_instant_camera.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_tripod",
       "familyId": "tripod",
-      "source": "../products/prd_tripod.png",
+      "source": "../products/prd_tripod.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_camera_flash",
       "familyId": "camera_flash",
-      "source": "../products/prd_camera_flash.png",
+      "source": "../products/prd_camera_flash.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_action_camera",
       "familyId": "action_camera",
-      "source": "../products/prd_action_camera.png",
+      "source": "../products/prd_action_camera.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_perfume_set",
       "familyId": "perfume_set",
-      "source": "../products/prd_perfume_set.png",
+      "source": "../products/prd_perfume_set.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_makeup_set",
       "familyId": "makeup_set",
-      "source": "../products/prd_makeup_set.png",
+      "source": "../products/prd_makeup_set.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_trench_coat",
       "familyId": "trench_coat",
-      "source": "../products/prd_trench_coat.png",
+      "source": "../products/prd_trench_coat.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_leather_bag",
       "familyId": "leather_bag",
-      "source": "../products/prd_leather_bag.png",
+      "source": "../products/prd_leather_bag.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_air_fryer",
       "familyId": "air_fryer",
-      "source": "../products/prd_air_fryer.png",
+      "source": "../products/prd_air_fryer.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_sewing_machine",
       "familyId": "sewing_machine",
-      "source": "../products/prd_sewing_machine.png",
+      "source": "../products/prd_sewing_machine.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_air_purifier",
       "familyId": "air_purifier",
-      "source": "../products/prd_air_purifier.png",
+      "source": "../products/prd_air_purifier.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_cordless_drill",
       "familyId": "cordless_drill",
-      "source": "../products/prd_cordless_drill.png",
+      "source": "../products/prd_cordless_drill.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_headphones",
       "familyId": "headphones",
-      "source": "../products/prd_headphones.png",
+      "source": "../products/prd_headphones.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_soundbar",
       "familyId": "soundbar",
-      "source": "../products/prd_soundbar.png",
+      "source": "../products/prd_soundbar.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_portable_recorder",
       "familyId": "portable_recorder",
-      "source": "../products/prd_portable_recorder.png",
+      "source": "../products/prd_portable_recorder.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_karaoke_speaker",
       "familyId": "karaoke_speaker",
-      "source": "../products/prd_karaoke_speaker.png",
+      "source": "../products/prd_karaoke_speaker.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_webcam",
       "familyId": "webcam",
-      "source": "../products/prd_webcam.png",
+      "source": "../products/prd_webcam.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_external_ssd",
       "familyId": "external_ssd",
-      "source": "../products/prd_external_ssd.png",
+      "source": "../products/prd_external_ssd.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_photo_printer",
       "familyId": "photo_printer",
-      "source": "../products/prd_photo_printer.png",
+      "source": "../products/prd_photo_printer.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_mesh_router",
       "familyId": "mesh_router",
-      "source": "../products/prd_mesh_router.png",
+      "source": "../products/prd_mesh_router.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_arcade_stick",
       "familyId": "arcade_stick",
-      "source": "../products/prd_arcade_stick.png",
+      "source": "../products/prd_arcade_stick.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_flight_joystick",
       "familyId": "flight_joystick",
-      "source": "../products/prd_flight_joystick.png",
+      "source": "../products/prd_flight_joystick.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_gaming_mouse",
       "familyId": "gaming_mouse",
-      "source": "../products/prd_gaming_mouse.png",
+      "source": "../products/prd_gaming_mouse.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_mini_drone",
       "familyId": "mini_drone",
-      "source": "../products/prd_mini_drone.png",
+      "source": "../products/prd_mini_drone.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_camera_gimbal",
       "familyId": "camera_gimbal",
-      "source": "../products/prd_camera_gimbal.png",
+      "source": "../products/prd_camera_gimbal.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_binoculars",
       "familyId": "binoculars",
-      "source": "../products/prd_binoculars.png",
+      "source": "../products/prd_binoculars.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_telescope",
       "familyId": "telescope",
-      "source": "../products/prd_telescope.png",
+      "source": "../products/prd_telescope.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_film_scanner",
       "familyId": "film_scanner",
-      "source": "../products/prd_film_scanner.png",
+      "source": "../products/prd_film_scanner.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_ukulele",
       "familyId": "ukulele",
-      "source": "../products/prd_ukulele.png",
+      "source": "../products/prd_ukulele.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_midi_controller",
       "familyId": "midi_controller",
-      "source": "../products/prd_midi_controller.png",
+      "source": "../products/prd_midi_controller.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_cajon",
       "familyId": "cajon",
-      "source": "../products/prd_cajon.png",
+      "source": "../products/prd_cajon.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_harmonica_set",
       "familyId": "harmonica_set",
-      "source": "../products/prd_harmonica_set.png",
+      "source": "../products/prd_harmonica_set.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_leather_boots",
       "familyId": "leather_boots",
-      "source": "../products/prd_leather_boots.png",
+      "source": "../products/prd_leather_boots.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_sunglasses",
       "familyId": "sunglasses",
-      "source": "../products/prd_sunglasses.png",
+      "source": "../products/prd_sunglasses.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_travel_suitcase",
       "familyId": "travel_suitcase",
-      "source": "../products/prd_travel_suitcase.png",
+      "source": "../products/prd_travel_suitcase.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_leather_wallet",
       "familyId": "leather_wallet",
-      "source": "../products/prd_leather_wallet.png",
+      "source": "../products/prd_leather_wallet.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_model_train_set",
       "familyId": "model_train_set",
-      "source": "../products/prd_model_train_set.png",
+      "source": "../products/prd_model_train_set.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_diecast_car_set",
       "familyId": "diecast_car_set",
-      "source": "../products/prd_diecast_car_set.png",
+      "source": "../products/prd_diecast_car_set.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_building_block_set",
       "familyId": "building_block_set",
-      "source": "../products/prd_building_block_set.png",
+      "source": "../products/prd_building_block_set.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_rc_car",
       "familyId": "rc_car",
-      "source": "../products/prd_rc_car.png",
+      "source": "../products/prd_rc_car.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_urban_motorcycle",
       "familyId": "urban_motorcycle",
-      "source": "../products/prd_urban_motorcycle.png",
+      "source": "../products/prd_urban_motorcycle.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_touring_motorcycle",
       "familyId": "touring_motorcycle",
-      "source": "../products/prd_touring_motorcycle.png",
+      "source": "../products/prd_touring_motorcycle.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_utility_atv",
       "familyId": "utility_atv",
-      "source": "../products/prd_utility_atv.png",
+      "source": "../products/prd_utility_atv.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_compact_hatchback",
       "familyId": "compact_hatchback",
-      "source": "../products/prd_compact_hatchback.png",
+      "source": "../products/prd_compact_hatchback.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_executive_sedan",
       "familyId": "executive_sedan",
-      "source": "../products/prd_executive_sedan.png",
+      "source": "../products/prd_executive_sedan.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_cargo_van",
       "familyId": "cargo_van",
-      "source": "../products/prd_cargo_van.png",
+      "source": "../products/prd_cargo_van.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_electric_kettle",
       "familyId": "electric_kettle",
-      "source": "../products/prd_electric_kettle.png",
+      "source": "../products/prd_electric_kettle.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_blender_set",
       "familyId": "blender_set",
-      "source": "../products/prd_blender_set.png",
+      "source": "../products/prd_blender_set.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_steam_iron",
       "familyId": "steam_iron",
-      "source": "../products/prd_steam_iron.png",
+      "source": "../products/prd_steam_iron.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_dehumidifier",
       "familyId": "dehumidifier",
-      "source": "../products/prd_dehumidifier.png",
+      "source": "../products/prd_dehumidifier.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_bluetooth_speaker",
       "familyId": "bluetooth_speaker",
-      "source": "../products/prd_bluetooth_speaker.png",
+      "source": "../products/prd_bluetooth_speaker.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_podcast_microphone",
       "familyId": "podcast_microphone",
-      "source": "../products/prd_podcast_microphone.png",
+      "source": "../products/prd_podcast_microphone.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_noise_cancel_earbuds",
       "familyId": "noise_cancel_earbuds",
-      "source": "../products/prd_noise_cancel_earbuds.png",
+      "source": "../products/prd_noise_cancel_earbuds.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_stereo_receiver",
       "familyId": "stereo_receiver",
-      "source": "../products/prd_stereo_receiver.png",
+      "source": "../products/prd_stereo_receiver.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_office_keyboard_mouse",
       "familyId": "office_keyboard_mouse",
-      "source": "../products/prd_office_keyboard_mouse.png",
+      "source": "../products/prd_office_keyboard_mouse.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_usb_dock",
       "familyId": "usb_dock",
-      "source": "../products/prd_usb_dock.png",
+      "source": "../products/prd_usb_dock.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_portable_monitor",
       "familyId": "portable_monitor",
-      "source": "../products/prd_portable_monitor.png",
+      "source": "../products/prd_portable_monitor.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_mini_nas",
       "familyId": "mini_nas",
-      "source": "../products/prd_mini_nas.png",
+      "source": "../products/prd_mini_nas.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_ring_light",
       "familyId": "ring_light",
-      "source": "../products/prd_ring_light.png",
+      "source": "../products/prd_ring_light.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_instant_printer",
       "familyId": "instant_printer",
-      "source": "../products/prd_instant_printer.png",
+      "source": "../products/prd_instant_printer.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_camera_backpack",
       "familyId": "camera_backpack",
-      "source": "../products/prd_camera_backpack.png",
+      "source": "../products/prd_camera_backpack.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_light_meter",
       "familyId": "light_meter",
-      "source": "../products/prd_light_meter.png",
+      "source": "../products/prd_light_meter.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_wooden_puzzle_set",
       "familyId": "wooden_puzzle_set",
-      "source": "../products/prd_wooden_puzzle_set.png",
+      "source": "../products/prd_wooden_puzzle_set.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_tabletop_miniatures",
       "familyId": "tabletop_miniatures",
-      "source": "../products/prd_tabletop_miniatures.png",
+      "source": "../products/prd_tabletop_miniatures.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_dance_mat",
       "familyId": "dance_mat",
-      "source": "../products/prd_dance_mat.png",
+      "source": "../products/prd_dance_mat.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_capture_card",
       "familyId": "capture_card",
-      "source": "../products/prd_capture_card.png",
+      "source": "../products/prd_capture_card.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_kalimba",
       "familyId": "kalimba",
-      "source": "../products/prd_kalimba.png",
+      "source": "../products/prd_kalimba.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_digital_metronome",
       "familyId": "digital_metronome",
-      "source": "../products/prd_digital_metronome.png",
+      "source": "../products/prd_digital_metronome.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_electronic_drum_pad",
       "familyId": "electronic_drum_pad",
-      "source": "../products/prd_electronic_drum_pad.png",
+      "source": "../products/prd_electronic_drum_pad.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_alto_saxophone",
       "familyId": "alto_saxophone",
-      "source": "../products/prd_alto_saxophone.png",
+      "source": "../products/prd_alto_saxophone.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_hair_styler",
       "familyId": "hair_styler",
-      "source": "../products/prd_hair_styler.png",
+      "source": "../products/prd_hair_styler.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_leather_jacket",
       "familyId": "leather_jacket",
-      "source": "../products/prd_leather_jacket.png",
+      "source": "../products/prd_leather_jacket.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_travel_backpack",
       "familyId": "travel_backpack",
-      "source": "../products/prd_travel_backpack.png",
+      "source": "../products/prd_travel_backpack.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_skin_care_device",
       "familyId": "skin_care_device",
-      "source": "../products/prd_skin_care_device.png",
+      "source": "../products/prd_skin_care_device.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_wooden_chess_set",
       "familyId": "wooden_chess_set",
-      "source": "../products/prd_wooden_chess_set.png",
+      "source": "../products/prd_wooden_chess_set.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_mechanical_desk_clock",
       "familyId": "mechanical_desk_clock",
-      "source": "../products/prd_mechanical_desk_clock.png",
+      "source": "../products/prd_mechanical_desk_clock.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_precision_tool_set",
       "familyId": "precision_tool_set",
-      "source": "../products/prd_precision_tool_set.png",
+      "source": "../products/prd_precision_tool_set.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_brass_compass",
       "familyId": "brass_compass",
-      "source": "../products/prd_brass_compass.png",
+      "source": "../products/prd_brass_compass.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_air_compressor",
       "familyId": "air_compressor",
-      "source": "../products/prd_air_compressor.png",
+      "source": "../products/prd_air_compressor.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_thickness_planer",
       "familyId": "thickness_planer",
-      "source": "../products/prd_thickness_planer.png",
+      "source": "../products/prd_thickness_planer.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_inverter_welder",
       "familyId": "inverter_welder",
-      "source": "../products/prd_inverter_welder.png",
+      "source": "../products/prd_inverter_welder.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_motorized_treadmill",
       "familyId": "motorized_treadmill",
-      "source": "../products/prd_motorized_treadmill.png",
+      "source": "../products/prd_motorized_treadmill.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_analog_audio_mixer",
       "familyId": "analog_audio_mixer",
-      "source": "../products/prd_analog_audio_mixer.png",
+      "source": "../products/prd_analog_audio_mixer.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_digital_piano",
       "familyId": "digital_piano",
-      "source": "../products/prd_digital_piano.png",
+      "source": "../products/prd_digital_piano.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_acoustic_drum_kit",
       "familyId": "acoustic_drum_kit",
-      "source": "../products/prd_acoustic_drum_kit.png",
+      "source": "../products/prd_acoustic_drum_kit.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_studio_strobe_kit",
       "familyId": "studio_strobe_kit",
-      "source": "../products/prd_studio_strobe_kit.png",
+      "source": "../products/prd_studio_strobe_kit.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_laser_engraver",
       "familyId": "laser_engraver",
-      "source": "../products/prd_laser_engraver.png",
+      "source": "../products/prd_laser_engraver.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_table_saw",
       "familyId": "table_saw",
-      "source": "../products/prd_table_saw.png",
+      "source": "../products/prd_table_saw.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_portable_generator",
       "familyId": "portable_generator",
-      "source": "../products/prd_portable_generator.png",
+      "source": "../products/prd_portable_generator.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_pressure_washer",
       "familyId": "pressure_washer",
-      "source": "../products/prd_pressure_washer.png",
+      "source": "../products/prd_pressure_washer.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_prosumer_espresso",
       "familyId": "prosumer_espresso",
-      "source": "../products/prd_prosumer_espresso.png",
+      "source": "../products/prd_prosumer_espresso.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_massage_chair",
       "familyId": "massage_chair",
-      "source": "../products/prd_massage_chair.png",
+      "source": "../products/prd_massage_chair.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_pottery_wheel",
       "familyId": "pottery_wheel",
-      "source": "../products/prd_pottery_wheel.png",
+      "source": "../products/prd_pottery_wheel.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_vinyl_cutting_plotter",
       "familyId": "vinyl_cutting_plotter",
-      "source": "../products/prd_vinyl_cutting_plotter.png",
+      "source": "../products/prd_vinyl_cutting_plotter.webp",
       "dedicated": true
     }
   ],

@@ -11,6 +11,7 @@
     "test:offline": "pnpm build && playwright test offline.e2e.ts",
     "test:browser": "pnpm build && playwright test",
     "test:coverage": "vitest run --coverage",
+    "assets:optimize": "node scripts/optimize-product-assets.mjs",
     "format": "prettier --write src",
     "cap:sync": "capacitor sync android",
     "preview": "vite preview"
@@ -36,6 +37,7 @@
     "@vitest/coverage-v8": "^4.1.11",
     "oxlint": "^1.79.0",
     "prettier": "^3.9.6",
+    "sharp": "^0.35.4",
     "typescript": "~6.0.2",
     "vite": "^8.2.2",
     "vitest": "^4.1.11"

@@ -6,7 +6,7 @@ test.describe("missing product images", () => {
   test("uses an offline-safe category fallback without blocking trade", async ({
     page,
   }) => {
-    await page.route("**/assets/prd_*.png", (route) => route.abort());
+    await page.route("**/assets/prd_*.webp", (route) => route.abort());
     await page.goto("/");
     await completeFirstLaunch(page);
     const startingImage = page.getByRole("img", { name: "Eski defter" });

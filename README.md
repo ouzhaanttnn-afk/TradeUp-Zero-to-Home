@@ -36,8 +36,13 @@ pnpm test
 pnpm test:browser
 pnpm test:offline
 pnpm build
+pnpm assets:optimize
 pnpm cap:sync
 ```
+
+`assets:optimize` rebuilds delivery-ready WebP files from the editable product
+PNG sources. The production manifest references only the compact WebP outputs;
+tests enforce a total and per-file delivery budget.
 
 Android debug/release builds require a local JDK and Android SDK:
 
