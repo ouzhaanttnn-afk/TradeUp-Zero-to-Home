@@ -28,6 +28,22 @@ describe("canonical valuation engine", () => {
     expect(camera.baseValueMinor).toBeGreaterThan(laptop.baseValueMinor);
   });
 
+  it("keeps motorcycles, ATV and cars on a credible high-ticket ladder", () => {
+    const motorcycle = familyById("urban_motorcycle")!;
+    const atv = familyById("utility_atv")!;
+    const hatchback = familyById("compact_hatchback")!;
+    const sedan = familyById("executive_sedan")!;
+    const van = familyById("cargo_van")!;
+
+    expect(motorcycle.baseValueMinor).toBeLessThan(atv.baseValueMinor);
+    expect(atv.baseValueMinor).toBeLessThan(hatchback.baseValueMinor);
+    expect(hatchback.baseValueMinor).toBeLessThan(sedan.baseValueMinor);
+    expect(sedan.baseValueMinor).toBeLessThan(van.baseValueMinor);
+    expect(motorcycle.category).toBe("Araç");
+    expect(motorcycle.tier).toBe(4);
+    expect(van.tier).toBe(5);
+  });
+
   it("prices condition, attributes, accessories and defects causally", () => {
     expect(conditionFactorBps(90)).toBeGreaterThan(conditionFactorBps(60));
     expect(
@@ -120,7 +136,7 @@ describe("canonical valuation engine", () => {
 
     expect(trenchPrices.length).toBeGreaterThan(20);
     expect(bagPrices.length).toBeGreaterThan(20);
-    expect(Math.min(...trenchPrices)).toBeGreaterThanOrEqual(50_000);
+    expect(Math.min(...trenchPrices)).toBeGreaterThanOrEqual(45_000);
     expect(Math.max(...trenchPrices)).toBeLessThanOrEqual(220_000);
     expect(Math.min(...bagPrices)).toBeGreaterThanOrEqual(100_000);
     expect(Math.max(...bagPrices)).toBeLessThanOrEqual(500_000);

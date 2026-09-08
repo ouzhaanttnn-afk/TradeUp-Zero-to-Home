@@ -668,7 +668,15 @@ export function market(
 ): Listing[] {
   const r = rng(seed + cycle * 7_919);
   const tier =
-    totalWealthMinor < 1_000_000 ? 1 : totalWealthMinor < 7_500_000 ? 2 : 3;
+    totalWealthMinor < 1_000_000
+      ? 1
+      : totalWealthMinor < 7_500_000
+        ? 2
+        : totalWealthMinor < 25_000_000
+          ? 3
+          : totalWealthMinor < 100_000_000
+            ? 4
+            : 5;
   const pool = families.filter((family) => family.tier <= tier);
   const focusIndex = Math.floor(r() * pool.length);
   const focus = pool[focusIndex];

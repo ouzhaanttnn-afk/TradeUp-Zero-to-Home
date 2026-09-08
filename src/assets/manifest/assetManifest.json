@@ -595,6 +595,42 @@
       "familyId": "rc_car",
       "source": "../products/prd_rc_car.png",
       "dedicated": true
+    },
+    {
+      "assetKey": "prd_urban_motorcycle",
+      "familyId": "urban_motorcycle",
+      "source": "../products/prd_urban_motorcycle.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_touring_motorcycle",
+      "familyId": "touring_motorcycle",
+      "source": "../products/prd_touring_motorcycle.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_utility_atv",
+      "familyId": "utility_atv",
+      "source": "../products/prd_utility_atv.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_compact_hatchback",
+      "familyId": "compact_hatchback",
+      "source": "../products/prd_compact_hatchback.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_executive_sedan",
+      "familyId": "executive_sedan",
+      "source": "../products/prd_executive_sedan.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_cargo_van",
+      "familyId": "cargo_van",
+      "source": "../products/prd_cargo_van.png",
+      "dedicated": true
     }
   ],
   "overlays": [

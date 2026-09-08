@@ -1154,10 +1154,173 @@ const mediumBudgetSeeds: Seed[] = [
 export const heroFamilies: Family[] = seeds.map(defineFamily);
 export const mediumBudgetFamilies: Family[] =
   mediumBudgetSeeds.map(defineFamily);
+
+type VehicleSeed = {
+  id: string;
+  name: string;
+  assetKey: string;
+  baseValueMinor: number;
+  demand: number;
+  liquidity: number;
+  tier: 4 | 5;
+  mileageOptions: [string, string, string];
+  secondEvidence: string;
+};
+
+const defineVehicleFamily = (seed: VehicleSeed): Family => ({
+  id: seed.id,
+  name: seed.name,
+  assetKey: seed.assetKey,
+  baseValueMinor: seed.baseValueMinor,
+  demand: seed.demand,
+  liquidity: seed.liquidity,
+  category: "Araç",
+  tier: seed.tier,
+  rarity: 2,
+  conditionCap: 96,
+  attributes: [
+    {
+      id: "mileage",
+      label: "Kilometre",
+      type: "CATEGORY",
+      options: seed.mileageOptions,
+      comparePriority: 1,
+    },
+    {
+      id: "trim",
+      label: "Donanım",
+      type: "CATEGORY",
+      options: ["Temel", "Plus", "Pro"],
+      comparePriority: 2,
+    },
+    {
+      id: "spare-key",
+      label: "Yedek anahtar",
+      type: "BOOLEAN",
+      comparePriority: 3,
+    },
+  ],
+  evidence: [
+    {
+      id: "service-record",
+      label: "Bakım kaydı",
+      claim: "Düzenli bakım yapıldığı beyanı",
+      checkedCopy: "Bakım kayıtları kontrol edildi",
+      inspectionKinds: ["PHOTO", "ASK_SELLER"],
+      critical: false,
+    },
+    {
+      id: "mechanical-check",
+      label: seed.secondEvidence,
+      claim: `${seed.secondEvidence} sorunsuz beyanı`,
+      checkedCopy: `${seed.secondEvidence} yapıldı`,
+      inspectionKinds: ["ASK_SELLER", "QUICK_TEST"],
+      critical: true,
+    },
+  ],
+  defects: [
+    {
+      id: "record-mismatch",
+      label: "Bakım kaydı tutarsızlığı",
+      severity: "MEDIUM",
+      valuePenaltyBps: 900,
+      riskSignal: 0.5,
+      evidenceId: "service-record",
+      overlayKey: "wear",
+    },
+    {
+      id: "mechanical-fault",
+      label: `${seed.secondEvidence} sorunu`,
+      severity: "HIGH",
+      valuePenaltyBps: 2_200,
+      riskSignal: 0.82,
+      evidenceId: "mechanical-check",
+      overlayKey: "warning",
+    },
+  ],
+  variants: [
+    { id: "standard", label: "Standart Paket", valueFactorBps: 10_000 },
+    { id: "premium", label: "Üst Paket", valueFactorBps: 11_500 },
+  ],
+  preparation: preparation(seed.baseValueMinor),
+});
+
+const vehicleSeeds: VehicleSeed[] = [
+  {
+    id: "urban_motorcycle",
+    name: "Şehir Motosikleti",
+    assetKey: "prd_urban_motorcycle",
+    baseValueMinor: 32_000_000,
+    demand: 0.64,
+    liquidity: 0.58,
+    tier: 4,
+    mileageOptions: ["45 bin km üstü", "20–45 bin km", "20 bin km altı"],
+    secondEvidence: "Motor testi",
+  },
+  {
+    id: "touring_motorcycle",
+    name: "Uzun Yol Motosikleti",
+    assetKey: "prd_touring_motorcycle",
+    baseValueMinor: 58_000_000,
+    demand: 0.52,
+    liquidity: 0.45,
+    tier: 4,
+    mileageOptions: ["60 bin km üstü", "25–60 bin km", "25 bin km altı"],
+    secondEvidence: "Motor testi",
+  },
+  {
+    id: "utility_atv",
+    name: "Arazi Tipi ATV",
+    assetKey: "prd_utility_atv",
+    baseValueMinor: 42_000_000,
+    demand: 0.48,
+    liquidity: 0.4,
+    tier: 4,
+    mileageOptions: ["Yoğun kullanım", "Orta kullanım", "Düşük kullanım"],
+    secondEvidence: "Aktarma testi",
+  },
+  {
+    id: "compact_hatchback",
+    name: "Kompakt Şehir Otomobili",
+    assetKey: "prd_compact_hatchback",
+    baseValueMinor: 115_000_000,
+    demand: 0.69,
+    liquidity: 0.62,
+    tier: 5,
+    mileageOptions: ["180 bin km üstü", "90–180 bin km", "90 bin km altı"],
+    secondEvidence: "Motor testi",
+  },
+  {
+    id: "executive_sedan",
+    name: "Üst Sınıf Sedan",
+    assetKey: "prd_executive_sedan",
+    baseValueMinor: 185_000_000,
+    demand: 0.46,
+    liquidity: 0.38,
+    tier: 5,
+    mileageOptions: ["160 bin km üstü", "80–160 bin km", "80 bin km altı"],
+    secondEvidence: "Ekspertiz kaydı",
+  },
+  {
+    id: "cargo_van",
+    name: "Kompakt Hafif Ticari",
+    assetKey: "prd_cargo_van",
+    baseValueMinor: 225_000_000,
+    demand: 0.57,
+    liquidity: 0.47,
+    tier: 5,
+    mileageOptions: ["240 bin km üstü", "120–240 bin km", "120 bin km altı"],
+    secondEvidence: "Motor testi",
+  },
+];
+
+export const vehicleFamilies: Family[] = vehicleSeeds.map(defineVehicleFamily);
+
 export const families: Family[] = [
   ...heroFamilies,
   ...scaledSeeds.map(defineFamily),
   ...mediumBudgetFamilies,
+  ...vehicleFamilies,
 ];
 export const familyById = (id: string) =>
   families.find((family) => family.id === id);

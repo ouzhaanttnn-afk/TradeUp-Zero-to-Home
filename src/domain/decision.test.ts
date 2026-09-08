@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { families, initialState, market } from "../game";
-import { heroFamilies, mediumBudgetFamilies } from "../content/families";
+import {
+  heroFamilies,
+  mediumBudgetFamilies,
+  vehicleFamilies,
+} from "../content/families";
 import {
   comparableListings,
   comparisonRows,
@@ -63,9 +67,9 @@ describe("decision vertical slice", () => {
     ).toBe(true);
   });
 
-  it("keeps 24 deep hero families and expands content across nine categories", () => {
+  it("keeps 24 deep hero families and expands content across ten categories", () => {
     expect(heroFamilies).toHaveLength(24);
-    expect(new Set(families.map((family) => family.category))).toHaveLength(9);
+    expect(new Set(families.map((family) => family.category))).toHaveLength(10);
     expect(new Set(families.map((family) => family.id)).size).toBe(
       families.length,
     );
@@ -98,6 +102,42 @@ describe("decision vertical slice", () => {
       expect(family.baseValueMinor).toBeLessThanOrEqual(950_000);
       expect([1, 2]).toContain(family.tier);
     }
+  });
+
+  it("adds six vehicle families only to the matching high-ticket tiers", () => {
+    expect(vehicleFamilies).toHaveLength(6);
+    expect(vehicleFamilies.every((family) => family.category === "Araç")).toBe(
+      true,
+    );
+    expect(vehicleFamilies.map((family) => family.tier)).toEqual([
+      4, 4, 4, 5, 5, 5,
+    ]);
+    expect(
+      vehicleFamilies.every(
+        (family) =>
+          family.baseValueMinor >= 25_000_000 &&
+          family.baseValueMinor <= 300_000_000,
+      ),
+    ).toBe(true);
+    expect(
+      vehicleFamilies.every((family) =>
+        family.attributes.some((attribute) => attribute.label === "Kilometre"),
+      ),
+    ).toBe(true);
+    expect(
+      Array.from({ length: 80 }, (_, cycle) =>
+        market(91_300, 24_999_999, cycle, cycle, 24),
+      )
+        .flat()
+        .some((listing) => listing.instance.family.category === "Araç"),
+    ).toBe(false);
+    expect(
+      Array.from({ length: 80 }, (_, cycle) =>
+        market(91_300, 25_000_000, cycle, cycle, 24),
+      )
+        .flat()
+        .some((listing) => listing.familyId === "urban_motorcycle"),
+    ).toBe(true);
   });
 
   it("keeps ten same-family listings available for comparison", () => {

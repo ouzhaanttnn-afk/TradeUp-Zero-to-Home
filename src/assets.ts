@@ -96,6 +96,12 @@ import modelTrainSet from "./assets/products/prd_model_train_set.png";
 import diecastCarSet from "./assets/products/prd_diecast_car_set.png";
 import buildingBlockSet from "./assets/products/prd_building_block_set.png";
 import rcCar from "./assets/products/prd_rc_car.png";
+import urbanMotorcycle from "./assets/products/prd_urban_motorcycle.png";
+import touringMotorcycle from "./assets/products/prd_touring_motorcycle.png";
+import utilityAtv from "./assets/products/prd_utility_atv.png";
+import compactHatchback from "./assets/products/prd_compact_hatchback.png";
+import executiveSedan from "./assets/products/prd_executive_sedan.png";
+import cargoVan from "./assets/products/prd_cargo_van.png";
 
 const dedicatedAssets: Record<string, string> = {
   prd_notebook: notebook,
@@ -194,6 +200,12 @@ const dedicatedAssets: Record<string, string> = {
   prd_diecast_car_set: diecastCarSet,
   prd_building_block_set: buildingBlockSet,
   prd_rc_car: rcCar,
+  prd_urban_motorcycle: urbanMotorcycle,
+  prd_touring_motorcycle: touringMotorcycle,
+  prd_utility_atv: utilityAtv,
+  prd_compact_hatchback: compactHatchback,
+  prd_executive_sedan: executiveSedan,
+  prd_cargo_van: cargoVan,
 };
 
 const fallbackSvg = (category: string, symbol: string, color: string) =>
@@ -209,6 +221,7 @@ const categoryFallbacks: Record<string, string> = {
   Bilgisayar: fallbackSvg("Bilgisayar", "▣", "#8db8ff"),
   Fotoğraf: fallbackSvg("Fotoğraf", "◫", "#ff9c83"),
   "Moda/Bakım": fallbackSvg("Moda/Bakım", "✦", "#d8b27c"),
+  Araç: fallbackSvg("Araç", "◆", "#69d99c"),
 };
 
 export const assetFor = (key: string, category?: string) =>
