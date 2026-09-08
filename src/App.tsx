@@ -79,7 +79,6 @@ import { purchaseDecisionCause } from "./ui/decisionCause";
 import {
   ALL_MARKET_CATEGORIES,
   filterMarketListings,
-  listingAgeLabel,
   marketCategories,
   sortMarketListings,
   type MarketSort,
@@ -94,6 +93,7 @@ import { marketScanRefillStatus, shortDuration } from "./ui/marketScan";
 import { recoveryPlan } from "./ui/recoveryPlan";
 import { ownsAnimatedAvatars as hasAnimatedAvatars } from "./domain/profile";
 import { ProductVisual } from "./ui/ProductVisual";
+import { MarketListingCard } from "./ui/MarketListingCard";
 
 type Tab = "market" | "follow" | "portfolio" | "journey";
 type PortfolioSegment = "inventory" | "preparation" | "listings";
@@ -1382,63 +1382,17 @@ export default function App() {
                 const risk = npcRiskSignal(item, game.gameTimeMin);
                 const watched = game.follow.watchedListingIds.includes(item.id);
                 return (
-                  <button
-                    className="listing market-card"
+                  <MarketListingCard
                     key={item.id}
-                    data-listing-id={item.id}
-                    data-price-minor={item.priceMinor}
-                    onClick={() => selectListing(item.id)}
-                    aria-label={`${item.instance.family.name}, fiyat ${money(item.priceMinor)}, kondisyon yüzde ${item.instance.condition}, bilgi güveni ${evidenceLabel(item.instance.evidenceConfidence)}, ${listingAgeLabel(item.createdAtGameMin, game.gameTimeMin)}, ${itemSignal.text}. İlan detaylarını aç`}
-                  >
-                    <div className="market-visual-frame">
-                      <ProductVisual
-                        instance={item.instance}
-                        className="product-art"
-                        priority={index < 6}
-                      />
-                      <span className="market-condition-signal">
-                        %{item.instance.condition}
-                      </span>
-                    </div>
-                    {risk.level !== "low" ? (
-                      <span
-                        className={`market-heat market-heat--${risk.level}`}
-                      >
-                        {risk.text}
-                      </span>
-                    ) : null}
-                    <div className="listing-copy">
-                      <small className="market-category">
-                        {item.instance.family.category} · Sv. {categoryLevel}
-                      </small>
-                      <h3>{item.instance.family.name}</h3>
-                      <div className="market-price-row">
-                        <strong>{money(item.priceMinor)}</strong>
-                        {watched ? (
-                          <span className="watch-state">
-                            <Icon name="follow" /> Takipte
-                          </span>
-                        ) : null}
-                      </div>
-                      <div className="tags">
-                        <b className={itemSignal.cls}>{itemSignal.text}</b>
-                        <span>%{item.instance.condition} kondisyon</span>
-                      </div>
-                      <div className="market-card-facts">
-                        <span>
-                          Bilgi:{" "}
-                          {evidenceLabel(item.instance.evidenceConfidence)}
-                        </span>
-                        <span>İlgi %{item.interest}</span>
-                        <span>
-                          {listingAgeLabel(
-                            item.createdAtGameMin,
-                            game.gameTimeMin,
-                          )}
-                        </span>
-                      </div>
-                    </div>
-                  </button>
+                    item={item}
+                    categoryLevel={categoryLevel}
+                    itemSignal={itemSignal}
+                    risk={risk}
+                    watched={watched}
+                    gameTimeMin={game.gameTimeMin}
+                    priority={index < 6}
+                    onSelect={() => selectListing(item.id)}
+                  />
                 );
               })}
             </div>
