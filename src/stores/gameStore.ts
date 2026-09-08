@@ -8,6 +8,7 @@ import {
   purchaseListing,
   quoteAssetExit,
   rejectBuyerOffer,
+  revisePlayerListing,
   settleAssetSale,
   withdrawPlayerListing,
 } from "../domain/economy";
@@ -107,6 +108,7 @@ type Store = {
   offer: (item: Listing, mode?: PlayerOfferMode) => void;
   sell: (item: OwnedAsset, quick: boolean) => void;
   list: (item: OwnedAsset, askingPriceMinor: number) => void;
+  reviseListing: (listingId: string, askingPriceMinor: number) => void;
   withdrawListing: (listingId: string) => void;
   acceptBuyer: (offerId: string) => void;
   counterBuyer: (offerId: string) => void;
@@ -703,6 +705,42 @@ export const useGameStore = create<Store>((set, get) => ({
       notice: worldNotice(
         progressed,
         `${item.instance.family.name} ilana çıktı. Alıcılar aranıyor.`,
+      ),
+    });
+  },
+  reviseListing: (listingId, askingPriceMinor) => {
+    const game = get().game;
+    const listing = game.playerListings.find((item) => item.id === listingId);
+    const asset = listing
+      ? game.ownedAssets.find((item) => item.id === listing.ownedAssetId)
+      : undefined;
+    const result = revisePlayerListing(
+      game,
+      listingId,
+      askingPriceMinor,
+      game.gameTimeMin,
+    );
+    if (!result.ok) {
+      set({
+        notice:
+          result.reason === "ACTIVE_BUYER_OFFER"
+            ? "Önce mevcut alıcı teklifini yanıtla."
+            : "İlan fiyatı değiştirilemedi.",
+      });
+      buzz(game);
+      sound(game, "WARNING");
+      return;
+    }
+    if (result.idempotent) {
+      set({ notice: "İlan fiyatı zaten bu tutarda." });
+      return;
+    }
+    const progressed = progressBy(result.state);
+    set({
+      game: stampAndPersist(progressed.state),
+      notice: worldNotice(
+        progressed,
+        `${asset?.instance.family.name ?? "Ürün"} için yeni fiyat ${money(askingPriceMinor)}.`,
       ),
     });
   },

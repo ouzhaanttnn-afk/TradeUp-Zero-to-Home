@@ -17,6 +17,7 @@ import {
   quoteAssetSale,
   reconcileJournal,
   rejectBuyerOffer,
+  revisePlayerListing,
   settleAssetSale,
   withdrawPlayerListing,
 } from "./economy";
@@ -315,6 +316,61 @@ describe("canonical ownership and accounting", () => {
       expect(relisted.state.ownedAssets[0].state).toBe("LISTED");
       expect(relisted.state.playerListings).toHaveLength(2);
     }
+  });
+
+  it("revises an active listing without changing ownership or accounting", () => {
+    const state = purchasedState();
+    const asset = state.ownedAssets[0];
+    const listed = createPlayerListing(state, asset.id, 30_000, 20);
+    if (!listed.ok) throw new Error(listed.reason);
+    const listing = listed.state.playerListings[0];
+    const beforeWorth = netWorthMinor(listed.state);
+
+    const revised = revisePlayerListing(listed.state, listing.id, 27_500, 30);
+    if (!revised.ok) throw new Error(revised.reason);
+
+    expect(revised.state.playerListings[0]).toMatchObject({
+      askingPriceMinor: 27_500,
+      interest: 0,
+      createdAtGameMin: 20,
+      expiresAtGameMin: listing.expiresAtGameMin,
+      state: "ACTIVE",
+    });
+    expect(revised.state.ownedAssets[0]).toEqual(listed.state.ownedAssets[0]);
+    expect(netWorthMinor(revised.state)).toBe(beforeWorth);
+    expect(reconcileJournal(revised.state)).toEqual({
+      cash: true,
+      activeBookCost: true,
+      realizedProfit: true,
+    });
+    expect(revised.state.transactionJournal.at(-1)?.metadata).toMatchObject({
+      action: "PRICE_REVISION",
+      previousAskingPriceMinor: 30_000,
+      askingPriceMinor: 27_500,
+    });
+  });
+
+  it("does not revise a listing while an active buyer offer is waiting", () => {
+    const state = purchasedState();
+    const asset = state.ownedAssets[0];
+    const listed = createPlayerListing(state, asset.id, 30_000, 20);
+    if (!listed.ok) throw new Error(listed.reason);
+    const listing = listed.state.playerListings[0];
+    const withOffer: GameState = {
+      ...listed.state,
+      buyerOffers: [
+        {
+          id: "offer:revision-lock",
+          listingId: listing.id,
+          amountMinor: 28_000,
+          buyer: "Deniz",
+          expiresAtGameMin: 80,
+        },
+      ],
+    };
+    const revised = revisePlayerListing(withOffer, listing.id, 27_500, 30);
+    expect(revised).toMatchObject({ ok: false, reason: "ACTIVE_BUYER_OFFER" });
+    expect(revised.state).toEqual(withOffer);
   });
 
   it("rejects only the buyer offer while keeping the asset listed and accounting untouched", () => {

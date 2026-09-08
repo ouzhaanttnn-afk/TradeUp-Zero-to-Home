@@ -21,6 +21,7 @@ type EconomyFailureReason =
   | "ASSET_NOT_AVAILABLE"
   | "BUYER_OFFER_NOT_FOUND"
   | "COUNTER_NOT_AVAILABLE"
+  | "ACTIVE_BUYER_OFFER"
   | "PLAYER_LISTING_NOT_FOUND"
   | "INVALID_AMOUNT";
 
@@ -434,6 +435,82 @@ export function withdrawPlayerListing(
           {
             listingId,
             action: "WITHDRAWN",
+          },
+        ),
+      ],
+    },
+  };
+}
+
+export function revisePlayerListing(
+  state: GameState,
+  listingId: ListingId,
+  askingPriceMinor: number,
+  gameTime: number,
+): EconomyCommandResult {
+  if (!Number.isInteger(askingPriceMinor) || askingPriceMinor <= 0) {
+    return { ok: false, state, reason: "INVALID_AMOUNT" };
+  }
+  const listing = state.playerListings.find((item) => item.id === listingId);
+  if (
+    !listing ||
+    listing.state !== "ACTIVE" ||
+    listing.expiresAtGameMin <= gameTime
+  ) {
+    return { ok: false, state, reason: "PLAYER_LISTING_NOT_FOUND" };
+  }
+  const asset = state.ownedAssets.find(
+    (item) => item.id === listing.ownedAssetId,
+  );
+  if (
+    !asset ||
+    asset.state !== "LISTED" ||
+    asset.currentListingId !== listingId
+  ) {
+    return { ok: false, state, reason: "ASSET_NOT_AVAILABLE" };
+  }
+  if (
+    state.buyerOffers.some(
+      (offer) =>
+        offer.listingId === listingId && offer.expiresAtGameMin > gameTime,
+    )
+  ) {
+    return { ok: false, state, reason: "ACTIVE_BUYER_OFFER" };
+  }
+  if (listing.askingPriceMinor === askingPriceMinor) {
+    return { ok: true, state, idempotent: true };
+  }
+
+  const transactionId = `listing-revision:${listingId}:${gameTime}:${askingPriceMinor}`;
+  if (hasJournalEntry(state, transactionId)) {
+    return { ok: true, state, idempotent: true };
+  }
+
+  return {
+    ok: true,
+    idempotent: false,
+    state: {
+      ...state,
+      playerListings: state.playerListings.map((item) =>
+        item.id === listingId
+          ? { ...item, askingPriceMinor, interest: 0 }
+          : item,
+      ),
+      transactionJournal: [
+        ...state.transactionJournal,
+        journalEntry(
+          transactionId,
+          "LISTING",
+          gameTime,
+          listing.ownedAssetId,
+          0,
+          0,
+          0,
+          {
+            listingId,
+            action: "PRICE_REVISION",
+            previousAskingPriceMinor: listing.askingPriceMinor,
+            askingPriceMinor,
           },
         ),
       ],

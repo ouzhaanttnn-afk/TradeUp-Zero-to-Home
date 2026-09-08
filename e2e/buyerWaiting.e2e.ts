@@ -115,6 +115,29 @@ for (const width of [320, 430]) {
       ).toEqual([]);
     };
     await layout();
+    const revisedPriceMinor = saved.playerListings[0].askingPriceMinor + 1_000;
+    await page
+      .getByRole("button", { name: "Fiyatı değiştir", exact: true })
+      .click();
+    await page
+      .getByRole("textbox", {
+        name: `${asset.instance.family.name} yeni ilan fiyatı`,
+      })
+      .fill(String(revisedPriceMinor / 100));
+    await page
+      .getByRole("button", { name: "Fiyatı uygula", exact: true })
+      .click();
+    await expect(page.getByText(/için yeni fiyat/)).toBeVisible();
+    await expect
+      .poll(async () => (await readSave()).playerListings[0].askingPriceMinor)
+      .toBe(revisedPriceMinor);
+    const revised = await readSave();
+    expect(revised.cashMinor).toBe(saved.cashMinor);
+    expect(reconcileJournal(revised)).toEqual({
+      cash: true,
+      activeBookCost: true,
+      realizedProfit: true,
+    });
     await page.screenshot({
       path: testInfo.outputPath("waiting.png"),
       fullPage: true,
@@ -124,8 +147,8 @@ for (const width of [320, 430]) {
     await expect(
       page.getByRole("heading", { name: "Fırsat akışı" }),
     ).toBeVisible();
-    expect((await readSave()).cashMinor).toBe(saved.cashMinor);
-    expect((await readSave()).gameTimeMin).toBe(saved.gameTimeMin);
+    expect((await readSave()).cashMinor).toBe(revised.cashMinor);
+    expect((await readSave()).gameTimeMin).toBe(revised.gameTimeMin);
     // Advance the browser clock, not the engine state: exercise the real interval path.
     for (
       let minute = 0;
@@ -161,7 +184,7 @@ for (const width of [320, 430]) {
       .toBe(1);
     const offered = await readSave();
     expect(offered.cashMinor).toBe(saved.cashMinor);
-    expect(offered.transactionJournal).toEqual(saved.transactionJournal);
+    expect(offered.transactionJournal).toEqual(revised.transactionJournal);
     await page
       .getByRole("button", { name: "Teklifi reddet", exact: true })
       .click();

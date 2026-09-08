@@ -60,4 +60,30 @@ describe("listing waiting and offer presentation", () => {
       listingActivity(listing, [{ ...offer, expiresAtGameMin: 200 }], 100),
     ).toMatchObject({ offers: [], waiting: false });
   });
+
+  it("explains the strongest visible reason for an offerless listing", () => {
+    const signals = {
+      estimateLowMinor: 8_000,
+      estimateHighMinor: 11_000,
+      evidenceConfidence: 0.8,
+      demand: 0.8,
+      competingListings: 0,
+    };
+    expect(
+      listingActivity({ ...listing, askingPriceMinor: 12_000 }, [], 20, signals)
+        .diagnosis,
+    ).toBe("Fiyat, tahmini piyasa aralığının üzerinde.");
+    expect(
+      listingActivity(listing, [], 20, {
+        ...signals,
+        evidenceConfidence: 0.3,
+      }).diagnosis,
+    ).toBe("Ürün bilgisi zayıf; alıcılar temkinli davranıyor.");
+    expect(
+      listingActivity(listing, [], 20, {
+        ...signals,
+        competingListings: 4,
+      }).diagnosis,
+    ).toBe("Benzer ilan sayısı yüksek; ürünün öne çıkması zorlaşıyor.");
+  });
 });

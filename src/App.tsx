@@ -22,6 +22,7 @@ import {
 import {
   comparableListings,
   inspectionOptions,
+  instanceEstimateBand,
   listingEstimateBand,
 } from "./domain/decision";
 import { WORLD_CONFIG } from "./domain/config";
@@ -268,6 +269,10 @@ export default function App() {
     string | null
   >(null);
   const [manualListingPrice, setManualListingPrice] = useState("");
+  const [revisingListingId, setRevisingListingId] = useState<string | null>(
+    null,
+  );
+  const [revisedListingPrice, setRevisedListingPrice] = useState("");
   const [focusedAssetId, setFocusedAssetId] = useState<string | null>(null);
   const [homeFinaleOpen, setHomeFinaleOpen] = useState(false);
   const [homePulseStage, setHomePulseStage] = useState<number | null>(null);
@@ -304,6 +309,7 @@ export default function App() {
     offer,
     sell,
     list,
+    reviseListing,
     withdrawListing,
     acceptBuyer,
     counterBuyer,
@@ -467,19 +473,31 @@ export default function App() {
     const asset = game.ownedAssets.find(
       (item) => item.id === playerListing.ownedAssetId,
     );
-    return asset
-      ? [
+    if (!asset) return [];
+    const estimate = instanceEstimateBand(
+      asset.instance,
+      categoryExpertiseLevel(game, asset.instance.family.category),
+    );
+    return [
+      {
+        listing: playerListing,
+        asset,
+        activity: listingActivity(
+          playerListing,
+          game.buyerOffers,
+          game.gameTimeMin,
           {
-            listing: playerListing,
-            asset,
-            activity: listingActivity(
-              playerListing,
-              game.buyerOffers,
-              game.gameTimeMin,
-            ),
+            estimateLowMinor: estimate.lowMinor,
+            estimateHighMinor: estimate.highMinor,
+            evidenceConfidence: asset.instance.evidenceConfidence,
+            demand: asset.instance.family.demand,
+            competingListings: marketListings.filter(
+              (listing) => listing.familyId === asset.familyId,
+            ).length,
           },
-        ]
-      : [];
+        ),
+      },
+    ];
   });
   const pendingBuyerOfferCount = playerListings.reduce(
     (count, entry) => count + entry.activity.offers.length,
@@ -1564,6 +1582,11 @@ export default function App() {
                               <div className="listing-wait-copy">
                                 <b>Yayında · {activity.ageLabel}</b>
                                 <span>Alıcı teklifi bekleniyor</span>
+                                {activity.diagnosis ? (
+                                  <span className="listing-diagnosis">
+                                    {activity.diagnosis}
+                                  </span>
+                                ) : null}
                               </div>
                               <button onClick={() => navigate("market")}>
                                 Pazara göz at
@@ -1650,7 +1673,60 @@ export default function App() {
                               </div>
                             );
                           })}
+                          {revisingListingId === playerListing.id ? (
+                            <form
+                              className="listing-revision-form"
+                              onSubmit={(event) => {
+                                event.preventDefault();
+                                const amount =
+                                  manualListingPriceMinor(revisedListingPrice);
+                                if (!amount) return;
+                                reviseListing(playerListing.id, amount);
+                                setRevisingListingId(null);
+                              }}
+                            >
+                              <label>
+                                <span>Yeni fiyat</span>
+                                <span className="manual-price-input">
+                                  ₺
+                                  <input
+                                    value={revisedListingPrice}
+                                    inputMode="decimal"
+                                    aria-label={`${asset.instance.family.name} yeni ilan fiyatı`}
+                                    onChange={(event) =>
+                                      setRevisedListingPrice(event.target.value)
+                                    }
+                                  />
+                                </span>
+                              </label>
+                              <button
+                                className="primary"
+                                type="submit"
+                                disabled={
+                                  !manualListingPriceMinor(revisedListingPrice)
+                                }
+                              >
+                                Fiyatı uygula
+                              </button>
+                            </form>
+                          ) : null}
                           <div className="sell-actions listing-withdraw-actions">
+                            <button
+                              disabled={activity.offers.length > 0}
+                              title={
+                                activity.offers.length > 0
+                                  ? "Önce mevcut teklifi yanıtla"
+                                  : undefined
+                              }
+                              onClick={() => {
+                                setRevisingListingId(playerListing.id);
+                                setRevisedListingPrice(
+                                  String(playerListing.askingPriceMinor / 100),
+                                );
+                              }}
+                            >
+                              Fiyatı değiştir
+                            </button>
                             <button
                               onClick={() => {
                                 withdrawListing(playerListing.id);
