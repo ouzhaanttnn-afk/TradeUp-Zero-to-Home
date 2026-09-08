@@ -80,6 +80,10 @@ import {
   type MarketSort,
 } from "./ui/marketCard";
 import { purchaseBudget } from "./ui/purchaseBudget";
+import {
+  manualListingPriceMinor,
+  manualListingWaitCopy,
+} from "./ui/manualListingPrice";
 import { homeAtmosphereStage, homeGoldPercent } from "./ui/homeAtmosphere";
 
 type Tab = "market" | "follow" | "portfolio" | "journey";
@@ -260,6 +264,10 @@ export default function App() {
   const [purchasesOpen, setPurchasesOpen] = useState(false);
   const [resetArmed, setResetArmed] = useState(false);
   const [quickSaleAssetId, setQuickSaleAssetId] = useState<string | null>(null);
+  const [manualListingAssetId, setManualListingAssetId] = useState<
+    string | null
+  >(null);
+  const [manualListingPrice, setManualListingPrice] = useState("");
   const [focusedAssetId, setFocusedAssetId] = useState<string | null>(null);
   const [homeFinaleOpen, setHomeFinaleOpen] = useState(false);
   const [homePulseStage, setHomePulseStage] = useState<number | null>(null);
@@ -616,6 +624,7 @@ export default function App() {
     setSelectedId(null);
     setComparing(false);
     setQuickSaleAssetId(null);
+    setManualListingAssetId(null);
     setFocusedAssetId(assetId);
     setPortfolioSegment(segment);
     setTab("portfolio");
@@ -782,36 +791,97 @@ export default function App() {
                   </button>
                 </>
               ) : (
-                <div className="listing-strategy-options">
+                <>
+                  <div className="listing-strategy-options">
+                    <button
+                      aria-label={`Hemen sat · ${money(quote.quickSaleMinor)}`}
+                      onClick={() => setQuickSaleAssetId(item.id)}
+                    >
+                      <b>Hızlı</b>
+                      <strong>{money(quote.quickSaleMinor)}</strong>
+                      <small>Şimdi sat</small>
+                    </button>
+                    <button
+                      className="primary"
+                      aria-label={`İlan oluştur · ${money(quote.balancedAskingMinor)}`}
+                      onClick={() =>
+                        listAndContinue(item, quote.balancedAskingMinor)
+                      }
+                    >
+                      <b>Dengeli</b>
+                      <strong>{money(quote.balancedAskingMinor)}</strong>
+                      <small>Normal bekleme</small>
+                    </button>
+                    <button
+                      onClick={() =>
+                        listAndContinue(item, quote.premiumAskingMinor)
+                      }
+                    >
+                      <b>Yüksek</b>
+                      <strong>{money(quote.premiumAskingMinor)}</strong>
+                      <small>Daha uzun bekle</small>
+                    </button>
+                  </div>
                   <button
-                    aria-label={`Hemen sat · ${money(quote.quickSaleMinor)}`}
-                    onClick={() => setQuickSaleAssetId(item.id)}
+                    className="manual-listing-toggle"
+                    aria-expanded={manualListingAssetId === item.id}
+                    onClick={() => {
+                      if (manualListingAssetId === item.id) {
+                        setManualListingAssetId(null);
+                        return;
+                      }
+                      setManualListingAssetId(item.id);
+                      setManualListingPrice(
+                        String(quote.balancedAskingMinor / 100),
+                      );
+                    }}
                   >
-                    <b>Hızlı</b>
-                    <strong>{money(quote.quickSaleMinor)}</strong>
-                    <small>Şimdi sat</small>
+                    Kendi fiyatını belirle
                   </button>
-                  <button
-                    className="primary"
-                    aria-label={`İlan oluştur · ${money(quote.balancedAskingMinor)}`}
-                    onClick={() =>
-                      listAndContinue(item, quote.balancedAskingMinor)
-                    }
-                  >
-                    <b>Dengeli</b>
-                    <strong>{money(quote.balancedAskingMinor)}</strong>
-                    <small>Normal bekleme</small>
-                  </button>
-                  <button
-                    onClick={() =>
-                      listAndContinue(item, quote.premiumAskingMinor)
-                    }
-                  >
-                    <b>Yüksek</b>
-                    <strong>{money(quote.premiumAskingMinor)}</strong>
-                    <small>Daha uzun bekle</small>
-                  </button>
-                </div>
+                  {manualListingAssetId === item.id ? (
+                    <form
+                      className="manual-listing-form"
+                      onSubmit={(event) => {
+                        event.preventDefault();
+                        const amount =
+                          manualListingPriceMinor(manualListingPrice);
+                        if (!amount) return;
+                        listAndContinue(item, amount);
+                      }}
+                    >
+                      <label>
+                        <span>İlan fiyatı</span>
+                        <span className="manual-price-input">
+                          ₺
+                          <input
+                            value={manualListingPrice}
+                            inputMode="decimal"
+                            aria-label="Kendi ilan fiyatın"
+                            onChange={(event) =>
+                              setManualListingPrice(event.target.value)
+                            }
+                          />
+                        </span>
+                      </label>
+                      <small>
+                        {manualListingPriceMinor(manualListingPrice)
+                          ? manualListingWaitCopy(
+                              manualListingPriceMinor(manualListingPrice)!,
+                              quote.balancedAskingMinor,
+                              quote.premiumAskingMinor,
+                            )
+                          : "Geçerli bir fiyat yaz"}
+                      </small>
+                      <button
+                        className="primary"
+                        disabled={!manualListingPriceMinor(manualListingPrice)}
+                        type="submit"
+                      >
+                        Bu fiyatla ilan ver
+                      </button>
+                    </form>
+                  ) : null}
+                </>
               )}
             </div>
           ) : null}

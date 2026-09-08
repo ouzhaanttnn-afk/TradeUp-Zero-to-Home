@@ -1218,6 +1218,63 @@ main {
 .listing-strategy-options .primary small {
   color: #082116;
 }
+.portfolio-next-action .manual-listing-toggle {
+  min-height: 38px;
+  border-style: dashed;
+  color: #a9bdb3;
+  background: transparent;
+}
+.manual-listing-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 6px;
+  padding-top: 2px;
+}
+.manual-listing-form label {
+  display: grid;
+  gap: 4px;
+  color: #9eb1a8;
+  font-size: calc(9px + var(--text-size-boost));
+}
+.manual-price-input {
+  display: flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 0 10px;
+  border: 1px solid #365247;
+  border-radius: 11px;
+  color: var(--accent);
+  background: #081710;
+  font-weight: 800;
+}
+.manual-price-input input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  color: #edf8f1;
+  background: transparent;
+  font: inherit;
+}
+.manual-listing-form > small {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+.manual-listing-form > button {
+  min-height: 42px;
+  margin: 0;
+  white-space: nowrap;
+}
+@media (max-width: 350px) {
+  .manual-listing-form {
+    grid-template-columns: 1fr;
+  }
+  .manual-listing-form > small,
+  .manual-listing-form > button {
+    grid-column: 1;
+  }
+}
 .preparation-options ~ .primary {
   grid-column: 1 / -1;
 }
