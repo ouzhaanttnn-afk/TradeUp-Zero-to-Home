@@ -1814,6 +1814,80 @@ nav .active .nav-icon {
   }
 }
 
+/* Project-owned atmosphere artwork */
+.app-shell.tab-market,
+.app-shell.tab-follow,
+.app-shell.tab-portfolio {
+  --screen-atmosphere: url("./assets/brand/ui_market_atmosphere_v1.webp");
+  --screen-atmosphere-position: center 17%;
+}
+
+.app-shell.tab-journey {
+  --screen-atmosphere: url("./assets/brand/ui_journey_atmosphere_v1.webp");
+  --screen-atmosphere-position: center 12%;
+}
+
+.app-shell > header,
+.app-shell > .wallet,
+.app-shell > .notice,
+.app-shell > main {
+  position: relative;
+  z-index: 1;
+}
+
+.app-shell main > .section-title:first-child {
+  position: relative;
+  min-height: 68px;
+  margin: 0 0 8px;
+  padding: 10px 11px;
+  overflow: hidden;
+  border: 1px solid rgba(151, 218, 184, 0.17);
+  border-radius: 17px;
+  background-image:
+    linear-gradient(92deg, rgba(4, 17, 11, 0.94) 0%, rgba(5, 19, 13, 0.76) 58%, rgba(7, 22, 15, 0.46) 100%),
+    var(--screen-atmosphere);
+  background-position: center, var(--screen-atmosphere-position);
+  background-size: cover, 100% auto;
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.2),
+    inset 0 1px rgba(255, 255, 255, 0.035);
+}
+
+.app-shell main > .section-title:first-child::after {
+  position: absolute;
+  right: -20px;
+  bottom: -32px;
+  width: 110px;
+  height: 70px;
+  border-radius: 50%;
+  background: rgba(97, 232, 161, 0.08);
+  filter: blur(18px);
+  content: "";
+  pointer-events: none;
+}
+
+.app-shell main > .section-title:first-child > * {
+  position: relative;
+  z-index: 1;
+}
+
+.app-shell main > .section-title:first-child h2 {
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.52);
+}
+
+.app-shell main > .section-title:first-child > span,
+.app-shell main > .section-title:first-child .market-listing-count {
+  color: #b3cbbf;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.7);
+}
+
+@media (max-width: 350px) {
+  .app-shell main > .section-title:first-child {
+    min-height: 64px;
+    padding-inline: 9px;
+  }
+}
+
 .product-art {
   font-size: 0;
   overflow: hidden;
@@ -3527,6 +3601,7 @@ main {
 }
 
 .segments button {
+  min-height: 46px;
   border-radius: 11px;
   color: #7f9a8c;
   transition: color 160ms ease, background 160ms ease, box-shadow 160ms ease;
@@ -3765,4 +3840,22 @@ nav .active::before {
   .wallet > div:not(.goal) {
     padding-inline: 5px;
   }
+}
+
+.app-shell::after {
+  z-index: 0;
+  background-image:
+    linear-gradient(180deg, rgba(3, 12, 8, 0.24), rgba(3, 11, 7, 0.96) 47%),
+    var(--screen-atmosphere),
+    linear-gradient(rgba(255, 255, 255, 0.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.009) 1px, transparent 1px);
+  background-repeat: no-repeat, no-repeat, repeat, repeat;
+  background-position:
+    center,
+    var(--screen-atmosphere-position),
+    center,
+    center;
+  background-size: 100% 100%, 100% auto, 28px 28px, 28px 28px;
+  mask-image: linear-gradient(to bottom, black 0%, rgba(0, 0, 0, 0.68) 42%, transparent 78%);
+  opacity: 0.3;
 }
