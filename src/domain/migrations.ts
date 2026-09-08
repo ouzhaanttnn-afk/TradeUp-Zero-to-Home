@@ -47,6 +47,7 @@ const createDefaultMonetizationState = (gameTimeMin: number) => ({
   lifetimeActivePlayMinutes: 0,
   rewardCooldownUntilGameMin: undefined,
   rewardTransactions: [],
+  marketScanCredits: 25,
 });
 
 function migrateFamily(value: unknown): Family {
@@ -518,15 +519,17 @@ export function migrateStateToV4(value: unknown): unknown {
 }
 
 export function migrateStateToCurrent(value: unknown): unknown {
-  return migrateStateToV13(
-    migrateStateToV12(
-      migrateStateToV11(
-        migrateStateToV10(
-          migrateStateToV9(
-            migrateStateToV8(
-              migrateStateToV7(
-                migrateStateToV6(
-                  migrateStateToV5(migrateStateToV4(migrateStateToV3(value))),
+  return migrateStateToV14(
+    migrateStateToV13(
+      migrateStateToV12(
+        migrateStateToV11(
+          migrateStateToV10(
+            migrateStateToV9(
+              migrateStateToV8(
+                migrateStateToV7(
+                  migrateStateToV6(
+                    migrateStateToV5(migrateStateToV4(migrateStateToV3(value))),
+                  ),
                 ),
               ),
             ),
@@ -535,6 +538,20 @@ export function migrateStateToCurrent(value: unknown): unknown {
       ),
     ),
   );
+}
+
+export function migrateStateToV14(value: unknown): unknown {
+  const source = record(value);
+  if (integer(source.version) >= 14) return value;
+  const monetization = record(source.monetization);
+  return {
+    ...source,
+    version: 14,
+    monetization: {
+      ...monetization,
+      marketScanCredits: 25,
+    },
+  };
 }
 
 export function migrateStateToV13(value: unknown): unknown {

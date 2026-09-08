@@ -349,6 +349,7 @@ export type MonetizationState = {
   lifetimeActivePlayMinutes: number;
   rewardCooldownUntilGameMin?: number;
   rewardTransactions: RewardActionTransaction[];
+  marketScanCredits: number;
 };
 
 export type AnalyticsEventName =

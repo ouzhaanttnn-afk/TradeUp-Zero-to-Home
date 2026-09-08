@@ -29,7 +29,7 @@ export type {
   TransactionJournalEntry,
 } from "./domain/models";
 export { families } from "./content/families";
-export const SAVE_VERSION = 13;
+export const SAVE_VERSION = 14;
 export const HOME_GOAL_MINOR = 350_000_000;
 
 const attributeDefinitionSchema = z.object({
@@ -408,6 +408,7 @@ const monetizationSchema = z.object({
   lifetimeActivePlayMinutes: z.number().int().nonnegative(),
   rewardCooldownUntilGameMin: z.number().nonnegative().optional(),
   rewardTransactions: z.array(rewardTransactionSchema),
+  marketScanCredits: z.number().int().nonnegative().max(25),
 });
 const negotiationSchema = z.object({
   listingId: z.string(),
@@ -812,6 +813,7 @@ const createDefaultMonetizationState = (gameTimeMin: number) => ({
   lifetimeActivePlayMinutes: 0,
   rewardCooldownUntilGameMin: undefined,
   rewardTransactions: [],
+  marketScanCredits: 25,
 });
 
 export const initialState = (

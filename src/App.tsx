@@ -170,8 +170,8 @@ const storeCopy: Record<
 
 const rewardCopy = {
   MARKET_SCOUT: {
-    ad: "Yakındaki ilanları tara · Video",
-    premium: "Premium tarama hakkını kullan",
+    ad: "25 tarama hakkı · Video",
+    premium: "25 tarama hakkını yenile",
   },
   FAST_INSPECTION: {
     ad: "İncelemeyi şimdi bitir · Video",
@@ -1093,13 +1093,28 @@ export default function App() {
                         </option>
                       </select>
                     </label>
-                    <button
-                      className="market-refresh"
-                      onClick={scan}
-                      aria-label="Pazarı yenile"
-                    >
-                      <Icon name="refresh" />
-                    </button>
+                    {game.monetization.marketScanCredits === 0 &&
+                    canClaimReward("MARKET_SCOUT") ? (
+                      <button
+                        className="market-refresh market-refresh--reward"
+                        disabled={monetizationBusy}
+                        onClick={() => void claimReward("MARKET_SCOUT")}
+                        aria-label={rewardLabel("MARKET_SCOUT")}
+                      >
+                        <Icon name="refresh" />
+                        <span>+25</span>
+                      </button>
+                    ) : (
+                      <button
+                        className="market-refresh"
+                        disabled={game.monetization.marketScanCredits === 0}
+                        onClick={scan}
+                        aria-label={`Pazarı yenile · ${game.monetization.marketScanCredits} hak kaldı`}
+                      >
+                        <Icon name="refresh" />
+                        <span>{game.monetization.marketScanCredits}</span>
+                      </button>
+                    )}
                   </>
                 ) : null}
               </div>
@@ -1136,15 +1151,6 @@ export default function App() {
               </div>
             ) : null}
             <div className="feed market-grid">
-              {!selected && canClaimReward("MARKET_SCOUT") ? (
-                <button
-                  className="reward-cta"
-                  disabled={monetizationBusy}
-                  onClick={() => void claimReward("MARKET_SCOUT")}
-                >
-                  {rewardLabel("MARKET_SCOUT")}
-                </button>
-              ) : null}
               {startingOffer ? (
                 <article className="starting-sale">
                   <img

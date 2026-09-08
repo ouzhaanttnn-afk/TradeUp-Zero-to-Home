@@ -1,12 +1,9 @@
-import { market } from "../game";
-import { WORLD_CONFIG } from "./config";
-import { activePlayerListings, netWorthMinor } from "./economy";
+import { activePlayerListings } from "./economy";
 import { completeDuePreparations } from "./preparation";
 import { rollBuyerExposure } from "./world";
 import type {
   GameState,
   EntitlementId,
-  Listing,
   MonetizationProductId,
   MonetizationState,
   RewardActionTransaction,
@@ -40,13 +37,8 @@ const FIRST_SALE_LOCK_MIN =
   MONETIZATION_CONFIG.reward.firstSaleCompleteThresholdMinutes;
 const LISTING_REACH_MAX_AGE_MIN =
   MONETIZATION_CONFIG.reward.placementReward.LISTING_REACH_MAX_AGE_GAME_MIN;
-const LISTING_SCOUT_ADD_COUNT =
-  MONETIZATION_CONFIG.reward.placementReward.MARKET_SCOUT_LISTING_COUNT;
-
-const isActiveMarketListing = (
-  state: Listing["state"],
-): state is "ACTIVE" | "WATCHED" | "NEGOTIATING" =>
-  state === "ACTIVE" || state === "WATCHED" || state === "NEGOTIATING";
+const MARKET_SCOUT_SCAN_CREDITS =
+  MONETIZATION_CONFIG.reward.placementReward.MARKET_SCOUT_SCAN_CREDITS;
 const nowSeconds = (state: Pick<GameState, "gameTimeMin">) =>
   state.gameTimeMin * 60;
 
@@ -77,6 +69,8 @@ export const createDefaultMonetizationState = (
   lifetimeActivePlayMinutes: 0,
   rewardCooldownUntilGameMin: undefined,
   rewardTransactions: [],
+  marketScanCredits:
+    MONETIZATION_CONFIG.reward.placementReward.MARKET_SCOUT_SCAN_CREDITS,
 });
 
 export const hasPremiumEntitlement = (state: Pick<GameState, "monetization">) =>
@@ -155,14 +149,7 @@ const nextPlacementTarget = (
   state: GameState,
 ): string | undefined => {
   if (placementId === "MARKET_SCOUT") {
-    const activeCount = state.listings.filter((listing) =>
-      isActiveMarketListing(listing.state),
-    ).length;
-    const inspectedCount = state.analytics.events.filter(
-      (event) =>
-        event.name === "listing_open" || event.name === "listing_impression",
-    ).length;
-    return activeCount < 8 || inspectedCount >= 8
+    return state.monetization.marketScanCredits === 0
       ? `market-scout:${state.marketCycle}:${state.gameTimeMin}`
       : undefined;
   }
@@ -206,31 +193,13 @@ const applyReward = (
   let next = state;
 
   if (placementId === "MARKET_SCOUT") {
-    // rewarded scout only extends listing pool deterministically
-    const existingCount = state.listings.filter((listing) =>
-      isActiveMarketListing(listing.state),
-    ).length;
-    const additional = Math.max(
-      0,
-      Math.min(
-        LISTING_SCOUT_ADD_COUNT,
-        WORLD_CONFIG.maxActiveListings - existingCount,
-      ),
-    );
-    if (additional > 0) {
-      const arrivals: Listing[] = market(
-        state.seed,
-        Math.max(0, netWorthMinor(state)),
-        state.marketCycle + 1,
-        state.gameTimeMin,
-        additional,
-      );
-      next = {
-        ...state,
-        marketCycle: state.marketCycle + 1,
-        listings: [...state.listings, ...arrivals],
-      };
-    }
+    next = {
+      ...state,
+      monetization: {
+        ...state.monetization,
+        marketScanCredits: MARKET_SCOUT_SCAN_CREDITS,
+      },
+    };
   }
 
   if (placementId === "FAST_INSPECTION") {

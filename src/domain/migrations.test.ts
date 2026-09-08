@@ -4,6 +4,21 @@ import { reconcileJournal } from "./economy";
 import { migrateStateToCurrent } from "./migrations";
 
 describe("save migration", () => {
+  it("grants the approved 25-scan allowance to v13 saves", () => {
+    const current = initialState(500, "SANDBOX");
+    const monetization = { ...current.monetization } as Record<string, unknown>;
+    delete monetization.marketScanCredits;
+    const v13 = { ...current, version: 13, monetization };
+
+    const state = validateState(migrateStateToCurrent(v13));
+
+    expect(state.monetization.marketScanCredits).toBe(25);
+    expect(reconcileJournal(state)).toEqual({
+      cash: true,
+      activeBookCost: true,
+      realizedProfit: true,
+    });
+  });
   it("adds a future-ready player profile without changing v12 economy data", () => {
     const current = initialState(500, "SANDBOX");
     const v12: Record<string, unknown> = { ...current, version: 12 };

@@ -533,6 +533,37 @@ main {
   width: 18px;
   height: 18px;
 }
+.market-refresh > span {
+  position: absolute;
+  right: 2px;
+  bottom: 1px;
+  z-index: 2;
+  min-width: 18px;
+  padding: 2px 4px;
+  border: 1px solid #29473a;
+  border-radius: 8px;
+  color: #b9d3c5;
+  background: #0a1b13;
+  font-size: calc(7px + var(--text-size-boost));
+  font-weight: 850;
+  line-height: 1;
+}
+.market-refresh--reward {
+  color: #ffe39a;
+}
+.market-refresh--reward::before {
+  border-color: rgba(224, 183, 83, 0.48);
+  background: linear-gradient(145deg, #3a3218, #201d12);
+}
+.market-refresh--reward > span {
+  border-color: #8b7130;
+  color: #ffe39a;
+  background: #2a2414;
+}
+.market-refresh:disabled {
+  cursor: default;
+  opacity: 0.48;
+}
 .market-sort--active {
   color: var(--accent);
 }

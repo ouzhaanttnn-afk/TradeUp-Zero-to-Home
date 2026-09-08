@@ -355,7 +355,7 @@ Oyuncu her ilanda bütün bilgiyi toplamak zorunda değildir. Daha fazla doğrul
 | Listing | Satıcının sunduğu fırsat | askingPrice, urgency, claims, age, competition |
 | Player listing | Oyuncunun çıkış denemesi | bookCost, askingPrice, proofQuality, visibility |
 
-Pazar tam yenileme butonuyla sıfırlanmaz. İlanlar akışa kademeli gelir, yaşlanır, teklif alır, NPC’ye satılır veya süresi dolarak çıkar. Oyuncu “Pazarı tara” aksiyonuyla yeni bir örneklem açabilir; bu aksiyon oyun zamanı ilerletir ve eski ilanların yaşamını sürdürür. Rewarded refresh de aynı dünyayı yok etmez; sadece yakındaki yeni ilanların görünürlüğünü artırır.
+Pazar tam yenileme butonuyla sıfırlanmaz. İlanlar akışa kademeli gelir, yaşlanır, teklif alır, NPC’ye satılır veya süresi dolarak çıkar. Oyuncu “Pazarı tara” aksiyonuyla yeni bir örneklem açabilir; bu aksiyon oyun zamanı ilerletir, bir aktif tarama hakkı tüketir ve eski ilanların yaşamını sürdürür. Rewarded yenileme dünyayı veya ilanları değiştirmez; yalnız biten tarama hakkını 25’e yeniler.
 
 ## Simülasyon ilkeleri
 - Aynı ProductFamily için vertical slice’ta tipik 8–16 aktif ilan hedeflenir.
@@ -1018,6 +1018,10 @@ Görevler varsa “3 reklam izle” veya “10 rastgele ürün al” şeklinde o
 # 34A. Rewarded Reklam Yerleşimleri ve Kesin Limitler
 > Rewarded reklam oyuncunun doğal olarak beklediği bir işlemi hızlandırır veya standart pazar örneklemini genişletir; sonucu iyileştirmez.
 
+> **[ONAYLI REVİZYON · 2026-09-08] Pazar tarama hakkı:** Oyuncu 25 ücretsiz aktif tarama hakkıyla başlar. Her `Pazarı yenile` kullanımı bir hak tüketir; pazarın doğal zaman akışı, mevcut ilanların yaşamı ve temel ticaret döngüsü hak olmasa da sürer. Hak sıfıra indiğinde `MARKET_SCOUT`, açık kullanıcı seçimiyle 25 hakkı yeniler. Premium aynı yenilemeyi video olmadan, aynı cap ve cooldown ile uygular. Hak satın alınamaz, biriktirilemez ve 25 üstüne çıkamaz. Bu revizyon aşağıdaki eski `MARKET_SCOUT` ödül satırındaki “4 yeni ilan” davranışının yerini alır; yeni placement oluşturmaz.
+
+> **[KİLİTLİ] Zorunlu reklam yok:** Para/servet eşikleri dahil hiçbir gameplay olayı reklamı otomatik başlatamaz. Bu eşikler yalnız uygun, isteğe bağlı rewarded CTA’yı bağlamsal olarak görünür kılabilir; oyuncu reddederse ekonomi, ilerleme ve pazar akışı kilitlenmez.
+
 ## Global uygunluk ve frekans
 | Kural | Kilitli değer |
 | --- | --- |
@@ -1033,7 +1037,7 @@ Görevler varsa “3 reklam izle” veya “10 rastgele ürün al” şeklinde o
 ## v1.0 placement matrisi
 | Placement ID | Göründüğü bağlam | Kesin ödül | Placement sınırı | Değiştirmediği şey |
 | --- | --- | --- | --- | --- |
-| `MARKET_SCOUT` | En az 8 ilan incelendiğinde veya aktif feed 8’in altına düştüğünde | Normal spawn dağılımından 4 yeni ilan arrival queue’ya eklenir | 2 / rolling 24s; oturumda 1 | İlanların fair value, rarity, hot-deal olasılığı ve NPC ömrü bias almaz; mevcut pazar silinmez |
+| `MARKET_SCOUT` | Aktif tarama hakkı 0 olduğunda | Aktif tarama hakkı 25’e yenilenir | 2 / rolling 24s; oturumda 1 | İlanların fair value, rarity, hot-deal olasılığı ve NPC ömrü bias almaz; mevcut pazar silinmez ve doğal akış durmaz |
 | `FAST_INSPECTION` | Sonucu önceden üretilmiş aktif incelemede kalan süre >45 sn | İnceleme süresi şimdi tamamlanır | 3 / rolling 24s; aynı listing/asset için 1 | Evidence sonucu, confidence artışı, kusur ve değer hesabı değişmez |
 | `FAST_PREPARATION` | Maliyeti ödenmiş hazırlıkta kalan süre >60 sn | Temizle / Tamamla / Hafif servis süresi şimdi biter | 3 / rolling 24s; aynı action instance için 1 | Maliyet, condition cap, accessory sonucu, başarı/arıza sonucu değişmez |
 | `LISTING_REACH` | Oyuncu ilanı en az 5 oyun dakikası aktif ve henüz teklif almamışsa | Aynı buyer algoritmasıyla 1 ek exposure roll planlanır | 2 / rolling 24s; listing lifecycle başına 1 | Teklif garantisi, teklif tutarı, buyer bütçesi ve satış olasılığına gizli bonus yok |
@@ -1049,7 +1053,7 @@ Global cap placement cap’lerinin toplamından önce uygulanır. Oyuncu aynı g
 ## CTA dili
 | Ücretsiz kullanıcı | Premium kullanıcı |
 | --- | --- |
-| “Yakındaki ilanları tara • Video” | “Premium tarama hakkını kullan” |
+| “25 tarama hakkı • Video” | “25 tarama hakkını yenile” |
 | “İncelemeyi şimdi bitir • Video” | “İncelemeyi şimdi bitir” |
 | “Hazırlığı şimdi bitir • Video” | “Hazırlığı şimdi bitir” |
 | “İlanı bir kez öne çıkar • Video” | “Premium erişim hakkını kullan” |

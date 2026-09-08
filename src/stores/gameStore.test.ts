@@ -175,6 +175,22 @@ describe("application lifecycle", () => {
   });
 });
 
+describe("market scan allowance", () => {
+  it("consumes 25 manual scans and never makes the counter negative", () => {
+    const game = initialState(0, "SANDBOX");
+    game.ftue.stage = "COMPLETE";
+    useGameStore.setState({ game, ready: true, sessionActive: true });
+
+    for (let index = 0; index < 25; index += 1) useGameStore.getState().scan();
+
+    expect(useGameStore.getState().game.monetization.marketScanCredits).toBe(0);
+    const exhausted = structuredClone(useGameStore.getState().game);
+    useGameStore.getState().scan();
+    expect(useGameStore.getState().game).toEqual(exhausted);
+    expect(useGameStore.getState().notice).toContain("Tarama hakkın bitti");
+  });
+});
+
 describe("delayed provider responses", () => {
   it.each(["hydrate", "openPurchases"] as const)(
     "preserves gameplay while %s waits for consent",

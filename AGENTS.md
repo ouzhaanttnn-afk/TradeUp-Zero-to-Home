@@ -19,6 +19,7 @@
 - Negotiation has exactly two player offer rights. Do not add extra offers, retries, guaranteed deals, premium currency, cash packs, forced ads, a second sight, or invisible major defects.
 - Keep the four-tab portrait shell: Pazar, Takip, Portföy, Yolculuk. Envanter, Hazırlık, and İlanlarım are Portföy segments. Respect safe areas, 320–430 px widths, text scaling, reduced motion, haptics-off, and missing-asset fallback.
 - Assets are not a gameplay blocker. Follow: manifest and placeholder, 24 hero families, condition/evidence overlays, then measured expansion.
+- Approved 2026-09-08 scan amendment: the player has 25 active market scans; each manual refresh consumes one. At zero, `MARKET_SCOUT` restores exactly 25 through an explicit rewarded choice or the premium bypass with unchanged caps/cooldown. Natural market flow never stops, credits never exceed 25, and no currency/wealth event may automatically show an ad.
 
 ## Scope freeze
 

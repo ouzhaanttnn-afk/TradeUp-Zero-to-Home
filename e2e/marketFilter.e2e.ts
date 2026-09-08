@@ -38,6 +38,7 @@ test("category filter narrows the market without adding vertical controls", asyn
 
   const refresh = page.getByRole("button", { name: "Pazarı yenile" });
   await expect(refresh).toBeVisible();
+  await expect(refresh).toHaveAttribute("aria-label", /25 hak kaldı/);
   const settings = page
     .locator("header")
     .getByRole("button", { name: "Ayarlar", exact: true });
@@ -130,4 +131,6 @@ test("category filter narrows the market without adding vertical controls", asyn
 
   await filters.getByRole("button", { name: "Tümü" }).click();
   await expect(cards).toHaveCount(saved.listings.length);
+  await refresh.click();
+  await expect(refresh).toHaveAttribute("aria-label", /24 hak kaldı/);
 });

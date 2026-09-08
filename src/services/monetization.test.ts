@@ -28,6 +28,7 @@ const unlockedState = () => {
   state.monetization.firstSaleComplete = true;
   state.monetization.lifetimeActivePlayMinutes = 20;
   state.monetization.consent.canRequestAds = true;
+  state.monetization.marketScanCredits = 0;
   state.analytics.events = Array.from({ length: 8 }, (_, index) => ({
     id: `impression:${index}`,
     name: "listing_impression" as const,

@@ -335,10 +335,23 @@ export const useGameStore = create<Store>((set, get) => ({
   },
   scan: () => {
     const previous = get().game;
+    if (previous.monetization.marketScanCredits <= 0) {
+      set({
+        notice:
+          "Tarama hakkın bitti. Pazar kendiliğinden akmaya devam eder; istersen haklarını yenileyebilirsin.",
+      });
+      return;
+    }
     const scanned = scanMarket(previous);
     const result = {
       ...scanned,
-      state: withBuyerOfferAnalytics(previous, scanned.state),
+      state: withBuyerOfferAnalytics(previous, {
+        ...scanned.state,
+        monetization: {
+          ...scanned.state.monetization,
+          marketScanCredits: previous.monetization.marketScanCredits - 1,
+        },
+      }),
     };
     set({
       game: stampAndPersist(result.state),

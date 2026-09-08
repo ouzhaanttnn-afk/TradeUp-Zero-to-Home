@@ -14,15 +14,26 @@ import {
 } from "./monetization";
 
 const makeReadyForRewards = () => {
-  const unlocked = advanceRewardState(markFirstSaleComplete(initialState(0, "SANDBOX")), 20);
-  return syncConsentState({
-    ...unlocked,
-    listings: unlocked.listings.map((listing, index) =>
-      index >= 7
-        ? { ...listing, state: "SOLD" as Listing["state"] }
-        : listing,
-    ),
-  }, true, false);
+  const unlocked = advanceRewardState(
+    markFirstSaleComplete(initialState(0, "SANDBOX")),
+    20,
+  );
+  return syncConsentState(
+    {
+      ...unlocked,
+      listings: unlocked.listings.map((listing, index) =>
+        index >= 7
+          ? { ...listing, state: "SOLD" as Listing["state"] }
+          : listing,
+      ),
+      monetization: {
+        ...unlocked.monetization,
+        marketScanCredits: 0,
+      },
+    },
+    true,
+    false,
+  );
 };
 
 const inspectionEntry = {
@@ -72,7 +83,11 @@ describe("monetization reward eligibility", () => {
     expect(first.ok).toBe(true);
 
     const applied = applyRewardedResult(first.state, first.rewardId);
-    const later = { ...applied, gameTimeMin: applied.gameTimeMin + 1 };
+    const later = {
+      ...applied,
+      gameTimeMin: applied.gameTimeMin + 1,
+      monetization: { ...applied.monetization, marketScanCredits: 0 },
+    };
     const second = requestMonetizedAction(later, "MARKET_SCOUT", "ad");
     expect(second.ok).toBe(false);
     if (second.ok) throw new Error("Expected cooldown block");
@@ -92,7 +107,10 @@ describe("monetization reward eligibility", () => {
 
   it("is idempotent when the same rewarded action already exists", () => {
     const base = makeReadyForRewards();
-    const ready = { ...base, transactionJournal: [...base.transactionJournal, inspectionEntry] };
+    const ready = {
+      ...base,
+      transactionJournal: [...base.transactionJournal, inspectionEntry],
+    };
     const requested = requestMonetizedAction(ready, "FAST_INSPECTION", "ad");
     if (!requested.ok) throw new Error("Expected request");
     const applied = applyRewardedResult(requested.state, requested.rewardId);
@@ -105,9 +123,24 @@ describe("monetization reward eligibility", () => {
     const ready = makeReadyForRewards();
     const requested = requestMonetizedAction(ready, "MARKET_SCOUT", "ad");
     if (!requested.ok) throw new Error("Expected request");
-    const failed = closeRewardedAction(requested.state, requested.rewardId, "FAILED");
+    const failed = closeRewardedAction(
+      requested.state,
+      requested.rewardId,
+      "FAILED",
+    );
     expect(failed.monetization.usage.sessionRewardCount).toBe(0);
     expect(failed.monetization.rewardCooldownUntilGameMin).toBeUndefined();
+  });
+
+  it("restores exactly 25 scans without changing the existing market", () => {
+    const ready = makeReadyForRewards();
+    const requested = requestMonetizedAction(ready, "MARKET_SCOUT", "ad");
+    if (!requested.ok) throw new Error("Expected request");
+    const applied = applyRewardedResult(requested.state, requested.rewardId);
+
+    expect(applied.monetization.marketScanCredits).toBe(25);
+    expect(applied.listings).toEqual(ready.listings);
+    expect(applied.marketCycle).toBe(ready.marketCycle);
   });
 
   it("requires consent for ads and verified premium ownership for video bypass", () => {
