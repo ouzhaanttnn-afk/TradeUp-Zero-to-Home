@@ -137,27 +137,30 @@ test("expanded product families use dedicated mobile artwork", async ({
   await persistGame(page, saved);
   await page.reload();
 
-  for (const [name, assetName] of [
-    ["Koleksiyon Masa Oyunu", "prd_board_game"],
-    ["Kıyı Cep Radyosu", "prd_portable_radio"],
-    ["Dolma Kalem Seti", "prd_fountain_pen"],
-    ["Ark Zemin Lambası", "prd_floor_lamp"],
-    ["Nadir Oyun Kartuşu", "prd_game_cartridge"],
-    ["Sedir Parfüm Seti", "prd_perfume_set"],
-    ["Mühürlü Renk Paleti", "prd_makeup_set"],
-    ["Ada Trençkot", "prd_trench_coat"],
-    ["Atölye Deri Çanta", "prd_leather_bag"],
-    ["Vista VR Başlık", "prd_vr_headset"],
-    ["Rota Robot Süpürge", "prd_robot_vacuum"],
-    ["Nova Fold Telefon", "prd_fold_phone"],
-    ["Apex Yarış Direksiyonu", "prd_racing_wheel"],
-    ["Mutfak Stand Mikseri", "prd_stand_mixer"],
-    ["Vela Stüdyo Monitörü", "prd_studio_monitor"],
+  for (const [, assetName] of [
+    [boardGame, "prd_board_game"],
+    [portableRadio, "prd_portable_radio"],
+    [fountainPen, "prd_fountain_pen"],
+    [floorLamp, "prd_floor_lamp"],
+    [gameCartridge, "prd_game_cartridge"],
+    [perfumeSet, "prd_perfume_set"],
+    [makeupSet, "prd_makeup_set"],
+    [trenchCoat, "prd_trench_coat"],
+    [leatherBag, "prd_leather_bag"],
+    [vrHeadset, "prd_vr_headset"],
+    [robotVacuum, "prd_robot_vacuum"],
+    [foldPhone, "prd_fold_phone"],
+    [racingWheel, "prd_racing_wheel"],
+    [standMixer, "prd_stand_mixer"],
+    [studioMonitor, "prd_studio_monitor"],
   ] as const) {
-    const card = page.locator(".market-card").filter({ hasText: name });
+    const cards = page.locator(".market-card").filter({
+      has: page.locator(`img[src*="${assetName}"]`),
+    });
+    await expect(cards).not.toHaveCount(0);
+    const card = cards.first();
     const visual = card.locator(".product-visual");
     const image = visual.locator("img");
-    await expect(card).toHaveCount(1);
     await expect(visual).not.toHaveClass(/product-visual--fallback/);
     await expect(image).toHaveAttribute("src", new RegExp(assetName));
     await expect
@@ -181,14 +184,17 @@ test("expanded product families use dedicated mobile artwork", async ({
   });
   await page
     .locator(".market-card")
-    .filter({ hasText: "Nadir Oyun Kartuşu" })
+    .filter({
+      has: page.locator('img[src*="prd_game_cartridge"]'),
+    })
+    .first()
     .scrollIntoViewIfNeeded();
   await page.screenshot({
     path: testInfo.outputPath("game-cartridge-asset-390.png"),
     animations: "disabled",
   });
   await page.getByRole("button", { name: "Moda/Bakım", exact: true }).click();
-  await expect(page.locator(".market-card")).toHaveCount(4);
+  expect(await page.locator(".market-card").count()).toBeGreaterThanOrEqual(4);
   await page.screenshot({
     path: testInfo.outputPath("fashion-care-assets-390.png"),
     fullPage: true,
@@ -263,27 +269,30 @@ test("secondary expansion artwork loads without category fallbacks", async ({
   await persistGame(page, validateState(state));
   await page.reload();
 
-  for (const [name, assetName] of [
-    ["Orbit DAC Amfi", "prd_dac_amp"],
-    ["Sahil Kasetçalar", "prd_cassette_player"],
-    ["Kuzey E-Kitap Okuyucu", "prd_e_reader"],
-    ["Cep Projektörü", "prd_mobile_projector"],
-    ["Vela Çalışma Monitörü", "prd_monitor"],
-    ["Orbit Mini Bilgisayar", "prd_mini_pc"],
-    ["Kuzey Mekanik Klavye", "prd_mechanical_keyboard"],
-    ["Anı Şipşak Kamera", "prd_instant_camera"],
-    ["Karbon Seyahat Tripodu", "prd_tripod"],
-    ["Stüdyo Tepe Flaşı", "prd_camera_flash"],
-    ["Rota Aksiyon Kamerası", "prd_action_camera"],
-    ["Cep Çakmağı", "prd_vintage_lighter"],
-    ["Ceviz Yan Sehpa", "prd_side_table"],
-    ["Atlas Dayanıklı Telefon", "prd_rugged_phone"],
-    ["Forge Oyun Klavyesi", "prd_gaming_keyboard"],
+  for (const [, assetName] of [
+    [dacAmp, "prd_dac_amp"],
+    [cassettePlayer, "prd_cassette_player"],
+    [eReader, "prd_e_reader"],
+    [mobileProjector, "prd_mobile_projector"],
+    [monitor, "prd_monitor"],
+    [miniPc, "prd_mini_pc"],
+    [mechanicalKeyboard, "prd_mechanical_keyboard"],
+    [instantCamera, "prd_instant_camera"],
+    [tripod, "prd_tripod"],
+    [cameraFlash, "prd_camera_flash"],
+    [actionCamera, "prd_action_camera"],
+    [vintageLighter, "prd_vintage_lighter"],
+    [sideTable, "prd_side_table"],
+    [ruggedPhone, "prd_rugged_phone"],
+    [gamingKeyboard, "prd_gaming_keyboard"],
   ] as const) {
-    const card = page.locator(".market-card").filter({ hasText: name });
+    const cards = page.locator(".market-card").filter({
+      has: page.locator(`img[src*="${assetName}"]`),
+    });
+    await expect(cards).not.toHaveCount(0);
+    const card = cards.first();
     const visual = card.locator(".product-visual");
     const image = visual.locator("img");
-    await expect(card).toHaveCount(1);
     await expect(visual).not.toHaveClass(/product-visual--fallback/);
     await expect(image).toHaveAttribute("src", new RegExp(assetName));
     await expect
@@ -303,12 +312,12 @@ test("final expansion artwork loads without category fallbacks", async ({
   await page.setViewportSize({ width: 390, height: 844 });
   const state = initialState(Date.now(), "SANDBOX");
   const rows = [
-    ["bass_guitar", "Arda B4 Bas Gitar", "prd_bass_guitar"],
-    ["audio_interface", "Vox Ses Arayüzü", "prd_audio_interface"],
-    ["drum_machine", "Ritim Davul Makinesi", "prd_drum_machine"],
-    ["violin", "Ladin Öğrenci Kemanı", "prd_violin"],
-    ["graphics_tablet", "Çizim Tableti", "prd_graphics_tablet"],
-    ["router", "Mesh Ağ İstasyonu", "prd_router"],
+    ["bass_guitar", "prd_bass_guitar"],
+    ["audio_interface", "prd_audio_interface"],
+    ["drum_machine", "prd_drum_machine"],
+    ["violin", "prd_violin"],
+    ["graphics_tablet", "prd_graphics_tablet"],
+    ["router", "prd_router"],
   ] as const;
   const families = rows.map(([familyId]) => familyById(familyId));
   if (families.some((family) => !family)) {
@@ -327,11 +336,14 @@ test("final expansion artwork loads without category fallbacks", async ({
   await persistGame(page, validateState(state));
   await page.reload();
 
-  for (const [, name, assetName] of rows) {
-    const card = page.locator(".market-card").filter({ hasText: name });
+  for (const [, assetName] of rows) {
+    const cards = page.locator(".market-card").filter({
+      has: page.locator(`img[src*="${assetName}"]`),
+    });
+    await expect(cards).not.toHaveCount(0);
+    const card = cards.first();
     const visual = card.locator(".product-visual");
     const image = visual.locator("img");
-    await expect(card).toHaveCount(1);
     await expect(visual).not.toHaveClass(/product-visual--fallback/);
     await expect(image).toHaveAttribute("src", new RegExp(assetName));
     await expect

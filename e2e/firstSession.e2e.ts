@@ -83,7 +83,7 @@ for (const choice of [
     }
     await page
       .locator(`.market-card[data-price-minor="${choice.price * 100}"]`)
-      .filter({ hasText: "Kuzey Defteri" })
+      .filter({ hasText: "Koleksiyon Kutu Defteri" })
       .click();
     const purchaseSteps = page.getByRole("group", {
       name: "Satın alma adımları",
@@ -168,13 +168,18 @@ for (const choice of [
       page.getByRole("tab", { name: "Hazırlık", exact: true }),
     ).toHaveAttribute("aria-selected", "true");
     await expect(
-      page.getByRole("article", { name: "Kuzey Defteri", exact: true }),
+      page.getByRole("article", {
+        name: "Koleksiyon Kutu Defteri",
+        exact: true,
+      }),
     ).toBeFocused();
     const firstAssetCard = page.getByRole("article", {
-      name: "Kuzey Defteri",
+      name: "Koleksiyon Kutu Defteri",
       exact: true,
     });
-    await expect(firstAssetCard.locator("h3")).toHaveText("Kuzey Defteri");
+    await expect(firstAssetCard.locator("h3")).toHaveText(
+      "Koleksiyon Kutu Defteri",
+    );
     expect(
       await firstAssetCard.locator(".owned-icon").evaluate((element) => {
         const box = element.getBoundingClientRect();
@@ -408,14 +413,17 @@ for (const choice of [
     if (choice.width === 320) {
       await page
         .locator('.market-card[data-price-minor="14000"]')
-        .filter({ hasText: "Kuzey Defteri" })
+        .filter({ hasText: "Koleksiyon Kutu Defteri" })
         .click();
       await page.getByRole("button", { name: /^Hemen al/ }).click();
       await expect(
         page.getByRole("tab", { name: "Envanter", exact: true }),
       ).toHaveAttribute("aria-selected", "true");
       await expect(
-        page.getByRole("article", { name: "Kuzey Defteri", exact: true }),
+        page.getByRole("article", {
+          name: "Koleksiyon Kutu Defteri",
+          exact: true,
+        }),
       ).toBeFocused();
       await expect
         .poll(async () => (await readSave()).cashMinor)

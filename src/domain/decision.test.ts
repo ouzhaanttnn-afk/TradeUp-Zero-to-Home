@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { families, initialState, market } from "../game";
-import { heroFamilies } from "../content/families";
+import { heroFamilies, mediumBudgetFamilies } from "../content/families";
 import {
   comparableListings,
   comparisonRows,
@@ -66,7 +66,9 @@ describe("decision vertical slice", () => {
   it("keeps 24 deep hero families and expands content across nine categories", () => {
     expect(heroFamilies).toHaveLength(24);
     expect(new Set(families.map((family) => family.category))).toHaveLength(9);
-    expect(new Set(families.map((family) => family.id)).size).toBe(families.length);
+    expect(new Set(families.map((family) => family.id)).size).toBe(
+      families.length,
+    );
     expect(new Set(families.map((family) => family.assetKey)).size).toBe(
       families.length,
     );
@@ -80,6 +82,21 @@ describe("decision vertical slice", () => {
       expect(new Set(family.preparation.map((item) => item.kind))).toEqual(
         new Set(["CLEAN", "TEST", "COMPLETE"]),
       );
+    }
+  });
+
+  it("adds exactly 32 distinct mid-budget products without bypassing progression", () => {
+    expect(mediumBudgetFamilies).toHaveLength(32);
+    expect(new Set(mediumBudgetFamilies.map((family) => family.id)).size).toBe(
+      32,
+    );
+    expect(
+      new Set(mediumBudgetFamilies.map((family) => family.assetKey)).size,
+    ).toBe(32);
+    for (const family of mediumBudgetFamilies) {
+      expect(family.baseValueMinor).toBeGreaterThanOrEqual(180_000);
+      expect(family.baseValueMinor).toBeLessThanOrEqual(950_000);
+      expect([1, 2]).toContain(family.tier);
     }
   });
 

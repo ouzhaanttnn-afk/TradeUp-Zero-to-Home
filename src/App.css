@@ -1079,7 +1079,7 @@ main {
   min-width: 0;
 }
 .preparation-options summary {
-  min-height: 40px;
+  min-height: 44px;
   padding: 8px 0;
   font-size: calc(10px + var(--text-size-boost));
   cursor: pointer;
@@ -1203,7 +1203,7 @@ main {
   margin-top: -1px;
 }
 .owned--listing .listing-withdraw-actions button {
-  min-height: 40px;
+  min-height: 44px;
   padding-block: 7px;
 }
 @media (max-width: 430px) {

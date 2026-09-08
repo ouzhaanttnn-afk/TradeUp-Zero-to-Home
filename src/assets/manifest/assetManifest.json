@@ -403,6 +403,198 @@
       "familyId": "leather_bag",
       "source": "../products/prd_leather_bag.png",
       "dedicated": true
+    },
+    {
+      "assetKey": "prd_air_fryer",
+      "familyId": "air_fryer",
+      "source": "../products/prd_air_fryer.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_sewing_machine",
+      "familyId": "sewing_machine",
+      "source": "../products/prd_sewing_machine.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_air_purifier",
+      "familyId": "air_purifier",
+      "source": "../products/prd_air_purifier.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_cordless_drill",
+      "familyId": "cordless_drill",
+      "source": "../products/prd_cordless_drill.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_headphones",
+      "familyId": "headphones",
+      "source": "../products/prd_headphones.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_soundbar",
+      "familyId": "soundbar",
+      "source": "../products/prd_soundbar.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_portable_recorder",
+      "familyId": "portable_recorder",
+      "source": "../products/prd_portable_recorder.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_karaoke_speaker",
+      "familyId": "karaoke_speaker",
+      "source": "../products/prd_karaoke_speaker.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_webcam",
+      "familyId": "webcam",
+      "source": "../products/prd_webcam.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_external_ssd",
+      "familyId": "external_ssd",
+      "source": "../products/prd_external_ssd.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_photo_printer",
+      "familyId": "photo_printer",
+      "source": "../products/prd_photo_printer.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_mesh_router",
+      "familyId": "mesh_router",
+      "source": "../products/prd_mesh_router.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_arcade_stick",
+      "familyId": "arcade_stick",
+      "source": "../products/prd_arcade_stick.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_flight_joystick",
+      "familyId": "flight_joystick",
+      "source": "../products/prd_flight_joystick.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_gaming_mouse",
+      "familyId": "gaming_mouse",
+      "source": "../products/prd_gaming_mouse.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_mini_drone",
+      "familyId": "mini_drone",
+      "source": "../products/prd_mini_drone.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_camera_gimbal",
+      "familyId": "camera_gimbal",
+      "source": "../products/prd_camera_gimbal.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_binoculars",
+      "familyId": "binoculars",
+      "source": "../products/prd_binoculars.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_telescope",
+      "familyId": "telescope",
+      "source": "../products/prd_telescope.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_film_scanner",
+      "familyId": "film_scanner",
+      "source": "../products/prd_film_scanner.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_ukulele",
+      "familyId": "ukulele",
+      "source": "../products/prd_ukulele.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_midi_controller",
+      "familyId": "midi_controller",
+      "source": "../products/prd_midi_controller.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_cajon",
+      "familyId": "cajon",
+      "source": "../products/prd_cajon.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_harmonica_set",
+      "familyId": "harmonica_set",
+      "source": "../products/prd_harmonica_set.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_leather_boots",
+      "familyId": "leather_boots",
+      "source": "../products/prd_leather_boots.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_sunglasses",
+      "familyId": "sunglasses",
+      "source": "../products/prd_sunglasses.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_travel_suitcase",
+      "familyId": "travel_suitcase",
+      "source": "../products/prd_travel_suitcase.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_leather_wallet",
+      "familyId": "leather_wallet",
+      "source": "../products/prd_leather_wallet.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_model_train_set",
+      "familyId": "model_train_set",
+      "source": "../products/prd_model_train_set.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_diecast_car_set",
+      "familyId": "diecast_car_set",
+      "source": "../products/prd_diecast_car_set.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_building_block_set",
+      "familyId": "building_block_set",
+      "source": "../products/prd_building_block_set.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_rc_car",
+      "familyId": "rc_car",
+      "source": "../products/prd_rc_car.png",
+      "dedicated": true
     }
   ],
   "overlays": [

@@ -64,6 +64,38 @@ import perfumeSet from "./assets/products/prd_perfume_set.png";
 import makeupSet from "./assets/products/prd_makeup_set.png";
 import trenchCoat from "./assets/products/prd_trench_coat.png";
 import leatherBag from "./assets/products/prd_leather_bag.png";
+import airFryer from "./assets/products/prd_air_fryer.png";
+import sewingMachine from "./assets/products/prd_sewing_machine.png";
+import airPurifier from "./assets/products/prd_air_purifier.png";
+import cordlessDrill from "./assets/products/prd_cordless_drill.png";
+import headphones from "./assets/products/prd_headphones.png";
+import soundbar from "./assets/products/prd_soundbar.png";
+import portableRecorder from "./assets/products/prd_portable_recorder.png";
+import karaokeSpeaker from "./assets/products/prd_karaoke_speaker.png";
+import webcam from "./assets/products/prd_webcam.png";
+import externalSsd from "./assets/products/prd_external_ssd.png";
+import photoPrinter from "./assets/products/prd_photo_printer.png";
+import meshRouter from "./assets/products/prd_mesh_router.png";
+import arcadeStick from "./assets/products/prd_arcade_stick.png";
+import flightJoystick from "./assets/products/prd_flight_joystick.png";
+import gamingMouse from "./assets/products/prd_gaming_mouse.png";
+import miniDrone from "./assets/products/prd_mini_drone.png";
+import cameraGimbal from "./assets/products/prd_camera_gimbal.png";
+import binoculars from "./assets/products/prd_binoculars.png";
+import telescope from "./assets/products/prd_telescope.png";
+import filmScanner from "./assets/products/prd_film_scanner.png";
+import ukulele from "./assets/products/prd_ukulele.png";
+import midiController from "./assets/products/prd_midi_controller.png";
+import cajon from "./assets/products/prd_cajon.png";
+import harmonicaSet from "./assets/products/prd_harmonica_set.png";
+import leatherBoots from "./assets/products/prd_leather_boots.png";
+import sunglasses from "./assets/products/prd_sunglasses.png";
+import travelSuitcase from "./assets/products/prd_travel_suitcase.png";
+import leatherWallet from "./assets/products/prd_leather_wallet.png";
+import modelTrainSet from "./assets/products/prd_model_train_set.png";
+import diecastCarSet from "./assets/products/prd_diecast_car_set.png";
+import buildingBlockSet from "./assets/products/prd_building_block_set.png";
+import rcCar from "./assets/products/prd_rc_car.png";
 
 const dedicatedAssets: Record<string, string> = {
   prd_notebook: notebook,
@@ -130,6 +162,38 @@ const dedicatedAssets: Record<string, string> = {
   prd_makeup_set: makeupSet,
   prd_trench_coat: trenchCoat,
   prd_leather_bag: leatherBag,
+  prd_air_fryer: airFryer,
+  prd_sewing_machine: sewingMachine,
+  prd_air_purifier: airPurifier,
+  prd_cordless_drill: cordlessDrill,
+  prd_headphones: headphones,
+  prd_soundbar: soundbar,
+  prd_portable_recorder: portableRecorder,
+  prd_karaoke_speaker: karaokeSpeaker,
+  prd_webcam: webcam,
+  prd_external_ssd: externalSsd,
+  prd_photo_printer: photoPrinter,
+  prd_mesh_router: meshRouter,
+  prd_arcade_stick: arcadeStick,
+  prd_flight_joystick: flightJoystick,
+  prd_gaming_mouse: gamingMouse,
+  prd_mini_drone: miniDrone,
+  prd_camera_gimbal: cameraGimbal,
+  prd_binoculars: binoculars,
+  prd_telescope: telescope,
+  prd_film_scanner: filmScanner,
+  prd_ukulele: ukulele,
+  prd_midi_controller: midiController,
+  prd_cajon: cajon,
+  prd_harmonica_set: harmonicaSet,
+  prd_leather_boots: leatherBoots,
+  prd_sunglasses: sunglasses,
+  prd_travel_suitcase: travelSuitcase,
+  prd_leather_wallet: leatherWallet,
+  prd_model_train_set: modelTrainSet,
+  prd_diecast_car_set: diecastCarSet,
+  prd_building_block_set: buildingBlockSet,
+  prd_rc_car: rcCar,
 };
 
 const fallbackSvg = (category: string, symbol: string, color: string) =>

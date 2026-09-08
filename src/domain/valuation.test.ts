@@ -108,7 +108,7 @@ describe("canonical valuation engine", () => {
   });
 
   it("keeps generated trench-coat and leather-bag listings in distinct credible bands", () => {
-    const listings = Array.from({ length: 160 }, (_, cycle) =>
+    const listings = Array.from({ length: 320 }, (_, cycle) =>
       market(90_421, 100_000_000, cycle, cycle * 2, 24),
     ).flat();
     const trenchPrices = listings
