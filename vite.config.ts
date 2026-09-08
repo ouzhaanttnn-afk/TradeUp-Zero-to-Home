@@ -15,10 +15,52 @@ export const avatarPrecachePaths = [
   "/assets/avatars/gece-analisti.webp",
 ] as const;
 
+export const deliveryBudgets = {
+  entryJavaScriptBytes: 400 * 1024,
+  chunkJavaScriptBytes: 180 * 1024,
+  stylesheetBytes: 100 * 1024,
+} as const;
+
+export const deliveryBudgetViolation = (
+  fileName: string,
+  bytes: number,
+  entry = false,
+) => {
+  const limit = fileName.endsWith(".css")
+    ? deliveryBudgets.stylesheetBytes
+    : fileName.endsWith(".js")
+      ? entry
+        ? deliveryBudgets.entryJavaScriptBytes
+        : deliveryBudgets.chunkJavaScriptBytes
+      : undefined;
+  if (limit === undefined || bytes <= limit) return undefined;
+  return `${fileName} is ${bytes} bytes; delivery budget is ${limit} bytes`;
+};
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
+    {
+      name: "tradeup-delivery-budget",
+      apply: "build",
+      generateBundle(_options, bundle) {
+        for (const output of Object.values(bundle)) {
+          const bytes =
+            output.type === "chunk"
+              ? Buffer.byteLength(output.code)
+              : typeof output.source === "string"
+                ? Buffer.byteLength(output.source)
+                : output.source.byteLength;
+          const violation = deliveryBudgetViolation(
+            output.fileName,
+            bytes,
+            output.type === "chunk" && output.isEntry,
+          );
+          if (violation) this.error(violation);
+        }
+      },
+    },
     {
       name: "tradeup-offline-precache",
       apply: "build",
