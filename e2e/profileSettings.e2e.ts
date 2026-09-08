@@ -25,7 +25,7 @@ test("profile and settings stay accessible from the mobile game header", async (
     .getByRole("button", { name: "Satın Almalar ve Görünüm" })
     .click();
   await expect(dialog.locator(".purchase-list article")).toHaveCount(4);
-  await expect(dialog).toContainText("Web önizleme");
+  await expect(dialog).toContainText("Yakında");
   await expect(dialog).not.toContainText("Fiyat yüklenemedi");
   expect(
     await dialog

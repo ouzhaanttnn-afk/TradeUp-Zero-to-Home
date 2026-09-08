@@ -2151,7 +2151,7 @@ export default function App() {
                         <p>Oynanış ekonomisini değiştirmez.</p>
                       </div>
                       <span>
-                        {storeProducts.length ? "Mağaza bağlı" : "Web önizleme"}
+                        {storeProducts.length ? "Mağaza hazır" : "Yakında"}
                       </span>
                     </div>
                     <div className="purchase-list">
@@ -2187,7 +2187,7 @@ export default function App() {
                                 </button>
                               ) : (
                                 <span className="store-unavailable">
-                                  Mobil uygulamada
+                                  Yakında
                                 </span>
                               )}
                             </article>
@@ -2196,9 +2196,8 @@ export default function App() {
                       )}
                     </div>
                     <p className="purchase-note">
-                      Web önizlemesinde ödeme yapılmaz. Fiyat ve satın alma
-                      düğmesi yalnız App Store veya Play Store bağlantısı
-                      doğrulandığında görünür.
+                      Paketler mobil mağaza bağlantısı tamamlandığında açılır. O
+                      zamana kadar oynanışın ve ilerlemen değişmez.
                     </p>
                     <div className="purchase-footer-actions">
                       <button
