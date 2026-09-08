@@ -13,9 +13,25 @@ test("profile and settings stay accessible from the mobile game header", async (
     animations: "disabled",
   });
 
-  await page.getByRole("button", { name: "Ayarlar", exact: true }).click();
+  const settingsButton = page.getByRole("button", {
+    name: "Ayarlar",
+    exact: true,
+  });
+  await settingsButton.click();
   const dialog = page.getByRole("dialog", { name: "Profil ve Ayarlar" });
   await expect(dialog).toBeVisible();
+  await expect(
+    dialog.getByRole("button", { name: "Ayarları kapat" }),
+  ).toBeFocused();
+  expect(await page.evaluate(() => document.body.style.overflow)).toBe(
+    "hidden",
+  );
+  await page.keyboard.press("Shift+Tab");
+  expect(
+    await page.evaluate(() =>
+      Boolean(document.activeElement?.closest(".settings-card")),
+    ),
+  ).toBe(true);
   await expect(page.getByLabel("Oyuncu adı")).toHaveValue("Yeni Tüccar");
 
   await page.getByLabel("Oyuncu adı").fill("  Pazar   Ustası  ");
@@ -57,6 +73,8 @@ test("profile and settings stay accessible from the mobile game header", async (
   ).toEqual({ fits: true, smallTargets: 0 });
 
   await dialog.getByRole("button", { name: "Ayarları kapat" }).click();
+  await expect(settingsButton).toBeFocused();
+  expect(await page.evaluate(() => document.body.style.overflow)).toBe("");
   await expect(
     page.getByRole("heading", { name: "Fırsat akışı" }),
   ).toBeVisible();

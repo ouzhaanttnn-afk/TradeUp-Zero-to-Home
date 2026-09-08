@@ -229,7 +229,7 @@ button {
     color 140ms ease;
 }
 button:active:not(:disabled) {
-  transform: scale(0.985);
+  transform: translateY(1px);
 }
 button:focus-visible {
   outline: 3px solid rgba(105, 226, 162, 0.72);

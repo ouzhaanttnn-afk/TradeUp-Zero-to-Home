@@ -76,6 +76,7 @@ import { ProductVisual } from "./ui/ProductVisual";
 import { AvatarPortrait } from "./ui/AvatarPortrait";
 import ProfileOnboarding from "./ui/ProfileOnboarding";
 import { MarketListingCard } from "./ui/MarketListingCard";
+import { useModalFocus } from "./ui/useModalFocus";
 
 const loadSettingsPanel = () => import("./ui/SettingsPanel");
 const loadFollowPanel = () => import("./ui/FollowPanel");
@@ -179,7 +180,10 @@ export default function App() {
   const [homeFinaleOpen, setHomeFinaleOpen] = useState(false);
   const [homePulseStage, setHomePulseStage] = useState<number | null>(null);
   const [wallClockNow, setWallClockNow] = useState(() => Date.now());
+  const settingsButtonRef = useRef<HTMLButtonElement>(null);
+  const restoreSettingsFocusRef = useRef(false);
   const sheetCloseRef = useRef<HTMLButtonElement>(null);
+  const sheetRef = useRef<HTMLElement>(null);
   const comparisonRef = useRef<HTMLDivElement>(null);
   const homeFinaleButtonRef = useRef<HTMLButtonElement>(null);
   const previousHomeStageRef = useRef<number | undefined>(undefined);
@@ -237,9 +241,16 @@ export default function App() {
     setTab("journey");
   }, [tab]);
   const closeSettingsPanel = useCallback(() => {
+    restoreSettingsFocusRef.current = true;
     setSettingsOpen(false);
     setTab(settingsReturnTab);
   }, [settingsReturnTab]);
+
+  useEffect(() => {
+    if (settingsOpen || !restoreSettingsFocusRef.current) return;
+    restoreSettingsFocusRef.current = false;
+    settingsButtonRef.current?.focus();
+  }, [settingsOpen]);
 
   useEffect(() => {
     void hydrate();
@@ -264,38 +275,12 @@ export default function App() {
       if (removeListener) void removeListener();
     };
   }, [pause, resume]);
-  useEffect(() => {
-    if (!selectedId) return undefined;
-    const previousFocus = document.activeElement as HTMLElement | null;
-    const frame = window.requestAnimationFrame(() =>
-      sheetCloseRef.current?.focus(),
-    );
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setSelectedId(null);
-    };
-    window.addEventListener("keydown", closeOnEscape);
-    return () => {
-      window.cancelAnimationFrame(frame);
-      window.removeEventListener("keydown", closeOnEscape);
-      previousFocus?.focus();
-    };
-  }, [selectedId]);
-  useEffect(() => {
-    if (!homeFinaleOpen) return undefined;
-    const previousFocus = document.activeElement as HTMLElement | null;
-    const frame = window.requestAnimationFrame(() =>
-      homeFinaleButtonRef.current?.focus(),
-    );
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setHomeFinaleOpen(false);
-    };
-    window.addEventListener("keydown", closeOnEscape);
-    return () => {
-      window.cancelAnimationFrame(frame);
-      window.removeEventListener("keydown", closeOnEscape);
-      previousFocus?.focus();
-    };
-  }, [homeFinaleOpen]);
+  useModalFocus(
+    selectedId !== null,
+    sheetRef,
+    sheetCloseRef,
+    () => setSelectedId(null),
+  );
 
   useEffect(() => {
     if (tab !== "portfolio" || !focusedAssetId) return;
@@ -903,6 +888,7 @@ export default function App() {
             </div>
           </div>
           <button
+            ref={settingsButtonRef}
             className="profile-settings-button"
             aria-expanded={settingsOpen}
             aria-label="Ayarlar"
@@ -1683,6 +1669,7 @@ export default function App() {
       {selected ? (
         <div className="scrim" onClick={() => setSelectedId(null)}>
           <section
+            ref={sheetRef}
             className="sheet"
             onClick={(event) => event.stopPropagation()}
             role="dialog"

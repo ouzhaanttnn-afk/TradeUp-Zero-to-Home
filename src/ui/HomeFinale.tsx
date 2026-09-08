@@ -1,7 +1,8 @@
-import type { RefObject } from "react";
+import { useRef, type RefObject } from "react";
 import { money } from "../game";
 import { Icon } from "./Icon";
 import { simplifyLegacyPlayerCopy } from "./playerLanguage";
+import { useModalFocus } from "./useModalFocus";
 
 type FinaleHighlight = {
   id: string;
@@ -18,8 +19,11 @@ export default function HomeFinale({
   buttonRef: RefObject<HTMLButtonElement | null>;
   onClose: () => void;
 }) {
+  const panelRef = useRef<HTMLElement>(null);
+  useModalFocus(true, panelRef, buttonRef, onClose);
   return (
     <section
+      ref={panelRef}
       className="home-finale"
       role="dialog"
       aria-modal="true"

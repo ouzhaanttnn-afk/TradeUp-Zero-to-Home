@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { avatars } from "../content/avatars";
 import { marketExpertiseLevel } from "../domain/meta";
 import { ownsAnimatedAvatars } from "../domain/profile";
@@ -10,6 +10,7 @@ import { HOME_GOAL_MINOR, wealth } from "../game";
 import { useGameStore } from "../stores/gameStore";
 import { AvatarPortrait } from "./AvatarPortrait";
 import { Icon } from "./Icon";
+import { useModalFocus } from "./useModalFocus";
 
 type SoundLevel = AccessibilityPreferences["soundLevel"];
 
@@ -73,20 +74,9 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
   const [purchasesOpen, setPurchasesOpen] = useState(false);
   const [resetArmed, setResetArmed] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLElement>(null);
 
-  useEffect(() => {
-    const previousFocus = document.activeElement as HTMLElement | null;
-    const frame = requestAnimationFrame(() => closeRef.current?.focus());
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", closeOnEscape);
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("keydown", closeOnEscape);
-      previousFocus?.focus();
-    };
-  }, [onClose]);
+  useModalFocus(true, panelRef, closeRef, onClose);
 
   const marketLevel = marketExpertiseLevel(game);
   const homeProgress = game.home.purchased
@@ -99,6 +89,7 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
 
   return (
     <section
+      ref={panelRef}
       className="settings-card"
       role="dialog"
       aria-modal="true"

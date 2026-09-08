@@ -35,8 +35,20 @@ test("watched listing remains actionable after the Follow tab loads on demand", 
 
   const detail = page.getByRole("dialog", { name: listingName });
   await expect(detail).toBeVisible();
+  await expect(detail.getByRole("button", { name: "Kapat" })).toBeFocused();
+  expect(await page.evaluate(() => document.body.style.overflow)).toBe(
+    "hidden",
+  );
+  await page.keyboard.press("Shift+Tab");
+  expect(
+    await page.evaluate(() =>
+      Boolean(document.activeElement?.closest(".sheet")),
+    ),
+  ).toBe(true);
   await detail.getByRole("button", { name: "İlanı takip et" }).click();
   await detail.getByRole("button", { name: "Kapat" }).click();
+  await expect(firstListing).toBeFocused();
+  expect(await page.evaluate(() => document.body.style.overflow)).toBe("");
 
   await page.getByRole("button", { name: "Takip", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Takip" })).toBeVisible();
