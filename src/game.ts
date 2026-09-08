@@ -677,6 +677,7 @@ export function market(
   cycle = 0,
   gameTimeMin = 0,
   count = 24,
+  focusCategories: readonly string[] = [],
 ): Listing[] {
   const r = rng(seed + cycle * 7_919);
   const tier =
@@ -690,11 +691,18 @@ export function market(
             ? 4
             : 5;
   const pool = families.filter((family) => family.tier <= tier);
-  const focusIndex = Math.floor(r() * pool.length);
-  const focus = pool[focusIndex];
+  const eventPool = pool.filter((family) =>
+    focusCategories.includes(family.category),
+  );
+  const focusPool = eventPool.length ? eventPool : pool;
+  const focusIndex = Math.floor(r() * focusPool.length);
+  const focus = focusPool[focusIndex];
+  const cohortStart = eventPool.length
+    ? Math.floor(r() * pool.length)
+    : focusIndex;
   const cohort = Array.from(
     { length: Math.min(4, pool.length) },
-    (_, index) => pool[(focusIndex + index) % pool.length],
+    (_, index) => pool[(cohortStart + index) % pool.length],
   );
   return Array.from({ length: count }, (_, index) => {
     const family =

@@ -4,6 +4,7 @@ import { netWorthMinor } from "./economy";
 import { completeDuePreparations } from "./preparation";
 import { recordMarketExits } from "./meta";
 import { BUYER_PERSONAS, eligibleBuyerTypes } from "./buyers";
+import { activeMarketEvent, eventAffectsCategory } from "./marketEvents";
 import type {
   BuyerOffer,
   GameState,
@@ -195,6 +196,12 @@ export const buyerOfferForMinute = (
   const priceRatio =
     listing.askingPriceMinor / Math.max(1, asset.instance.fairValueMinor);
   const priceFit = clamp01((1.3 - priceRatio) / 0.55);
+  const marketEvent = activeMarketEvent(state.seed, gameTimeMin);
+  const eventDemandMultiplier =
+    marketEvent &&
+    eventAffectsCategory(marketEvent, asset.instance.family.category)
+      ? marketEvent.demandMultiplier
+      : 1;
   const arrivalChance =
     0.006 +
     asset.instance.family.demand * 0.018 +
@@ -207,7 +214,10 @@ export const buyerOfferForMinute = (
       gameTimeMin * 131_071 +
       rollSalt,
   )();
-  if (roll >= clamp01(arrivalChance * tempo.arrivalMultiplier))
+  if (
+    roll >=
+    clamp01(arrivalChance * tempo.arrivalMultiplier * eventDemandMultiplier)
+  )
     return undefined;
 
   const amountRoll = rng(
@@ -234,7 +244,8 @@ export const buyerOfferForMinute = (
         conditionFactor *
         demandFactor *
         (0.94 + amountRoll * 0.1) *
-        persona.amountMultiplier) /
+        persona.amountMultiplier *
+        (1 + (eventDemandMultiplier - 1) * 0.5)) /
         1_000,
     ) * 1_000;
   return {
@@ -376,12 +387,14 @@ function appendArrivals(state: GameState, requestedCount: number) {
   const count = Math.min(requestedCount, capacity);
   if (count === 0) return { state, arrivals: 0 };
   const marketCycle = state.marketCycle + 1;
+  const marketEvent = activeMarketEvent(state.seed, state.gameTimeMin);
   const arrivals = market(
     state.seed,
     netWorthMinor(state),
     marketCycle,
     state.gameTimeMin,
     count,
+    marketEvent?.affectedCategories,
   );
   return {
     state: {

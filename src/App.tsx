@@ -27,6 +27,7 @@ import {
 } from "./domain/decision";
 import { WORLD_CONFIG } from "./domain/config";
 import { buyerPersona } from "./domain/buyers";
+import { activeMarketEvent } from "./domain/marketEvents";
 import { ftueCopy, ftueStageLabel, isFtueActive } from "./domain/ftue";
 import {
   categoryExpertiseLevel,
@@ -444,6 +445,7 @@ export default function App() {
   }, [tab, portfolioSegment, focusedAssetId]);
 
   const total = wealth(game);
+  const marketEvent = activeMarketEvent(game.seed, game.gameTimeMin);
   const scanRefill = marketScanRefillStatus(game, wallClockNow);
   useEffect(() => {
     if (tab !== "market" || scanRefill.full) return undefined;
@@ -1216,6 +1218,16 @@ export default function App() {
                   Sıradaki +1 · {shortDuration(scanRefill.nextCreditSeconds)}
                 </span>
               </p>
+            ) : null}
+            {!ftueActive && marketEvent ? (
+              <aside className="market-event" aria-label="Güncel pazar olayı">
+                <span aria-hidden="true">↗</span>
+                <div>
+                  <small>PAZAR HAREKETİ</small>
+                  <b>{marketEvent.title}</b>
+                  <p>{marketEvent.message}</p>
+                </div>
+              </aside>
             ) : null}
             {!ftueActive && marketCategoryOptions.length > 1 ? (
               <div
