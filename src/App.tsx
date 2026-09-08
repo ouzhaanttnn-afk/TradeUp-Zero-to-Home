@@ -857,7 +857,7 @@ export default function App() {
 
   return (
     <div
-      className={`app-shell${game.accessibility.reducedMotion ? " reduced-motion" : ""}${game.accessibility.largeText ? " large-text" : ""}${game.home.purchased ? " home-complete" : ""}${homePulseStage !== null ? " home-atmosphere-pulse" : ""}`}
+      className={`app-shell tab-${tab}${game.accessibility.reducedMotion ? " reduced-motion" : ""}${game.accessibility.largeText ? " large-text" : ""}${game.home.purchased ? " home-complete" : ""}${homePulseStage !== null ? " home-atmosphere-pulse" : ""}`}
       style={
         {
           "--home-gold-progress": `${goldPercent / 100}`,
