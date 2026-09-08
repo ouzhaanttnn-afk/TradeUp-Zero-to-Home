@@ -129,3 +129,62 @@ export const percentile = (values: number[], ratio: number) => {
   const sorted = [...values].sort((left, right) => left - right);
   return sorted[Math.round((sorted.length - 1) * ratio)] ?? 0;
 };
+
+export type CareerSimulationSummary = {
+  sampleSize: number;
+  homeTrades: { fastP10: number; median: number; slowP90: number };
+  medianRefreshes: number;
+  milestones: Array<{
+    wealthMinor: number;
+    medianTrades: number;
+    goldPercent: number;
+  }>;
+};
+
+export function summarizeCareerSample(
+  sample: CareerSimulation[] = simulateCareerSample(100),
+): CareerSimulationSummary {
+  if (!sample.length) throw new Error("Career sample cannot be empty");
+  const milestoneWealth = sample[0].milestones.map(
+    (milestone) => milestone.wealthMinor,
+  );
+  return {
+    sampleSize: sample.length,
+    homeTrades: {
+      fastP10: percentile(
+        sample.map((run) => run.trades),
+        0.1,
+      ),
+      median: percentile(
+        sample.map((run) => run.trades),
+        0.5,
+      ),
+      slowP90: percentile(
+        sample.map((run) => run.trades),
+        0.9,
+      ),
+    },
+    medianRefreshes: percentile(
+      sample.map((run) => run.refreshes),
+      0.5,
+    ),
+    milestones: milestoneWealth.map((wealthMinor) => {
+      const reached = sample.map((run) => {
+        const milestone = run.milestones.find(
+          (item) => item.wealthMinor === wealthMinor,
+        );
+        if (!milestone)
+          throw new Error(`Missing career milestone ${wealthMinor}`);
+        return milestone;
+      });
+      return {
+        wealthMinor,
+        medianTrades: percentile(
+          reached.map((milestone) => milestone.trades),
+          0.5,
+        ),
+        goldPercent: reached[0].goldPercent,
+      };
+    }),
+  };
+}

@@ -24,11 +24,11 @@ Model, dikkatli ama kusursuz olmayan bir oyuncuyu temsil eder:
 | Nokta                     |          Medyan ticaret | Arka plan altını |
 | ------------------------- | ----------------------: | ---------------: |
 | ₺5.000                    |                      12 |               %5 |
-| ₺875.000                  |                     388 |              %22 |
-| ₺1.750.000                |                     474 |              %42 |
-| ₺2.625.000                |                     546 |              %65 |
+| ₺875.000                  |                     318 |              %22 |
+| ₺1.750.000                |                     458 |              %42 |
+| ₺2.625.000                |                     528 |              %65 |
 | ₺3.000.000                |                     561 |            %77,1 |
-| ₺3.150.000                |                     561 |              %82 |
+| ₺3.150.000                |                     573 |              %82 |
 | ₺3.500.000, ev alınabilir |                     602 |              %92 |
 | Ev satın alındı           | 602 + satın alma kararı |             %100 |
 
@@ -45,6 +45,6 @@ Model, dikkatli ama kusursuz olmayan bir oyuncuyu temsil eder:
 
 Bu sonuç kısa bir oyun için yüksek, uzun süreli bir mobil simülasyon için ise ölçülmesi gereken bir beta hedefidir. Oyuncu oturum başına ortalama 3–5 başarılı ticaret bitirirse medyan ev yolculuğu yaklaşık 120–201 aktif oturuma karşılık gelir. Beta testinde ilk izlenecek ölçüler; ilk ₺5.000'e ulaşma, ₺875.000'e ulaşma, kârlı ticaret başına süre ve oyuncunun hangi servet basamağında ayrıldığı olmalıdır.
 
-Yeni 32 ürün başlangıç ve orta seviyede çeşitlilik sağlar; araç basamağını erkene çekmez. Bu nedenle içerik artışı tek başına ev hedefini yapay olarak kolaylaştırmaz. Simülasyon bir denge ölçüm aracıdır, canlı oyun kuralı değildir ve fiyat motorunu değiştirmez.
+Yeni 32 ürün başlangıç ve orta seviyede çeşitlilik sağlar; araç basamağını erkene çekmez. Bu nedenle içerik artışı tek başına ev hedefini yapay olarak kolaylaştırmaz. Simülasyon bir denge ölçüm aracıdır, canlı oyun kuralı değildir ve fiyat motorunu değiştirmez. Tablodaki her ara eşik artık aynı 100 tohumluk örnekten hesaplanır ve otomatik testte birebir korunur.
 
 Eklenen 16 üst-orta ürün yalnızca 3. seviyede açılır. Önceki kataloğa göre medyan ev yolculuğunu 662'den 602 ticarete indirmiştir; bu yaklaşık %9 hızlanma beta analizinde özellikle izlenmelidir.
