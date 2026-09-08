@@ -103,6 +103,7 @@ type Store = {
   resume: () => Promise<void>;
   flush: () => Promise<void>;
   scan: () => void;
+  refreshMarketScanCredits: () => void;
   tick: () => void;
   buy: (item: Listing, priceMinor?: number) => boolean;
   buyHome: () => boolean;
@@ -266,6 +267,11 @@ export const useGameStore = create<Store>((set, get) => ({
         loadedGame,
         systemTimeProvider.nowWallMs(),
       );
+      const restoredScanCredits = Math.max(
+        0,
+        game.monetization.marketScanCredits -
+          loadedGame.monetization.marketScanCredits,
+      );
       // Never overwrite an unreadable save with the temporary fallback career.
       persistenceSuspended = recovery === "STORAGE_UNAVAILABLE";
       const recoveryNotice =
@@ -279,7 +285,11 @@ export const useGameStore = create<Store>((set, get) => ({
       set((current) => ({
         game,
         ready: true,
-        notice: recoveryNotice ?? current.notice,
+        notice:
+          recoveryNotice ??
+          (restoredScanCredits > 0
+            ? `${restoredScanCredits} yenileme hakkın geri doldu.`
+            : current.notice),
       }));
       const refreshed = await refreshMonetization(
         game,
@@ -324,10 +334,20 @@ export const useGameStore = create<Store>((set, get) => ({
       previous,
       rechargeMarketScanCredits(result.state, nowWallMs),
     );
+    const restoredScanCredits = Math.max(
+      0,
+      game.monetization.marketScanCredits -
+        previous.monetization.marketScanCredits,
+    );
     set({
       sessionActive: true,
       game: stampAndPersist(game),
-      notice: worldNotice(result, "Kaldığın yerden devam ediyorsun."),
+      notice: worldNotice(
+        result,
+        restoredScanCredits > 0
+          ? `${restoredScanCredits} yenileme hakkın geri doldu.`
+          : "Kaldığın yerden devam ediyorsun.",
+      ),
     });
     const refreshed = await refreshMonetization(
       game,
@@ -380,6 +400,21 @@ export const useGameStore = create<Store>((set, get) => ({
           : "Pazar tarandı; mevcut ilanlar yaşamaya devam ediyor.",
       ),
     });
+  },
+  refreshMarketScanCredits: () => {
+    const previous = get().game;
+    const game = rechargeMarketScanCredits(
+      previous,
+      systemTimeProvider.nowWallMs(),
+    );
+    if (
+      game.monetization.marketScanCredits ===
+        previous.monetization.marketScanCredits &&
+      game.monetization.marketScanRefillAnchorWallMs ===
+        previous.monetization.marketScanRefillAnchorWallMs
+    )
+      return;
+    set({ game: stampAndPersist(game) });
   },
   tick: () => {
     if (!get().sessionActive || !get().ready) return;

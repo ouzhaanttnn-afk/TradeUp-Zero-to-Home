@@ -88,6 +88,7 @@ import {
   manualListingWaitCopy,
 } from "./ui/manualListingPrice";
 import { homeAtmosphereStage, homeGoldPercent } from "./ui/homeAtmosphere";
+import { marketScanRefillStatus, shortDuration } from "./ui/marketScan";
 
 type Tab = "market" | "follow" | "portfolio" | "journey";
 type PortfolioSegment = "inventory" | "preparation" | "listings";
@@ -278,6 +279,7 @@ export default function App() {
   const [focusedAssetId, setFocusedAssetId] = useState<string | null>(null);
   const [homeFinaleOpen, setHomeFinaleOpen] = useState(false);
   const [homePulseStage, setHomePulseStage] = useState<number | null>(null);
+  const [wallClockNow, setWallClockNow] = useState(() => Date.now());
   const sheetCloseRef = useRef<HTMLButtonElement>(null);
   const comparisonRef = useRef<HTMLDivElement>(null);
   const homeFinaleButtonRef = useRef<HTMLButtonElement>(null);
@@ -305,6 +307,7 @@ export default function App() {
     pause,
     resume,
     scan,
+    refreshMarketScanCredits,
     tick,
     buy,
     buyHome,
@@ -439,6 +442,15 @@ export default function App() {
   }, [tab, portfolioSegment, focusedAssetId]);
 
   const total = wealth(game);
+  const scanRefill = marketScanRefillStatus(game, wallClockNow);
+  useEffect(() => {
+    if (tab !== "market" || scanRefill.full) return undefined;
+    const timer = window.setInterval(() => {
+      setWallClockNow(Date.now());
+      refreshMarketScanCredits();
+    }, 1_000);
+    return () => window.clearInterval(timer);
+  }, [refreshMarketScanCredits, scanRefill.full, tab]);
   const marketListings = useMemo(() => activeMarketListings(game), [game]);
   const marketCategoryOptions = useMemo(
     () => marketCategories(marketListings),
@@ -1145,6 +1157,14 @@ export default function App() {
                 ) : null}
               </div>
             </div>
+            {!ftueActive && !scanRefill.full ? (
+              <p className="market-refill-status" role="status">
+                <span>Yenileme {game.monetization.marketScanCredits}/25</span>
+                <span>
+                  Sıradaki +1 · {shortDuration(scanRefill.nextCreditSeconds)}
+                </span>
+              </p>
+            ) : null}
             {!ftueActive && marketCategoryOptions.length > 1 ? (
               <div
                 className="chips market-filters"
