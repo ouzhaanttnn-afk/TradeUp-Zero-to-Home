@@ -28,6 +28,7 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@capacitor/cli": "^8.5.1",
     "@playwright/test": "^1.62.1",
     "@types/node": "^24.13.3",
