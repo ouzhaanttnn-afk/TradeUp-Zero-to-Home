@@ -51,6 +51,7 @@ const defaultPlacementUsage = (): Record<RewardPlacementId, number[]> => ({
 
 export const createDefaultMonetizationState = (
   gameTimeMin: number,
+  wallClockMs = 0,
 ): MonetizationState => ({
   consent: {
     adPersonalizationAllowed: false,
@@ -71,7 +72,59 @@ export const createDefaultMonetizationState = (
   rewardTransactions: [],
   marketScanCredits:
     MONETIZATION_CONFIG.reward.placementReward.MARKET_SCOUT_SCAN_CREDITS,
+  marketScanRefillAnchorWallMs: wallClockMs,
 });
+
+const MARKET_SCAN_CAP =
+  MONETIZATION_CONFIG.reward.placementReward.MARKET_SCOUT_SCAN_CREDITS;
+const MARKET_SCAN_REFILL_INTERVAL_MS =
+  (MONETIZATION_CONFIG.reward.placementReward.MARKET_SCOUT_FULL_REFILL_MINUTES *
+    60_000) /
+  MARKET_SCAN_CAP;
+
+export const rechargeMarketScanCredits = (
+  state: GameState,
+  requestedWallMs: number,
+): GameState => {
+  const nowWallMs = Math.max(
+    state.lastWallClockMs,
+    state.monetization.marketScanRefillAnchorWallMs,
+    requestedWallMs,
+  );
+  if (state.monetization.marketScanCredits >= MARKET_SCAN_CAP) {
+    if (state.monetization.marketScanRefillAnchorWallMs === nowWallMs)
+      return state;
+    return {
+      ...state,
+      monetization: {
+        ...state.monetization,
+        marketScanRefillAnchorWallMs: nowWallMs,
+      },
+    };
+  }
+  const elapsedMs = Math.max(
+    0,
+    nowWallMs - state.monetization.marketScanRefillAnchorWallMs,
+  );
+  const earned = Math.floor(elapsedMs / MARKET_SCAN_REFILL_INTERVAL_MS);
+  if (earned <= 0) return state;
+  const marketScanCredits = Math.min(
+    MARKET_SCAN_CAP,
+    state.monetization.marketScanCredits + earned,
+  );
+  return {
+    ...state,
+    monetization: {
+      ...state.monetization,
+      marketScanCredits,
+      marketScanRefillAnchorWallMs:
+        marketScanCredits === MARKET_SCAN_CAP
+          ? nowWallMs
+          : state.monetization.marketScanRefillAnchorWallMs +
+            earned * MARKET_SCAN_REFILL_INTERVAL_MS,
+    },
+  };
+};
 
 export const hasPremiumEntitlement = (state: Pick<GameState, "monetization">) =>
   state.monetization.entitlements.some(

@@ -29,7 +29,7 @@ export type {
   TransactionJournalEntry,
 } from "./domain/models";
 export { families } from "./content/families";
-export const SAVE_VERSION = 14;
+export const SAVE_VERSION = 15;
 export const HOME_GOAL_MINOR = 350_000_000;
 
 const attributeDefinitionSchema = z.object({
@@ -409,6 +409,7 @@ const monetizationSchema = z.object({
   rewardCooldownUntilGameMin: z.number().nonnegative().optional(),
   rewardTransactions: z.array(rewardTransactionSchema),
   marketScanCredits: z.number().int().nonnegative().max(25),
+  marketScanRefillAnchorWallMs: z.number().nonnegative(),
 });
 const negotiationSchema = z.object({
   listingId: z.string(),
@@ -790,7 +791,10 @@ export const money = (minor: number) => formatter.format(minor / 100);
 export const signedMoney = (minor: number) =>
   minor > 0 ? `+${money(minor)}` : minor < 0 ? money(minor) : `±${money(0)}`;
 
-const createDefaultMonetizationState = (gameTimeMin: number) => ({
+const createDefaultMonetizationState = (
+  gameTimeMin: number,
+  wallClockMs: number,
+) => ({
   entitlements: [],
   consent: {
     adPersonalizationAllowed: false,
@@ -814,6 +818,7 @@ const createDefaultMonetizationState = (gameTimeMin: number) => ({
   rewardCooldownUntilGameMin: undefined,
   rewardTransactions: [],
   marketScanCredits: 25,
+  marketScanRefillAnchorWallMs: wallClockMs,
 });
 
 export const initialState = (
@@ -868,7 +873,7 @@ export const initialState = (
       soundLevel: "LOW",
     },
     profile: { displayName: "Yeni Tüccar" },
-    monetization: createDefaultMonetizationState(0),
+    monetization: createDefaultMonetizationState(0, lastWallClockMs),
     ftue: {
       stage: mode === "FTUE" ? "STARTING_SALE" : "COMPLETE",
       dismissedStages: [],

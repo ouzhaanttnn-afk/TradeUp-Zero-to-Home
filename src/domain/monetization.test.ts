@@ -7,6 +7,7 @@ import {
   closeRewardedAction,
   getRewardEligibility,
   markFirstSaleComplete,
+  rechargeMarketScanCredits,
   requestMonetizedAction,
   setRewardEntitlement,
   syncConsentState,
@@ -48,6 +49,41 @@ const inspectionEntry = {
 };
 
 describe("monetization reward eligibility", () => {
+  it("refills one scan per 72 seconds and reaches 25 after 30 minutes", () => {
+    const base = initialState(1_000, "SANDBOX");
+    const empty = {
+      ...base,
+      monetization: {
+        ...base.monetization,
+        marketScanCredits: 0,
+        marketScanRefillAnchorWallMs: 1_000,
+      },
+    };
+
+    const oneCredit = rechargeMarketScanCredits(empty, 73_000);
+    expect(oneCredit.monetization.marketScanCredits).toBe(1);
+    expect(oneCredit.monetization.marketScanRefillAnchorWallMs).toBe(73_000);
+
+    const full = rechargeMarketScanCredits(empty, 1_801_000);
+    expect(full.monetization.marketScanCredits).toBe(25);
+    expect(full.monetization.marketScanRefillAnchorWallMs).toBe(1_801_000);
+  });
+
+  it("does not grant scans when the device clock moves backwards", () => {
+    const base = initialState(100_000, "SANDBOX");
+    const empty = {
+      ...base,
+      monetization: {
+        ...base.monetization,
+        marketScanCredits: 0,
+        marketScanRefillAnchorWallMs: 100_000,
+      },
+    };
+
+    expect(
+      rechargeMarketScanCredits(empty, 10_000).monetization.marketScanCredits,
+    ).toBe(0);
+  });
   it("requires first sale unlock and play time before reward actions", () => {
     const locked = initialState(0, "SANDBOX");
     const before = requestMonetizedAction(locked, "MARKET_SCOUT", "ad");

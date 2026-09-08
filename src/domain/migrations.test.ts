@@ -13,6 +13,7 @@ describe("save migration", () => {
     const state = validateState(migrateStateToCurrent(v13));
 
     expect(state.monetization.marketScanCredits).toBe(25);
+    expect(state.monetization.marketScanRefillAnchorWallMs).toBe(500);
     expect(reconcileJournal(state)).toEqual({
       cash: true,
       activeBookCost: true,

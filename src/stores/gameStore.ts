@@ -44,7 +44,10 @@ import {
   recordFtueWithdrawal,
   revealFirstMarket,
 } from "../domain/ftue";
-import { advanceRewardState } from "../domain/monetization";
+import {
+  advanceRewardState,
+  rechargeMarketScanCredits,
+} from "../domain/monetization";
 import type {
   InspectionKind,
   MonetizationProductId,
@@ -254,7 +257,11 @@ export const useGameStore = create<Store>((set, get) => ({
     if (hydration) return hydration;
     hydration = (async () => {
       await saveQueue.catch(() => undefined);
-      const { state: game, recovery } = await loadGameWithStatus();
+      const { state: loadedGame, recovery } = await loadGameWithStatus();
+      const game = rechargeMarketScanCredits(
+        loadedGame,
+        systemTimeProvider.nowWallMs(),
+      );
       // Never overwrite an unreadable save with the temporary fallback career.
       persistenceSuspended = recovery === "STORAGE_UNAVAILABLE";
       const recoveryNotice =
@@ -307,8 +314,12 @@ export const useGameStore = create<Store>((set, get) => ({
     }
     if (get().sessionActive) return;
     const previous = get().game;
-    const result = advanceOffline(previous, systemTimeProvider.nowWallMs());
-    const game = withBuyerOfferAnalytics(previous, result.state);
+    const nowWallMs = systemTimeProvider.nowWallMs();
+    const result = advanceOffline(previous, nowWallMs);
+    const game = withBuyerOfferAnalytics(
+      previous,
+      rechargeMarketScanCredits(result.state, nowWallMs),
+    );
     set({
       sessionActive: true,
       game: stampAndPersist(game),
@@ -334,7 +345,10 @@ export const useGameStore = create<Store>((set, get) => ({
     await enqueueSave({ ...state, lastWallClockMs: wallClockMs }, wallClockMs);
   },
   scan: () => {
-    const previous = get().game;
+    const previous = rechargeMarketScanCredits(
+      get().game,
+      systemTimeProvider.nowWallMs(),
+    );
     if (previous.monetization.marketScanCredits <= 0) {
       set({
         notice:
@@ -366,13 +380,17 @@ export const useGameStore = create<Store>((set, get) => ({
   tick: () => {
     if (!get().sessionActive || !get().ready) return;
     const result = progressBy(get().game, WORLD_CONFIG.activeTickMin);
+    const rechargedState = rechargeMarketScanCredits(
+      result.state,
+      systemTimeProvider.nowWallMs(),
+    );
     const eventCount =
       result.summary.buyerOffers +
       result.summary.npcSales +
       result.summary.marketExpirations +
       result.summary.playerListingExpirations;
     set((current) => ({
-      game: stampAndPersist(result.state),
+      game: stampAndPersist(rechargedState),
       notice: eventCount
         ? (worldEventNotice(result) ?? current.notice)
         : current.notice,

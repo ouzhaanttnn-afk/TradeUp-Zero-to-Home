@@ -350,6 +350,7 @@ export type MonetizationState = {
   rewardCooldownUntilGameMin?: number;
   rewardTransactions: RewardActionTransaction[];
   marketScanCredits: number;
+  marketScanRefillAnchorWallMs: number;
 };
 
 export type AnalyticsEventName =
