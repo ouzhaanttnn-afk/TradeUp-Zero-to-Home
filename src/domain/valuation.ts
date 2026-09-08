@@ -172,6 +172,7 @@ export function exitPricingBps(fairValueMinor: number) {
   return {
     quickSaleBps: interpolate(8_200, 8_700, progress),
     balancedAskingBps: interpolate(10_500, 10_300, progress),
+    premiumAskingBps: interpolate(11_400, 11_000, progress),
   };
 }
 

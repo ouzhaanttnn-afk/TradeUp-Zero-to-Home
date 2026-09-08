@@ -1,4 +1,4 @@
-import { playerOfferMinor } from "../game";
+import { playerOfferMinor, type PlayerOfferMode } from "../game";
 import type { Negotiation } from "../domain/models";
 
 export function purchaseBudget(
@@ -6,6 +6,7 @@ export function purchaseBudget(
   cashMinor: number,
   negotiation: Negotiation | undefined,
   allowDirect: boolean,
+  offerMode: PlayerOfferMode = "BALANCED",
 ) {
   const quote = (amountMinor: number) => ({
     amountMinor,
@@ -15,7 +16,7 @@ export function purchaseBudget(
   const rights = negotiation?.offersRemaining ?? 2;
   const offer =
     rights && !negotiation?.closed
-      ? quote(playerOfferMinor(askingMinor, rights === 2 ? 1 : 2))
+      ? quote(playerOfferMinor(askingMinor, rights === 2 ? 1 : 2, offerMode))
       : null;
   const counter = negotiation?.counterMinor
     ? quote(negotiation.counterMinor)

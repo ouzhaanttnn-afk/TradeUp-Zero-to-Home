@@ -159,6 +159,7 @@ describe("canonical ownership and accounting", () => {
     expect(quoteAssetExit(asset)).toEqual({
       quickSaleMinor: 33_000,
       balancedAskingMinor: 42_000,
+      premiumAskingMinor: 46_000,
       quickSaleProfitMinor: 10_000,
       estimatedPremiumGivenUpMinor: 9_000,
     });

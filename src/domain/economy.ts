@@ -88,9 +88,16 @@ export const quoteAssetExit = (asset: OwnedAsset) => {
         10_000 /
         1_000,
     ) * 1_000;
+  const premiumAskingMinor =
+    Math.round(
+      (asset.instance.fairValueMinor * pricing.premiumAskingBps) /
+        10_000 /
+        1_000,
+    ) * 1_000;
   return {
     quickSaleMinor,
     balancedAskingMinor,
+    premiumAskingMinor,
     quickSaleProfitMinor: quoteAssetSale(asset, quickSaleMinor).profitMinor,
     estimatedPremiumGivenUpMinor: Math.max(
       0,

@@ -68,6 +68,7 @@ import {
   type GameState,
   type Listing,
   type OwnedAsset,
+  type PlayerOfferMode,
 } from "../game";
 import { systemTimeProvider } from "../infrastructure/time";
 import type { StoreProductMetadata } from "../infrastructure/monetization";
@@ -100,7 +101,7 @@ type Store = {
   tick: () => void;
   buy: (item: Listing, priceMinor?: number) => boolean;
   buyHome: () => boolean;
-  offer: (item: Listing) => void;
+  offer: (item: Listing, mode?: PlayerOfferMode) => void;
   sell: (item: OwnedAsset, quick: boolean) => void;
   list: (item: OwnedAsset, askingPriceMinor: number) => void;
   withdrawListing: (listingId: string) => void;
@@ -449,7 +450,7 @@ export const useGameStore = create<Store>((set, get) => ({
     sound(game, "SALE_PROFIT");
     return true;
   },
-  offer: (item) => {
+  offer: (item, mode = "BALANCED") => {
     const game = get().game;
     if (isFtueActive(game) && game.ftue.stage !== "NEGOTIATION") {
       set({ notice: "Önce karşılaştır ve bir kanıtı kontrol et." });
@@ -489,7 +490,7 @@ export const useGameStore = create<Store>((set, get) => ({
       return;
     }
     const index = current.offersRemaining === 2 ? 1 : 2;
-    const offerMinor = playerOfferMinor(currentListing.priceMinor, index);
+    const offerMinor = playerOfferMinor(currentListing.priceMinor, index, mode);
     const result = resolveOffer(
       currentListing,
       offerMinor,
@@ -499,7 +500,12 @@ export const useGameStore = create<Store>((set, get) => ({
     const offeredGame = trackAnalytics(
       game,
       "offer_submitted",
-      { familyId: item.familyId, offerMinor, offerIndex: index },
+      {
+        familyId: item.familyId,
+        offerMinor,
+        offerIndex: index,
+        offerMode: mode,
+      },
       `${item.id}:${index}`,
     );
     if (result.result === "accepted") {

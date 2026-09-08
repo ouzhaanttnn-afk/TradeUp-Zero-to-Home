@@ -21,6 +21,27 @@ describe("purchase budget presentation", () => {
       );
     }
   });
+  it("quotes distinct risk presets without changing the two offer rights", () => {
+    const aggressive = purchaseBudget(
+      50_000,
+      100_000,
+      undefined,
+      true,
+      "AGGRESSIVE",
+    );
+    const balanced = purchaseBudget(
+      50_000,
+      100_000,
+      undefined,
+      true,
+      "BALANCED",
+    );
+    const safe = purchaseBudget(50_000, 100_000, undefined, true, "SAFE");
+
+    expect(aggressive.offer?.amountMinor).toBe(38_000);
+    expect(balanced.offer?.amountMinor).toBe(41_000);
+    expect(safe.offer?.amountMinor).toBe(45_000);
+  });
   it("allows an affordable offer when asking price exceeds cash", () => {
     const result = purchaseBudget(50_000, 42_000, undefined, true);
     expect(result.offer).toEqual({

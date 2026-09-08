@@ -42,7 +42,14 @@ import type {
   MonetizationProductId,
 } from "./domain/models";
 import { activeMarketListings, npcRiskSignal } from "./domain/world";
-import { HOME_GOAL_MINOR, money, signal, signedMoney, wealth } from "./game";
+import {
+  HOME_GOAL_MINOR,
+  money,
+  signal,
+  signedMoney,
+  wealth,
+  type PlayerOfferMode,
+} from "./game";
 import { useGameStore } from "./stores/gameStore";
 import { Icon, type IconName } from "./ui/Icon";
 import { evidencePresentation } from "./ui/evidencePresentation";
@@ -92,6 +99,16 @@ const nextSoundLevel: Record<SoundLevel, SoundLevel> = {
   LOW: "NORMAL",
   NORMAL: "OFF",
 };
+
+const offerModeOptions: Array<{
+  mode: PlayerOfferMode;
+  label: string;
+  detail: string;
+}> = [
+  { mode: "AGGRESSIVE", label: "Sert", detail: "Yüksek risk" },
+  { mode: "BALANCED", label: "Dengeli", detail: "Orta yol" },
+  { mode: "SAFE", label: "Güvenli", detail: "Kabul şansı daha yüksek" },
+];
 
 export function StartupSkeleton() {
   return (
@@ -235,6 +252,8 @@ export default function App() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [comparing, setComparing] = useState(false);
   const [purchaseFeedback, setPurchaseFeedback] = useState("");
+  const [purchaseOfferMode, setPurchaseOfferMode] =
+    useState<PlayerOfferMode>("BALANCED");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsReturnTab, setSettingsReturnTab] = useState<Tab>("market");
   const [profileDraft, setProfileDraft] = useState("");
@@ -476,6 +495,7 @@ export default function App() {
         game.cashMinor,
         negotiating,
         !ftueActive,
+        purchaseOfferMode,
       )
     : null;
   const balanceCopy = (quote: {
@@ -552,6 +572,7 @@ export default function App() {
     setSelectedId(listingId);
     setComparing(false);
     setPurchaseFeedback("");
+    setPurchaseOfferMode("BALANCED");
     openListing(listingId);
   };
   const toggleComparison = () => {
@@ -735,19 +756,63 @@ export default function App() {
           {(item.state === "IN_INVENTORY" || item.state === "READY") &&
           quickSaleAssetId !== item.id &&
           (!ftueActive || game.ftue.stage === "LISTING") ? (
-            <div className="portfolio-next-action">
+            <div
+              className={`portfolio-next-action${ftueActive ? "" : " listing-strategies"}`}
+            >
               <small>SIRADAKİ ADIM</small>
-              <b>Dengeli fiyatla satışa çıkar</b>
-              <span>
-                Toplam harcaman {money(item.bookCostMinor)} · İlan fiyatı{" "}
-                {money(quote.balancedAskingMinor)}
-              </span>
-              <button
-                className="primary"
-                onClick={() => listAndContinue(item, quote.balancedAskingMinor)}
-              >
-                İlan oluştur <b>{money(quote.balancedAskingMinor)}</b>
-              </button>
+              <b>
+                {ftueActive
+                  ? "Dengeli fiyatla satışa çıkar"
+                  : "Nasıl satmak istersin?"}
+              </b>
+              {ftueActive ? (
+                <>
+                  <span>
+                    Toplam harcaman {money(item.bookCostMinor)} · İlan fiyatı{" "}
+                    {money(quote.balancedAskingMinor)}
+                  </span>
+                  <button
+                    className="primary"
+                    aria-label={`İlan oluştur · ${money(quote.balancedAskingMinor)}`}
+                    onClick={() =>
+                      listAndContinue(item, quote.balancedAskingMinor)
+                    }
+                  >
+                    İlan oluştur <b>{money(quote.balancedAskingMinor)}</b>
+                  </button>
+                </>
+              ) : (
+                <div className="listing-strategy-options">
+                  <button
+                    aria-label={`Hemen sat · ${money(quote.quickSaleMinor)}`}
+                    onClick={() => setQuickSaleAssetId(item.id)}
+                  >
+                    <b>Hızlı</b>
+                    <strong>{money(quote.quickSaleMinor)}</strong>
+                    <small>Şimdi sat</small>
+                  </button>
+                  <button
+                    className="primary"
+                    aria-label={`İlan oluştur · ${money(quote.balancedAskingMinor)}`}
+                    onClick={() =>
+                      listAndContinue(item, quote.balancedAskingMinor)
+                    }
+                  >
+                    <b>Dengeli</b>
+                    <strong>{money(quote.balancedAskingMinor)}</strong>
+                    <small>Normal bekleme</small>
+                  </button>
+                  <button
+                    onClick={() =>
+                      listAndContinue(item, quote.premiumAskingMinor)
+                    }
+                  >
+                    <b>Yüksek</b>
+                    <strong>{money(quote.premiumAskingMinor)}</strong>
+                    <small>Daha uzun bekle</small>
+                  </button>
+                </div>
+              )}
             </div>
           ) : null}
           {showPreparation &&
@@ -793,57 +858,44 @@ export default function App() {
               </div>
             </details>
           ) : null}
-          {!showPreparation && !ftueActive ? (
-            quickSaleAssetId === item.id ? (
-              <div
-                className="quick-sale-confirm"
-                role="group"
-                aria-label="Hızlı satış onayı"
-              >
-                <strong>
-                  {quote.quickSaleProfitMinor >= 0 ? "Net kâr" : "Net zarar"}{" "}
-                  <span
-                    className={
-                      quote.quickSaleProfitMinor < 0 ? "loss" : "profit"
-                    }
-                  >
-                    {signedMoney(quote.quickSaleProfitMinor)}
-                  </span>
-                </strong>
-                <small>
-                  Satış tutarı {money(quote.quickSaleMinor)} · Toplam harcaman{" "}
-                  {money(item.bookCostMinor)}
-                </small>
-                <small>
-                  Dengeli ilana göre kaçırılan tahmini ek kazanç{" "}
-                  {money(quote.estimatedPremiumGivenUpMinor)}
-                </small>
-                <button
-                  className="primary"
-                  onClick={() => {
-                    setQuickSaleAssetId(null);
-                    sell(item, true);
-                  }}
-                >
-                  Satışı onayla · {money(quote.quickSaleMinor)}
-                </button>
-                <button
-                  className="text-button"
-                  onClick={() => setQuickSaleAssetId(null)}
-                >
-                  Vazgeç
-                </button>
-              </div>
-            ) : (
-              <button onClick={() => setQuickSaleAssetId(item.id)}>
-                Hemen sat · net{" "}
-                <b
+          {!ftueActive && quickSaleAssetId === item.id ? (
+            <div
+              className="quick-sale-confirm"
+              role="group"
+              aria-label="Hızlı satış onayı"
+            >
+              <strong>
+                {quote.quickSaleProfitMinor >= 0 ? "Net kâr" : "Net zarar"}{" "}
+                <span
                   className={quote.quickSaleProfitMinor < 0 ? "loss" : "profit"}
                 >
                   {signedMoney(quote.quickSaleProfitMinor)}
-                </b>
+                </span>
+              </strong>
+              <small>
+                Satış tutarı {money(quote.quickSaleMinor)} · Toplam harcaman{" "}
+                {money(item.bookCostMinor)}
+              </small>
+              <small>
+                Dengeli ilana göre kaçırılan tahmini ek kazanç{" "}
+                {money(quote.estimatedPremiumGivenUpMinor)}
+              </small>
+              <button
+                className="primary"
+                onClick={() => {
+                  setQuickSaleAssetId(null);
+                  sell(item, true);
+                }}
+              >
+                Satışı onayla · {money(quote.quickSaleMinor)}
               </button>
-            )
+              <button
+                className="text-button"
+                onClick={() => setQuickSaleAssetId(null)}
+              >
+                Vazgeç
+              </button>
+            </div>
           ) : null}
           {!showPreparation && availablePreparations.length > 0 ? (
             <button onClick={() => showOwnedAsset(item.id, "preparation")}>
@@ -1665,7 +1717,9 @@ export default function App() {
                         value={profileDraft}
                         maxLength={20}
                         autoComplete="nickname"
-                        onChange={(event) => setProfileDraft(event.target.value)}
+                        onChange={(event) =>
+                          setProfileDraft(event.target.value)
+                        }
                       />
                     </label>
                   </div>
@@ -1908,7 +1962,10 @@ export default function App() {
                     </div>
                   </section>
                 ) : null}
-                <section className="settings-danger-zone" aria-label="Kayıt yönetimi">
+                <section
+                  className="settings-danger-zone"
+                  aria-label="Kayıt yönetimi"
+                >
                   <div>
                     <b>Kayıt yönetimi</b>
                     <small>Bu işlem geri alınamaz.</small>
@@ -2535,6 +2592,37 @@ export default function App() {
                   <small>{balanceCopy(budget.counter)}</small>
                 </button>
               ) : null}
+              {!ftueActive && budget?.offer ? (
+                <div
+                  className="offer-mode-picker"
+                  role="group"
+                  aria-label="Teklif tarzı"
+                >
+                  {offerModeOptions.map((option) => {
+                    const amount = purchaseBudget(
+                      selected.priceMinor,
+                      game.cashMinor,
+                      negotiating,
+                      true,
+                      option.mode,
+                    ).offer?.amountMinor;
+                    return (
+                      <button
+                        key={option.mode}
+                        className={
+                          purchaseOfferMode === option.mode ? "active" : ""
+                        }
+                        aria-pressed={purchaseOfferMode === option.mode}
+                        onClick={() => setPurchaseOfferMode(option.mode)}
+                      >
+                        <b>{option.label}</b>
+                        <strong>{amount ? money(amount) : "—"}</strong>
+                        <small>{option.detail}</small>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : null}
               {!ftueActive || game.ftue.stage === "NEGOTIATION" ? (
                 <>
                   <div className="sheet-actions">
@@ -2550,10 +2638,18 @@ export default function App() {
                         !budget?.offer || budget.offer.shortfallMinor > 0
                       }
                       onClick={() =>
-                        purchaseAndContinue(selected.id, () => offer(selected))
+                        purchaseAndContinue(selected.id, () =>
+                          offer(
+                            selected,
+                            ftueActive ? "BALANCED" : purchaseOfferMode,
+                          ),
+                        )
                       }
                     >
                       Pazarlık et
+                      {!ftueActive
+                        ? ` · ${offerModeOptions.find((option) => option.mode === purchaseOfferMode)?.label}`
+                        : ""}
                       {budget?.offer ? (
                         <>
                           <small>

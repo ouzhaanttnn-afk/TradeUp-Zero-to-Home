@@ -743,9 +743,23 @@ export function sellerFloor(item: Listing) {
     item.urgency,
   );
 }
-export function playerOfferMinor(askingMinor: number, offerIndex: 1 | 2) {
+export type PlayerOfferMode = "AGGRESSIVE" | "BALANCED" | "SAFE";
+
+const playerOfferBps: Record<PlayerOfferMode, readonly [number, number]> = {
+  AGGRESSIVE: [7_600, 8_600],
+  BALANCED: [8_200, 9_100],
+  SAFE: [8_900, 9_600],
+};
+
+export function playerOfferMinor(
+  askingMinor: number,
+  offerIndex: 1 | 2,
+  mode: PlayerOfferMode = "BALANCED",
+) {
   return (
-    Math.round((askingMinor * (offerIndex === 1 ? 0.82 : 0.91)) / 1_000) * 1_000
+    Math.round(
+      (askingMinor * playerOfferBps[mode][offerIndex - 1]) / 10_000 / 1_000,
+    ) * 1_000
   );
 }
 
