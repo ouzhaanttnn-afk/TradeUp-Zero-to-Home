@@ -89,6 +89,7 @@ import {
 } from "./ui/manualListingPrice";
 import { homeAtmosphereStage, homeGoldPercent } from "./ui/homeAtmosphere";
 import { marketScanRefillStatus, shortDuration } from "./ui/marketScan";
+import { recoveryPlan } from "./ui/recoveryPlan";
 
 type Tab = "market" | "follow" | "portfolio" | "journey";
 type PortfolioSegment = "inventory" | "preparation" | "listings";
@@ -564,6 +565,7 @@ export default function App() {
   const marketLevel = marketExpertiseLevel(game);
   const marketXpTarget = nextExpertiseThreshold(game.expertise.marketXp);
   const estimates = wealthPresentation(game);
+  const recovery = ftueActive ? null : recoveryPlan(game);
   const homeProgress = game.home.purchased
     ? 100
     : Math.min(100, Math.floor((total / HOME_GOAL_MINOR) * 100));
@@ -1093,6 +1095,54 @@ export default function App() {
               Ürününe dön
             </button>
           ) : null}
+        </aside>
+      ) : null}
+      {recovery ? (
+        <aside className="recovery-bar" aria-label="Nakit toparlama yolları">
+          <div>
+            <small>NAKİT PLANI</small>
+            <b>{recovery.title}</b>
+          </div>
+          <div className="recovery-actions">
+            <button
+              onClick={() => {
+                setMarketCategory("Küçük Eşya");
+                setMarketSort("PRICE_ASC");
+                navigate("market");
+              }}
+            >
+              Küçük eşya bul
+            </button>
+            {recovery.canQuickSell ? (
+              <button
+                onClick={() => {
+                  const candidate = inventory
+                    .map((asset) => ({
+                      asset,
+                      proceeds: quoteAssetExit(asset).quickSaleMinor,
+                    }))
+                    .sort(
+                      (left, right) => right.proceeds - left.proceeds,
+                    )[0]?.asset;
+                  if (!candidate) return;
+                  showOwnedAsset(candidate.id, "inventory");
+                  setQuickSaleAssetId(candidate.id);
+                }}
+              >
+                Hızlı satış
+              </button>
+            ) : null}
+            {recovery.canRevise ? (
+              <button
+                onClick={() => {
+                  setPortfolioSegment("listings");
+                  navigate("portfolio");
+                }}
+              >
+                İlanı düzenle
+              </button>
+            ) : null}
+          </div>
         </aside>
       ) : null}
 
