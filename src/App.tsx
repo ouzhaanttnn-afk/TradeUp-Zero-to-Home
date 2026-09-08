@@ -1700,70 +1700,92 @@ export default function App() {
                     </span>
                   </div>
                 </form>
-                <h3 className="settings-group-title">Oyun deneyimi</h3>
-                <div>
-                  <span>Dokunsal geri bildirim</span>
-                  <button
-                    aria-pressed={game.accessibility.hapticsEnabled}
-                    onClick={() =>
-                      setHaptics(!game.accessibility.hapticsEnabled)
-                    }
-                  >
-                    {game.accessibility.hapticsEnabled
-                      ? "Açık · kapat"
-                      : "Kapalı · aç"}
-                  </button>
-                </div>
-                <div>
-                  <span>Azaltılmış hareket</span>
-                  <button
-                    aria-pressed={game.accessibility.reducedMotion}
-                    onClick={() =>
-                      setReducedMotion(!game.accessibility.reducedMotion)
-                    }
-                  >
-                    {game.accessibility.reducedMotion
-                      ? "Açık · kapat"
-                      : "Kapalı · aç"}
-                  </button>
-                </div>
-                <div>
-                  <span>Metin boyutu</span>
-                  <button
-                    aria-pressed={game.accessibility.largeText}
-                    onClick={() => setLargeText(!game.accessibility.largeText)}
-                  >
-                    {game.accessibility.largeText
-                      ? "Büyük · standart"
-                      : "Standart · büyüt"}
-                  </button>
-                </div>
-                <div>
-                  <span>Ses seviyesi</span>
-                  <button
-                    aria-label={`Ses seviyesi: ${soundLevelLabel[game.accessibility.soundLevel]}. Değiştir`}
-                    onClick={() =>
-                      setSoundLevel(
-                        nextSoundLevel[game.accessibility.soundLevel],
-                      )
-                    }
-                  >
-                    {soundLevelLabel[game.accessibility.soundLevel]} · değiştir
-                  </button>
-                </div>
-                <div>
-                  <span>İsteğe bağlı analitik</span>
-                  <button
-                    aria-pressed={game.analytics.enabled}
-                    onClick={() => setAnalytics(!game.analytics.enabled)}
-                  >
-                    {game.analytics.enabled ? "Açık · kapat" : "Kapalı · aç"}
-                  </button>
-                </div>
-                <p>
-                  Karar olayları yalnız yerel kuyrukta tutulur; kişisel bilgi
-                  içermez. Kapatmak kuyruğu temizler.
-                </p>
+                <section
+                  className="settings-section"
+                  aria-labelledby="experience-settings-title"
+                >
+                  <div className="settings-section-heading">
+                    <div>
+                      <h3 id="experience-settings-title">Oyun deneyimi</h3>
+                      <p>Görünüm, ses ve erişilebilirlik</p>
+                    </div>
+                  </div>
+                  <div className="settings-row">
+                    <span>
+                      <b>Dokunsal geri bildirim</b>
+                      <small>Önemli kararlarda titreşim</small>
+                    </span>
+                    <button
+                      className="settings-toggle"
+                      aria-pressed={game.accessibility.hapticsEnabled}
+                      onClick={() =>
+                        setHaptics(!game.accessibility.hapticsEnabled)
+                      }
+                    >
+                      {game.accessibility.hapticsEnabled ? "Açık" : "Kapalı"}
+                    </button>
+                  </div>
+                  <div className="settings-row">
+                    <span>
+                      <b>Azaltılmış hareket</b>
+                      <small>Geçişleri ve parlamaları sakinleştirir</small>
+                    </span>
+                    <button
+                      className="settings-toggle"
+                      aria-pressed={game.accessibility.reducedMotion}
+                      onClick={() =>
+                        setReducedMotion(!game.accessibility.reducedMotion)
+                      }
+                    >
+                      {game.accessibility.reducedMotion ? "Açık" : "Kapalı"}
+                    </button>
+                  </div>
+                  <div className="settings-row">
+                    <span>
+                      <b>Metin boyutu</b>
+                      <small>Arayüz okunabilirliği</small>
+                    </span>
+                    <button
+                      className="settings-value"
+                      aria-pressed={game.accessibility.largeText}
+                      onClick={() =>
+                        setLargeText(!game.accessibility.largeText)
+                      }
+                    >
+                      {game.accessibility.largeText ? "Büyük" : "Standart"}
+                    </button>
+                  </div>
+                  <div className="settings-row">
+                    <span>
+                      <b>Ses seviyesi</b>
+                      <small>Efektlerin yüksekliği</small>
+                    </span>
+                    <button
+                      className="settings-value"
+                      aria-label={`Ses seviyesi: ${soundLevelLabel[game.accessibility.soundLevel]}. Değiştir`}
+                      onClick={() =>
+                        setSoundLevel(
+                          nextSoundLevel[game.accessibility.soundLevel],
+                        )
+                      }
+                    >
+                      {soundLevelLabel[game.accessibility.soundLevel]}
+                    </button>
+                  </div>
+                  <div className="settings-row">
+                    <span>
+                      <b>İsteğe bağlı analitik</b>
+                      <small>Kişisel bilgi içermez</small>
+                    </span>
+                    <button
+                      className="settings-toggle"
+                      aria-pressed={game.analytics.enabled}
+                      onClick={() => setAnalytics(!game.analytics.enabled)}
+                    >
+                      {game.analytics.enabled ? "Açık" : "Kapalı"}
+                    </button>
+                  </div>
+                </section>
                 <button
                   className="secondary"
                   aria-expanded={purchasesOpen}
@@ -1780,6 +1802,15 @@ export default function App() {
                     className="purchase-panel"
                     aria-label="Satın Almalar ve Görünüm"
                   >
+                    <div className="purchase-panel-heading">
+                      <div>
+                        <strong>Kalıcı paketler</strong>
+                        <p>Oynanış ekonomisini değiştirmez.</p>
+                      </div>
+                      <span>
+                        {storeProducts.length ? "Mağaza bağlı" : "Web önizleme"}
+                      </span>
+                    </div>
                     <div className="purchase-list">
                       {(Object.keys(storeCopy) as MonetizationProductId[]).map(
                         (productId) => {
@@ -1813,7 +1844,7 @@ export default function App() {
                                 </button>
                               ) : (
                                 <span className="store-unavailable">
-                                  Fiyat yüklenemedi
+                                  Mobil uygulamada
                                 </span>
                               )}
                             </article>
@@ -1821,23 +1852,26 @@ export default function App() {
                         },
                       )}
                     </div>
-                    <p>
-                      Fiyatlar doğrudan cihaz mağazasından gelir. Satın alımlar
-                      kalıcıdır; oyun parası veya pazar avantajı vermez.
+                    <p className="purchase-note">
+                      Web önizlemesinde ödeme yapılmaz. Fiyat ve satın alma
+                      düğmesi yalnız App Store veya Play Store bağlantısı
+                      doğrulandığında görünür.
                     </p>
-                    <button
-                      className="secondary"
-                      disabled={monetizationBusy}
-                      onClick={() => void restorePurchases()}
-                    >
-                      Satın Almaları Geri Yükle
-                    </button>
-                    <button
-                      className="text-button"
-                      onClick={() => void showPrivacyOptions()}
-                    >
-                      Gizlilik Seçenekleri
-                    </button>
+                    <div className="purchase-footer-actions">
+                      <button
+                        className="secondary"
+                        disabled={monetizationBusy || !storeProducts.length}
+                        onClick={() => void restorePurchases()}
+                      >
+                        Satın alımları geri yükle
+                      </button>
+                      <button
+                        className="text-button"
+                        onClick={() => void showPrivacyOptions()}
+                      >
+                        Gizlilik
+                      </button>
+                    </div>
                   </section>
                 ) : null}
                 <button
@@ -2182,249 +2216,251 @@ export default function App() {
             aria-modal="true"
             aria-labelledby="listing-detail-title"
           >
-            <div className="grab" aria-hidden="true" />
-            <button
-              ref={sheetCloseRef}
-              className="close"
-              onClick={() => setSelectedId(null)}
-              aria-label="Kapat"
-            >
-              <Icon name="close" />
-            </button>
-            <div className="sheet-hero-shell">
-              <ProductVisual
-                instance={selected.instance}
-                className="hero-art"
-                alt={selected.instance.family.name}
-                priority
-              />
-              <span className="sheet-category">
-                {selected.instance.family.category}
-              </span>
-            </div>
-            <div className="sheet-summary">
-              <div className="sheet-title">
-                <small>{sellerLabel[selected.seller]} satıcı</small>
-                <h2 id="listing-detail-title">
-                  {selected.instance.family.name}
-                </h2>
-              </div>
-              <div className="detail-price">
-                <div>
-                  <small>İLAN FİYATI</small>
-                  <strong>{money(selected.priceMinor)}</strong>
-                </div>
-                <span
-                  className={
-                    signal(
-                      selected,
-                      categoryExpertiseLevel(
-                        game,
-                        selected.instance.family.category,
-                      ),
-                    ).cls
-                  }
-                >
-                  {
-                    signal(
-                      selected,
-                      categoryExpertiseLevel(
-                        game,
-                        selected.instance.family.category,
-                      ),
-                    ).text
-                  }
+            <div className="sheet-scroll">
+              <div className="grab" aria-hidden="true" />
+              <button
+                ref={sheetCloseRef}
+                className="close"
+                onClick={() => setSelectedId(null)}
+                aria-label="Kapat"
+              >
+                <Icon name="close" />
+              </button>
+              <div className="sheet-hero-shell">
+                <ProductVisual
+                  instance={selected.instance}
+                  className="hero-art"
+                  alt={selected.instance.family.name}
+                  priority
+                />
+                <span className="sheet-category">
+                  {selected.instance.family.category}
                 </span>
               </div>
-            </div>
-            <div className="sheet-follow-actions">
-              <button
-                className={
-                  game.follow.watchedListingIds.includes(selected.id)
-                    ? "active-watch"
-                    : ""
-                }
-                onClick={() => toggleWatch(selected.id)}
-              >
-                <Icon name="follow" />
-                {game.follow.watchedListingIds.includes(selected.id)
-                  ? "Takipten çıkar"
-                  : "İlanı takip et"}
-              </button>
-              {marketLevel >= 3 ? (
+              <div className="sheet-summary">
+                <div className="sheet-title">
+                  <small>{sellerLabel[selected.seller]} satıcı</small>
+                  <h2 id="listing-detail-title">
+                    {selected.instance.family.name}
+                  </h2>
+                </div>
+                <div className="detail-price">
+                  <div>
+                    <small>İLAN FİYATI</small>
+                    <strong>{money(selected.priceMinor)}</strong>
+                  </div>
+                  <span
+                    className={
+                      signal(
+                        selected,
+                        categoryExpertiseLevel(
+                          game,
+                          selected.instance.family.category,
+                        ),
+                      ).cls
+                    }
+                  >
+                    {
+                      signal(
+                        selected,
+                        categoryExpertiseLevel(
+                          game,
+                          selected.instance.family.category,
+                        ),
+                      ).text
+                    }
+                  </span>
+                </div>
+              </div>
+              <div className="sheet-follow-actions">
                 <button
-                  onClick={() =>
-                    saveSearch(
-                      selected.familyId,
-                      selected.priceMinor,
-                      selected.instance.condition,
-                      "ANY",
-                    )
+                  className={
+                    game.follow.watchedListingIds.includes(selected.id)
+                      ? "active-watch"
+                      : ""
                   }
+                  onClick={() => toggleWatch(selected.id)}
                 >
-                  Ürün alarmı kur
+                  <Icon name="follow" />
+                  {game.follow.watchedListingIds.includes(selected.id)
+                    ? "Takipten çıkar"
+                    : "İlanı takip et"}
                 </button>
-              ) : (
-                <span>Ürün alarmı Seviye 3'te açılır</span>
-              )}
-            </div>
-            <div className="band">
-              <div>
-                <span>Tahmini fiyat aralığı</span>
-                <b>
-                  {money(
-                    listingEstimateBand(
-                      selected,
-                      categoryExpertiseLevel(
-                        game,
-                        selected.instance.family.category,
-                      ),
-                    ).lowMinor,
-                  )}{" "}
-                  –{" "}
-                  {money(
-                    listingEstimateBand(
-                      selected,
-                      categoryExpertiseLevel(
-                        game,
-                        selected.instance.family.category,
-                      ),
-                    ).highMinor,
-                  )}
-                </b>
-              </div>
-              <i>
-                <em
-                  style={{
-                    left: `${Math.max(
-                      4,
-                      Math.min(
-                        94,
-                        (selected.priceMinor /
-                          (listingEstimateBand(
-                            selected,
-                            categoryExpertiseLevel(
-                              game,
-                              selected.instance.family.category,
-                            ),
-                          ).highMinor || 1)) *
-                          100,
-                      ),
-                    )}%`,
-                  }}
-                />
-              </i>
-            </div>
-            <div className="details">
-              <div>
-                <span>Kondisyon</span>
-                <b>%{selected.instance.condition}</b>
-              </div>
-              <div>
-                <span>Bilgi güveni</span>
-                <b>{evidenceLabel(selected.instance.evidenceConfidence)}</b>
-              </div>
-              <div>
-                <span>Pazarlık hakkı</span>
-                <b aria-label={`${offers} pazarlık hakkı kaldı`}>
-                  {"● ".repeat(offers)}
-                  {"○ ".repeat(2 - offers)}
-                </b>
-              </div>
-            </div>
-            <div className="evidence-panel">
-              <small>
-                ÜRÜN KONTROLLERİ · GÜVEN %
-                {Math.round(selected.instance.evidenceConfidence * 100)}
-              </small>
-              {selected.instance.evidence.map((record) => {
-                const definition = selected.instance.family.evidence.find(
-                  (item) => item.id === record.definitionId,
-                );
-                const evidenceState = evidencePresentation(record.status);
-                return (
-                  <p className="evidence-row" key={record.definitionId}>
-                    <b>{definition?.label}</b>
-                    <span className={`evidence-state ${evidenceState.tone}`}>
-                      {evidenceState.label}
-                    </span>
-                  </p>
-                );
-              })}
-              {!ftueActive ? renderInspectionActions() : null}
-              {canClaimReward("FAST_INSPECTION") ? (
-                <button
-                  className="reward-cta"
-                  disabled={monetizationBusy}
-                  onClick={() => void claimReward("FAST_INSPECTION")}
-                >
-                  {rewardLabel("FAST_INSPECTION")}
-                </button>
-              ) : null}
-              {!ftueActive || game.ftue.stage !== "COMPARE" ? (
-                <button className="secondary" onClick={toggleComparison}>
-                  {comparing
-                    ? "Karşılaştırmayı kapat"
-                    : "Benzer ilanlarla karşılaştır"}
-                </button>
-              ) : null}
-            </div>
-            {comparing ? (
-              <div className="compare-stack" ref={comparisonRef}>
-                <h3>Aynı ürün grubu · {comparables.length} ilan</h3>
-                {comparables.length < 2 ? (
-                  <p>
-                    Şu anda aynı ürün grubunda karşılaştırılabilecek başka aktif
-                    ilan yok.
-                  </p>
+                {marketLevel >= 3 ? (
+                  <button
+                    onClick={() =>
+                      saveSearch(
+                        selected.familyId,
+                        selected.priceMinor,
+                        selected.instance.condition,
+                        "ANY",
+                      )
+                    }
+                  >
+                    Ürün alarmı kur
+                  </button>
                 ) : (
-                  <>
-                    <p>
-                      Farklı satırlar işaretli. Satıcı tipi güvenilirlik
-                      garantisi değildir; inceleme bulgularını karşılaştır.
-                    </p>
-                    {comparables.map((item, index) => (
-                      <section
-                        className="compare-card"
-                        key={item.id}
-                        aria-label={`İlan ${index + 1}`}
-                      >
-                        <h4>
-                          İlan {index + 1} ·{" "}
-                          {index === 0 ? "Açık ilan" : "Alternatif"}
-                        </h4>
-                        <dl>
-                          {compareRows.map((row) => (
-                            <div
-                              className={
-                                row.different
-                                  ? "compare-row different"
-                                  : "compare-row"
-                              }
-                              key={row.label}
-                            >
-                              <dt>
-                                {row.label}
-                                {row.different ? <small>Farklı</small> : null}
-                              </dt>
-                              <dd>{row.values[index]}</dd>
-                            </div>
-                          ))}
-                        </dl>
-                        {index > 0 ? (
-                          <button
-                            className="secondary"
-                            onClick={() => selectListing(item.id)}
-                          >
-                            İlan {index + 1} detaylarını aç
-                          </button>
-                        ) : null}
-                      </section>
-                    ))}
-                  </>
+                  <span>Ürün alarmı Seviye 3'te açılır</span>
                 )}
               </div>
-            ) : null}
+              <div className="band">
+                <div>
+                  <span>Tahmini fiyat aralığı</span>
+                  <b>
+                    {money(
+                      listingEstimateBand(
+                        selected,
+                        categoryExpertiseLevel(
+                          game,
+                          selected.instance.family.category,
+                        ),
+                      ).lowMinor,
+                    )}{" "}
+                    –{" "}
+                    {money(
+                      listingEstimateBand(
+                        selected,
+                        categoryExpertiseLevel(
+                          game,
+                          selected.instance.family.category,
+                        ),
+                      ).highMinor,
+                    )}
+                  </b>
+                </div>
+                <i>
+                  <em
+                    style={{
+                      left: `${Math.max(
+                        4,
+                        Math.min(
+                          94,
+                          (selected.priceMinor /
+                            (listingEstimateBand(
+                              selected,
+                              categoryExpertiseLevel(
+                                game,
+                                selected.instance.family.category,
+                              ),
+                            ).highMinor || 1)) *
+                            100,
+                        ),
+                      )}%`,
+                    }}
+                  />
+                </i>
+              </div>
+              <div className="details">
+                <div>
+                  <span>Kondisyon</span>
+                  <b>%{selected.instance.condition}</b>
+                </div>
+                <div>
+                  <span>Bilgi güveni</span>
+                  <b>{evidenceLabel(selected.instance.evidenceConfidence)}</b>
+                </div>
+                <div>
+                  <span>Pazarlık hakkı</span>
+                  <b aria-label={`${offers} pazarlık hakkı kaldı`}>
+                    {"● ".repeat(offers)}
+                    {"○ ".repeat(2 - offers)}
+                  </b>
+                </div>
+              </div>
+              <div className="evidence-panel">
+                <small>
+                  ÜRÜN KONTROLLERİ · GÜVEN %
+                  {Math.round(selected.instance.evidenceConfidence * 100)}
+                </small>
+                {selected.instance.evidence.map((record) => {
+                  const definition = selected.instance.family.evidence.find(
+                    (item) => item.id === record.definitionId,
+                  );
+                  const evidenceState = evidencePresentation(record.status);
+                  return (
+                    <p className="evidence-row" key={record.definitionId}>
+                      <b>{definition?.label}</b>
+                      <span className={`evidence-state ${evidenceState.tone}`}>
+                        {evidenceState.label}
+                      </span>
+                    </p>
+                  );
+                })}
+                {!ftueActive ? renderInspectionActions() : null}
+                {canClaimReward("FAST_INSPECTION") ? (
+                  <button
+                    className="reward-cta"
+                    disabled={monetizationBusy}
+                    onClick={() => void claimReward("FAST_INSPECTION")}
+                  >
+                    {rewardLabel("FAST_INSPECTION")}
+                  </button>
+                ) : null}
+                {!ftueActive || game.ftue.stage !== "COMPARE" ? (
+                  <button className="secondary" onClick={toggleComparison}>
+                    {comparing
+                      ? "Karşılaştırmayı kapat"
+                      : "Benzer ilanlarla karşılaştır"}
+                  </button>
+                ) : null}
+              </div>
+              {comparing ? (
+                <div className="compare-stack" ref={comparisonRef}>
+                  <h3>Aynı ürün grubu · {comparables.length} ilan</h3>
+                  {comparables.length < 2 ? (
+                    <p>
+                      Şu anda aynı ürün grubunda karşılaştırılabilecek başka
+                      aktif ilan yok.
+                    </p>
+                  ) : (
+                    <>
+                      <p>
+                        Farklı satırlar işaretli. Satıcı tipi güvenilirlik
+                        garantisi değildir; inceleme bulgularını karşılaştır.
+                      </p>
+                      {comparables.map((item, index) => (
+                        <section
+                          className="compare-card"
+                          key={item.id}
+                          aria-label={`İlan ${index + 1}`}
+                        >
+                          <h4>
+                            İlan {index + 1} ·{" "}
+                            {index === 0 ? "Açık ilan" : "Alternatif"}
+                          </h4>
+                          <dl>
+                            {compareRows.map((row) => (
+                              <div
+                                className={
+                                  row.different
+                                    ? "compare-row different"
+                                    : "compare-row"
+                                }
+                                key={row.label}
+                              >
+                                <dt>
+                                  {row.label}
+                                  {row.different ? <small>Farklı</small> : null}
+                                </dt>
+                                <dd>{row.values[index]}</dd>
+                              </div>
+                            ))}
+                          </dl>
+                          {index > 0 ? (
+                            <button
+                              className="secondary"
+                              onClick={() => selectListing(item.id)}
+                            >
+                              İlan {index + 1} detaylarını aç
+                            </button>
+                          ) : null}
+                        </section>
+                      ))}
+                    </>
+                  )}
+                </div>
+              ) : null}
+            </div>
             <div
               className="sheet-decision"
               role="group"

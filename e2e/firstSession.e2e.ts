@@ -76,9 +76,7 @@ for (const choice of [
     if (choice.withdraw || choice.width === 320) {
       await page.getByRole("button", { name: "Yolculuk", exact: true }).click();
       await page.getByRole("button", { name: "Ayarlar", exact: true }).click();
-      await page
-        .getByRole("button", { name: "Standart · büyüt", exact: true })
-        .click();
+      await page.getByRole("button", { name: "Standart", exact: true }).click();
       await page
         .getByRole("button", { name: "Ayarları kapat", exact: true })
         .click();

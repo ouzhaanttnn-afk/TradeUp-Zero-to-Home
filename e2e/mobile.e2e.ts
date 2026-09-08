@@ -112,17 +112,15 @@ for (const width of [320, 390, 430]) {
       animations: "disabled",
     });
     await page.getByRole("button", { name: "Ayarlar", exact: true }).click();
-    await page
-      .getByRole("button", { name: "Standart · büyüt", exact: true })
-      .click();
+    await page.getByRole("button", { name: "Standart", exact: true }).click();
     const motion = page
-      .locator(".settings-card > div")
+      .locator(".settings-row")
       .filter({ hasText: "Azaltılmış hareket" })
       .getByRole("button");
     if ((await motion.getAttribute("aria-pressed")) !== "true")
       await motion.click();
     const haptics = page
-      .locator(".settings-card > div")
+      .locator(".settings-row")
       .filter({ hasText: "Dokunsal geri bildirim" })
       .getByRole("button");
     if ((await haptics.getAttribute("aria-pressed")) !== "false")
@@ -137,7 +135,7 @@ for (const width of [320, 390, 430]) {
     await page.getByRole("button", { name: "Ayarlar", exact: true }).click();
     await expect(
       page
-        .locator(".settings-card > div")
+        .locator(".settings-row")
         .filter({ hasText: "Dokunsal geri bildirim" })
         .getByRole("button"),
     ).toHaveAttribute("aria-pressed", "false");
@@ -172,12 +170,21 @@ for (const width of [320, 390, 430]) {
     await expect(page.locator(".sheet-decision-heading")).toContainText(
       "Nakit ₺420",
     );
+    await expect(
+      page.getByRole("button", {
+        name: "Benzer ilanlarla karşılaştır",
+        exact: true,
+      }),
+    ).toBeInViewport();
     await page
       .getByRole("button", {
         name: "Benzer ilanlarla karşılaştır",
         exact: true,
       })
       .click();
+    await expect(
+      page.getByRole("button", { name: /Fotoğrafları incele/ }),
+    ).toBeInViewport();
     await expect(page.locator(".compare-card")).toHaveCount(2);
     await checkLayout(page);
     await page.getByRole("button", { name: "İlan 2 detaylarını aç" }).click();

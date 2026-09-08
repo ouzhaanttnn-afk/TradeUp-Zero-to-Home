@@ -21,6 +21,19 @@ test("profile and settings stay accessible from the mobile game header", async (
   await expect(
     dialog.getByRole("group", { name: "Profil özeti" }),
   ).toContainText("Pazar seviyesi");
+  await dialog
+    .getByRole("button", { name: "Satın Almalar ve Görünüm" })
+    .click();
+  await expect(dialog.locator(".purchase-list article")).toHaveCount(4);
+  await expect(dialog).toContainText("Web önizleme");
+  await expect(dialog).not.toContainText("Fiyat yüklenemedi");
+  expect(
+    await dialog
+      .locator(".purchase-list article")
+      .evaluateAll((cards) =>
+        cards.every((card) => card.getBoundingClientRect().height <= 76),
+      ),
+  ).toBe(true);
   await page.screenshot({
     path: testInfo.outputPath("profile-settings-320.png"),
     animations: "disabled",
