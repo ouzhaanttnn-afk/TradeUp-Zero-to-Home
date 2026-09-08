@@ -79,6 +79,9 @@ for (const choice of [
       await page
         .getByRole("button", { name: "Standart · büyüt", exact: true })
         .click();
+      await page
+        .getByRole("button", { name: "Ayarları kapat", exact: true })
+        .click();
       await page.getByRole("button", { name: "Pazar", exact: true }).click();
     }
     await page

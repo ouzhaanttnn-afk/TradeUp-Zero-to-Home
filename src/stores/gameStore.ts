@@ -126,6 +126,7 @@ type Store = {
   setReducedMotion: (enabled: boolean) => void;
   setLargeText: (enabled: boolean) => void;
   setSoundLevel: (level: GameState["accessibility"]["soundLevel"]) => void;
+  setProfileName: (displayName: string) => void;
   openPurchases: () => Promise<void>;
   purchaseProduct: (productId: MonetizationProductId) => Promise<void>;
   restorePurchases: () => Promise<void>;
@@ -1087,6 +1088,21 @@ export const useGameStore = create<Store>((set, get) => ({
         accessibility: { ...game.accessibility, soundLevel: level },
       }),
       notice: `Ses seviyesi ${label} olarak ayarlandı.`,
+    });
+  },
+  setProfileName: (displayName) => {
+    const normalized = displayName.trim().replace(/\s+/g, " ").slice(0, 20);
+    if (!normalized) {
+      set({ notice: "Oyuncu adı boş bırakılamaz." });
+      return;
+    }
+    const game = get().game;
+    set({
+      game: stampAndPersist({
+        ...game,
+        profile: { ...game.profile, displayName: normalized },
+      }),
+      notice: "Profil adı kaydedildi.",
     });
   },
   openPurchases: async () => {

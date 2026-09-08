@@ -141,6 +141,9 @@ for (const width of [320, 390, 430]) {
         .filter({ hasText: "Dokunsal geri bildirim" })
         .getByRole("button"),
     ).toHaveAttribute("aria-pressed", "false");
+    await page
+      .getByRole("button", { name: "Ayarları kapat", exact: true })
+      .click();
     await page.getByRole("button", { name: "Pazar", exact: true }).click();
     await checkMarketGrid(page);
     await page.screenshot({

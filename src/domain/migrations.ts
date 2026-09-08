@@ -518,14 +518,16 @@ export function migrateStateToV4(value: unknown): unknown {
 }
 
 export function migrateStateToCurrent(value: unknown): unknown {
-  return migrateStateToV12(
-    migrateStateToV11(
-      migrateStateToV10(
-        migrateStateToV9(
-          migrateStateToV8(
-            migrateStateToV7(
-              migrateStateToV6(
-                migrateStateToV5(migrateStateToV4(migrateStateToV3(value))),
+  return migrateStateToV13(
+    migrateStateToV12(
+      migrateStateToV11(
+        migrateStateToV10(
+          migrateStateToV9(
+            migrateStateToV8(
+              migrateStateToV7(
+                migrateStateToV6(
+                  migrateStateToV5(migrateStateToV4(migrateStateToV3(value))),
+                ),
               ),
             ),
           ),
@@ -533,6 +535,20 @@ export function migrateStateToCurrent(value: unknown): unknown {
       ),
     ),
   );
+}
+
+export function migrateStateToV13(value: unknown): unknown {
+  const source = record(value);
+  if (integer(source.version) >= 13) return value;
+  const profile = record(source.profile);
+  const displayName = string(profile.displayName, "Yeni Tüccar")
+    .trim()
+    .slice(0, 20);
+  return {
+    ...source,
+    version: 13,
+    profile: { displayName: displayName || "Yeni Tüccar" },
+  };
 }
 
 export function migrateStateToV12(value: unknown): unknown {

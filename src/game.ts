@@ -29,7 +29,7 @@ export type {
   TransactionJournalEntry,
 } from "./domain/models";
 export { families } from "./content/families";
-export const SAVE_VERSION = 12;
+export const SAVE_VERSION = 13;
 export const HOME_GOAL_MINOR = 350_000_000;
 
 const attributeDefinitionSchema = z.object({
@@ -357,6 +357,9 @@ const accessibilitySchema = z.object({
   largeText: z.boolean(),
   soundLevel: z.enum(["OFF", "LOW", "NORMAL"]),
 });
+const profileSchema = z.object({
+  displayName: z.string().trim().min(1).max(20),
+});
 const rewardTransactionSchema = z.object({
   id: z.string(),
   placementId: z.enum([
@@ -451,6 +454,7 @@ const stateSchema = z
     home: homeSchema,
     analytics: analyticsSchema,
     accessibility: accessibilitySchema,
+    profile: profileSchema,
     ftue: ftueSchema,
     monetization: monetizationSchema,
     lastWallClockMs: z.number().nonnegative(),
@@ -839,6 +843,7 @@ export const initialState = (
       largeText: false,
       soundLevel: "LOW",
     },
+    profile: { displayName: "Yeni Tüccar" },
     monetization: createDefaultMonetizationState(0),
     ftue: {
       stage: mode === "FTUE" ? "STARTING_SALE" : "COMPLETE",

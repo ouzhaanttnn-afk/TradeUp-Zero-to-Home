@@ -530,6 +530,15 @@ describe("accessibility preferences", () => {
 
     expect(playFeedbackSound).toHaveBeenCalledWith("WARNING", "NORMAL");
   });
+
+  it("normalizes and persists the player profile name", () => {
+    useGameStore.getState().setProfileName("  Pazar   Ustası  ");
+
+    expect(useGameStore.getState().game.profile.displayName).toBe(
+      "Pazar Ustası",
+    );
+    expect(useGameStore.getState().notice).toBe("Profil adı kaydedildi.");
+  });
 });
 
 describe("persistence recovery notice", () => {

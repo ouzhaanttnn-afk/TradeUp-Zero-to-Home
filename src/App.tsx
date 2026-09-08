@@ -236,6 +236,8 @@ export default function App() {
   const [comparing, setComparing] = useState(false);
   const [purchaseFeedback, setPurchaseFeedback] = useState("");
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsReturnTab, setSettingsReturnTab] = useState<Tab>("market");
+  const [profileDraft, setProfileDraft] = useState("");
   const [purchasesOpen, setPurchasesOpen] = useState(false);
   const [resetArmed, setResetArmed] = useState(false);
   const [quickSaleAssetId, setQuickSaleAssetId] = useState<string | null>(null);
@@ -245,6 +247,7 @@ export default function App() {
   const sheetCloseRef = useRef<HTMLButtonElement>(null);
   const comparisonRef = useRef<HTMLDivElement>(null);
   const homeFinaleButtonRef = useRef<HTMLButtonElement>(null);
+  const settingsCloseRef = useRef<HTMLButtonElement>(null);
   const previousHomeStageRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
@@ -293,6 +296,7 @@ export default function App() {
     setReducedMotion,
     setLargeText,
     setSoundLevel,
+    setProfileName,
     openPurchases,
     purchaseProduct,
     restorePurchases,
@@ -301,9 +305,41 @@ export default function App() {
     reset,
   } = useGameStore();
 
+  const openSettingsPanel = () => {
+    setSettingsReturnTab(tab);
+    setProfileDraft(game.profile.displayName);
+    setResetArmed(false);
+    setSettingsOpen(true);
+    setTab("journey");
+  };
+  const closeSettingsPanel = () => {
+    setSettingsOpen(false);
+    setPurchasesOpen(false);
+    setResetArmed(false);
+    setTab(settingsReturnTab);
+  };
+
   useEffect(() => {
     void hydrate();
   }, [hydrate]);
+  useEffect(() => {
+    if (!settingsOpen) return undefined;
+    const frame = requestAnimationFrame(() =>
+      settingsCloseRef.current?.focus(),
+    );
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setSettingsOpen(false);
+      setPurchasesOpen(false);
+      setResetArmed(false);
+      setTab(settingsReturnTab);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [settingsOpen, settingsReturnTab]);
   useEffect(() => {
     if (!ready || !sessionActive) return undefined;
     const timer = window.setInterval(tick, WORLD_CONFIG.activeTickMin * 60_000);
@@ -829,10 +865,31 @@ export default function App() {
       }
     >
       <header>
-        <div>
-          <span className="eyebrow">TRADEUP</span>
-          <h1>Zero to Home</h1>
+        <div className="brand-lockup">
+          <span className="brand-mark" aria-hidden="true">
+            ↑
+          </span>
+          <div>
+            <span className="eyebrow">TRADEUP</span>
+            <h1>Zero to Home</h1>
+          </div>
         </div>
+        <button
+          className="profile-settings-button"
+          aria-expanded={settingsOpen}
+          aria-label="Ayarlar"
+          onClick={openSettingsPanel}
+        >
+          <span className="profile-monogram" aria-hidden="true">
+            {game.profile.displayName
+              .split(/\s+/)
+              .slice(0, 2)
+              .map((part) => part[0])
+              .join("")
+              .toLocaleUpperCase("tr-TR")}
+          </span>
+          <Icon name="settings" />
+        </button>
       </header>
 
       <section className="wallet" aria-label="Finans özeti">
@@ -1558,18 +1615,92 @@ export default function App() {
                 <small>KİŞİSEL KAYIT</small>
                 <h2>Yolculuk</h2>
               </div>
-              <button
-                className="text-button"
-                onClick={() => {
-                  setSettingsOpen((open) => !open);
-                  setResetArmed(false);
-                }}
-              >
-                Ayarlar
-              </button>
             </div>
             {settingsOpen ? (
-              <section className="settings-card">
+              <section
+                className="settings-card"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="settings-title"
+              >
+                <div className="settings-sheet-heading">
+                  <div>
+                    <small>OYUNCU MERKEZİ</small>
+                    <h2 id="settings-title">Profil ve Ayarlar</h2>
+                  </div>
+                  <button
+                    ref={settingsCloseRef}
+                    className="icon-button"
+                    aria-label="Ayarları kapat"
+                    onClick={closeSettingsPanel}
+                  >
+                    <Icon name="close" />
+                  </button>
+                </div>
+                <form
+                  className="profile-card"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    setProfileName(profileDraft);
+                    setProfileDraft(
+                      profileDraft.trim().replace(/\s+/g, " ").slice(0, 20),
+                    );
+                  }}
+                >
+                  <span className="profile-avatar" aria-hidden="true">
+                    {(profileDraft || game.profile.displayName)
+                      .split(/\s+/)
+                      .slice(0, 2)
+                      .map((part) => part[0])
+                      .join("")
+                      .toLocaleUpperCase("tr-TR")}
+                  </span>
+                  <label>
+                    <span>Oyuncu adı</span>
+                    <input
+                      value={profileDraft}
+                      maxLength={20}
+                      autoComplete="nickname"
+                      onChange={(event) => setProfileDraft(event.target.value)}
+                    />
+                  </label>
+                  <button
+                    className="primary"
+                    disabled={
+                      !profileDraft.trim() ||
+                      profileDraft.trim().replace(/\s+/g, " ") ===
+                        game.profile.displayName
+                    }
+                    type="submit"
+                  >
+                    Kaydet
+                  </button>
+                  <div
+                    className="profile-stats"
+                    role="group"
+                    aria-label="Profil özeti"
+                  >
+                    <span>
+                      <small>Pazar seviyesi</small>
+                      <b>{marketLevel}</b>
+                    </span>
+                    <span>
+                      <small>Tamamlanan satış</small>
+                      <b>
+                        {
+                          game.transactionJournal.filter(
+                            (entry) => entry.kind === "SALE",
+                          ).length
+                        }
+                      </b>
+                    </span>
+                    <span>
+                      <small>Ev yolculuğu</small>
+                      <b>%{homeProgress}</b>
+                    </span>
+                  </div>
+                </form>
+                <h3 className="settings-group-title">Oyun deneyimi</h3>
                 <div>
                   <span>Dokunsal geri bildirim</span>
                   <button

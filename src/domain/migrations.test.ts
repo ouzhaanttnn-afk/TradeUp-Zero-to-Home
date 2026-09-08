@@ -4,6 +4,22 @@ import { reconcileJournal } from "./economy";
 import { migrateStateToCurrent } from "./migrations";
 
 describe("save migration", () => {
+  it("adds a future-ready player profile without changing v12 economy data", () => {
+    const current = initialState(500, "SANDBOX");
+    const v12: Record<string, unknown> = { ...current, version: 12 };
+    delete v12.profile;
+
+    const state = validateState(migrateStateToCurrent(v12));
+
+    expect(state.version).toBe(SAVE_VERSION);
+    expect(state.profile).toEqual({ displayName: "Yeni Tüccar" });
+    expect(state.transactionJournal).toEqual(current.transactionJournal);
+    expect(reconcileJournal(state)).toEqual({
+      cash: true,
+      activeBookCost: true,
+      realizedProfit: true,
+    });
+  });
   it("migrates v11 rights without resetting an earlier negotiated listing", () => {
     const state = initialState(0, "SANDBOX");
     const [first, second] = state.listings;

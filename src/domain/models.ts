@@ -395,6 +395,10 @@ export type AccessibilityPreferences = {
   soundLevel: "OFF" | "LOW" | "NORMAL";
 };
 
+export type PlayerProfile = {
+  displayName: string;
+};
+
 export type Negotiation = {
   listingId: ListingId;
   offersRemaining: 0 | 1 | 2;
@@ -440,6 +444,7 @@ export type GameState = {
   home: HomeState;
   analytics: AnalyticsState;
   accessibility: AccessibilityPreferences;
+  profile: PlayerProfile;
   monetization: MonetizationState;
   ftue: FtueState;
   lastWallClockMs: number;
