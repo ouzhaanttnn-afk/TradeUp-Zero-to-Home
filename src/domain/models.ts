@@ -187,10 +187,14 @@ export type BuyerOffer = {
   listingId: ListingId;
   amountMinor: number;
   buyer: string;
+  buyerType?: BuyerType;
   expiresAtGameMin: number;
   counterUsed?: boolean;
   initialAmountMinor?: number;
 };
+
+export type BuyerType =
+  "QUICK" | "QUALITY" | "NEGOTIATOR" | "COLLECTOR" | "RISK_AVERSE" | "BULK";
 
 export type TransactionKind =
   | "OPENING_BALANCE"

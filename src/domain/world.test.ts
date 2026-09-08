@@ -153,6 +153,7 @@ describe("deterministic market world", () => {
     expect(left).toEqual(right);
     expect(left.summary.buyerOffers).toBeGreaterThan(0);
     expect(left.state.buyerOffers.length).toBeLessThanOrEqual(1);
+    expect(left.state.buyerOffers[0]?.buyerType).toBeTruthy();
 
     const expiryState = structuredClone(listed.state);
     expiryState.playerListings[0].expiresAtGameMin = 1;

@@ -3,6 +3,7 @@ import { BUYER_TEMPO_CONFIG, WORLD_CONFIG } from "./config";
 import { netWorthMinor } from "./economy";
 import { completeDuePreparations } from "./preparation";
 import { recordMarketExits } from "./meta";
+import { BUYER_PERSONAS, eligibleBuyerTypes } from "./buyers";
 import type {
   BuyerOffer,
   GameState,
@@ -215,6 +216,16 @@ export const buyerOfferForMinute = (
       gameTimeMin * 524_287 +
       rollSalt,
   )();
+  const personaRoll = rng(
+    state.seed +
+      hashString(listing.id) * 16_381 +
+      gameTimeMin * 262_147 +
+      rollSalt,
+  )();
+  const eligibleTypes = eligibleBuyerTypes(state, asset);
+  const buyerType =
+    eligibleTypes[Math.floor(personaRoll * eligibleTypes.length)];
+  const persona = BUYER_PERSONAS[buyerType];
   const conditionFactor = 0.96 + (asset.instance.condition - 75) / 500;
   const demandFactor = 0.96 + asset.instance.family.demand * 0.06;
   const amountMinor =
@@ -222,15 +233,16 @@ export const buyerOfferForMinute = (
       (asset.instance.fairValueMinor *
         conditionFactor *
         demandFactor *
-        (0.94 + amountRoll * 0.1)) /
+        (0.94 + amountRoll * 0.1) *
+        persona.amountMultiplier) /
         1_000,
     ) * 1_000;
-  const buyers = ["Deniz", "Ece", "Mert", "Selin"] as const;
   return {
     id: `offer:${listing.id}:${gameTimeMin}`,
     listingId: listing.id,
     amountMinor,
-    buyer: buyers[Math.floor(amountRoll * buyers.length)],
+    buyer: persona.names[Math.floor(amountRoll * persona.names.length)],
+    buyerType,
     expiresAtGameMin: gameTimeMin + WORLD_CONFIG.buyerOfferLifetimeMin,
   };
 };

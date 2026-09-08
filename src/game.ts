@@ -219,6 +219,16 @@ const buyerOfferSchema = z.object({
   listingId: z.string(),
   amountMinor: z.number().int().nonnegative(),
   buyer: z.string(),
+  buyerType: z
+    .enum([
+      "QUICK",
+      "QUALITY",
+      "NEGOTIATOR",
+      "COLLECTOR",
+      "RISK_AVERSE",
+      "BULK",
+    ])
+    .optional(),
   expiresAtGameMin: z.number().int().nonnegative(),
   counterUsed: z.boolean().optional(),
   initialAmountMinor: z.number().int().nonnegative().optional(),

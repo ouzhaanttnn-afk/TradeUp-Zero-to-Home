@@ -26,6 +26,7 @@ import {
   listingEstimateBand,
 } from "./domain/decision";
 import { WORLD_CONFIG } from "./domain/config";
+import { buyerPersona } from "./domain/buyers";
 import { ftueCopy, ftueStageLabel, isFtueActive } from "./domain/ftue";
 import {
   categoryExpertiseLevel,
@@ -1608,6 +1609,7 @@ export default function App() {
                             const counterMinor = !buyerOffer.counterUsed
                               ? buyerCounterMinor(buyerOffer, playerListing)
                               : undefined;
+                            const persona = buyerPersona(buyerOffer.buyerType);
                             return (
                               <div
                                 className="buyer-offer"
@@ -1621,6 +1623,12 @@ export default function App() {
                                     ? "son fiyatını verdi"
                                     : "teklif verdi"}
                                 </h4>
+                                {persona ? (
+                                  <p className="buyer-persona">
+                                    <b>{persona.label}</b>
+                                    <span>{persona.tendency}</span>
+                                  </p>
+                                ) : null}
                                 <dl className="sale-breakdown">
                                   <div>
                                     <dt>Alacağın tutar</dt>

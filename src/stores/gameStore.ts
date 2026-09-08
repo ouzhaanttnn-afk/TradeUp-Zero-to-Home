@@ -222,6 +222,7 @@ const withBuyerOfferAnalytics = (previous: GameState, state: GameState) => {
             listingId: offer.listingId,
             amountMinor: offer.amountMinor,
             buyerTempoRevision: BUYER_TEMPO_CONFIG.revision,
+            buyerType: offer.buyerType ?? "SCRIPTED",
             scripted: offer.id.startsWith("offer:ftue-"),
             listingAgeAtOfferMin: Math.max(
               0,

@@ -11,6 +11,7 @@ import type {
 } from "./models";
 import { WORLD_CONFIG } from "./config";
 import { exitPricingBps } from "./valuation";
+import { buyerPersona } from "./buyers";
 
 type EconomyFailureReason =
   | "INSUFFICIENT_CASH"
@@ -606,7 +607,10 @@ export function counterBuyerOffer(
   }
 
   const roll = (state.seed + stableTextHash(offer.id)) % 100;
-  if (roll < 45) {
+  const persona = buyerPersona(offer.buyerType);
+  const acceptBelow = persona?.counterAcceptBelow ?? 45;
+  const finalBelow = persona?.counterFinalBelow ?? 80;
+  if (roll < acceptBelow) {
     const transactionId = `sale:buyer-counter:${offer.id}`;
     const settled = settleAssetSale(
       state,
@@ -625,7 +629,7 @@ export function counterBuyerOffer(
       transactionId,
     };
   }
-  if (roll < 80) {
+  if (roll < finalBelow) {
     const finalMinor = Math.max(
       offer.amountMinor + 1_000,
       Math.round(

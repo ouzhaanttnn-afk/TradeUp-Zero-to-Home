@@ -1335,6 +1335,19 @@ main {
   margin: 0 0 6px;
   font-size: calc(13px + var(--text-size-boost));
 }
+.buyer-persona {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 7px;
+  align-items: baseline;
+  margin: 0 0 7px !important;
+}
+.buyer-persona b {
+  color: #d8bf7b;
+}
+.buyer-persona span {
+  color: #8fa59a;
+}
 .sale-breakdown {
   margin: 0;
   display: grid;
