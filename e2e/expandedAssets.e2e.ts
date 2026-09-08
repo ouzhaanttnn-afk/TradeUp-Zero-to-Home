@@ -360,3 +360,70 @@ test("final expansion artwork loads without category fallbacks", async ({
       .toBe(true);
   }
 });
+
+test("upper-mid expansion artwork loads without category fallbacks", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const state = initialState(Date.now(), "SANDBOX");
+  const rows = [
+    ["air_compressor", "prd_air_compressor"],
+    ["thickness_planer", "prd_thickness_planer"],
+    ["inverter_welder", "prd_inverter_welder"],
+    ["motorized_treadmill", "prd_motorized_treadmill"],
+    ["analog_audio_mixer", "prd_analog_audio_mixer"],
+    ["digital_piano", "prd_digital_piano"],
+    ["acoustic_drum_kit", "prd_acoustic_drum_kit"],
+    ["studio_strobe_kit", "prd_studio_strobe_kit"],
+    ["laser_engraver", "prd_laser_engraver"],
+    ["table_saw", "prd_table_saw"],
+    ["portable_generator", "prd_portable_generator"],
+    ["pressure_washer", "prd_pressure_washer"],
+    ["prosumer_espresso", "prd_prosumer_espresso"],
+    ["massage_chair", "prd_massage_chair"],
+    ["pottery_wheel", "prd_pottery_wheel"],
+    ["vinyl_cutting_plotter", "prd_vinyl_cutting_plotter"],
+  ] as const;
+  const families = rows.map(([familyId]) => familyById(familyId));
+  if (families.some((family) => !family)) {
+    throw new Error("Upper-mid asset family is missing");
+  }
+  for (const [index, family] of families.entries()) {
+    if (!family) continue;
+    state.listings[index] = {
+      ...state.listings[index],
+      familyId: family.id,
+      instance: { ...state.listings[index].instance, family },
+    };
+  }
+
+  await page.goto("/");
+  await completeFirstLaunch(page);
+  await persistGame(page, validateState(state));
+  await page.reload();
+
+  for (const [, assetName] of rows) {
+    const card = page.locator(".market-card").filter({
+      has: page.locator(`img[src*="${assetName}"]`),
+    });
+    await expect(card).not.toHaveCount(0);
+    const visual = card.first().locator(".product-visual");
+    const image = visual.locator("img");
+    await expect(visual).not.toHaveClass(/product-visual--fallback/);
+    await expect(image).toHaveAttribute("src", new RegExp(assetName));
+    await expect
+      .poll(() =>
+        image.evaluate(
+          (element: HTMLImageElement) =>
+            element.complete && element.naturalWidth > 0,
+        ),
+      )
+      .toBe(true);
+  }
+
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+});

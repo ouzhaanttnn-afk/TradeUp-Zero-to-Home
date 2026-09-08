@@ -134,6 +134,22 @@ import woodenChessSet from "./assets/products/prd_wooden_chess_set.png";
 import mechanicalDeskClock from "./assets/products/prd_mechanical_desk_clock.png";
 import precisionToolSet from "./assets/products/prd_precision_tool_set.png";
 import brassCompass from "./assets/products/prd_brass_compass.png";
+import airCompressor from "./assets/products/prd_air_compressor.png";
+import thicknessPlaner from "./assets/products/prd_thickness_planer.png";
+import inverterWelder from "./assets/products/prd_inverter_welder.png";
+import motorizedTreadmill from "./assets/products/prd_motorized_treadmill.png";
+import analogAudioMixer from "./assets/products/prd_analog_audio_mixer.png";
+import digitalPiano from "./assets/products/prd_digital_piano.png";
+import acousticDrumKit from "./assets/products/prd_acoustic_drum_kit.png";
+import studioStrobeKit from "./assets/products/prd_studio_strobe_kit.png";
+import laserEngraver from "./assets/products/prd_laser_engraver.png";
+import tableSaw from "./assets/products/prd_table_saw.png";
+import portableGenerator from "./assets/products/prd_portable_generator.png";
+import pressureWasher from "./assets/products/prd_pressure_washer.png";
+import prosumerEspresso from "./assets/products/prd_prosumer_espresso.png";
+import massageChair from "./assets/products/prd_massage_chair.png";
+import potteryWheel from "./assets/products/prd_pottery_wheel.png";
+import vinylCuttingPlotter from "./assets/products/prd_vinyl_cutting_plotter.png";
 
 const dedicatedAssets: Record<string, string> = {
   prd_notebook: notebook,
@@ -270,6 +286,22 @@ const dedicatedAssets: Record<string, string> = {
   prd_mechanical_desk_clock: mechanicalDeskClock,
   prd_precision_tool_set: precisionToolSet,
   prd_brass_compass: brassCompass,
+  prd_air_compressor: airCompressor,
+  prd_thickness_planer: thicknessPlaner,
+  prd_inverter_welder: inverterWelder,
+  prd_motorized_treadmill: motorizedTreadmill,
+  prd_analog_audio_mixer: analogAudioMixer,
+  prd_digital_piano: digitalPiano,
+  prd_acoustic_drum_kit: acousticDrumKit,
+  prd_studio_strobe_kit: studioStrobeKit,
+  prd_laser_engraver: laserEngraver,
+  prd_table_saw: tableSaw,
+  prd_portable_generator: portableGenerator,
+  prd_pressure_washer: pressureWasher,
+  prd_prosumer_espresso: prosumerEspresso,
+  prd_massage_chair: massageChair,
+  prd_pottery_wheel: potteryWheel,
+  prd_vinyl_cutting_plotter: vinylCuttingPlotter,
 };
 
 const fallbackSvg = (category: string, symbol: string, color: string) =>

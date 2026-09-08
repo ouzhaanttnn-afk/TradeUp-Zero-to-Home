@@ -823,6 +823,102 @@
       "familyId": "brass_compass",
       "source": "../products/prd_brass_compass.png",
       "dedicated": true
+    },
+    {
+      "assetKey": "prd_air_compressor",
+      "familyId": "air_compressor",
+      "source": "../products/prd_air_compressor.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_thickness_planer",
+      "familyId": "thickness_planer",
+      "source": "../products/prd_thickness_planer.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_inverter_welder",
+      "familyId": "inverter_welder",
+      "source": "../products/prd_inverter_welder.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_motorized_treadmill",
+      "familyId": "motorized_treadmill",
+      "source": "../products/prd_motorized_treadmill.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_analog_audio_mixer",
+      "familyId": "analog_audio_mixer",
+      "source": "../products/prd_analog_audio_mixer.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_digital_piano",
+      "familyId": "digital_piano",
+      "source": "../products/prd_digital_piano.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_acoustic_drum_kit",
+      "familyId": "acoustic_drum_kit",
+      "source": "../products/prd_acoustic_drum_kit.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_studio_strobe_kit",
+      "familyId": "studio_strobe_kit",
+      "source": "../products/prd_studio_strobe_kit.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_laser_engraver",
+      "familyId": "laser_engraver",
+      "source": "../products/prd_laser_engraver.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_table_saw",
+      "familyId": "table_saw",
+      "source": "../products/prd_table_saw.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_portable_generator",
+      "familyId": "portable_generator",
+      "source": "../products/prd_portable_generator.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_pressure_washer",
+      "familyId": "pressure_washer",
+      "source": "../products/prd_pressure_washer.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_prosumer_espresso",
+      "familyId": "prosumer_espresso",
+      "source": "../products/prd_prosumer_espresso.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_massage_chair",
+      "familyId": "massage_chair",
+      "source": "../products/prd_massage_chair.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_pottery_wheel",
+      "familyId": "pottery_wheel",
+      "source": "../products/prd_pottery_wheel.png",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_vinyl_cutting_plotter",
+      "familyId": "vinyl_cutting_plotter",
+      "source": "../products/prd_vinyl_cutting_plotter.png",
+      "dedicated": true
     }
   ],
   "overlays": [

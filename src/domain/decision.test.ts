@@ -4,6 +4,7 @@ import {
   heroFamilies,
   mediumBudgetFamilies,
   starterExpansionFamilies,
+  upperMidFamilies,
   vehicleFamilies,
 } from "../content/families";
 import {
@@ -106,7 +107,7 @@ describe("decision vertical slice", () => {
   });
 
   it("adds 32 more starter and mid-tier products with bounded prices", () => {
-    expect(families).toHaveLength(137);
+    expect(families).toHaveLength(153);
     expect(starterExpansionFamilies).toHaveLength(32);
     expect(
       new Set(starterExpansionFamilies.map((family) => family.id)).size,
@@ -121,6 +122,19 @@ describe("decision vertical slice", () => {
       expect(family.baseValueMinor).toBeGreaterThanOrEqual(45_000);
       expect(family.baseValueMinor).toBeLessThanOrEqual(850_000);
       expect([0, 1, 2]).toContain(family.tier);
+    }
+  });
+
+  it("adds 16 upper-mid products only at tier three", () => {
+    expect(upperMidFamilies).toHaveLength(16);
+    expect(new Set(upperMidFamilies.map((family) => family.id)).size).toBe(16);
+    expect(
+      new Set(upperMidFamilies.map((family) => family.assetKey)).size,
+    ).toBe(16);
+    for (const family of upperMidFamilies) {
+      expect(family.baseValueMinor).toBeGreaterThanOrEqual(1_850_000);
+      expect(family.baseValueMinor).toBeLessThanOrEqual(5_800_000);
+      expect(family.tier).toBe(3);
     }
   });
 
