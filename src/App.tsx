@@ -11,9 +11,7 @@ import {
 import { App as CapacitorApp } from "@capacitor/app";
 import "./App.css";
 import { assetFor, fallbackAssetFor } from "./assets";
-import { familyById } from "./content/families";
 import {
-  activeBookCostMinor,
   activeOwnedAssets,
   activePlayerListings,
   buyerCounterMinor,
@@ -32,12 +30,7 @@ import { WORLD_CONFIG } from "./domain/config";
 import { buyerPersona } from "./domain/buyers";
 import { activeMarketEvent } from "./domain/marketEvents";
 import { ftueCopy, ftueStageLabel, isFtueActive } from "./domain/ftue";
-import {
-  categoryExpertiseLevel,
-  marketExpertiseLevel,
-  nextExpertiseThreshold,
-  savedSearchMatches,
-} from "./domain/meta";
+import { categoryExpertiseLevel, marketExpertiseLevel } from "./domain/meta";
 import {
   getRewardEligibility,
   hasPremiumEntitlement,
@@ -54,16 +47,7 @@ import {
 import { useGameStore } from "./stores/gameStore";
 import { Icon, type IconName } from "./ui/Icon";
 import { evidencePresentation } from "./ui/evidencePresentation";
-import { missedOpportunityPresentation } from "./ui/followPresentation";
-import {
-  careerEventPresentation,
-  completedSalesPresentation,
-  timelineFilterLabel,
-  type TimelineFilter,
-} from "./ui/journeyPresentation";
 import { ownershipPresentation } from "./ui/ownershipPresentation";
-import { simplifyLegacyPlayerCopy } from "./ui/playerLanguage";
-import { saleHistoryCopy } from "./ui/saleHistory";
 import { latestSaleResult } from "./ui/saleResult";
 import { formatEstimate, wealthPresentation } from "./ui/wealthPresentation";
 import {
@@ -89,11 +73,17 @@ import { homeAtmosphereStage, homeGoldPercent } from "./ui/homeAtmosphere";
 import { marketScanRefillStatus, shortDuration } from "./ui/marketScan";
 import { recoveryPlan } from "./ui/recoveryPlan";
 import { ProductVisual } from "./ui/ProductVisual";
-import { MarketListingCard } from "./ui/MarketListingCard";
 import { AvatarPortrait } from "./ui/AvatarPortrait";
+import ProfileOnboarding from "./ui/ProfileOnboarding";
+import { MarketListingCard } from "./ui/MarketListingCard";
 
-const SettingsPanel = lazy(() => import("./ui/SettingsPanel"));
-const ProfileOnboarding = lazy(() => import("./ui/ProfileOnboarding"));
+const loadSettingsPanel = () => import("./ui/SettingsPanel");
+const loadFollowPanel = () => import("./ui/FollowPanel");
+const loadJourneyPanel = () => import("./ui/JourneyPanel");
+const SettingsPanel = lazy(loadSettingsPanel);
+const HomeFinale = lazy(() => import("./ui/HomeFinale"));
+const FollowPanel = lazy(loadFollowPanel);
+const JourneyPanel = lazy(loadJourneyPanel);
 
 type Tab = "market" | "follow" | "portfolio" | "journey";
 type PortfolioSegment = "inventory" | "preparation" | "listings";
@@ -166,7 +156,6 @@ export default function App() {
   const [tab, setTab] = useState<Tab>("market");
   const [portfolioSegment, setPortfolioSegment] =
     useState<PortfolioSegment>("inventory");
-  const [timelineFilter, setTimelineFilter] = useState<TimelineFilter>("ALL");
   const [marketCategory, setMarketCategory] = useState(ALL_MARKET_CATEGORIES);
   const [marketSort, setMarketSort] = useState<MarketSort>("MARKET");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -396,9 +385,6 @@ export default function App() {
     0,
   );
   const latestSale = latestSaleResult(game);
-  const watchedListings = marketListings.filter((listing) =>
-    game.follow.watchedListingIds.includes(listing.id),
-  );
   const negotiating = selected
     ? (game.negotiations[selected.id] ??
       (game.negotiation?.listingId === selected.id
@@ -440,7 +426,6 @@ export default function App() {
         )
       : undefined;
   const marketLevel = marketExpertiseLevel(game);
-  const marketXpTarget = nextExpertiseThreshold(game.expertise.marketXp);
   const estimates = wealthPresentation(game);
   const recovery = ftueActive ? null : recoveryPlan(game);
   const homeProgress = game.home.purchased
@@ -474,30 +459,18 @@ export default function App() {
         .filter((event) => event !== undefined),
     [game.career],
   );
-  const timeline = useMemo(
-    () =>
-      game.career
-        .filter(
-          (event) => timelineFilter === "ALL" || event.group === timelineFilter,
-        )
-        .toReversed(),
-    [game.career, timelineFilter],
-  );
-  const completedSales = completedSalesPresentation(game.realizedProfitMinor);
 
   if (!ready) return <StartupSkeleton />;
 
   if (!game.profile.onboardingComplete) {
     return (
-      <Suspense fallback={<StartupSkeleton />}>
-        <ProfileOnboarding
-          game={game}
-          monetizationBusy={monetizationBusy}
-          notice={notice}
-          onComplete={completeProfileOnboarding}
-          onRestorePurchases={restorePurchases}
-        />
-      </Suspense>
+      <ProfileOnboarding
+        game={game}
+        monetizationBusy={monetizationBusy}
+        notice={notice}
+        onComplete={completeProfileOnboarding}
+        onRestorePurchases={restorePurchases}
+      />
     );
   }
 
@@ -933,6 +906,8 @@ export default function App() {
             className="profile-settings-button"
             aria-expanded={settingsOpen}
             aria-label="Ayarlar"
+            onPointerEnter={() => void loadSettingsPanel()}
+            onFocus={() => void loadSettingsPanel()}
             onClick={openSettingsPanel}
           >
             <AvatarPortrait
@@ -1180,194 +1155,46 @@ export default function App() {
                   </div>
                 </article>
               ) : null}
-              {visibleMarketListings.map((item, index) => {
-                const categoryLevel = categoryExpertiseLevel(
-                  game,
-                  item.instance.family.category,
-                );
-                const itemSignal = signal(item, categoryLevel);
-                const risk = npcRiskSignal(item, game.gameTimeMin);
-                const watched = game.follow.watchedListingIds.includes(item.id);
-                return (
-                  <MarketListingCard
-                    key={item.id}
-                    item={item}
-                    categoryLevel={categoryLevel}
-                    itemSignal={itemSignal}
-                    risk={risk}
-                    watched={watched}
-                    gameTimeMin={game.gameTimeMin}
-                    priority={index < 6}
-                    onSelect={() => selectListing(item.id)}
-                  />
-                );
-              })}
+              <Suspense fallback={<p role="status">İlanlar hazırlanıyor…</p>}>
+                {visibleMarketListings.map((item, index) => {
+                  const categoryLevel = categoryExpertiseLevel(
+                    game,
+                    item.instance.family.category,
+                  );
+                  const itemSignal = signal(item, categoryLevel);
+                  const risk = npcRiskSignal(item, game.gameTimeMin);
+                  const watched = game.follow.watchedListingIds.includes(
+                    item.id,
+                  );
+                  return (
+                    <MarketListingCard
+                      key={item.id}
+                      item={item}
+                      categoryLevel={categoryLevel}
+                      itemSignal={itemSignal}
+                      risk={risk}
+                      watched={watched}
+                      gameTimeMin={game.gameTimeMin}
+                      priority={index < 6}
+                      onSelect={() => selectListing(item.id)}
+                    />
+                  );
+                })}
+              </Suspense>
             </div>
           </>
         ) : null}
-
         {tab === "follow" ? (
-          <>
-            <div className="section-title">
-              <div>
-                <small>GERİ DÖNÜŞ NOKTAN</small>
-                <h2>Takip</h2>
-              </div>
-              <span>{watchedListings.length} canlı</span>
-            </div>
-            {!watchedListings.length &&
-            !game.follow.savedSearches.length &&
-            !game.follow.missedOpportunities.length ? (
-              <div className="empty">
-                <span className="empty-icon">
-                  <Icon name="follow" />
-                </span>
-                <h3>Henüz takip yok</h3>
-                <p>
-                  Bir ilanı takip et. Pazar deneyimin Seviye 3 olduğunda ürün
-                  alarmı da kurabilirsin.
-                </p>
-                <button onClick={() => navigate("market")}>
-                  Pazardan ürün seç
-                </button>
-              </div>
-            ) : null}
-            {watchedListings.length ? (
-              <h3 className="module-title">İzleme listesi</h3>
-            ) : null}
-            <div className="feed compact-feed">
-              {watchedListings.map((item) => (
-                <button
-                  className="listing watch-listing"
-                  key={item.id}
-                  onClick={() => selectListing(item.id)}
-                  aria-label={`${item.instance.family.name}, fiyat ${money(item.priceMinor)}, yüzde ${item.instance.condition} kondisyon. Takip edilen ilanı aç`}
-                >
-                  <ProductVisual
-                    instance={item.instance}
-                    className="product-art"
-                  />
-                  <div className="listing-copy">
-                    <small>CANLI · %{item.instance.condition} kondisyon</small>
-                    <h3>{item.instance.family.name}</h3>
-                    <span className="subtle">
-                      {npcRiskSignal(item, game.gameTimeMin).text}
-                    </span>
-                  </div>
-                  <div className="price">
-                    <strong>{money(item.priceMinor)}</strong>
-                    <small>incele</small>
-                  </div>
-                </button>
-              ))}
-            </div>
-            {game.follow.savedSearches.length ? (
-              <h3 className="module-title">Ürün alarmları</h3>
-            ) : null}
-            <div className="follow-stack">
-              {game.follow.savedSearches.map((search) => {
-                const family = familyById(search.familyId);
-                const matches = marketListings.filter((listing) =>
-                  savedSearchMatches(search, listing),
-                );
-                return (
-                  <article className="follow-card" key={search.id}>
-                    <div className="follow-card-heading">
-                      <div>
-                        <small>ÜRÜN ALARMI</small>
-                        <h3>{family?.name ?? "Bilinmeyen ürün grubu"}</h3>
-                      </div>
-                      <span
-                        className={`match-count${matches.length ? " has-matches" : ""}`}
-                      >
-                        {matches.length
-                          ? `${matches.length} eşleşme`
-                          : "Bekliyor"}
-                      </span>
-                    </div>
-                    <div className="alarm-criteria">
-                      <span>
-                        <small>En yüksek fiyat</small>
-                        <b>{money(search.maxPriceMinor)}</b>
-                      </span>
-                      <span>
-                        <small>En düşük kondisyon</small>
-                        <b>%{search.minCondition}</b>
-                      </span>
-                      <span>
-                        <small>Bilgi kontrolü</small>
-                        <b>
-                          {search.evidencePreference === "CHECKED"
-                            ? "Gerekli"
-                            : "Fark etmez"}
-                        </b>
-                      </span>
-                    </div>
-                    <div className="inline-actions">
-                      {matches[0] ? (
-                        <button
-                          className="primary"
-                          onClick={() => selectListing(matches[0].id)}
-                        >
-                          Eşleşmeyi aç
-                        </button>
-                      ) : null}
-                      <button
-                        className="text-button"
-                        onClick={() => removeSearch(search.id)}
-                      >
-                        Kaldır
-                      </button>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-            {game.follow.missedOpportunities.length ? (
-              <h3 className="module-title">Kaçan fırsatlar</h3>
-            ) : null}
-            <div className="follow-stack">
-              {game.follow.missedOpportunities.toReversed().map((missed) => {
-                const similar = marketListings.find(
-                  (listing) => listing.familyId === missed.familyId,
-                );
-                const missedState = missedOpportunityPresentation(
-                  missed.reason,
-                  game.gameTimeMin,
-                  missed.atGameMin,
-                );
-                return (
-                  <article className="follow-card missed" key={missed.id}>
-                    <div className="missed-meta">
-                      <small className={`missed-reason ${missedState.tone}`}>
-                        {missedState.label}
-                      </small>
-                      <span className="missed-age">{missedState.ageLabel}</span>
-                    </div>
-                    <div>
-                      <h3>{missed.familyName}</h3>
-                      <p>
-                        {money(missed.priceMinor)} · %{missed.condition}{" "}
-                        kondisyon. Fırsat kapandı; benzer ilanları aramaya devam
-                        edebilirsin.
-                      </p>
-                    </div>
-                    {similar ? (
-                      <button onClick={() => selectListing(similar.id)}>
-                        Benzerini gör
-                      </button>
-                    ) : (
-                      <button onClick={() => navigate("market")}>
-                        Pazara dön
-                      </button>
-                    )}
-                  </article>
-                );
-              })}
-            </div>
-          </>
+          <Suspense fallback={<p role="status">Takip listesi hazırlanıyor…</p>}>
+            <FollowPanel
+              game={game}
+              marketListings={marketListings}
+              onSelectListing={selectListing}
+              onOpenMarket={() => navigate("market")}
+              onRemoveSearch={removeSearch}
+            />
+          </Suspense>
         ) : null}
-
         {tab === "portfolio" ? (
           <>
             <div className="section-title">
@@ -1756,274 +1583,36 @@ export default function App() {
             ) : null}
           </>
         ) : null}
-
         {tab === "journey" ? (
-          <>
-            {!settingsOpen ? (
-              <div className="section-title">
-                <div>
-                  <small>KİŞİSEL KAYIT</small>
-                  <h2>Yolculuk</h2>
-                </div>
-              </div>
-            ) : null}
-            {settingsOpen ? (
-              <Suspense
-                fallback={
-                  <section className="settings-card" role="status">
-                    <div className="settings-sheet-heading">
-                      <div>
-                        <small>HESABIM</small>
-                        <h2>Profil ve Ayarlar</h2>
-                      </div>
+          settingsOpen ? (
+            <Suspense
+              fallback={
+                <section className="settings-card" role="status">
+                  <div className="settings-sheet-heading">
+                    <div>
+                      <small>HESABIM</small>
+                      <h2>Profil ve Ayarlar</h2>
                     </div>
-                    <p className="settings-loading">Ayarlar hazırlanıyor…</p>
-                  </section>
-                }
-              >
-                <SettingsPanel onClose={closeSettingsPanel} />
-              </Suspense>
-            ) : null}
-            {!settingsOpen ? (
-              <>
-                <section
-                  className={`score-card journey-score ${completedSales.tone}`}
-                >
-                  <div className="journey-score-heading">
-                    <small>{completedSales.label}</small>
-                    <span>Gerçekleşen sonuç</span>
                   </div>
-                  <strong
-                    className={game.realizedProfitMinor < 0 ? "loss" : ""}
-                  >
-                    {money(game.realizedProfitMinor)}
-                  </strong>
-                  <p>
-                    Bu tutar yalnız tamamlanan satışlardan gelir; elindeki
-                    ürünlerin tahmini değeri aşağıda ayrı gösterilir.
-                  </p>
+                  <p className="settings-loading">Ayarlar hazırlanıyor…</p>
                 </section>
-                <div className="journey-block-heading">
-                  <div>
-                    <small>PARAN VE ÜRÜNLERİN</small>
-                    <h3>Bugünkü durum</h3>
-                  </div>
-                  <span>{activeOwnedAssets(game).length} ürün</span>
-                </div>
-                <div className="metric-grid journey-metrics">
-                  <div>
-                    <span>Nakit</span>
-                    <b>{money(game.cashMinor)}</b>
-                  </div>
-                  <div>
-                    <span>Toplam tahmini değer</span>
-                    <b>{formatEstimate(estimates.total)}</b>
-                  </div>
-                  <div>
-                    <span>Ürünlerin tahmini değeri</span>
-                    <b>{formatEstimate(estimates.portfolio)}</b>
-                  </div>
-                  <div>
-                    <span>Ürünlere harcanan toplam</span>
-                    <b>{money(activeBookCostMinor(game))}</b>
-                  </div>
-                  <div>
-                    <span>Ürünlerdeki tahmini fark</span>
-                    <b
-                      className={
-                        estimates.difference.highMinor < 0 ? "loss" : ""
-                      }
-                    >
-                      {formatEstimate(estimates.difference, true)}
-                    </b>
-                  </div>
-                  <div>
-                    <span>Toplam değerin nakit kısmı</span>
-                    <b>
-                      %{estimates.cashShare.low}–%{estimates.cashShare.high}
-                    </b>
-                  </div>
-                </div>
-                <section className="expertise-card">
-                  <div className="expertise-heading">
-                    <div>
-                      <small>PAZAR DENEYİMİ</small>
-                      <h3>Seviye {marketLevel}</h3>
-                    </div>
-                    <span>
-                      {game.expertise.marketXp} / {marketXpTarget} deneyim
-                    </span>
-                  </div>
-                  <div className="xp-bar">
-                    <i
-                      style={{
-                        width: `${Math.min(
-                          100,
-                          (game.expertise.marketXp / marketXpTarget) * 100,
-                        )}%`,
-                      }}
-                    />
-                  </div>
-                  <p>
-                    {marketLevel < 3
-                      ? "Seviye 3: ürün alarmları ve fiyat eğilimi"
-                      : marketLevel < 6
-                        ? "Seviye 6: bilgi güveni ve kusur ihtimali"
-                        : "Bilgi araçların kararını netleştirir; fiyat bonusu vermez."}
-                  </p>
-                  <div className="category-levels">
-                    {Object.entries(game.expertise.categoryXp)
-                      .sort((left, right) => right[1] - left[1])
-                      .map(([category, xp]) => (
-                        <span key={category}>
-                          {category} · Seviye{" "}
-                          {categoryExpertiseLevel(game, category)}{" "}
-                          <small>{xp} deneyim</small>
-                        </span>
-                      ))}
-                  </div>
-                </section>
-                {game.home.unlocked ? (
-                  <section className="home-card">
-                    <div className="home-silhouette" aria-hidden="true">
-                      <span>
-                        <Icon name="home" />
-                      </span>
-                    </div>
-                    <div>
-                      <small>EV YOLCULUĞU · %{homeProgress}</small>
-                      <h3>
-                        {game.home.purchased
-                          ? "Evin artık senin"
-                          : "Kendi alanına giden yol"}
-                      </h3>
-                      <p>
-                        {game.home.purchased
-                          ? "Hedef tamamlandı; pazar ve kariyerin açık kalmaya devam ediyor."
-                          : homeProgress < 50
-                            ? "İlk kârlı satışınla hedef görünür oldu."
-                            : `Kalan tahmini mesafe ${formatEstimate({
-                                lowMinor: Math.max(
-                                  0,
-                                  HOME_GOAL_MINOR - estimates.total.highMinor,
-                                ),
-                                highMinor: Math.max(
-                                  0,
-                                  HOME_GOAL_MINOR - estimates.total.lowMinor,
-                                ),
-                              })}. Ev alımı için hedefte nakit gerekecek.`}
-                      </p>
-                      <div className="xp-bar">
-                        <i style={{ width: `${homeProgress}%` }} />
-                      </div>
-                      {!game.home.purchased &&
-                      game.cashMinor >= HOME_GOAL_MINOR ? (
-                        <button
-                          className="home-purchase-button"
-                          onClick={() => {
-                            if (buyHome()) setHomeFinaleOpen(true);
-                          }}
-                        >
-                          Evi satın al · {money(HOME_GOAL_MINOR)}
-                        </button>
-                      ) : null}
-                      {!game.home.purchased &&
-                      homeProgress >= 100 &&
-                      game.cashMinor < HOME_GOAL_MINOR ? (
-                        <div className="home-cash-plan">
-                          <span>
-                            Nakit eksiği{" "}
-                            {money(HOME_GOAL_MINOR - game.cashMinor)}. Ürünlerin
-                            otomatik satılmaz.
-                          </span>
-                          <button onClick={() => navigate("portfolio")}>
-                            Portföyü aç
-                          </button>
-                        </div>
-                      ) : null}
-                    </div>
-                  </section>
-                ) : (
-                  <section className="locked-home">
-                    <span>
-                      <Icon name="home" />
-                    </span>
-                    <div>
-                      <small>UZUN DÖNEM HEDEFİ</small>
-                      <h3>Ev yolculuğu henüz görünmedi</h3>
-                      <p>
-                        Temel döngüyü öğrenip ilk kârlı satışını tamamladığında
-                        açılır.
-                      </p>
-                    </div>
-                  </section>
-                )}
-                <div className="timeline-header">
-                  <div>
-                    <small>KİŞİSEL KAYITLARIN</small>
-                    <h3>Kariyer hikâyen</h3>
-                  </div>
-                  <span>{game.career.length} önemli an</span>
-                </div>
-                <div className="chips timeline-filters">
-                  {(
-                    ["ALL", "FIRSTS", "RECORDS", "MILESTONES", "HOME"] as const
-                  ).map((filter) => (
-                    <button
-                      className={timelineFilter === filter ? "active" : ""}
-                      key={filter}
-                      onClick={() => setTimelineFilter(filter)}
-                    >
-                      {timelineFilterLabel(filter)}
-                    </button>
-                  ))}
-                </div>
-                {!timeline.length ? (
-                  <div className="empty compact-empty">
-                    <h3>Bu grupta olay yok</h3>
-                    <p>
-                      Anlamlı ilkler, rekorlar ve eşikler gerçek işlemlerinden
-                      doğar.
-                    </p>
-                  </div>
-                ) : null}
-                <div className="timeline">
-                  {timeline.map((event) => {
-                    const eventState = careerEventPresentation(
-                      event.group,
-                      game.gameTimeMin,
-                      event.atGameMin,
-                    );
-                    const saleCopy = saleHistoryCopy(event);
-                    return (
-                      <article
-                        className={`timeline-event ${eventState.tone}`}
-                        key={event.id}
-                      >
-                        <div className="timeline-rail" aria-hidden="true">
-                          <span className="timeline-dot" />
-                        </div>
-                        <div className="timeline-event-copy">
-                          <div className="timeline-meta">
-                            <small className="timeline-kind">
-                              {eventState.label}
-                            </small>
-                            <span>{eventState.ageLabel}</span>
-                          </div>
-                          <b>{simplifyLegacyPlayerCopy(event.label)}</b>
-                          {saleCopy ? <p>{saleCopy}</p> : null}
-                        </div>
-                        {event.amountMinor !== undefined ? (
-                          <em>{money(event.amountMinor)}</em>
-                        ) : null}
-                      </article>
-                    );
-                  })}
-                </div>
-              </>
-            ) : null}
-          </>
-        ) : null}
+              }
+            >
+              <SettingsPanel onClose={closeSettingsPanel} />
+            </Suspense>
+          ) : (
+            <Suspense fallback={<p role="status">Yolculuk hazırlanıyor…</p>}>
+              <JourneyPanel
+                game={game}
+                homeProgress={homeProgress}
+                onBuyHome={() => {
+                  if (buyHome()) setHomeFinaleOpen(true);
+                }}
+                onOpenPortfolio={() => navigate("portfolio")}
+              />
+            </Suspense>
+          )
+        ) : null}{" "}
       </main>
 
       {!settingsOpen ? (
@@ -2039,6 +1628,20 @@ export default function App() {
             <button
               className={tab === item ? "active" : ""}
               key={item}
+              onPointerEnter={
+                item === "follow"
+                  ? () => void loadFollowPanel()
+                  : item === "journey"
+                    ? () => void loadJourneyPanel()
+                    : undefined
+              }
+              onFocus={
+                item === "follow"
+                  ? () => void loadFollowPanel()
+                  : item === "journey"
+                    ? () => void loadJourneyPanel()
+                    : undefined
+              }
               onClick={() => navigate(item)}
               aria-label={label}
               aria-describedby={
@@ -2068,43 +1671,13 @@ export default function App() {
       ) : null}
 
       {homeFinaleOpen ? (
-        <section
-          className="home-finale"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="home-finale-title"
-        >
-          <div className="home-finale-glow" aria-hidden="true" />
-          <div className="home-finale-house" aria-hidden="true">
-            <Icon name="home" />
-          </div>
-          <small>ZERO TO HOME</small>
-          <h2 id="home-finale-title">Anahtar artık sende.</h2>
-          <p>
-            Sıfırdan başladın. Aldın, hazırladın, sattın ve kendi evine ulaştın.
-          </p>
-          {finaleHighlights.length ? (
-            <div
-              className="home-finale-highlights"
-              aria-label="Yolculuğundan anlar"
-            >
-              {finaleHighlights.map((event) => (
-                <span key={event.id}>
-                  <b>{simplifyLegacyPlayerCopy(event.label)}</b>
-                  {event.amountMinor !== undefined
-                    ? money(event.amountMinor)
-                    : null}
-                </span>
-              ))}
-            </div>
-          ) : null}
-          <button
-            ref={homeFinaleButtonRef}
-            onClick={() => setHomeFinaleOpen(false)}
-          >
-            Yolculuğa devam et
-          </button>
-        </section>
+        <Suspense fallback={null}>
+          <HomeFinale
+            highlights={finaleHighlights}
+            buttonRef={homeFinaleButtonRef}
+            onClose={() => setHomeFinaleOpen(false)}
+          />
+        </Suspense>
       ) : null}
 
       {selected ? (
