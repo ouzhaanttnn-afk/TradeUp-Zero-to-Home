@@ -1,4 +1,7 @@
 import {
+  lazy,
+  Suspense,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -9,7 +12,7 @@ import { App as CapacitorApp } from "@capacitor/app";
 import "./App.css";
 import { assetFor, fallbackAssetFor } from "./assets";
 import { familyById } from "./content/families";
-import { avatarById, avatars, freeAvatars } from "./content/avatars";
+import { avatars, freeAvatars } from "./content/avatars";
 import {
   activeBookCostMinor,
   activeOwnedAssets,
@@ -40,11 +43,7 @@ import {
   getRewardEligibility,
   hasPremiumEntitlement,
 } from "./domain/monetization";
-import type {
-  AccessibilityPreferences,
-  AvatarId,
-  MonetizationProductId,
-} from "./domain/models";
+import type { AvatarId } from "./domain/models";
 import { activeMarketListings, npcRiskSignal } from "./domain/world";
 import {
   HOME_GOAL_MINOR,
@@ -94,24 +93,15 @@ import { recoveryPlan } from "./ui/recoveryPlan";
 import { ownsAnimatedAvatars as hasAnimatedAvatars } from "./domain/profile";
 import { ProductVisual } from "./ui/ProductVisual";
 import { MarketListingCard } from "./ui/MarketListingCard";
+import { AvatarPortrait } from "./ui/AvatarPortrait";
+
+const SettingsPanel = lazy(() => import("./ui/SettingsPanel"));
 
 type Tab = "market" | "follow" | "portfolio" | "journey";
 type PortfolioSegment = "inventory" | "preparation" | "listings";
 
 const evidenceLabel = (confidence: number) =>
   confidence >= 0.72 ? "Yüksek" : confidence >= 0.46 ? "Orta" : "Düşük";
-
-type SoundLevel = AccessibilityPreferences["soundLevel"];
-const soundLevelLabel: Record<SoundLevel, string> = {
-  OFF: "Kapalı",
-  LOW: "Düşük",
-  NORMAL: "Normal",
-};
-const nextSoundLevel: Record<SoundLevel, SoundLevel> = {
-  OFF: "LOW",
-  LOW: "NORMAL",
-  NORMAL: "OFF",
-};
 
 const offerModeOptions: Array<{
   mode: PlayerOfferMode;
@@ -155,32 +145,6 @@ export function StartupSkeleton() {
   );
 }
 
-const storeCopy: Record<
-  MonetizationProductId,
-  { title: string; detail: string }
-> = {
-  tradeup_premium_lifetime: {
-    title: "TradeUp Premium",
-    detail: "Uygun hızlandırmaları video izlemeden kullan; limitler değişmez.",
-  },
-  tradeup_theme_night_market: {
-    title: "Gece Pazarı teması",
-    detail: "Yalnız arayüz görünümünü kişiselleştirir.",
-  },
-  tradeup_theme_workshop: {
-    title: "Endüstriyel Atölye teması",
-    detail: "Yalnız arayüz görünümünü kişiselleştirir.",
-  },
-  tradeup_home_styles_01: {
-    title: "Ev stilleri paketi",
-    detail: "Ev finali için üç görsel stil; ilerlemeye para eklemez.",
-  },
-  tradeup_animated_avatars_01: {
-    title: "Canlı avatar koleksiyonu",
-    detail: "Üç hareketli profil görünümü; yalnız kozmetiktir.",
-  },
-};
-
 const rewardCopy = {
   MARKET_SCOUT: {
     ad: "25 tarama hakkı · Video",
@@ -200,33 +164,6 @@ const rewardCopy = {
   },
 } as const;
 
-function AvatarPortrait({
-  avatarId,
-  className = "",
-}: {
-  avatarId: AvatarId;
-  className?: string;
-}) {
-  const avatar = avatarById(avatarId);
-  return (
-    <span
-      className={`avatar-portrait avatar-motion--${avatar.motion} ${className}`.trim()}
-      aria-hidden="true"
-    >
-      <span className="avatar-aura" />
-      <b className="avatar-fallback">{avatar.name.slice(0, 1)}</b>
-      <img
-        src={avatar.image}
-        alt=""
-        draggable={false}
-        onError={(event) => {
-          event.currentTarget.hidden = true;
-        }}
-      />
-    </span>
-  );
-}
-
 export default function App() {
   const [tab, setTab] = useState<Tab>("market");
   const [portfolioSegment, setPortfolioSegment] =
@@ -242,13 +179,10 @@ export default function App() {
     useState<PlayerOfferMode>("BALANCED");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsReturnTab, setSettingsReturnTab] = useState<Tab>("market");
-  const [profileDraft, setProfileDraft] = useState("");
   const [onboardingName, setOnboardingName] = useState("");
   const [avatarDraft, setAvatarDraft] = useState<AvatarId>("pazar-kasifi");
   const [onboardingRestoreRequested, setOnboardingRestoreRequested] =
     useState(false);
-  const [purchasesOpen, setPurchasesOpen] = useState(false);
-  const [resetArmed, setResetArmed] = useState(false);
   const [quickSaleAssetId, setQuickSaleAssetId] = useState<string | null>(null);
   const [manualListingAssetId, setManualListingAssetId] = useState<
     string | null
@@ -265,7 +199,6 @@ export default function App() {
   const sheetCloseRef = useRef<HTMLButtonElement>(null);
   const comparisonRef = useRef<HTMLDivElement>(null);
   const homeFinaleButtonRef = useRef<HTMLButtonElement>(null);
-  const settingsCloseRef = useRef<HTMLButtonElement>(null);
   const previousHomeStageRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
@@ -283,7 +216,6 @@ export default function App() {
     ready,
     sessionActive,
     notice,
-    storeProducts,
     monetizationBusy,
     hydrate,
     pause,
@@ -311,57 +243,24 @@ export default function App() {
     removeSearch,
     recordImpressions,
     openJourney,
-    setAnalytics,
-    setHaptics,
-    setReducedMotion,
-    setLargeText,
-    setSoundLevel,
-    setProfileName,
-    setProfileAvatar,
     completeProfileOnboarding,
-    openPurchases,
-    purchaseProduct,
     restorePurchases,
-    showPrivacyOptions,
     claimReward,
-    reset,
   } = useGameStore();
 
-  const openSettingsPanel = () => {
+  const openSettingsPanel = useCallback(() => {
     setSettingsReturnTab(tab);
-    setProfileDraft(game.profile.displayName);
-    setResetArmed(false);
     setSettingsOpen(true);
     setTab("journey");
-  };
-  const closeSettingsPanel = () => {
+  }, [tab]);
+  const closeSettingsPanel = useCallback(() => {
     setSettingsOpen(false);
-    setPurchasesOpen(false);
-    setResetArmed(false);
     setTab(settingsReturnTab);
-  };
+  }, [settingsReturnTab]);
 
   useEffect(() => {
     void hydrate();
   }, [hydrate]);
-  useEffect(() => {
-    if (!settingsOpen) return undefined;
-    const frame = requestAnimationFrame(() =>
-      settingsCloseRef.current?.focus(),
-    );
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      setSettingsOpen(false);
-      setPurchasesOpen(false);
-      setResetArmed(false);
-      setTab(settingsReturnTab);
-    };
-    window.addEventListener("keydown", closeOnEscape);
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("keydown", closeOnEscape);
-    };
-  }, [settingsOpen, settingsReturnTab]);
   useEffect(() => {
     if (!ready || !sessionActive) return undefined;
     const timer = window.setInterval(tick, WORLD_CONFIG.activeTickMin * 60_000);
@@ -1119,56 +1018,62 @@ export default function App() {
         } as CSSProperties
       }
     >
-      <header>
-        <div className="brand-lockup">
-          <span className="brand-mark" aria-hidden="true">
-            ↑
-          </span>
-          <div>
-            <span className="eyebrow">TRADEUP</span>
-            <h1>Zero to Home</h1>
-          </div>
-        </div>
-        <button
-          className="profile-settings-button"
-          aria-expanded={settingsOpen}
-          aria-label="Ayarlar"
-          onClick={openSettingsPanel}
-        >
-          <AvatarPortrait
-            avatarId={game.profile.avatarId}
-            className="profile-header-avatar"
-          />
-          <Icon name="settings" />
-        </button>
-      </header>
-
-      <section className="wallet" aria-label="Finans özeti">
-        <div>
-          <small>Nakit</small>
-          <strong>{money(game.cashMinor)}</strong>
-        </div>
-        <div>
-          <small>Tahmini net servet</small>
-          <strong>{formatEstimate(estimates.total)}</strong>
-        </div>
-        {game.home.unlocked ? (
-          <div
-            className="goal"
-            aria-label={`Ev yolculuğu yüzde ${homeProgress}`}
-          >
-            <small>Ev yolculuğu · %{homeProgress}</small>
-            <span>
-              <i style={{ width: `${homeProgress}%` }} />
+      {!settingsOpen ? (
+        <header>
+          <div className="brand-lockup">
+            <span className="brand-mark" aria-hidden="true">
+              ↑
             </span>
+            <div>
+              <span className="eyebrow">TRADEUP</span>
+              <h1>Zero to Home</h1>
+            </div>
           </div>
-        ) : null}
-      </section>
+          <button
+            className="profile-settings-button"
+            aria-expanded={settingsOpen}
+            aria-label="Ayarlar"
+            onClick={openSettingsPanel}
+          >
+            <AvatarPortrait
+              avatarId={game.profile.avatarId}
+              className="profile-header-avatar"
+            />
+            <Icon name="settings" />
+          </button>
+        </header>
+      ) : null}
 
-      <div className="notice" role="status" key={notice}>
-        {notice}
-      </div>
-      {showCoachHere ? (
+      {!settingsOpen ? (
+        <section className="wallet" aria-label="Finans özeti">
+          <div>
+            <small>Nakit</small>
+            <strong>{money(game.cashMinor)}</strong>
+          </div>
+          <div>
+            <small>Tahmini net servet</small>
+            <strong>{formatEstimate(estimates.total)}</strong>
+          </div>
+          {game.home.unlocked ? (
+            <div
+              className="goal"
+              aria-label={`Ev yolculuğu yüzde ${homeProgress}`}
+            >
+              <small>Ev yolculuğu · %{homeProgress}</small>
+              <span>
+                <i style={{ width: `${homeProgress}%` }} />
+              </span>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
+
+      {!settingsOpen ? (
+        <div className="notice" role="status" key={notice}>
+          {notice}
+        </div>
+      ) : null}
+      {!settingsOpen && showCoachHere ? (
         <aside className="coach" aria-label="İlk oturum rehberi">
           <button onClick={dismissCoach} aria-label="Rehberi kapat">
             <Icon name="close" />
@@ -1186,7 +1091,7 @@ export default function App() {
           ) : null}
         </aside>
       ) : null}
-      {recovery ? (
+      {!settingsOpen && recovery ? (
         <aside className="recovery-bar" aria-label="Nakit toparlama yolları">
           <div>
             <small>NAKİT PLANI</small>
@@ -1238,64 +1143,66 @@ export default function App() {
       <main>
         {tab === "market" ? (
           <>
-            <div className="section-title">
-              <div>
-                <small>CANLI PAZAR</small>
-                <h2>Fırsat akışı</h2>
+            {!settingsOpen ? (
+              <div className="section-title">
+                <div>
+                  <small>CANLI PAZAR</small>
+                  <h2>Fırsat akışı</h2>
+                </div>
+                <div className="market-title-actions">
+                  <span className="market-listing-count">
+                    {visibleMarketListings.length} ilan
+                  </span>
+                  {!ftueActive ? (
+                    <>
+                      <label
+                        className={`market-sort${marketSort === "MARKET" ? "" : " market-sort--active"}`}
+                        title="Pazarı sırala"
+                      >
+                        <Icon name="sort" />
+                        <select
+                          aria-label="Pazar sıralaması"
+                          value={marketSort}
+                          onChange={(event) =>
+                            setMarketSort(event.target.value as MarketSort)
+                          }
+                        >
+                          <option value="MARKET">Pazar sırası</option>
+                          <option value="PRICE_ASC">
+                            Fiyat: düşükten yükseğe
+                          </option>
+                          <option value="PRICE_DESC">
+                            Fiyat: yüksekten düşüğe
+                          </option>
+                        </select>
+                      </label>
+                      {game.monetization.marketScanCredits === 0 &&
+                      canClaimReward("MARKET_SCOUT") ? (
+                        <button
+                          className="market-refresh market-refresh--reward"
+                          disabled={monetizationBusy}
+                          onClick={() => void claimReward("MARKET_SCOUT")}
+                          aria-label={rewardLabel("MARKET_SCOUT")}
+                        >
+                          <Icon name="refresh" />
+                          <span>+25</span>
+                        </button>
+                      ) : (
+                        <button
+                          className="market-refresh"
+                          disabled={game.monetization.marketScanCredits === 0}
+                          onClick={scan}
+                          aria-label={`Pazarı yenile · ${game.monetization.marketScanCredits} hak kaldı`}
+                        >
+                          <Icon name="refresh" />
+                          <span>{game.monetization.marketScanCredits}</span>
+                        </button>
+                      )}
+                    </>
+                  ) : null}
+                </div>
               </div>
-              <div className="market-title-actions">
-                <span className="market-listing-count">
-                  {visibleMarketListings.length} ilan
-                </span>
-                {!ftueActive ? (
-                  <>
-                    <label
-                      className={`market-sort${marketSort === "MARKET" ? "" : " market-sort--active"}`}
-                      title="Pazarı sırala"
-                    >
-                      <Icon name="sort" />
-                      <select
-                        aria-label="Pazar sıralaması"
-                        value={marketSort}
-                        onChange={(event) =>
-                          setMarketSort(event.target.value as MarketSort)
-                        }
-                      >
-                        <option value="MARKET">Pazar sırası</option>
-                        <option value="PRICE_ASC">
-                          Fiyat: düşükten yükseğe
-                        </option>
-                        <option value="PRICE_DESC">
-                          Fiyat: yüksekten düşüğe
-                        </option>
-                      </select>
-                    </label>
-                    {game.monetization.marketScanCredits === 0 &&
-                    canClaimReward("MARKET_SCOUT") ? (
-                      <button
-                        className="market-refresh market-refresh--reward"
-                        disabled={monetizationBusy}
-                        onClick={() => void claimReward("MARKET_SCOUT")}
-                        aria-label={rewardLabel("MARKET_SCOUT")}
-                      >
-                        <Icon name="refresh" />
-                        <span>+25</span>
-                      </button>
-                    ) : (
-                      <button
-                        className="market-refresh"
-                        disabled={game.monetization.marketScanCredits === 0}
-                        onClick={scan}
-                        aria-label={`Pazarı yenile · ${game.monetization.marketScanCredits} hak kaldı`}
-                      >
-                        <Icon name="refresh" />
-                        <span>{game.monetization.marketScanCredits}</span>
-                      </button>
-                    )}
-                  </>
-                ) : null}
-              </div>
-            </div>
+            ) : null}
             {!ftueActive && !scanRefill.full ? (
               <p className="market-refill-status" role="status">
                 <span>Yenileme {game.monetization.marketScanCredits}/25</span>
@@ -1952,627 +1859,313 @@ export default function App() {
 
         {tab === "journey" ? (
           <>
-            <div className="section-title">
-              <div>
-                <small>KİŞİSEL KAYIT</small>
-                <h2>Yolculuk</h2>
-              </div>
-            </div>
-            {settingsOpen ? (
-              <section
-                className="settings-card"
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="settings-title"
-              >
-                <div className="settings-sheet-heading">
-                  <div>
-                    <small>HESABIM</small>
-                    <h2 id="settings-title">Profil ve Ayarlar</h2>
-                  </div>
-                  <button
-                    ref={settingsCloseRef}
-                    className="icon-button"
-                    aria-label="Ayarları kapat"
-                    onClick={closeSettingsPanel}
-                  >
-                    <Icon name="close" />
-                  </button>
+            {!settingsOpen ? (
+              <div className="section-title">
+                <div>
+                  <small>KİŞİSEL KAYIT</small>
+                  <h2>Yolculuk</h2>
                 </div>
-                <form
-                  className="profile-card"
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    setProfileName(profileDraft);
-                    setProfileDraft(
-                      profileDraft.trim().replace(/\s+/g, " ").slice(0, 20),
-                    );
-                  }}
-                >
-                  <AvatarPortrait
-                    avatarId={game.profile.avatarId}
-                    className="profile-avatar"
-                  />
-                  <div className="profile-identity">
-                    <span className="profile-kicker">
-                      Pazar seviyesi {marketLevel}
-                    </span>
-                    <label>
-                      <span>Oyuncu adı</span>
-                      <input
-                        value={profileDraft}
-                        maxLength={20}
-                        autoComplete="nickname"
-                        onChange={(event) =>
-                          setProfileDraft(event.target.value)
-                        }
-                      />
-                    </label>
-                  </div>
-                  <button
-                    className="primary"
-                    disabled={
-                      !profileDraft.trim() ||
-                      profileDraft.trim().replace(/\s+/g, " ") ===
-                        game.profile.displayName
-                    }
-                    type="submit"
-                  >
-                    Kaydet
-                  </button>
-                  <div
-                    className="profile-stats"
-                    role="group"
-                    aria-label="Profil özeti"
-                  >
-                    <span>
-                      <small>Pazar seviyesi</small>
-                      <b>{marketLevel}</b>
-                    </span>
-                    <span>
-                      <small>Satış</small>
-                      <b>
-                        {
-                          game.transactionJournal.filter(
-                            (entry) => entry.kind === "SALE",
-                          ).length
-                        }
-                      </b>
-                    </span>
-                    <span>
-                      <small>Ev hedefi</small>
-                      <b>%{homeProgress}</b>
-                    </span>
-                  </div>
-                </form>
-                <fieldset className="avatar-picker avatar-picker--settings">
-                  <legend>Profil avatarı</legend>
-                  <div className="avatar-options">
-                    {avatars.map((avatar) => {
-                      const locked = avatar.premium && !ownsAnimatedAvatars;
-                      return (
-                        <button
-                          key={avatar.id}
-                          type="button"
-                          disabled={locked}
-                          aria-pressed={game.profile.avatarId === avatar.id}
-                          aria-label={`${avatar.name}${locked ? ", canlı avatar paketi gerekli" : ""}`}
-                          onClick={() => setProfileAvatar(avatar.id)}
-                        >
-                          <AvatarPortrait avatarId={avatar.id} />
-                          <span>
-                            <b>{avatar.name}</b>
-                            <small>
-                              {locked ? "Canlı · Yakında" : avatar.role}
-                            </small>
-                          </span>
-                          {locked ? <i aria-hidden="true">◇</i> : null}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </fieldset>
-                <section
-                  className="settings-section"
-                  aria-labelledby="experience-settings-title"
-                >
-                  <div className="settings-section-heading">
-                    <span className="settings-heading-icon" aria-hidden="true">
-                      <Icon name="settings" />
-                    </span>
-                    <div>
-                      <h3 id="experience-settings-title">Oyun deneyimi</h3>
-                      <p>Sana uygun oyun hissi</p>
+              </div>
+            ) : null}
+            {settingsOpen ? (
+              <Suspense
+                fallback={
+                  <section className="settings-card" role="status">
+                    <div className="settings-sheet-heading">
+                      <div>
+                        <small>HESABIM</small>
+                        <h2>Profil ve Ayarlar</h2>
+                      </div>
                     </div>
+                    <p className="settings-loading">Ayarlar hazırlanıyor…</p>
+                  </section>
+                }
+              >
+                <SettingsPanel onClose={closeSettingsPanel} />
+              </Suspense>
+            ) : null}
+            {!settingsOpen ? (
+              <>
+                <section
+                  className={`score-card journey-score ${completedSales.tone}`}
+                >
+                  <div className="journey-score-heading">
+                    <small>{completedSales.label}</small>
+                    <span>Gerçekleşen sonuç</span>
                   </div>
-                  <div className="settings-row">
-                    <span className="settings-row-icon" aria-hidden="true">
-                      <Icon name="haptics" />
-                    </span>
-                    <span className="settings-row-copy">
-                      <b>Dokunsal geri bildirim</b>
-                      <small>Önemli kararlarda titreşim</small>
-                    </span>
-                    <button
-                      className="settings-switch"
-                      aria-pressed={game.accessibility.hapticsEnabled}
-                      aria-label={`Dokunsal tepki: ${game.accessibility.hapticsEnabled ? "Açık" : "Kapalı"}`}
-                      onClick={() =>
-                        setHaptics(!game.accessibility.hapticsEnabled)
+                  <strong
+                    className={game.realizedProfitMinor < 0 ? "loss" : ""}
+                  >
+                    {money(game.realizedProfitMinor)}
+                  </strong>
+                  <p>
+                    Bu tutar yalnız tamamlanan satışlardan gelir; elindeki
+                    ürünlerin tahmini değeri aşağıda ayrı gösterilir.
+                  </p>
+                </section>
+                <div className="journey-block-heading">
+                  <div>
+                    <small>PARAN VE ÜRÜNLERİN</small>
+                    <h3>Bugünkü durum</h3>
+                  </div>
+                  <span>{activeOwnedAssets(game).length} ürün</span>
+                </div>
+                <div className="metric-grid journey-metrics">
+                  <div>
+                    <span>Nakit</span>
+                    <b>{money(game.cashMinor)}</b>
+                  </div>
+                  <div>
+                    <span>Toplam tahmini değer</span>
+                    <b>{formatEstimate(estimates.total)}</b>
+                  </div>
+                  <div>
+                    <span>Ürünlerin tahmini değeri</span>
+                    <b>{formatEstimate(estimates.portfolio)}</b>
+                  </div>
+                  <div>
+                    <span>Ürünlere harcanan toplam</span>
+                    <b>{money(activeBookCostMinor(game))}</b>
+                  </div>
+                  <div>
+                    <span>Ürünlerdeki tahmini fark</span>
+                    <b
+                      className={
+                        estimates.difference.highMinor < 0 ? "loss" : ""
                       }
                     >
-                      <span aria-hidden="true" />
-                    </button>
+                      {formatEstimate(estimates.difference, true)}
+                    </b>
                   </div>
-                  <div className="settings-row">
-                    <span className="settings-row-icon" aria-hidden="true">
-                      <Icon name="motion" />
-                    </span>
-                    <span className="settings-row-copy">
-                      <b>Azaltılmış hareket</b>
-                      <small>Geçişleri ve parlamaları sakinleştirir</small>
-                    </span>
-                    <button
-                      className="settings-switch"
-                      aria-pressed={game.accessibility.reducedMotion}
-                      aria-label={`Azaltılmış hareket: ${game.accessibility.reducedMotion ? "Açık" : "Kapalı"}`}
-                      onClick={() =>
-                        setReducedMotion(!game.accessibility.reducedMotion)
-                      }
-                    >
-                      <span aria-hidden="true" />
-                    </button>
+                  <div>
+                    <span>Toplam değerin nakit kısmı</span>
+                    <b>
+                      %{estimates.cashShare.low}–%{estimates.cashShare.high}
+                    </b>
                   </div>
-                  <div className="settings-row">
-                    <span className="settings-row-icon" aria-hidden="true">
-                      <Icon name="text" />
+                </div>
+                <section className="expertise-card">
+                  <div className="expertise-heading">
+                    <div>
+                      <small>PAZAR DENEYİMİ</small>
+                      <h3>Seviye {marketLevel}</h3>
+                    </div>
+                    <span>
+                      {game.expertise.marketXp} / {marketXpTarget} deneyim
                     </span>
-                    <span className="settings-row-copy">
-                      <b>Metin boyutu</b>
-                      <small>Okuma rahatlığı</small>
-                    </span>
-                    <button
-                      className="settings-value"
-                      aria-pressed={game.accessibility.largeText}
-                      onClick={() =>
-                        setLargeText(!game.accessibility.largeText)
-                      }
-                    >
-                      {game.accessibility.largeText ? "Büyük" : "Standart"}
-                    </button>
                   </div>
-                  <div className="settings-row">
-                    <span className="settings-row-icon" aria-hidden="true">
-                      <Icon name="sound" />
-                    </span>
-                    <span className="settings-row-copy">
-                      <b>Ses seviyesi</b>
-                      <small>Efektlerin yüksekliği</small>
-                    </span>
-                    <button
-                      className="settings-value"
-                      aria-label={`Ses seviyesi: ${soundLevelLabel[game.accessibility.soundLevel]}. Değiştir`}
-                      onClick={() =>
-                        setSoundLevel(
-                          nextSoundLevel[game.accessibility.soundLevel],
-                        )
-                      }
-                    >
-                      {soundLevelLabel[game.accessibility.soundLevel]}
-                    </button>
+                  <div className="xp-bar">
+                    <i
+                      style={{
+                        width: `${Math.min(
+                          100,
+                          (game.expertise.marketXp / marketXpTarget) * 100,
+                        )}%`,
+                      }}
+                    />
                   </div>
-                  <div className="settings-row">
-                    <span className="settings-row-icon" aria-hidden="true">
-                      <Icon name="analytics" />
-                    </span>
-                    <span className="settings-row-copy">
-                      <b>İsteğe bağlı analitik</b>
-                      <small>Kişisel bilgi içermez</small>
-                    </span>
-                    <button
-                      className="settings-switch"
-                      aria-pressed={game.analytics.enabled}
-                      aria-label={`İsteğe bağlı analitik: ${game.analytics.enabled ? "Açık" : "Kapalı"}`}
-                      onClick={() => setAnalytics(!game.analytics.enabled)}
-                    >
-                      <span aria-hidden="true" />
-                    </button>
+                  <p>
+                    {marketLevel < 3
+                      ? "Seviye 3: ürün alarmları ve fiyat eğilimi"
+                      : marketLevel < 6
+                        ? "Seviye 6: bilgi güveni ve kusur ihtimali"
+                        : "Bilgi araçların kararını netleştirir; fiyat bonusu vermez."}
+                  </p>
+                  <div className="category-levels">
+                    {Object.entries(game.expertise.categoryXp)
+                      .sort((left, right) => right[1] - left[1])
+                      .map(([category, xp]) => (
+                        <span key={category}>
+                          {category} · Seviye{" "}
+                          {categoryExpertiseLevel(game, category)}{" "}
+                          <small>{xp} deneyim</small>
+                        </span>
+                      ))}
                   </div>
                 </section>
-                <button
-                  className="settings-link-card"
-                  aria-label="Satın Almalar ve Görünüm"
-                  aria-expanded={purchasesOpen}
-                  onClick={() => {
-                    const next = !purchasesOpen;
-                    setPurchasesOpen(next);
-                    if (next) void openPurchases();
-                  }}
-                >
-                  <span className="settings-link-icon" aria-hidden="true">
-                    <Icon name="store" />
-                  </span>
-                  <span>
-                    <b>Satın almalar &amp; görünüm</b>
-                    <small>Kalıcı paketler ve geri yükleme</small>
-                  </span>
-                  <i aria-hidden="true">{purchasesOpen ? "−" : "+"}</i>
-                </button>
-                {purchasesOpen ? (
-                  <section
-                    className="purchase-panel"
-                    aria-label="Satın Almalar ve Görünüm"
-                  >
-                    <div className="purchase-panel-heading">
-                      <div>
-                        <strong>Kalıcı paketler</strong>
-                        <p>Oynanış ekonomisini değiştirmez.</p>
-                      </div>
+                {game.home.unlocked ? (
+                  <section className="home-card">
+                    <div className="home-silhouette" aria-hidden="true">
                       <span>
-                        {storeProducts.length ? "Mağaza hazır" : "Yakında"}
+                        <Icon name="home" />
                       </span>
                     </div>
-                    <div className="purchase-list">
-                      {(Object.keys(storeCopy) as MonetizationProductId[]).map(
-                        (productId) => {
-                          const metadata = storeProducts.find(
-                            (product) => product.productId === productId,
-                          );
-                          const entitlement =
-                            game.monetization.entitlements.find(
-                              (entry) => entry.productId === productId,
-                            );
-                          const owned = entitlement?.status === "OWNED";
-                          const pending = entitlement?.status === "PENDING";
-                          return (
-                            <article key={productId}>
-                              <div>
-                                <strong>{storeCopy[productId].title}</strong>
-                                <p>{storeCopy[productId].detail}</p>
-                              </div>
-                              {owned || pending ? (
-                                <span className="entitlement-state">
-                                  {owned ? "Sahipsin" : "Ödeme beklemede"}
-                                </span>
-                              ) : metadata ? (
-                                <button
-                                  disabled={monetizationBusy}
-                                  onClick={() =>
-                                    void purchaseProduct(productId)
-                                  }
-                                >
-                                  Satın al · {metadata.localizedPrice}
-                                </button>
-                              ) : (
-                                <span className="store-unavailable">
-                                  Yakında
-                                </span>
-                              )}
-                            </article>
-                          );
-                        },
-                      )}
-                    </div>
-                    <p className="purchase-note">
-                      Paketler mobil mağaza bağlantısı tamamlandığında açılır. O
-                      zamana kadar oynanışın ve ilerlemen değişmez.
-                    </p>
-                    <div className="purchase-footer-actions">
-                      <button
-                        className="secondary"
-                        disabled={monetizationBusy || !storeProducts.length}
-                        onClick={() => void restorePurchases()}
-                      >
-                        Satın alımları geri yükle
-                      </button>
-                      <button
-                        className="text-button"
-                        onClick={() => void showPrivacyOptions()}
-                      >
-                        Gizlilik
-                      </button>
+                    <div>
+                      <small>EV YOLCULUĞU · %{homeProgress}</small>
+                      <h3>
+                        {game.home.purchased
+                          ? "Evin artık senin"
+                          : "Kendi alanına giden yol"}
+                      </h3>
+                      <p>
+                        {game.home.purchased
+                          ? "Hedef tamamlandı; pazar ve kariyerin açık kalmaya devam ediyor."
+                          : homeProgress < 50
+                            ? "İlk kârlı satışınla hedef görünür oldu."
+                            : `Kalan tahmini mesafe ${formatEstimate({
+                                lowMinor: Math.max(
+                                  0,
+                                  HOME_GOAL_MINOR - estimates.total.highMinor,
+                                ),
+                                highMinor: Math.max(
+                                  0,
+                                  HOME_GOAL_MINOR - estimates.total.lowMinor,
+                                ),
+                              })}. Ev alımı için hedefte nakit gerekecek.`}
+                      </p>
+                      <div className="xp-bar">
+                        <i style={{ width: `${homeProgress}%` }} />
+                      </div>
+                      {!game.home.purchased &&
+                      game.cashMinor >= HOME_GOAL_MINOR ? (
+                        <button
+                          className="home-purchase-button"
+                          onClick={() => {
+                            if (buyHome()) setHomeFinaleOpen(true);
+                          }}
+                        >
+                          Evi satın al · {money(HOME_GOAL_MINOR)}
+                        </button>
+                      ) : null}
+                      {!game.home.purchased &&
+                      homeProgress >= 100 &&
+                      game.cashMinor < HOME_GOAL_MINOR ? (
+                        <div className="home-cash-plan">
+                          <span>
+                            Nakit eksiği{" "}
+                            {money(HOME_GOAL_MINOR - game.cashMinor)}. Ürünlerin
+                            otomatik satılmaz.
+                          </span>
+                          <button onClick={() => navigate("portfolio")}>
+                            Portföyü aç
+                          </button>
+                        </div>
+                      ) : null}
                     </div>
                   </section>
-                ) : null}
-                <section
-                  className="settings-danger-zone"
-                  aria-label="Kayıt yönetimi"
-                >
-                  <div>
-                    <b>Kayıt yönetimi</b>
-                    <small>Bu işlem geri alınamaz.</small>
-                  </div>
-                  <button
-                    className={resetArmed ? "danger-confirm" : "text-button"}
-                    onClick={() => {
-                      if (resetArmed) {
-                        setResetArmed(false);
-                        setSettingsOpen(false);
-                        void reset();
-                      } else setResetArmed(true);
-                    }}
-                  >
-                    {resetArmed ? "Kalıcı olarak sıfırla" : "Kariyeri sıfırla"}
-                  </button>
-                  {resetArmed ? (
-                    <button
-                      className="text-button"
-                      onClick={() => setResetArmed(false)}
-                    >
-                      Vazgeç
-                    </button>
-                  ) : null}
-                </section>
-              </section>
-            ) : null}
-            <section
-              className={`score-card journey-score ${completedSales.tone}`}
-            >
-              <div className="journey-score-heading">
-                <small>{completedSales.label}</small>
-                <span>Gerçekleşen sonuç</span>
-              </div>
-              <strong className={game.realizedProfitMinor < 0 ? "loss" : ""}>
-                {money(game.realizedProfitMinor)}
-              </strong>
-              <p>
-                Bu tutar yalnız tamamlanan satışlardan gelir; elindeki ürünlerin
-                tahmini değeri aşağıda ayrı gösterilir.
-              </p>
-            </section>
-            <div className="journey-block-heading">
-              <div>
-                <small>PARAN VE ÜRÜNLERİN</small>
-                <h3>Bugünkü durum</h3>
-              </div>
-              <span>{activeOwnedAssets(game).length} ürün</span>
-            </div>
-            <div className="metric-grid journey-metrics">
-              <div>
-                <span>Nakit</span>
-                <b>{money(game.cashMinor)}</b>
-              </div>
-              <div>
-                <span>Toplam tahmini değer</span>
-                <b>{formatEstimate(estimates.total)}</b>
-              </div>
-              <div>
-                <span>Ürünlerin tahmini değeri</span>
-                <b>{formatEstimate(estimates.portfolio)}</b>
-              </div>
-              <div>
-                <span>Ürünlere harcanan toplam</span>
-                <b>{money(activeBookCostMinor(game))}</b>
-              </div>
-              <div>
-                <span>Ürünlerdeki tahmini fark</span>
-                <b className={estimates.difference.highMinor < 0 ? "loss" : ""}>
-                  {formatEstimate(estimates.difference, true)}
-                </b>
-              </div>
-              <div>
-                <span>Toplam değerin nakit kısmı</span>
-                <b>
-                  %{estimates.cashShare.low}–%{estimates.cashShare.high}
-                </b>
-              </div>
-            </div>
-            <section className="expertise-card">
-              <div className="expertise-heading">
-                <div>
-                  <small>PAZAR DENEYİMİ</small>
-                  <h3>Seviye {marketLevel}</h3>
-                </div>
-                <span>
-                  {game.expertise.marketXp} / {marketXpTarget} deneyim
-                </span>
-              </div>
-              <div className="xp-bar">
-                <i
-                  style={{
-                    width: `${Math.min(
-                      100,
-                      (game.expertise.marketXp / marketXpTarget) * 100,
-                    )}%`,
-                  }}
-                />
-              </div>
-              <p>
-                {marketLevel < 3
-                  ? "Seviye 3: ürün alarmları ve fiyat eğilimi"
-                  : marketLevel < 6
-                    ? "Seviye 6: bilgi güveni ve kusur ihtimali"
-                    : "Bilgi araçların kararını netleştirir; fiyat bonusu vermez."}
-              </p>
-              <div className="category-levels">
-                {Object.entries(game.expertise.categoryXp)
-                  .sort((left, right) => right[1] - left[1])
-                  .map(([category, xp]) => (
-                    <span key={category}>
-                      {category} · Seviye{" "}
-                      {categoryExpertiseLevel(game, category)}{" "}
-                      <small>{xp} deneyim</small>
+                ) : (
+                  <section className="locked-home">
+                    <span>
+                      <Icon name="home" />
                     </span>
-                  ))}
-              </div>
-            </section>
-            {game.home.unlocked ? (
-              <section className="home-card">
-                <div className="home-silhouette" aria-hidden="true">
-                  <span>
-                    <Icon name="home" />
-                  </span>
-                </div>
-                <div>
-                  <small>EV YOLCULUĞU · %{homeProgress}</small>
-                  <h3>
-                    {game.home.purchased
-                      ? "Evin artık senin"
-                      : "Kendi alanına giden yol"}
-                  </h3>
-                  <p>
-                    {game.home.purchased
-                      ? "Hedef tamamlandı; pazar ve kariyerin açık kalmaya devam ediyor."
-                      : homeProgress < 50
-                        ? "İlk kârlı satışınla hedef görünür oldu."
-                        : `Kalan tahmini mesafe ${formatEstimate({
-                            lowMinor: Math.max(
-                              0,
-                              HOME_GOAL_MINOR - estimates.total.highMinor,
-                            ),
-                            highMinor: Math.max(
-                              0,
-                              HOME_GOAL_MINOR - estimates.total.lowMinor,
-                            ),
-                          })}. Ev alımı için hedefte nakit gerekecek.`}
-                  </p>
-                  <div className="xp-bar">
-                    <i style={{ width: `${homeProgress}%` }} />
+                    <div>
+                      <small>UZUN DÖNEM HEDEFİ</small>
+                      <h3>Ev yolculuğu henüz görünmedi</h3>
+                      <p>
+                        Temel döngüyü öğrenip ilk kârlı satışını tamamladığında
+                        açılır.
+                      </p>
+                    </div>
+                  </section>
+                )}
+                <div className="timeline-header">
+                  <div>
+                    <small>KİŞİSEL KAYITLARIN</small>
+                    <h3>Kariyer hikâyen</h3>
                   </div>
-                  {!game.home.purchased && game.cashMinor >= HOME_GOAL_MINOR ? (
+                  <span>{game.career.length} önemli an</span>
+                </div>
+                <div className="chips timeline-filters">
+                  {(
+                    ["ALL", "FIRSTS", "RECORDS", "MILESTONES", "HOME"] as const
+                  ).map((filter) => (
                     <button
-                      className="home-purchase-button"
-                      onClick={() => {
-                        if (buyHome()) setHomeFinaleOpen(true);
-                      }}
+                      className={timelineFilter === filter ? "active" : ""}
+                      key={filter}
+                      onClick={() => setTimelineFilter(filter)}
                     >
-                      Evi satın al · {money(HOME_GOAL_MINOR)}
+                      {timelineFilterLabel(filter)}
                     </button>
-                  ) : null}
-                  {!game.home.purchased &&
-                  homeProgress >= 100 &&
-                  game.cashMinor < HOME_GOAL_MINOR ? (
-                    <div className="home-cash-plan">
-                      <span>
-                        Nakit eksiği {money(HOME_GOAL_MINOR - game.cashMinor)}.
-                        Ürünlerin otomatik satılmaz.
-                      </span>
-                      <button onClick={() => navigate("portfolio")}>
-                        Portföyü aç
-                      </button>
-                    </div>
-                  ) : null}
+                  ))}
                 </div>
-              </section>
-            ) : (
-              <section className="locked-home">
-                <span>
-                  <Icon name="home" />
-                </span>
-                <div>
-                  <small>UZUN DÖNEM HEDEFİ</small>
-                  <h3>Ev yolculuğu henüz görünmedi</h3>
-                  <p>
-                    Temel döngüyü öğrenip ilk kârlı satışını tamamladığında
-                    açılır.
-                  </p>
+                {!timeline.length ? (
+                  <div className="empty compact-empty">
+                    <h3>Bu grupta olay yok</h3>
+                    <p>
+                      Anlamlı ilkler, rekorlar ve eşikler gerçek işlemlerinden
+                      doğar.
+                    </p>
+                  </div>
+                ) : null}
+                <div className="timeline">
+                  {timeline.map((event) => {
+                    const eventState = careerEventPresentation(
+                      event.group,
+                      game.gameTimeMin,
+                      event.atGameMin,
+                    );
+                    const saleCopy = saleHistoryCopy(event);
+                    return (
+                      <article
+                        className={`timeline-event ${eventState.tone}`}
+                        key={event.id}
+                      >
+                        <div className="timeline-rail" aria-hidden="true">
+                          <span className="timeline-dot" />
+                        </div>
+                        <div className="timeline-event-copy">
+                          <div className="timeline-meta">
+                            <small className="timeline-kind">
+                              {eventState.label}
+                            </small>
+                            <span>{eventState.ageLabel}</span>
+                          </div>
+                          <b>{simplifyLegacyPlayerCopy(event.label)}</b>
+                          {saleCopy ? <p>{saleCopy}</p> : null}
+                        </div>
+                        {event.amountMinor !== undefined ? (
+                          <em>{money(event.amountMinor)}</em>
+                        ) : null}
+                      </article>
+                    );
+                  })}
                 </div>
-              </section>
-            )}
-            <div className="timeline-header">
-              <div>
-                <small>KİŞİSEL KAYITLARIN</small>
-                <h3>Kariyer hikâyen</h3>
-              </div>
-              <span>{game.career.length} önemli an</span>
-            </div>
-            <div className="chips timeline-filters">
-              {(
-                ["ALL", "FIRSTS", "RECORDS", "MILESTONES", "HOME"] as const
-              ).map((filter) => (
-                <button
-                  className={timelineFilter === filter ? "active" : ""}
-                  key={filter}
-                  onClick={() => setTimelineFilter(filter)}
-                >
-                  {timelineFilterLabel(filter)}
-                </button>
-              ))}
-            </div>
-            {!timeline.length ? (
-              <div className="empty compact-empty">
-                <h3>Bu grupta olay yok</h3>
-                <p>
-                  Anlamlı ilkler, rekorlar ve eşikler gerçek işlemlerinden
-                  doğar.
-                </p>
-              </div>
+              </>
             ) : null}
-            <div className="timeline">
-              {timeline.map((event) => {
-                const eventState = careerEventPresentation(
-                  event.group,
-                  game.gameTimeMin,
-                  event.atGameMin,
-                );
-                const saleCopy = saleHistoryCopy(event);
-                return (
-                  <article
-                    className={`timeline-event ${eventState.tone}`}
-                    key={event.id}
-                  >
-                    <div className="timeline-rail" aria-hidden="true">
-                      <span className="timeline-dot" />
-                    </div>
-                    <div className="timeline-event-copy">
-                      <div className="timeline-meta">
-                        <small className="timeline-kind">
-                          {eventState.label}
-                        </small>
-                        <span>{eventState.ageLabel}</span>
-                      </div>
-                      <b>{simplifyLegacyPlayerCopy(event.label)}</b>
-                      {saleCopy ? <p>{saleCopy}</p> : null}
-                    </div>
-                    {event.amountMinor !== undefined ? (
-                      <em>{money(event.amountMinor)}</em>
-                    ) : null}
-                  </article>
-                );
-              })}
-            </div>
           </>
         ) : null}
       </main>
 
-      <nav aria-label="Ana bölümler">
-        {(
-          [
-            ["market", "home", "Pazar"],
-            ["follow", "follow", "Takip"],
-            ["portfolio", "portfolio", "Portföy"],
-            ["journey", "journey", "Yolculuk"],
-          ] as const satisfies ReadonlyArray<readonly [Tab, IconName, string]>
-        ).map(([item, icon, label]) => (
-          <button
-            className={tab === item ? "active" : ""}
-            key={item}
-            onClick={() => navigate(item)}
-            aria-label={label}
-            aria-describedby={
-              item === "portfolio" && pendingBuyerOfferCount > 0
-                ? "pending-buyer-offers"
-                : undefined
-            }
-            aria-current={tab === item ? "page" : undefined}
-          >
-            <span className="nav-icon">
-              <Icon name={icon} />
-            </span>
-            <span className="nav-label">{label}</span>
-            {item === "portfolio" && pendingBuyerOfferCount > 0 ? (
-              <>
-                <span className="nav-offer-count" aria-hidden="true">
-                  {pendingBuyerOfferCount}
-                </span>
-                <span id="pending-buyer-offers" className="sr-only">
-                  {pendingBuyerOfferCount} alıcı teklifi bekliyor
-                </span>
-              </>
-            ) : null}
-          </button>
-        ))}
-      </nav>
+      {!settingsOpen ? (
+        <nav aria-label="Ana bölümler">
+          {(
+            [
+              ["market", "home", "Pazar"],
+              ["follow", "follow", "Takip"],
+              ["portfolio", "portfolio", "Portföy"],
+              ["journey", "journey", "Yolculuk"],
+            ] as const satisfies ReadonlyArray<readonly [Tab, IconName, string]>
+          ).map(([item, icon, label]) => (
+            <button
+              className={tab === item ? "active" : ""}
+              key={item}
+              onClick={() => navigate(item)}
+              aria-label={label}
+              aria-describedby={
+                item === "portfolio" && pendingBuyerOfferCount > 0
+                  ? "pending-buyer-offers"
+                  : undefined
+              }
+              aria-current={tab === item ? "page" : undefined}
+            >
+              <span className="nav-icon">
+                <Icon name={icon} />
+              </span>
+              <span className="nav-label">{label}</span>
+              {item === "portfolio" && pendingBuyerOfferCount > 0 ? (
+                <>
+                  <span className="nav-offer-count" aria-hidden="true">
+                    {pendingBuyerOfferCount}
+                  </span>
+                  <span id="pending-buyer-offers" className="sr-only">
+                    {pendingBuyerOfferCount} alıcı teklifi bekliyor
+                  </span>
+                </>
+              ) : null}
+            </button>
+          ))}
+        </nav>
+      ) : null}
 
       {homeFinaleOpen ? (
         <section
