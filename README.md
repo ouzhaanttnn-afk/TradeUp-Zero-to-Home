@@ -33,6 +33,7 @@ pnpm install
 pnpm dev
 pnpm lint
 pnpm test
+pnpm test:coverage
 pnpm test:browser
 pnpm test:offline
 pnpm build
@@ -52,6 +53,8 @@ cd android
 ```
 
 Never commit signing keys, passwords, API keys or store credentials. See `docs/RELEASE_CHECKLIST.md` for publisher-owned release steps.
+The reproducible non-store Definition of Done evidence and remaining device-owned
+gates are tracked in [`docs/NON_STORE_READINESS.md`](docs/NON_STORE_READINESS.md).
 
 Browser tests require Chrome and use a separate temporary profile. `test:browser`
 checks 320/390/430 px layouts, large text, reduced motion, haptics preference
