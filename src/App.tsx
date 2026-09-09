@@ -1045,7 +1045,10 @@ export default function App() {
                           <Icon name="refresh" />
                           <span className="market-refresh-copy">
                             <b>Yenile</b>
-                            <small>+25</small>
+                            <small>
+                              +25 · +1{" "}
+                              {shortDuration(scanRefill.nextCreditSeconds)}
+                            </small>
                           </span>
                         </button>
                       ) : (
@@ -1060,6 +1063,9 @@ export default function App() {
                             <b>Yenile</b>
                             <small>
                               {game.monetization.marketScanCredits}/25
+                              {!scanRefill.full
+                                ? ` · +1 ${shortDuration(scanRefill.nextCreditSeconds)}`
+                                : ""}
                             </small>
                           </span>
                         </button>
@@ -1068,14 +1074,6 @@ export default function App() {
                   ) : null}
                 </div>
               </div>
-            ) : null}
-            {!ftueActive && !scanRefill.full ? (
-              <p className="market-refill-status" role="status">
-                <span>Yenileme {game.monetization.marketScanCredits}/25</span>
-                <span>
-                  Sıradaki +1 · {shortDuration(scanRefill.nextCreditSeconds)}
-                </span>
-              </p>
             ) : null}
             {!ftueActive && marketEvent ? (
               <aside className="market-event" aria-label="Güncel pazar olayı">

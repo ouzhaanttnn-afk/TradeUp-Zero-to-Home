@@ -9,6 +9,8 @@ for (const width of [320, 430]) {
     await page.setViewportSize({ width, height: 844 });
     const saved = validateState(initialState(Date.now(), "SANDBOX"));
     saved.accessibility.reducedMotion = true;
+    saved.monetization.marketScanCredits = 21;
+    saved.monetization.marketScanRefillAnchorWallMs = Date.now();
 
     await page.goto("/");
     await completeFirstLaunch(page);
@@ -69,6 +71,22 @@ for (const width of [320, 430]) {
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth),
     ).toBe(width);
+    const refresh = page.getByRole("button", { name: /Pazarı yenile/ });
+    await expect(refresh.locator("small")).toContainText("21/25 · +1");
+    await expect(page.getByText("Yenileme 21/25", { exact: true })).toHaveCount(
+      0,
+    );
+    const noticeHeightBefore = await page
+      .locator(".notice")
+      .evaluate((notice) => notice.getBoundingClientRect().height);
+    await refresh.click();
+    await expect(page.locator(".notice")).toContainText(
+      "yeni ilan pazara eklendi",
+    );
+    const noticeHeightAfter = await page
+      .locator(".notice")
+      .evaluate((notice) => notice.getBoundingClientRect().height);
+    expect(noticeHeightAfter).toBe(noticeHeightBefore);
     const firstVisual = await cards
       .first()
       .locator(".product-art")

@@ -553,18 +553,6 @@ main {
   align-items: center;
   gap: 5px;
 }
-.market-refill-status {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  margin: -2px 2px 6px;
-  color: #789286;
-  font-size: calc(8px + var(--text-size-boost));
-}
-.market-refill-status span:last-child {
-  color: #afc8bb;
-  font-variant-numeric: tabular-nums;
-}
 .market-event {
   display: grid;
   grid-template-columns: 32px minmax(0, 1fr);
@@ -620,7 +608,7 @@ main {
 .market-refresh {
   position: relative;
   display: flex;
-  width: 88px;
+  width: 116px;
   height: 44px;
   align-items: center;
   justify-content: center;
@@ -662,9 +650,10 @@ main {
 }
 .market-refresh-copy small {
   color: #b7c9be;
-  font-size: calc(7px + var(--text-size-boost));
+  font-size: calc(6px + var(--text-size-boost));
   font-weight: 760;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .market-refresh--reward {
   color: #ffe39a;
@@ -4371,9 +4360,12 @@ header h1 {
 
 .notice {
   position: relative;
-  min-height: 28px;
+  min-height: calc(2.6em + 12px);
   margin-top: 5px;
   padding: 6px 10px 6px 25px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
   border: 1px solid rgba(113, 210, 159, 0.1);
   border-left: 0;
   border-radius: 11px;
@@ -4960,7 +4952,7 @@ nav .active::before {
   }
 
   .market-refresh {
-    width: 82px;
+    width: 108px;
     padding-inline: 8px;
   }
 }
