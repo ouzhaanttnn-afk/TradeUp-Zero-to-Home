@@ -6,11 +6,28 @@ import {
   advanceOffline,
   advanceWorldTo,
   effectiveOfflineGameMinutes,
+  npcRiskSignal,
   scanMarket,
   WORLD_CONFIG,
 } from "./world";
 
 describe("deterministic market world", () => {
+  it("keeps the medium-demand card signal short enough for the mobile grid", () => {
+    const listing = structuredClone(initialState(1_000, "SANDBOX").listings[0]);
+    listing.priceMinor = Math.round(listing.instance.fairValueMinor * 1.18);
+    listing.instance.family.liquidity = 1;
+    listing.instance.family.demand = 1;
+    listing.urgency = 0;
+    listing.interest = 0;
+    listing.createdAtGameMin = 0;
+    listing.expiresAtGameMin = 100;
+
+    expect(npcRiskSignal(listing, 0)).toEqual({
+      level: "medium",
+      text: "Talep çok",
+    });
+  });
+
   it("does not punish an unfinished first session while the app is closed", () => {
     const state = initialState(1_000);
     const result = advanceOffline(state, 24 * 60 * 60_000);

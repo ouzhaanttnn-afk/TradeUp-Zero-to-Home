@@ -83,8 +83,7 @@ export function npcRiskSignal(listing: Listing, gameTimeMin: number) {
   if (score >= 0.72)
     return { level: "critical" as const, text: "Başka teklif var" };
   if (score >= 0.56) return { level: "high" as const, text: "İlgi artıyor" };
-  if (score >= 0.38)
-    return { level: "medium" as const, text: "Birkaç kişi inceliyor" };
+  if (score >= 0.38) return { level: "medium" as const, text: "Talep çok" };
   return { level: "low" as const, text: "İlgi sakin" };
 }
 
