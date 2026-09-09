@@ -25,6 +25,21 @@ export function timelineFilterLabel(filter: TimelineFilter) {
   return filterLabels[filter];
 }
 
+export function timelinePageState(
+  itemCount: number,
+  requestedPage: number,
+  pageSize = 4,
+) {
+  const pageCount = Math.max(1, Math.ceil(itemCount / pageSize));
+  const page = Math.max(0, Math.min(requestedPage, pageCount - 1));
+  return {
+    page,
+    pageCount,
+    start: page * pageSize,
+    end: Math.min(itemCount, (page + 1) * pageSize),
+  };
+}
+
 export function careerEventPresentation(
   group: CareerEventGroup,
   currentGameMin: number,

@@ -12,6 +12,7 @@ import {
   careerEventPresentation,
   completedSalesPresentation,
   timelineFilterLabel,
+  timelinePageState,
   type TimelineFilter,
 } from "./journeyPresentation";
 import { simplifyLegacyPlayerCopy } from "./playerLanguage";
@@ -29,7 +30,10 @@ export default function JourneyPanel({
   onBuyHome: () => void;
   onOpenPortfolio: () => void;
 }) {
+  const timelinePageSize = 4;
   const [timelineFilter, setTimelineFilter] = useState<TimelineFilter>("ALL");
+  const [timelineExpanded, setTimelineExpanded] = useState(false);
+  const [timelinePage, setTimelinePage] = useState(0);
   const timeline = useMemo(
     () =>
       game.career
@@ -38,6 +42,15 @@ export default function JourneyPanel({
         )
         .toReversed(),
     [game.career, timelineFilter],
+  );
+  const timelinePages = timelinePageState(
+    timeline.length,
+    timelinePage,
+    timelinePageSize,
+  );
+  const visibleTimeline = timeline.slice(
+    timelinePages.start,
+    timelinePages.end,
   );
   const completedSales = completedSalesPresentation(game.realizedProfitMinor);
   const estimates = wealthPresentation(game);
@@ -52,6 +65,71 @@ export default function JourneyPanel({
           <h2>Yolculuk</h2>
         </div>
       </div>
+      {game.home.unlocked ? (
+        <section className="home-card home-card-primary">
+          <div className="home-silhouette" aria-hidden="true">
+            <span>
+              <Icon name="home" />
+            </span>
+          </div>
+          <div>
+            <small>EV YOLCULUĞU · %{homeProgress}</small>
+            <h3>
+              {game.home.purchased
+                ? "Evin artık senin"
+                : "Kendi alanına giden yol"}
+            </h3>
+            <p>
+              {game.home.purchased
+                ? "Hedef tamamlandı; pazar ve kariyerin açık kalmaya devam ediyor."
+                : homeProgress < 50
+                  ? "İlk kârlı satışınla hedef görünür oldu."
+                  : `Kalan tahmini mesafe ${formatEstimate({
+                      lowMinor: Math.max(
+                        0,
+                        HOME_GOAL_MINOR - estimates.total.highMinor,
+                      ),
+                      highMinor: Math.max(
+                        0,
+                        HOME_GOAL_MINOR - estimates.total.lowMinor,
+                      ),
+                    })}. Ev alımı için hedefte nakit gerekecek.`}
+            </p>
+            <div className="xp-bar">
+              <i style={{ width: `${homeProgress}%` }} />
+            </div>
+            {!game.home.purchased && game.cashMinor >= HOME_GOAL_MINOR ? (
+              <button className="home-purchase-button" onClick={onBuyHome}>
+                Evi satın al · {money(HOME_GOAL_MINOR)}
+              </button>
+            ) : null}
+            {!game.home.purchased &&
+            homeProgress >= 100 &&
+            game.cashMinor < HOME_GOAL_MINOR ? (
+              <div className="home-cash-plan">
+                <span>
+                  Nakit eksiği {money(HOME_GOAL_MINOR - game.cashMinor)}.
+                  Ürünlerin otomatik satılmaz.
+                </span>
+                <button onClick={onOpenPortfolio}>Portföyü aç</button>
+              </div>
+            ) : null}
+          </div>
+        </section>
+      ) : (
+        <section className="locked-home home-card-primary">
+          <span>
+            <Icon name="home" />
+          </span>
+          <div>
+            <small>UZUN DÖNEM HEDEFİ</small>
+            <h3>Ev yolculuğu henüz görünmedi</h3>
+            <p>
+              Temel döngüyü öğrenip ilk kârlı satışını tamamladığında açılır.
+            </p>
+          </div>
+        </section>
+      )}
       <section className={`score-card journey-score ${completedSales.tone}`}>
         <div className="journey-score-heading">
           <small>{completedSales.label}</small>
@@ -140,128 +218,107 @@ export default function JourneyPanel({
             ))}
         </div>
       </section>
-      {game.home.unlocked ? (
-        <section className="home-card">
-          <div className="home-silhouette" aria-hidden="true">
-            <span>
-              <Icon name="home" />
-            </span>
-          </div>
-          <div>
-            <small>EV YOLCULUĞU · %{homeProgress}</small>
-            <h3>
-              {game.home.purchased
-                ? "Evin artık senin"
-                : "Kendi alanına giden yol"}
-            </h3>
-            <p>
-              {game.home.purchased
-                ? "Hedef tamamlandı; pazar ve kariyerin açık kalmaya devam ediyor."
-                : homeProgress < 50
-                  ? "İlk kârlı satışınla hedef görünür oldu."
-                  : `Kalan tahmini mesafe ${formatEstimate({
-                      lowMinor: Math.max(
-                        0,
-                        HOME_GOAL_MINOR - estimates.total.highMinor,
-                      ),
-                      highMinor: Math.max(
-                        0,
-                        HOME_GOAL_MINOR - estimates.total.lowMinor,
-                      ),
-                    })}. Ev alımı için hedefte nakit gerekecek.`}
-            </p>
-            <div className="xp-bar">
-              <i style={{ width: `${homeProgress}%` }} />
-            </div>
-            {!game.home.purchased && game.cashMinor >= HOME_GOAL_MINOR ? (
-              <button className="home-purchase-button" onClick={onBuyHome}>
-                Evi satın al · {money(HOME_GOAL_MINOR)}
-              </button>
-            ) : null}
-            {!game.home.purchased &&
-            homeProgress >= 100 &&
-            game.cashMinor < HOME_GOAL_MINOR ? (
-              <div className="home-cash-plan">
-                <span>
-                  Nakit eksiği {money(HOME_GOAL_MINOR - game.cashMinor)}.
-                  Ürünlerin otomatik satılmaz.
-                </span>
-                <button onClick={onOpenPortfolio}>Portföyü aç</button>
-              </div>
-            ) : null}
-          </div>
-        </section>
-      ) : (
-        <section className="locked-home">
-          <span>
-            <Icon name="home" />
-          </span>
-          <div>
-            <small>UZUN DÖNEM HEDEFİ</small>
-            <h3>Ev yolculuğu henüz görünmedi</h3>
-            <p>
-              Temel döngüyü öğrenip ilk kârlı satışını tamamladığında açılır.
-            </p>
-          </div>
-        </section>
-      )}
-      <div className="timeline-header">
+      <div className="timeline-header timeline-header-collapsible">
         <div>
           <small>KİŞİSEL KAYITLARIN</small>
           <h3>Kariyer hikâyen</h3>
         </div>
-        <span>{game.career.length} önemli an</span>
+        <div className="timeline-summary">
+          <span>{game.career.length} önemli an</span>
+          <button
+            className="timeline-toggle"
+            type="button"
+            aria-expanded={timelineExpanded}
+            aria-controls="career-timeline-content"
+            onClick={() => setTimelineExpanded((expanded) => !expanded)}
+          >
+            {timelineExpanded ? "Kapat" : "Aç"}
+            <span aria-hidden="true">{timelineExpanded ? "−" : "+"}</span>
+          </button>
+        </div>
       </div>
-      <div className="chips timeline-filters">
-        {(["ALL", "FIRSTS", "RECORDS", "MILESTONES", "HOME"] as const).map(
-          (filter) => (
-            <button
-              className={timelineFilter === filter ? "active" : ""}
-              key={filter}
-              onClick={() => setTimelineFilter(filter)}
-            >
-              {timelineFilterLabel(filter)}
-            </button>
-          ),
-        )}
-      </div>
-      {!timeline.length ? (
-        <div className="empty compact-empty">
-          <h3>Bu grupta olay yok</h3>
-          <p>Anlamlı ilkler, rekorlar ve eşikler gerçek işlemlerinden doğar.</p>
+      {timelineExpanded ? (
+        <div className="timeline-content" id="career-timeline-content">
+          <div className="chips timeline-filters">
+            {(["ALL", "FIRSTS", "RECORDS", "MILESTONES", "HOME"] as const).map(
+              (filter) => (
+                <button
+                  className={timelineFilter === filter ? "active" : ""}
+                  key={filter}
+                  onClick={() => {
+                    setTimelineFilter(filter);
+                    setTimelinePage(0);
+                  }}
+                >
+                  {timelineFilterLabel(filter)}
+                </button>
+              ),
+            )}
+          </div>
+          {!timeline.length ? (
+            <div className="empty compact-empty">
+              <h3>Bu grupta olay yok</h3>
+              <p>
+                Anlamlı ilkler, rekorlar ve eşikler gerçek işlemlerinden doğar.
+              </p>
+            </div>
+          ) : null}
+          <div className="timeline">
+            {visibleTimeline.map((event) => {
+              const eventState = careerEventPresentation(
+                event.group,
+                game.gameTimeMin,
+                event.atGameMin,
+              );
+              const saleCopy = saleHistoryCopy(event);
+              return (
+                <article
+                  className={`timeline-event ${eventState.tone}`}
+                  key={event.id}
+                >
+                  <div className="timeline-rail" aria-hidden="true">
+                    <span className="timeline-dot" />
+                  </div>
+                  <div className="timeline-event-copy">
+                    <div className="timeline-meta">
+                      <small className="timeline-kind">
+                        {eventState.label}
+                      </small>
+                      <span>{eventState.ageLabel}</span>
+                    </div>
+                    <b>{simplifyLegacyPlayerCopy(event.label)}</b>
+                    {saleCopy ? <p>{saleCopy}</p> : null}
+                  </div>
+                  {event.amountMinor !== undefined ? (
+                    <em>{money(event.amountMinor)}</em>
+                  ) : null}
+                </article>
+              );
+            })}
+          </div>
+          {timelinePages.pageCount > 1 ? (
+            <div className="timeline-pagination" aria-label="Kariyer sayfaları">
+              <button
+                type="button"
+                disabled={timelinePages.page === 0}
+                onClick={() => setTimelinePage(timelinePages.page - 1)}
+              >
+                Önceki
+              </button>
+              <span>
+                {timelinePages.page + 1} / {timelinePages.pageCount}
+              </span>
+              <button
+                type="button"
+                disabled={timelinePages.page === timelinePages.pageCount - 1}
+                onClick={() => setTimelinePage(timelinePages.page + 1)}
+              >
+                Sonraki
+              </button>
+            </div>
+          ) : null}
         </div>
       ) : null}
-      <div className="timeline">
-        {timeline.map((event) => {
-          const eventState = careerEventPresentation(
-            event.group,
-            game.gameTimeMin,
-            event.atGameMin,
-          );
-          const saleCopy = saleHistoryCopy(event);
-          return (
-            <article
-              className={`timeline-event ${eventState.tone}`}
-              key={event.id}
-            >
-              <div className="timeline-rail" aria-hidden="true">
-                <span className="timeline-dot" />
-              </div>
-              <div className="timeline-event-copy">
-                <div className="timeline-meta">
-                  <small className="timeline-kind">{eventState.label}</small>
-                  <span>{eventState.ageLabel}</span>
-                </div>
-                <b>{simplifyLegacyPlayerCopy(event.label)}</b>
-                {saleCopy ? <p>{saleCopy}</p> : null}
-              </div>
-              {event.amountMinor !== undefined ? (
-                <em>{money(event.amountMinor)}</em>
-              ) : null}
-            </article>
-          );
-        })}
-      </div>
     </>
   );
 }
