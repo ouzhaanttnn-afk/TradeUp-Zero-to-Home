@@ -464,6 +464,29 @@ for (const choice of [
       expect((await readSave()).cashMinor).toBe(purchased.cashMinor);
       await stage("COMPLETE");
     }
+    const replayRaw = await page.evaluate(() =>
+      localStorage.getItem("tradeup:replay:v1"),
+    );
+    expect(replayRaw).not.toBeNull();
+    expect(replayRaw).not.toContain("Yeni Tüccar");
+    const replay = JSON.parse(replayRaw!) as {
+      configVersion: string;
+      seed: number;
+      commands: { name: string; sequence: number }[];
+    };
+    expect(replay.configVersion).toBe("gdd-2.2-r1");
+    expect(replay.seed).toBe(loaded.seed);
+    expect(replay.commands.map((command) => command.name)).toEqual(
+      expect.arrayContaining([
+        "ACCEPT_BUYER_OFFER",
+        "BUY_LISTING",
+        "PREPARE_ASSET",
+        "CREATE_LISTING",
+      ]),
+    );
+    expect(replay.commands.map((command) => command.sequence)).toEqual(
+      replay.commands.map((_, index) => index + 1),
+    );
     expect(errors).toEqual([]);
   });
 }

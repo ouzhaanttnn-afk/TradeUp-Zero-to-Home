@@ -59,6 +59,10 @@ persistence, missing product images, comparison navigation, and offline reload.
 `test:coverage` runs the full deterministic unit suite, including the 100-seed
 career simulation, and enforces baseline statement, branch, function and line
 coverage so test depth cannot silently regress.
+The browser keeps the latest 256 economy commands in a local, bounded replay
+bundle with the world seed and config version. It contains no profile name or
+publisher data, survives reloads for bug diagnosis, and is cleared with a
+career reset.
 It also completes the first-session loop with both starting notebook choices,
 reconciling cash, book cost, realized profit and the journal after each stage
 and after reload. Automated completion is not evidence of player retention or comprehension.

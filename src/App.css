@@ -1886,7 +1886,7 @@ main {
   min-height: 44px;
 }
 .owned--listing .listing-withdraw-actions button {
-  min-height: 44px;
+  min-height: 46px;
   padding-block: 7px;
 }
 @media (max-width: 430px) {

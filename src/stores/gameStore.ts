@@ -33,6 +33,10 @@ import {
   trackAnalytics,
 } from "../infrastructure/analytics";
 import { playFeedbackSound, type FeedbackSound } from "../infrastructure/audio";
+import {
+  clearReplayDiagnostics,
+  recordReplayCommand,
+} from "../infrastructure/replayDiagnostics";
 import { saleDecisionCause } from "../ui/decisionCause";
 import {
   dismissFtueStage,
@@ -333,6 +337,9 @@ export const useGameStore = create<Store>((set, get) => ({
     if (get().sessionActive) return;
     const previous = get().game;
     const nowWallMs = systemTimeProvider.nowWallMs();
+    recordReplayCommand(previous, "ADVANCE_OFFLINE", {
+      wallClockDeltaMs: Math.max(0, nowWallMs - previous.lastWallClockMs),
+    });
     const result = advanceOffline(previous, nowWallMs);
     const game = withBuyerOfferAnalytics(
       previous,
@@ -373,6 +380,7 @@ export const useGameStore = create<Store>((set, get) => ({
     await enqueueSave({ ...state, lastWallClockMs: wallClockMs }, wallClockMs);
   },
   scan: () => {
+    recordReplayCommand(get().game, "SCAN_MARKET");
     const previous = rechargeMarketScanCredits(
       get().game,
       systemTimeProvider.nowWallMs(),
@@ -422,6 +430,9 @@ export const useGameStore = create<Store>((set, get) => ({
   },
   tick: () => {
     if (!get().sessionActive || !get().ready) return;
+    recordReplayCommand(get().game, "TICK", {
+      minutes: WORLD_CONFIG.activeTickMin,
+    });
     const result = progressBy(get().game, WORLD_CONFIG.activeTickMin);
     const rechargedState = rechargeMarketScanCredits(
       result.state,
@@ -442,6 +453,10 @@ export const useGameStore = create<Store>((set, get) => ({
   },
   buy: (item, priceMinor = item.priceMinor) => {
     const game = get().game;
+    recordReplayCommand(game, "BUY_LISTING", {
+      listingId: item.id,
+      priceMinor,
+    });
     if (isFtueActive(game) && game.ftue.stage !== "NEGOTIATION") {
       set({
         notice: "İlk alımdan önce karşılaştırma ve kanıt adımlarını tamamla.",
@@ -495,6 +510,7 @@ export const useGameStore = create<Store>((set, get) => ({
   },
   buyHome: () => {
     const game = get().game;
+    recordReplayCommand(game, "BUY_HOME", { priceMinor: HOME_GOAL_MINOR });
     const result = purchaseHome(
       game,
       HOME_GOAL_MINOR,
@@ -527,6 +543,10 @@ export const useGameStore = create<Store>((set, get) => ({
   },
   offer: (item, mode = "BALANCED") => {
     const game = get().game;
+    recordReplayCommand(game, "MAKE_OFFER", {
+      listingId: item.id,
+      mode,
+    });
     if (isFtueActive(game) && game.ftue.stage !== "NEGOTIATION") {
       set({ notice: "Önce karşılaştır ve bir kanıtı kontrol et." });
       return;
@@ -635,6 +655,10 @@ export const useGameStore = create<Store>((set, get) => ({
   },
   sell: (item, quick) => {
     const game = get().game;
+    recordReplayCommand(game, "QUICK_SALE", {
+      assetId: item.id,
+      quick,
+    });
     if (isFtueActive(game) && game.ftue.firstAssetId === item.id) {
       set({ notice: "İlk döngüde bu ürünü dengeli fiyatla listele." });
       return;
@@ -711,6 +735,10 @@ export const useGameStore = create<Store>((set, get) => ({
   },
   list: (item, askingPriceMinor) => {
     const game = get().game;
+    recordReplayCommand(game, "CREATE_LISTING", {
+      assetId: item.id,
+      askingPriceMinor,
+    });
     if (isFtueActive(game) && game.ftue.stage !== "LISTING") {
       set({ notice: "İlk ürün için önce bir hazırlık tamamla." });
       return;
@@ -754,6 +782,10 @@ export const useGameStore = create<Store>((set, get) => ({
   },
   reviseListing: (listingId, askingPriceMinor) => {
     const game = get().game;
+    recordReplayCommand(game, "REVISE_LISTING", {
+      listingId,
+      askingPriceMinor,
+    });
     const listing = game.playerListings.find((item) => item.id === listingId);
     const asset = listing
       ? game.ownedAssets.find((item) => item.id === listing.ownedAssetId)
@@ -791,6 +823,7 @@ export const useGameStore = create<Store>((set, get) => ({
   },
   withdrawListing: (listingId) => {
     const game = get().game;
+    recordReplayCommand(game, "WITHDRAW_LISTING", { listingId });
     const listing = game.playerListings.find((item) => item.id === listingId);
     const asset = listing
       ? game.ownedAssets.find((item) => item.id === listing.ownedAssetId)
@@ -819,6 +852,7 @@ export const useGameStore = create<Store>((set, get) => ({
   },
   acceptBuyer: (offerId) => {
     const game = get().game;
+    recordReplayCommand(game, "ACCEPT_BUYER_OFFER", { offerId });
     const buyerOffer = game.buyerOffers.find((item) => item.id === offerId);
     const listing = buyerOffer
       ? game.playerListings.find((item) => item.id === buyerOffer.listingId)
@@ -884,6 +918,7 @@ export const useGameStore = create<Store>((set, get) => ({
   },
   counterBuyer: (offerId) => {
     const game = get().game;
+    recordReplayCommand(game, "COUNTER_BUYER_OFFER", { offerId });
     const buyerOffer = game.buyerOffers.find((item) => item.id === offerId);
     const listing = buyerOffer
       ? game.playerListings.find((item) => item.id === buyerOffer.listingId)
@@ -944,6 +979,7 @@ export const useGameStore = create<Store>((set, get) => ({
   },
   rejectBuyer: (offerId) => {
     const game = get().game;
+    recordReplayCommand(game, "REJECT_BUYER_OFFER", { offerId });
     const buyerOffer = game.buyerOffers.find((item) => item.id === offerId);
     const result = rejectBuyerOffer(game, offerId);
     if (!result.ok) {
@@ -957,6 +993,7 @@ export const useGameStore = create<Store>((set, get) => ({
   },
   inspect: (listingId, kind) => {
     const game = get().game;
+    recordReplayCommand(game, "INSPECT_LISTING", { listingId, kind });
     if (isFtueActive(game) && game.ftue.stage !== "EVIDENCE") {
       set({ notice: "Önce benzer ilanları karşılaştır." });
       return;
@@ -995,6 +1032,7 @@ export const useGameStore = create<Store>((set, get) => ({
   },
   prepare: (assetId, kind) => {
     const game = get().game;
+    recordReplayCommand(game, "PREPARE_ASSET", { assetId, kind });
     if (isFtueActive(game) && game.ftue.stage !== "PREPARATION") {
       set({ notice: "Bu hazırlık ilk satın almadan sonra açılır." });
       return;
@@ -1374,6 +1412,7 @@ export const useGameStore = create<Store>((set, get) => ({
   claimReward: async (placementId) => {
     if (get().monetizationBusy) return;
     const state = get().game;
+    recordReplayCommand(state, "CLAIM_REWARD", { placementId });
     const premium = state.monetization.entitlements.some(
       (entry) =>
         entry.entitlementId === "premium_lifetime" && entry.status === "OWNED",
@@ -1423,6 +1462,7 @@ export const useGameStore = create<Store>((set, get) => ({
   reset: async () => {
     await saveQueue.catch(() => undefined);
     await clearGame();
+    clearReplayDiagnostics();
     persistenceSuspended = false;
     const game = initialState(systemTimeProvider.nowWallMs());
     set({ game, notice: "Yeni kariyer başladı." });
