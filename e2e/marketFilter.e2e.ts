@@ -50,7 +50,7 @@ test("category filter narrows the market without adding vertical controls", asyn
   expect(
     await refresh.evaluate((button) => {
       const rect = button.getBoundingClientRect();
-      return rect.width === 44 && rect.height === 44;
+      return rect.width === 82 && rect.height === 44;
     }),
   ).toBe(true);
   const sort = page.getByLabel("Pazar sıralaması");

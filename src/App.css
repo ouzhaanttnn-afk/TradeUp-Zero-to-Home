@@ -605,7 +605,6 @@ main {
   font-size: calc(8px + var(--text-size-boost));
   line-height: 1.25;
 }
-.market-refresh,
 .market-sort {
   position: relative;
   display: grid;
@@ -617,6 +616,20 @@ main {
   border-radius: 50%;
   background: transparent;
   color: #a8c4b5;
+}
+.market-refresh {
+  position: relative;
+  display: flex;
+  width: 88px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 15px;
+  color: #f5d98d;
+  background: transparent;
 }
 .market-refresh::before,
 .market-sort::before {
@@ -634,20 +647,24 @@ main {
   width: 18px;
   height: 18px;
 }
-.market-refresh > span {
-  position: absolute;
-  right: 2px;
-  bottom: 1px;
-  z-index: 2;
-  min-width: 18px;
-  padding: 2px 4px;
-  border: 1px solid #29473a;
-  border-radius: 8px;
-  color: #b9d3c5;
-  background: #0a1b13;
-  font-size: calc(7px + var(--text-size-boost));
-  font-weight: 850;
+.market-refresh > .market-refresh-copy {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 1px;
+  text-align: left;
   line-height: 1;
+}
+.market-refresh-copy b {
+  font-size: calc(10px + var(--text-size-boost));
+  font-weight: 820;
+  letter-spacing: -0.02em;
+}
+.market-refresh-copy small {
+  color: #b7c9be;
+  font-size: calc(7px + var(--text-size-boost));
+  font-weight: 760;
+  font-variant-numeric: tabular-nums;
 }
 .market-refresh--reward {
   color: #ffe39a;
@@ -656,10 +673,8 @@ main {
   border-color: rgba(224, 183, 83, 0.48);
   background: linear-gradient(145deg, #3a3218, #201d12);
 }
-.market-refresh--reward > span {
-  border-color: #8b7130;
+.market-refresh--reward .market-refresh-copy small {
   color: #ffe39a;
-  background: #2a2414;
 }
 .market-refresh:disabled {
   cursor: default;
@@ -2465,7 +2480,11 @@ nav .active .nav-icon {
 }
 
 /* Project-owned atmosphere artwork */
-.app-shell.tab-market,
+.app-shell.tab-market {
+  --screen-atmosphere: url("./assets/brand/ui_market_table_atmosphere_v2.webp");
+  --screen-atmosphere-position: center top;
+}
+
 .app-shell.tab-follow,
 .app-shell.tab-portfolio {
   --screen-atmosphere: url("./assets/brand/ui_market_atmosphere_v1.webp");
@@ -4314,6 +4333,26 @@ main {
   box-shadow: inset 0 1px rgba(255, 255, 255, 0.03);
 }
 
+.market-refresh::before {
+  inset: 3px;
+  border-color: rgba(226, 187, 91, 0.52);
+  border-radius: 14px;
+  background:
+    radial-gradient(
+      circle at 18% 0,
+      rgba(255, 225, 141, 0.12),
+      transparent 46%
+    ),
+    linear-gradient(145deg, rgba(54, 43, 20, 0.96), rgba(21, 25, 17, 0.96));
+  box-shadow:
+    0 7px 18px rgba(0, 0, 0, 0.24),
+    inset 0 1px rgba(255, 239, 190, 0.16);
+}
+
+.market-refresh svg {
+  color: #efc967;
+}
+
 .market-filters {
   margin-inline: -10px;
   padding: 5px 10px 7px;
@@ -4352,14 +4391,14 @@ main {
 }
 
 .market-grid .market-card {
-  border: 1px solid rgba(127, 190, 158, 0.17);
+  border: 1px solid rgba(191, 164, 96, 0.2);
   border-radius: 15px;
   background:
-    radial-gradient(circle at 50% 0, rgba(76, 147, 111, 0.09), transparent 46%),
-    linear-gradient(155deg, rgba(15, 35, 26, 0.98), rgba(7, 18, 13, 0.99));
+    radial-gradient(circle at 50% 0, rgba(111, 151, 117, 0.1), transparent 46%),
+    linear-gradient(155deg, rgba(15, 35, 26, 0.94), rgba(7, 18, 13, 0.96));
   box-shadow:
-    0 9px 24px rgba(0, 0, 0, 0.17),
-    inset 0 1px rgba(255, 255, 255, 0.028);
+    0 10px 26px rgba(0, 0, 0, 0.24),
+    inset 0 1px rgba(255, 239, 190, 0.04);
 }
 
 .market-grid .market-card:active {
@@ -4810,4 +4849,26 @@ nav .active::before {
     transparent 78%
   );
   opacity: 0.3;
+}
+
+.app-shell.tab-market::after {
+  mask-image: linear-gradient(
+    to bottom,
+    black 0%,
+    rgba(0, 0, 0, 0.92) 58%,
+    rgba(0, 0, 0, 0.48) 88%,
+    transparent 100%
+  );
+  opacity: 0.55;
+}
+
+@media (max-width: 350px) {
+  .market-listing-count {
+    display: none;
+  }
+
+  .market-refresh {
+    width: 82px;
+    padding-inline: 8px;
+  }
 }

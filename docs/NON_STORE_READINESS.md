@@ -42,7 +42,7 @@ Son yerel doğrulama: 9 Eylül 2026.
 
 ## Son yerel kapı sonucu
 
-- `pnpm test`: 44 test dosyasında 294 test başarılı.
+- `pnpm test`: 44 test dosyasında 295 test başarılı.
 - `pnpm test:coverage`: satır %70,19; branch %54,42; function %66,62;
   statement %68,74 ve tüm zorunlu alt sınırlar geçildi.
 - `pnpm lint`: başarılı.

@@ -21,4 +21,20 @@ describe("product asset delivery budget", () => {
     expect(totalBytes).toBeLessThan(12 * 1024 * 1024);
     expect(largestBytes).toBeLessThan(160 * 1024);
   });
+
+  it("keeps the project-owned atmosphere artwork mobile-sized", async () => {
+    const atmosphereFiles = [
+      "./assets/brand/ui_market_atmosphere_v1.webp",
+      "./assets/brand/ui_market_table_atmosphere_v2.webp",
+      "./assets/brand/ui_journey_atmosphere_v1.webp",
+    ];
+    const sizes = await Promise.all(
+      atmosphereFiles.map((source) => stat(new URL(source, import.meta.url))),
+    );
+
+    expect(Math.max(...sizes.map((item) => item.size))).toBeLessThan(96 * 1024);
+    expect(sizes.reduce((total, item) => total + item.size, 0)).toBeLessThan(
+      192 * 1024,
+    );
+  });
 });

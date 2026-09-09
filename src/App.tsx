@@ -275,11 +275,8 @@ export default function App() {
       if (removeListener) void removeListener();
     };
   }, [pause, resume]);
-  useModalFocus(
-    selectedId !== null,
-    sheetRef,
-    sheetCloseRef,
-    () => setSelectedId(null),
+  useModalFocus(selectedId !== null, sheetRef, sheetCloseRef, () =>
+    setSelectedId(null),
   );
 
   useEffect(() => {
@@ -1046,7 +1043,10 @@ export default function App() {
                           aria-label={rewardLabel("MARKET_SCOUT")}
                         >
                           <Icon name="refresh" />
-                          <span>+25</span>
+                          <span className="market-refresh-copy">
+                            <b>Yenile</b>
+                            <small>+25</small>
+                          </span>
                         </button>
                       ) : (
                         <button
@@ -1056,7 +1056,12 @@ export default function App() {
                           aria-label={`Pazarı yenile · ${game.monetization.marketScanCredits} hak kaldı`}
                         >
                           <Icon name="refresh" />
-                          <span>{game.monetization.marketScanCredits}</span>
+                          <span className="market-refresh-copy">
+                            <b>Yenile</b>
+                            <small>
+                              {game.monetization.marketScanCredits}/25
+                            </small>
+                          </span>
                         </button>
                       )}
                     </>
