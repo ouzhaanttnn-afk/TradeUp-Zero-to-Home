@@ -77,7 +77,7 @@ test("first install caches game resources and preserves a sale across offline re
   );
   await page
     .getByRole("button", {
-      name: /Koleksiyon Kutu Defteri, fiyat ₺120, kondisyon yüzde 55,.+İlan detaylarını aç/,
+      name: /Deri Kapaklı Kutu Defteri, fiyat ₺120, kondisyon yüzde 55,.+İlan detaylarını aç/,
     })
     .click();
   await expect(

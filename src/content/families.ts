@@ -96,7 +96,7 @@ const defineFamily = (seed: Seed): Family => {
 const seeds: Seed[] = [
   [
     "notebook",
-    "Koleksiyon Kutu Defteri",
+    "Deri Kapaklı Kutu Defteri",
     "prd_notebook",
     18_000,
     "Küçük Eşya",
@@ -105,7 +105,7 @@ const seeds: Seed[] = [
   ],
   [
     "vinyl",
-    "Koleksiyonluk Klasik Plak Kapsülü",
+    "Koleksiyonluk Klasik Plak",
     "prd_vinyl",
     42_000,
     "Küçük Eşya",
@@ -114,7 +114,7 @@ const seeds: Seed[] = [
   ],
   [
     "book",
-    "Koleksiyonluk İlk Baskı Seti",
+    "Koleksiyonluk İlk Baskı Kitap Seti",
     "prd_book",
     98_000,
     "Küçük Eşya",
@@ -123,7 +123,7 @@ const seeds: Seed[] = [
   ],
   [
     "sneaker",
-    "Koleksiyonlu Kanvas Sneaker",
+    "Kanvas Günlük Sneaker",
     "prd_sneaker",
     240_000,
     "Küçük Eşya",
@@ -132,7 +132,7 @@ const seeds: Seed[] = [
   ],
   [
     "headset",
-    "Koleksiyon Mini Kulaklık",
+    "Kablosuz Kulak Üstü Kulaklık",
     "prd_headset",
     64_000,
     "Ses",
@@ -141,7 +141,7 @@ const seeds: Seed[] = [
   ],
   [
     "speaker",
-    "Koleksiyon Hoparlör Figürü",
+    "Raf Tipi Hoparlör",
     "prd_speaker",
     185_000,
     "Ses",
@@ -150,7 +150,7 @@ const seeds: Seed[] = [
   ],
   [
     "turntable",
-    "Koleksiyon Pikap Kiti",
+    "Klasik Pikap",
     "prd_turntable",
     280_000,
     "Ses",
@@ -159,7 +159,7 @@ const seeds: Seed[] = [
   ],
   [
     "record_player",
-    "Koleksiyon Plak Çalar",
+    "Dahili Hoparlörlü Plak Çalar",
     "prd_record_player",
     175_000,
     "Ses",
@@ -168,7 +168,7 @@ const seeds: Seed[] = [
   ],
   [
     "desk",
-    "Koleksiyon Mini Masa",
+    "Kompakt Çalışma Masası",
     "prd_desk",
     360_000,
     "Ev/Yaşam",
@@ -177,7 +177,7 @@ const seeds: Seed[] = [
   ],
   [
     "chair",
-    "Koleksiyon Sandalye",
+    "Kumaş Çalışma Sandalyesi",
     "prd_chair",
     76_000,
     "Ev/Yaşam",
@@ -186,7 +186,7 @@ const seeds: Seed[] = [
   ],
   [
     "coffee",
-    "Koleksiyon Espresso Ekipmanı",
+    "Ev Tipi Espresso Makinesi",
     "prd_coffee",
     690_000,
     "Ev/Yaşam",
@@ -195,7 +195,7 @@ const seeds: Seed[] = [
   ],
   [
     "lamp",
-    "Koleksiyon Masa Lambası",
+    "Metal Gövdeli Masa Lambası",
     "prd_lamp",
     52_000,
     "Ev/Yaşam",
@@ -204,7 +204,7 @@ const seeds: Seed[] = [
   ],
   [
     "console",
-    "Koleksiyon Oyun Konsolu",
+    "Ev Tipi Oyun Konsolu",
     "prd_console",
     1_600_000,
     "Oyun",
@@ -213,7 +213,7 @@ const seeds: Seed[] = [
   ],
   [
     "handheld",
-    "Koleksiyon Taşınabilir Konsol",
+    "Taşınabilir Oyun Konsolu",
     "prd_handheld",
     1_050_000,
     "Oyun",
@@ -222,7 +222,7 @@ const seeds: Seed[] = [
   ],
   [
     "controller",
-    "Koleksiyon Kumanda Seti",
+    "Kablosuz Kumanda Seti",
     "prd_controller",
     320_000,
     "Oyun",
@@ -231,7 +231,7 @@ const seeds: Seed[] = [
   ],
   [
     "game_collection",
-    "Koleksiyon Oyuncak Figür Seti",
+    "Koleksiyonluk Oyuncak Figür Seti",
     "prd_game_collection",
     150_000,
     "Oyun",
@@ -240,7 +240,7 @@ const seeds: Seed[] = [
   ],
   [
     "guitar",
-    "Koleksiyon Gitar Figürü",
+    "Elektro Gitar",
     "prd_guitar",
     1_200_000,
     "Müzik",
@@ -249,7 +249,7 @@ const seeds: Seed[] = [
   ],
   [
     "keyboard",
-    "Koleksiyon Klavye Seti",
+    "Elektronik Klavye",
     "prd_keyboard",
     420_000,
     "Müzik",
@@ -258,7 +258,7 @@ const seeds: Seed[] = [
   ],
   [
     "microphone",
-    "Koleksiyon Mikrofon Figürü",
+    "Stüdyo Mikrofonu",
     "prd_microphone",
     260_000,
     "Müzik",
@@ -267,7 +267,7 @@ const seeds: Seed[] = [
   ],
   [
     "pedal",
-    "Koleksiyon Efekt Pedalı",
+    "Analog Efekt Pedalı",
     "prd_pedal",
     190_000,
     "Müzik",
@@ -276,7 +276,7 @@ const seeds: Seed[] = [
   ],
   [
     "phone",
-    "Koleksiyon Mini Telefon",
+    "Akıllı Telefon",
     "prd_phone",
     820_000,
     "Telefon",
@@ -285,7 +285,7 @@ const seeds: Seed[] = [
   ],
   [
     "compact_phone",
-    "Koleksiyon Cep Telefonu",
+    "Kompakt Cep Telefonu",
     "prd_compact_phone",
     540_000,
     "Telefon",
@@ -294,7 +294,7 @@ const seeds: Seed[] = [
   ],
   [
     "tablet",
-    "Koleksiyon Tablet Seri",
+    "Kalem Destekli Tablet",
     "prd_tablet",
     760_000,
     "Telefon",
@@ -303,7 +303,7 @@ const seeds: Seed[] = [
   ],
   [
     "smartwatch",
-    "Koleksiyon Akıllı Saat",
+    "Akıllı Saat",
     "prd_smartwatch",
     310_000,
     "Telefon",
@@ -344,7 +344,7 @@ const seeds: Seed[] = [
 const scaledSeeds: Seed[] = [
   [
     "mechanical_watch",
-    "Koleksiyon Mekanik Saat",
+    "Koleksiyonluk Mekanik Saat",
     "prd_watch",
     460_000,
     "Küçük Eşya",
@@ -354,7 +354,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "fountain_pen",
-    "Koleksiyon Kalem Seti",
+    "Koleksiyonluk Dolma Kalem Seti",
     "prd_fountain_pen",
     125_000,
     "Küçük Eşya",
@@ -364,7 +364,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "board_game",
-    "Premium Koleksiyon Masa Oyunu",
+    "Delüks Masa Oyunu",
     "prd_board_game",
     84_000,
     "Küçük Eşya",
@@ -374,7 +374,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "vintage_lighter",
-    "Koleksiyon Cep Ateşlemeli",
+    "Koleksiyonluk Metal Çakmak",
     "prd_vintage_lighter",
     155_000,
     "Küçük Eşya",
@@ -384,7 +384,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "portable_radio",
-    "Koleksiyon Cep Radyosu",
+    "Taşınabilir Cep Radyosu",
     "prd_portable_radio",
     115_000,
     "Ses",
@@ -394,7 +394,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "studio_monitor",
-    "Koleksiyon Stüdyo Hoparlör Seti",
+    "Çift Stüdyo Monitörü",
     "prd_studio_monitor",
     640_000,
     "Ses",
@@ -404,7 +404,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "dac_amp",
-    "Koleksiyon Ses Arayüzü",
+    "Masaüstü DAC ve Kulaklık Amfisi",
     "prd_dac_amp",
     370_000,
     "Ses",
@@ -414,7 +414,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "cassette_player",
-    "Koleksiyon Kaset Çaları",
+    "Taşınabilir Kasetçalar",
     "prd_cassette_player",
     220_000,
     "Ses",
@@ -424,7 +424,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "floor_lamp",
-    "Koleksiyon Zemin Lambası",
+    "Ayarlanabilir Zemin Lambası",
     "prd_floor_lamp",
     185_000,
     "Ev/Yaşam",
@@ -434,7 +434,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "side_table",
-    "Koleksiyon Yan Sehpa",
+    "Ahşap Yan Sehpa",
     "prd_side_table",
     245_000,
     "Ev/Yaşam",
@@ -444,7 +444,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "robot_vacuum",
-    "Koleksiyon Robot Süpürge",
+    "Haritalamalı Robot Süpürge",
     "prd_robot_vacuum",
     780_000,
     "Ev/Yaşam",
@@ -454,7 +454,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "stand_mixer",
-    "Koleksiyon Mini Mutfak Mikseri",
+    "Tezgâh Tipi Mutfak Mikseri",
     "prd_stand_mixer",
     520_000,
     "Ev/Yaşam",
@@ -464,7 +464,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "vr_headset",
-    "Koleksiyon VR Seti",
+    "Sanal Gerçeklik Seti",
     "prd_vr_headset",
     1_400_000,
     "Oyun",
@@ -474,7 +474,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "gaming_keyboard",
-    "Koleksiyon Oyun Klavyesi",
+    "Mekanik Oyun Klavyesi",
     "prd_gaming_keyboard",
     230_000,
     "Oyun",
@@ -484,7 +484,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "racing_wheel",
-    "Koleksiyon Yarış Direksiyonu",
+    "Geri Bildirimli Yarış Direksiyonu",
     "prd_racing_wheel",
     1_200_000,
     "Oyun",
@@ -494,7 +494,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "game_cartridge",
-    "Nadir Koleksiyon Kartuşu",
+    "Nadir Koleksiyon Oyun Kartuşu",
     "prd_game_cartridge",
     175_000,
     "Oyun",
@@ -504,7 +504,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "bass_guitar",
-    "Koleksiyon Bas Gitar",
+    "Dört Telli Bas Gitar",
     "prd_bass_guitar",
     680_000,
     "Müzik",
@@ -514,7 +514,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "audio_interface",
-    "Koleksiyon Ses Arayüzü",
+    "USB Ses Kayıt Arayüzü",
     "prd_audio_interface",
     340_000,
     "Müzik",
@@ -524,7 +524,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "drum_machine",
-    "Koleksiyon Davul Seti",
+    "Programlanabilir Davul Makinesi",
     "prd_drum_machine",
     460_000,
     "Müzik",
@@ -534,7 +534,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "violin",
-    "Koleksiyon Keman Figürü",
+    "Öğrenci Tipi Keman",
     "prd_violin",
     295_000,
     "Müzik",
@@ -544,7 +544,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "fold_phone",
-    "Koleksiyon Katlanır Telefon",
+    "Katlanabilir Akıllı Telefon",
     "prd_fold_phone",
     2_800_000,
     "Telefon",
@@ -554,7 +554,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "rugged_phone",
-    "Koleksiyon Dayanıklı Telefon",
+    "Darbeye Dayanıklı Telefon",
     "prd_rugged_phone",
     690_000,
     "Telefon",
@@ -564,7 +564,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "e_reader",
-    "Koleksiyon E-Kitap",
+    "E-Kitap Okuyucu",
     "prd_e_reader",
     410_000,
     "Telefon",
@@ -574,7 +574,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "mobile_projector",
-    "Koleksiyon Mini Projeksiyon",
+    "Taşınabilir Mini Projektör",
     "prd_mobile_projector",
     610_000,
     "Telefon",
@@ -584,7 +584,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "laptop",
-    "Koleksiyon Mini Dizüstü",
+    "İnce ve Hafif Dizüstü",
     "prd_laptop",
     1_850_000,
     "Bilgisayar",
@@ -594,7 +594,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "monitor",
-    "Koleksiyon Monitör",
+    "Yüksek Yenilemeli Monitör",
     "prd_monitor",
     720_000,
     "Bilgisayar",
@@ -604,7 +604,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "mini_pc",
-    "Koleksiyon Mini PC",
+    "Kompakt Masaüstü Bilgisayar",
     "prd_mini_pc",
     980_000,
     "Bilgisayar",
@@ -614,7 +614,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "mechanical_keyboard",
-    "Koleksiyon Mekanik Klavye",
+    "Mekanik Masaüstü Klavye",
     "prd_mechanical_keyboard",
     280_000,
     "Bilgisayar",
@@ -624,7 +624,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "graphics_tablet",
-    "Koleksiyon Çizim Tableti",
+    "Basınç Hassasiyetli Çizim Tableti",
     "prd_graphics_tablet",
     390_000,
     "Bilgisayar",
@@ -634,7 +634,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "router",
-    "Koleksiyon Ağ Gücü",
+    "Kablosuz Ağ Yönlendirici",
     "prd_router",
     330_000,
     "Bilgisayar",
@@ -644,7 +644,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "camera",
-    "Koleksiyon Kamera",
+    "Aynasız Dijital Kamera",
     "prd_camera",
     3_000_000,
     "Fotoğraf",
@@ -654,7 +654,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "camera_lens",
-    "Koleksiyon Portre Lens",
+    "Sabit Odaklı Portre Lensi",
     "prd_camera_lens",
     1_400_000,
     "Fotoğraf",
@@ -664,7 +664,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "instant_camera",
-    "Koleksiyon Anlık Kamera",
+    "Anında Baskılı Kamera",
     "prd_instant_camera",
     360_000,
     "Fotoğraf",
@@ -674,7 +674,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "tripod",
-    "Koleksiyon Tripod",
+    "Alüminyum Kamera Tripodu",
     "prd_tripod",
     270_000,
     "Fotoğraf",
@@ -684,7 +684,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "camera_flash",
-    "Koleksiyon Stüdyo Flaş",
+    "Taşınabilir Stüdyo Flaşı",
     "prd_camera_flash",
     310_000,
     "Fotoğraf",
@@ -694,7 +694,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "action_camera",
-    "Koleksiyon Aksiyon Kamera",
+    "Su Geçirmez Aksiyon Kamerası",
     "prd_action_camera",
     540_000,
     "Fotoğraf",
@@ -704,7 +704,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "perfume_set",
-    "Koleksiyon Aromatik Set",
+    "Seçkili Parfüm Seti",
     "prd_perfume_set",
     210_000,
     "Moda/Bakım",
@@ -714,7 +714,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "makeup_set",
-    "Koleksiyon Makyaj Kiti",
+    "Profesyonel Makyaj Kiti",
     "prd_makeup_set",
     68_000,
     "Moda/Bakım",
@@ -724,7 +724,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "trench_coat",
-    "Koleksiyon Trençkot",
+    "Klasik Kesim Trençkot",
     "prd_trench_coat",
     125_000,
     "Moda/Bakım",
@@ -734,7 +734,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "leather_bag",
-    "Koleksiyon Deri Çanta",
+    "Hakiki Deri Omuz Çantası",
     "prd_leather_bag",
     275_000,
     "Moda/Bakım",
@@ -744,7 +744,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "cordless_vacuum",
-    "Koleksiyon Kablosuz Süpürge",
+    "Kablosuz Şarjlı Süpürge",
     "prd_cordless_vacuum",
     910_000,
     "Ev/Yaşam",
@@ -754,7 +754,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "handheld_vacuum",
-    "Koleksiyon El Süpürgesi",
+    "Kompakt El Süpürgesi",
     "prd_handheld_vacuum",
     370_000,
     "Ev/Yaşam",
@@ -764,7 +764,7 @@ const scaledSeeds: Seed[] = [
   ],
   [
     "stick_vacuum",
-    "Koleksiyon Dikey Süpürge",
+    "Hafif Dikey Süpürge",
     "prd_stick_vacuum",
     1_250_000,
     "Ev/Yaşam",

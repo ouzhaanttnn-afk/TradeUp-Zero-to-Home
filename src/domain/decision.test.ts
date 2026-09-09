@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { families, initialState, market } from "../game";
 import {
+  familyById,
   heroFamilies,
   mediumBudgetFamilies,
   starterExpansionFamilies,
@@ -89,6 +90,19 @@ describe("decision vertical slice", () => {
         new Set(["CLEAN", "TEST", "COMPLETE"]),
       );
     }
+  });
+
+  it("keeps collection wording exceptional instead of applying it to the whole market", () => {
+    const collectionFamilies = families.filter((family) =>
+      /koleksiyon/i.test(family.name),
+    );
+    expect(collectionFamilies).toHaveLength(7);
+    expect(collectionFamilies.length / families.length).toBeLessThan(0.06);
+    expect(collectionFamilies.map((family) => family.id)).toEqual(
+      expect.arrayContaining(["vinyl", "book", "game_cartridge"]),
+    );
+    expect(familyById("notebook")?.name).toBe("Deri Kapaklı Kutu Defteri");
+    expect(familyById("robot_vacuum")?.name).toBe("Haritalamalı Robot Süpürge");
   });
 
   it("adds exactly 32 distinct mid-budget products without bypassing progression", () => {

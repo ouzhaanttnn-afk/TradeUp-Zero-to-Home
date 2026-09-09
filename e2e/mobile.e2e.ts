@@ -14,7 +14,7 @@ test.describe("missing product images", () => {
     await page.getByRole("button", { name: "Teklifi kabul et · ₺420" }).click();
     await page
       .getByRole("button", {
-        name: /Koleksiyon Kutu Defteri, fiyat ₺120, kondisyon yüzde 55,.+İlan detaylarını aç/,
+        name: /Deri Kapaklı Kutu Defteri, fiyat ₺120, kondisyon yüzde 55,.+İlan detaylarını aç/,
       })
       .click();
     const product = page.locator(".sheet img");
@@ -154,7 +154,7 @@ for (const width of [320, 390, 430]) {
     });
     await page
       .getByRole("button", {
-        name: /Koleksiyon Kutu Defteri, fiyat ₺120, kondisyon yüzde 55,.+İlan detaylarını aç/,
+        name: /Deri Kapaklı Kutu Defteri, fiyat ₺120, kondisyon yüzde 55,.+İlan detaylarını aç/,
       })
       .click();
     await expect(page.locator(".sheet-category")).toHaveText("Küçük Eşya");

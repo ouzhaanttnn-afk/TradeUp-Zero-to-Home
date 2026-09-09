@@ -86,7 +86,7 @@ for (const choice of [
     }
     await page
       .locator(`.market-card[data-price-minor="${choice.price * 100}"]`)
-      .filter({ hasText: "Koleksiyon Kutu Defteri" })
+      .filter({ hasText: "Deri Kapaklı Kutu Defteri" })
       .click();
     const purchaseSteps = page.getByRole("group", {
       name: "Satın alma adımları",
@@ -172,16 +172,16 @@ for (const choice of [
     ).toHaveAttribute("aria-selected", "true");
     await expect(
       page.getByRole("article", {
-        name: "Koleksiyon Kutu Defteri",
+        name: "Deri Kapaklı Kutu Defteri",
         exact: true,
       }),
     ).toBeFocused();
     const firstAssetCard = page.getByRole("article", {
-      name: "Koleksiyon Kutu Defteri",
+      name: "Deri Kapaklı Kutu Defteri",
       exact: true,
     });
     await expect(firstAssetCard.locator("h3")).toHaveText(
-      "Koleksiyon Kutu Defteri",
+      "Deri Kapaklı Kutu Defteri",
     );
     expect(
       await firstAssetCard.locator(".owned-icon").evaluate((element) => {
@@ -416,7 +416,7 @@ for (const choice of [
     if (choice.width === 320) {
       await page
         .locator('.market-card[data-price-minor="14000"]')
-        .filter({ hasText: "Koleksiyon Kutu Defteri" })
+        .filter({ hasText: "Deri Kapaklı Kutu Defteri" })
         .click();
       await page.getByRole("button", { name: /^Hemen al/ }).click();
       await expect(
@@ -424,7 +424,7 @@ for (const choice of [
       ).toHaveAttribute("aria-selected", "true");
       await expect(
         page.getByRole("article", {
-          name: "Koleksiyon Kutu Defteri",
+          name: "Deri Kapaklı Kutu Defteri",
           exact: true,
         }),
       ).toBeFocused();
