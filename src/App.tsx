@@ -45,6 +45,7 @@ import {
   type PlayerOfferMode,
 } from "./game";
 import { useGameStore } from "./stores/gameStore";
+import { useTapHaptics } from "./hooks/useTapHaptics";
 import { Icon, type IconName } from "./ui/Icon";
 import { evidencePresentation } from "./ui/evidencePresentation";
 import { ownershipPresentation } from "./ui/ownershipPresentation";
@@ -154,6 +155,7 @@ const rewardCopy = {
 } as const;
 
 export default function App() {
+  useTapHaptics();
   const [tab, setTab] = useState<Tab>("market");
   const [portfolioSegment, setPortfolioSegment] =
     useState<PortfolioSegment>("inventory");
