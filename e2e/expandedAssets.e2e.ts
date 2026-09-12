@@ -468,7 +468,7 @@ test("vacuum families use distinct dedicated artwork", async ({ page }) => {
 
 test("capital bridge families load dedicated premium artwork", async ({
   page,
-}) => {
+}, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const state = initialState(Date.now(), "SANDBOX");
   const rows = [
@@ -496,6 +496,7 @@ test("capital bridge families load dedicated premium artwork", async ({
     state.listings[index] = {
       ...state.listings[index],
       familyId: family.id,
+      priceMinor: family.baseValueMinor,
       instance: { ...state.listings[index].instance, family },
     };
   }
@@ -506,7 +507,9 @@ test("capital bridge families load dedicated premium artwork", async ({
   await page.reload();
 
   for (const [, assetName] of rows) {
-    const image = page.locator(`.market-card img[src*="${assetName}"]`);
+    const card = page.locator(`.market-card:has(img[src*="${assetName}"])`);
+    const image = card.locator("img");
+    await expect(card).toHaveClass(/market-card--upper-market/);
     await expect(image).toHaveCount(1);
     await expect
       .poll(() =>
@@ -517,4 +520,24 @@ test("capital bridge families load dedicated premium artwork", async ({
       )
       .toBe(true);
   }
+
+  const firstCard = page.locator(".market-card").first();
+  const title = firstCard.locator("h3");
+  const titleLines = await title.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return (
+      Math.round(element.getBoundingClientRect().height) /
+      parseFloat(style.lineHeight)
+    );
+  });
+  expect(titleLines).toBeGreaterThanOrEqual(1.8);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: testInfo.outputPath("capital-bridge-market-390.png"),
+    animations: "disabled",
+  });
 });

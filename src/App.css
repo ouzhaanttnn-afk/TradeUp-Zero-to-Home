@@ -989,14 +989,14 @@ main {
 }
 .market-grid .listing h3 {
   display: -webkit-box;
-  min-height: 1.15em;
+  min-height: 2.44em;
   margin: 1px 0 1px;
   overflow: hidden;
   font-size: calc(8px + var(--text-size-boost));
   line-height: 1.22;
   white-space: normal;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
+  -webkit-line-clamp: 2;
 }
 .market-price-row {
   display: flex;
@@ -1010,6 +1010,9 @@ main {
   min-width: 0;
   overflow: hidden;
   font-size: calc(11px + var(--text-size-boost));
+  font-variant-numeric: tabular-nums;
+  line-height: 1.05;
+  white-space: nowrap;
   text-overflow: ellipsis;
   color: #f4f8f6;
 }
@@ -4520,6 +4523,37 @@ main {
 
 .market-grid .market-card:active {
   border-color: rgba(105, 238, 168, 0.38);
+}
+
+.market-grid .market-card--upper-market {
+  border-color: rgba(142, 215, 179, 0.28);
+  background:
+    radial-gradient(
+      circle at 76% -8%,
+      rgba(218, 183, 96, 0.11),
+      transparent 42%
+    ),
+    radial-gradient(circle at 20% 0, rgba(84, 177, 130, 0.13), transparent 48%),
+    linear-gradient(155deg, rgba(14, 38, 27, 0.97), rgba(5, 17, 11, 0.98));
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.27),
+    inset 0 1px rgba(236, 218, 164, 0.065);
+}
+
+.market-grid .market-card--upper-market .product-art {
+  border-color: rgba(201, 221, 209, 0.14);
+  background:
+    radial-gradient(
+      circle at 72% 10%,
+      rgba(213, 177, 91, 0.1),
+      transparent 34%
+    ),
+    radial-gradient(circle at 45% 24%, rgba(54, 126, 91, 0.78), #0a2116 74%);
+}
+
+.market-grid .market-card--upper-market .market-price-row > strong {
+  color: #edfff5;
+  text-shadow: 0 0 13px rgba(105, 225, 162, 0.12);
 }
 
 .market-grid .product-art {

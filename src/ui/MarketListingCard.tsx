@@ -37,11 +37,13 @@ export function MarketListingCard({
   onSelect: () => void;
 }) {
   const ageLabel = listingAgeLabel(item.createdAtGameMin, gameTimeMin);
+  const upperMarket = item.instance.family.tier >= 4;
   return (
     <button
-      className="listing market-card"
+      className={`listing market-card${upperMarket ? " market-card--upper-market" : ""}`}
       data-listing-id={item.id}
       data-price-minor={item.priceMinor}
+      data-market-tier={item.instance.family.tier}
       onClick={onSelect}
       aria-label={`${item.instance.family.name}, fiyat ${money(item.priceMinor)}, kondisyon yüzde ${item.instance.condition}, bilgi güveni ${evidenceLabel(item.instance.evidenceConfidence)}, ${ageLabel}, ${itemSignal.text}. İlan detaylarını aç`}
     >
