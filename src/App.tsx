@@ -378,6 +378,7 @@ export default function App() {
     : undefined;
   const offers = negotiating?.offersRemaining ?? 2;
   const ftueActive = isFtueActive(game);
+  const forceEvidenceOpen = ftueActive && game.ftue.stage !== "COMPARE";
   const budget = selected
     ? purchaseBudget(
         selected.priceMinor,
@@ -1874,9 +1875,10 @@ export default function App() {
               <section className="evidence-panel">
                 <button
                   className="evidence-toggle"
-                  aria-expanded={evidenceExpanded || ftueActive}
+                  aria-expanded={evidenceExpanded || forceEvidenceOpen}
                   onClick={() =>
-                    !ftueActive && setEvidenceExpanded((expanded) => !expanded)
+                    !forceEvidenceOpen &&
+                    setEvidenceExpanded((expanded) => !expanded)
                   }
                 >
                   <span>
@@ -1887,10 +1889,10 @@ export default function App() {
                     </b>
                   </span>
                   <span aria-hidden="true">
-                    {evidenceExpanded || ftueActive ? "−" : "+"}
+                    {evidenceExpanded || forceEvidenceOpen ? "−" : "+"}
                   </span>
                 </button>
-                {evidenceExpanded || ftueActive ? (
+                {evidenceExpanded || forceEvidenceOpen ? (
                   <div className="evidence-content">
                     {selected.instance.evidence.map((record) => {
                       const definition = selected.instance.family.evidence.find(
