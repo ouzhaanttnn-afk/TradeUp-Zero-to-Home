@@ -5,7 +5,7 @@ import assetManifest from "./assets/manifest/assetManifest.json";
 describe("product asset delivery budget", () => {
   it("ships every dedicated product as a compact WebP", async () => {
     const manifestSources = assetManifest.assets.map((asset) => asset.source);
-    expect(manifestSources).toHaveLength(185);
+    expect(manifestSources).toHaveLength(189);
     expect(manifestSources.every((source) => source.endsWith(".webp"))).toBe(
       true,
     );

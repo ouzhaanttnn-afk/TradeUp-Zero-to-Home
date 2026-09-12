@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { initialState, signedMoney, validateState } from "../game";
+import { HOME_OPTIONS } from "../content/homes";
 import type { GameState, OwnedAsset, OwnershipState } from "./models";
 import {
   activeBookCostMinor,
@@ -38,7 +39,7 @@ function purchasedState(): GameState {
 describe("canonical ownership and accounting", () => {
   it("purchases the home atomically with cash and preserves journal reconciliation", () => {
     const state = initialState(0, "SANDBOX");
-    const priceMinor = 350_000_000;
+    const priceMinor = HOME_OPTIONS[0].priceMinor;
     state.cashMinor = priceMinor;
     state.home = {
       ...state.home,

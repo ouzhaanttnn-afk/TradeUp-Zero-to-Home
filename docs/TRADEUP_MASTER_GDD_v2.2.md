@@ -892,6 +892,12 @@ Geç kariyerin az sayıda benzer pahalı ürüne dayanması ve yolculuğun hâl�
 
 Toplam ürün ailesi 185 olur. Aynı 100 seed’li simülasyonda medyan ev yolculuğu 282, P90 314 tamamlanmış satış ölçülür; ₺3.000.000 eşiğine medyan 261 satışta ulaşılır. İçerik paketi için regresyon sınırı medyanda 300, P90’da 330 satıştır. Bu değerler yayın sonrası telemetriyle yeniden kalibre edilir; ürünler arası gerçek fark değer, talep, satış hızı, kanıt ve kusur riskinden doğar.
 
+### Kullanıcı onaylı araç çeşitliliği eki — 12 Eylül 2026
+
+Sermayedar pazarına Kompakt Çift Kabin Pickup, Klasik Roadster, Performans Coupe ve Elektrikli SUV eklenir; araç ailesi sayısı 13’e, toplam ürün ailesi 189’a çıkar. Dört araç da Tier 5 erişimini, mevcut fiyat motorunu ve aynı ekonomik risk kurallarını kullanır. Kendi görselleri, kilometre veya durum seçenekleri, talep, satış hızı ve uygun teknik kontrol kanıtları vardır. Bu içerik eki yeni mekanik, ayrıcalıklı marj veya garantili kâr yaratmaz.
+
+Güncel 100 seed’li simülasyonda ₺3.500.000 emlak arama eşiğine hızlı P10 koşusu 232, medyan koşu 255 ve yavaş P90 koşusu 291 tamamlanmış satışta ulaşır; medyan piyasa yenilemesi 31’dir. Regresyon sınırları medyanda 300 ve P90’da 330 satış olarak korunur. Bu eşik yalnız emlak araştırmasını başlatır; gerçek ev satın alımı seçilen evin nakit bedelini ayrıca gerektirir.
+
 ## Progression ergonomisi
 - Düşük fiyatlı fırsatlar late-game’de de ekonomik olarak anlamlı kalır: hızlı likidite, bundle veya koleksiyon değeri.
 - Kategori içerikleri servete göre kapanmaz; yalnız yüksek riskli segmentler açılır.
@@ -928,9 +934,9 @@ Home goal locale/economy config ile tanımlanır; prototip Türkiye paketi için
 
 ### Kullanıcı onaylı ev pazarı revizyonu — 12 Eylül 2026
 
-₺3.500.000 toplam servete ulaşmak satın alma düğmesini anında açmaz; deterministik emlak araştırmasını başlatır. İlk iki ev ilanı 180 oyun dakikası sonra, kalan üç ilan ise 90’ar oyun dakikası arayla görünür. Bekleme gerçek para, reklam veya premium hakla atlanamaz; çevrimdışı ilerleme mevcut doğrulanmış oyun-zamanı kurallarını izler.
+₺3.500.000 toplam servete ulaşmak satın alma düğmesini anında açmaz; yalnız deterministik emlak araştırmasını başlatır ve hiçbir evin satış bedeli değildir. İlk iki ev ilanı 180 oyun dakikası sonra, kalan üç ilan ise 90’ar oyun dakikası arayla görünür. Bekleme gerçek para, reklam veya premium hakla atlanamaz; çevrimdışı ilerleme mevcut doğrulanmış oyun-zamanı kurallarını izler.
 
-Ev pazarı beş kalıcı seçenek içerir: Bahçeli Başlangıç Evi ₺3.500.000, Şehir Rezidans Dairesi ₺3.850.000, Teraslı Dubleks ₺4.250.000, Taş Avlulu Ev ₺4.700.000 ve Sahil Yamaç Villası ₺5.250.000. Oyuncu yalnız görünür durumdaki ve nakdini karşıladığı evi seçebilir. Seçilmeyen evler otomatik satın alınmaz; envanter otomatik satılmaz. Satın alınan evin kimliği finalde ve kariyer kaydında korunur.
+Ev pazarı beş kalıcı ve belirgin biçimde ayrışan seçenek içerir: Bahçeli Başlangıç Evi ₺3.750.000, Şehir Rezidans Dairesi ₺4.150.000, Teraslı Dubleks ₺4.750.000, Taş Avlulu Ev ₺5.600.000 ve Sahil Yamaç Villası ₺7.250.000. Oyuncu yalnız görünür durumdaki ve nakdini karşıladığı evi seçebilir. Seçilmeyen evler otomatik satın alınmaz; envanter otomatik satılmaz. Satın alınan evin kimliği finalde ve kariyer kaydında korunur.
 
 Ev satın alındıktan sonra pazarlık ve kariyer açık kalır. Bir sonraki uzun dönem hedefi v1.0 kapsamına yeni mekanik olarak eklenmez; arayüzde eylemsiz ve açıkça “Yakında” durumuyla gösterilir.
 

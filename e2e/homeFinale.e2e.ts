@@ -1,17 +1,19 @@
 import { expect, test } from "@playwright/test";
 import { completeFirstLaunch } from "./helpers";
-import { HOME_GOAL_MINOR, initialState, validateState } from "../src/game";
+import { initialState, validateState } from "../src/game";
+import { HOME_OPTIONS } from "../src/content/homes";
 
 test("wealth atmosphere culminates in an accessible home purchase finale", async ({
   page,
 }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const saved = initialState(Date.now(), "SANDBOX");
-  saved.cashMinor = HOME_GOAL_MINOR;
+  const selectedHomePriceMinor = HOME_OPTIONS[0].priceMinor;
+  saved.cashMinor = selectedHomePriceMinor;
   saved.gameTimeMin = 180;
   saved.transactionJournal[0] = {
     ...saved.transactionJournal[0],
-    cashDeltaMinor: HOME_GOAL_MINOR,
+    cashDeltaMinor: selectedHomePriceMinor,
   };
   saved.home = {
     unlocked: true,

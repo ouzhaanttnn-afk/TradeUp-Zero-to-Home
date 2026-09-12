@@ -564,6 +564,10 @@ test("late-career variety families load distinct dedicated artwork", async ({
     ["maxi_scooter", "prd_maxi_scooter"],
     ["used_light_commercial", "prd_used_light_commercial"],
     ["camper_van", "prd_camper_van"],
+    ["compact_pickup", "prd_compact_pickup"],
+    ["classic_roadster", "prd_classic_roadster"],
+    ["performance_coupe", "prd_performance_coupe"],
+    ["electric_suv", "prd_electric_suv"],
   ] as const;
 
   for (const [index, [familyId]] of rows.entries()) {

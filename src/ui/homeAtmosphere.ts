@@ -19,8 +19,8 @@ export function homeGoldPercent(
   const upperIndex = HOME_ATMOSPHERE_STOPS.findIndex(
     (stop) => ratio <= stop.wealthRatio,
   );
-  if (upperIndex <= 0) return HOME_ATMOSPHERE_STOPS[0].goldPercent;
   if (upperIndex === -1) return HOME_ATMOSPHERE_STOPS.at(-1)?.goldPercent ?? 92;
+  if (upperIndex === 0) return HOME_ATMOSPHERE_STOPS[0].goldPercent;
   const lower = HOME_ATMOSPHERE_STOPS[upperIndex - 1];
   const upper = HOME_ATMOSPHERE_STOPS[upperIndex];
   const progress =

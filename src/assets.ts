@@ -185,6 +185,10 @@ import gpuRenderWorkstation from "./assets/products/prd_gpu_render_workstation.w
 import maxiScooter from "./assets/products/prd_maxi_scooter.webp";
 import usedLightCommercial from "./assets/products/prd_used_light_commercial.webp";
 import camperVan from "./assets/products/prd_camper_van.webp";
+import compactPickup from "./assets/products/prd_compact_pickup.webp";
+import classicRoadster from "./assets/products/prd_classic_roadster.webp";
+import performanceCoupe from "./assets/products/prd_performance_coupe.webp";
+import electricSuv from "./assets/products/prd_electric_suv.webp";
 
 const dedicatedAssets: Record<string, string> = {
   prd_notebook: notebook,
@@ -372,6 +376,10 @@ const dedicatedAssets: Record<string, string> = {
   prd_maxi_scooter: maxiScooter,
   prd_used_light_commercial: usedLightCommercial,
   prd_camper_van: camperVan,
+  prd_compact_pickup: compactPickup,
+  prd_classic_roadster: classicRoadster,
+  prd_performance_coupe: performanceCoupe,
+  prd_electric_suv: electricSuv,
 };
 
 const fallbackSvg = (category: string, symbol: string, color: string) =>

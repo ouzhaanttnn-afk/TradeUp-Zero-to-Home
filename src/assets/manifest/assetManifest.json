@@ -1111,6 +1111,30 @@
       "familyId": "camper_van",
       "source": "../products/prd_camper_van.webp",
       "dedicated": true
+    },
+    {
+      "assetKey": "prd_compact_pickup",
+      "familyId": "compact_pickup",
+      "source": "../products/prd_compact_pickup.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_classic_roadster",
+      "familyId": "classic_roadster",
+      "source": "../products/prd_classic_roadster.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_performance_coupe",
+      "familyId": "performance_coupe",
+      "source": "../products/prd_performance_coupe.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_electric_suv",
+      "familyId": "electric_suv",
+      "source": "../products/prd_electric_suv.webp",
+      "dedicated": true
     }
   ],
   "overlays": [

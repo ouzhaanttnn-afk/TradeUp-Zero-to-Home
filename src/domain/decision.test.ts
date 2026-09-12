@@ -124,7 +124,7 @@ describe("decision vertical slice", () => {
   });
 
   it("adds 32 more starter and mid-tier products with bounded prices", () => {
-    expect(families).toHaveLength(185);
+    expect(families).toHaveLength(189);
     expect(starterExpansionFamilies).toHaveLength(32);
     expect(
       new Set(starterExpansionFamilies.map((family) => family.id)).size,
@@ -216,13 +216,13 @@ describe("decision vertical slice", () => {
     ).toBeGreaterThanOrEqual(4);
   });
 
-  it("adds nine vehicle families only to the matching high-ticket tiers", () => {
-    expect(vehicleFamilies).toHaveLength(9);
+  it("adds thirteen vehicle families only to the matching high-ticket tiers", () => {
+    expect(vehicleFamilies).toHaveLength(13);
     expect(vehicleFamilies.every((family) => family.category === "Araç")).toBe(
       true,
     );
     expect(vehicleFamilies.map((family) => family.tier)).toEqual([
-      4, 4, 4, 5, 5, 5, 5, 5, 5,
+      4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
     ]);
     expect(
       vehicleFamilies.every(

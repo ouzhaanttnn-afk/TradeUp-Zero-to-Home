@@ -20,6 +20,7 @@ describe("home atmosphere", () => {
 
   it("becomes fully gold only after the home is purchased", () => {
     expect(homeGoldPercent(GOAL, GOAL, false)).toBe(92);
+    expect(homeGoldPercent(GOAL + 25_000_000, GOAL, false)).toBe(92);
     expect(homeGoldPercent(0, GOAL, true)).toBe(100);
     expect(homeAtmosphereStage(100)).toBe(7);
   });
