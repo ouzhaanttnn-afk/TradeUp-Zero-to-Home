@@ -465,3 +465,56 @@ test("vacuum families use distinct dedicated artwork", async ({ page }) => {
       .toBe(true);
   }
 });
+
+test("capital bridge families load dedicated premium artwork", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const state = initialState(Date.now(), "SANDBOX");
+  const rows = [
+    ["cinema_camera_kit", "prd_cinema_camera_kit"],
+    ["workstation_laptop", "prd_workstation_laptop"],
+    ["digital_mixing_console", "prd_digital_mixing_console"],
+    ["commercial_espresso_machine", "prd_commercial_espresso_machine"],
+    ["broadcast_lens_set", "prd_broadcast_lens_set"],
+    ["synthesizer_workstation", "prd_synthesizer_workstation"],
+    ["premium_arcade_cabinet", "prd_premium_arcade_cabinet"],
+    ["professional_ceramic_kiln", "prd_professional_ceramic_kiln"],
+    ["compact_cnc_router", "prd_compact_cnc_router"],
+    ["industrial_embroidery_machine", "prd_industrial_embroidery_machine"],
+    ["concert_pa_system", "prd_concert_pa_system"],
+    ["server_rack_bundle", "prd_server_rack_bundle"],
+    ["broadcast_camera_package", "prd_broadcast_camera_package"],
+    ["event_led_wall", "prd_event_led_wall"],
+    ["industrial_3d_printer", "prd_industrial_3d_printer"],
+    ["grand_digital_piano", "prd_grand_digital_piano"],
+  ] as const;
+
+  for (const [index, [familyId]] of rows.entries()) {
+    const family = familyById(familyId);
+    if (!family) throw new Error(`Capital bridge family missing: ${familyId}`);
+    state.listings[index] = {
+      ...state.listings[index],
+      familyId: family.id,
+      instance: { ...state.listings[index].instance, family },
+    };
+  }
+
+  await page.goto("/");
+  await completeFirstLaunch(page);
+  await persistGame(page, validateState(state));
+  await page.reload();
+
+  for (const [, assetName] of rows) {
+    const image = page.locator(`.market-card img[src*="${assetName}"]`);
+    await expect(image).toHaveCount(1);
+    await expect
+      .poll(() =>
+        image.evaluate(
+          (element: HTMLImageElement) =>
+            element.complete && element.naturalWidth === 512,
+        ),
+      )
+      .toBe(true);
+  }
+});

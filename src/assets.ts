@@ -32,6 +32,22 @@ import robotVacuum from "./assets/products/prd_robot_vacuum.webp";
 import cordlessVacuum from "./assets/products/prd_cordless_vacuum_v2.webp";
 import handheldVacuum from "./assets/products/prd_handheld_vacuum_v2.webp";
 import stickVacuum from "./assets/products/prd_stick_vacuum_v2.webp";
+import cinemaCameraKit from "./assets/products/prd_cinema_camera_kit.webp";
+import workstationLaptop from "./assets/products/prd_workstation_laptop.webp";
+import digitalMixingConsole from "./assets/products/prd_digital_mixing_console.webp";
+import commercialEspressoMachine from "./assets/products/prd_commercial_espresso_machine.webp";
+import broadcastLensSet from "./assets/products/prd_broadcast_lens_set.webp";
+import synthesizerWorkstation from "./assets/products/prd_synthesizer_workstation.webp";
+import premiumArcadeCabinet from "./assets/products/prd_premium_arcade_cabinet.webp";
+import professionalCeramicKiln from "./assets/products/prd_professional_ceramic_kiln.webp";
+import compactCncRouter from "./assets/products/prd_compact_cnc_router.webp";
+import industrialEmbroideryMachine from "./assets/products/prd_industrial_embroidery_machine.webp";
+import concertPaSystem from "./assets/products/prd_concert_pa_system.webp";
+import serverRackBundle from "./assets/products/prd_server_rack_bundle.webp";
+import broadcastCameraPackage from "./assets/products/prd_broadcast_camera_package.webp";
+import eventLedWall from "./assets/products/prd_event_led_wall.webp";
+import industrial3dPrinter from "./assets/products/prd_industrial_3d_printer.webp";
+import grandDigitalPiano from "./assets/products/prd_grand_digital_piano.webp";
 import cameraLens from "./assets/products/prd_camera_lens.webp";
 import foldPhone from "./assets/products/prd_fold_phone.webp";
 import racingWheel from "./assets/products/prd_racing_wheel.webp";
@@ -187,6 +203,22 @@ const dedicatedAssets: Record<string, string> = {
   prd_cordless_vacuum: cordlessVacuum,
   prd_handheld_vacuum: handheldVacuum,
   prd_stick_vacuum: stickVacuum,
+  prd_cinema_camera_kit: cinemaCameraKit,
+  prd_workstation_laptop: workstationLaptop,
+  prd_digital_mixing_console: digitalMixingConsole,
+  prd_commercial_espresso_machine: commercialEspressoMachine,
+  prd_broadcast_lens_set: broadcastLensSet,
+  prd_synthesizer_workstation: synthesizerWorkstation,
+  prd_premium_arcade_cabinet: premiumArcadeCabinet,
+  prd_professional_ceramic_kiln: professionalCeramicKiln,
+  prd_compact_cnc_router: compactCncRouter,
+  prd_industrial_embroidery_machine: industrialEmbroideryMachine,
+  prd_concert_pa_system: concertPaSystem,
+  prd_server_rack_bundle: serverRackBundle,
+  prd_broadcast_camera_package: broadcastCameraPackage,
+  prd_event_led_wall: eventLedWall,
+  prd_industrial_3d_printer: industrial3dPrinter,
+  prd_grand_digital_piano: grandDigitalPiano,
   prd_camera_lens: cameraLens,
   prd_fold_phone: foldPhone,
   prd_racing_wheel: racingWheel,

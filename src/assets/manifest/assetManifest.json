@@ -919,6 +919,102 @@
       "familyId": "vinyl_cutting_plotter",
       "source": "../products/prd_vinyl_cutting_plotter.webp",
       "dedicated": true
+    },
+    {
+      "assetKey": "prd_cinema_camera_kit",
+      "familyId": "cinema_camera_kit",
+      "source": "../products/prd_cinema_camera_kit.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_workstation_laptop",
+      "familyId": "workstation_laptop",
+      "source": "../products/prd_workstation_laptop.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_digital_mixing_console",
+      "familyId": "digital_mixing_console",
+      "source": "../products/prd_digital_mixing_console.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_commercial_espresso_machine",
+      "familyId": "commercial_espresso_machine",
+      "source": "../products/prd_commercial_espresso_machine.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_broadcast_lens_set",
+      "familyId": "broadcast_lens_set",
+      "source": "../products/prd_broadcast_lens_set.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_synthesizer_workstation",
+      "familyId": "synthesizer_workstation",
+      "source": "../products/prd_synthesizer_workstation.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_premium_arcade_cabinet",
+      "familyId": "premium_arcade_cabinet",
+      "source": "../products/prd_premium_arcade_cabinet.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_professional_ceramic_kiln",
+      "familyId": "professional_ceramic_kiln",
+      "source": "../products/prd_professional_ceramic_kiln.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_compact_cnc_router",
+      "familyId": "compact_cnc_router",
+      "source": "../products/prd_compact_cnc_router.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_industrial_embroidery_machine",
+      "familyId": "industrial_embroidery_machine",
+      "source": "../products/prd_industrial_embroidery_machine.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_concert_pa_system",
+      "familyId": "concert_pa_system",
+      "source": "../products/prd_concert_pa_system.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_server_rack_bundle",
+      "familyId": "server_rack_bundle",
+      "source": "../products/prd_server_rack_bundle.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_broadcast_camera_package",
+      "familyId": "broadcast_camera_package",
+      "source": "../products/prd_broadcast_camera_package.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_event_led_wall",
+      "familyId": "event_led_wall",
+      "source": "../products/prd_event_led_wall.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_industrial_3d_printer",
+      "familyId": "industrial_3d_printer",
+      "source": "../products/prd_industrial_3d_printer.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_grand_digital_piano",
+      "familyId": "grand_digital_piano",
+      "source": "../products/prd_grand_digital_piano.webp",
+      "dedicated": true
     }
   ],
   "overlays": [

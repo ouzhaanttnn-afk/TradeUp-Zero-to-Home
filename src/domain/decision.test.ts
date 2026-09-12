@@ -6,6 +6,7 @@ import {
   mediumBudgetFamilies,
   starterExpansionFamilies,
   upperMidFamilies,
+  capitalBridgeFamilies,
   vehicleFamilies,
 } from "../content/families";
 import {
@@ -121,7 +122,7 @@ describe("decision vertical slice", () => {
   });
 
   it("adds 32 more starter and mid-tier products with bounded prices", () => {
-    expect(families).toHaveLength(153);
+    expect(families).toHaveLength(169);
     expect(starterExpansionFamilies).toHaveLength(32);
     expect(
       new Set(starterExpansionFamilies.map((family) => family.id)).size,
@@ -150,6 +151,26 @@ describe("decision vertical slice", () => {
       expect(family.baseValueMinor).toBeLessThanOrEqual(5_800_000);
       expect(family.tier).toBe(3);
     }
+  });
+
+  it("bridges upper-mid goods into high-ticket trading without changing margins", () => {
+    expect(capitalBridgeFamilies).toHaveLength(16);
+    expect(new Set(capitalBridgeFamilies.map((family) => family.id)).size).toBe(
+      16,
+    );
+    expect(
+      capitalBridgeFamilies.filter((family) => family.tier === 4),
+    ).toHaveLength(8);
+    expect(
+      capitalBridgeFamilies.filter((family) => family.tier === 5),
+    ).toHaveLength(8);
+    expect(
+      capitalBridgeFamilies.every(
+        (family) =>
+          family.baseValueMinor >= 12_800_000 &&
+          family.baseValueMinor <= 56_000_000,
+      ),
+    ).toBe(true);
   });
 
   it("adds six vehicle families only to the matching high-ticket tiers", () => {
