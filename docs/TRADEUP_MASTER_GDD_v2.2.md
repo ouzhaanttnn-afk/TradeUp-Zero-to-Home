@@ -926,6 +926,14 @@ Home goal locale/economy config ile tanımlanır; prototip Türkiye paketi için
 - Post-game seçenekleri: daha iyi ev, küçük atölye/office, yeni şehir, koleksiyon vitrini. Hepsi ERTELENDİ statüsündedir.
 - Ev görseli mağaza IAP’siyle gerçek hedefin önüne geçmez.
 
+### Kullanıcı onaylı ev pazarı revizyonu — 12 Eylül 2026
+
+₺3.500.000 toplam servete ulaşmak satın alma düğmesini anında açmaz; deterministik emlak araştırmasını başlatır. İlk iki ev ilanı 180 oyun dakikası sonra, kalan üç ilan ise 90’ar oyun dakikası arayla görünür. Bekleme gerçek para, reklam veya premium hakla atlanamaz; çevrimdışı ilerleme mevcut doğrulanmış oyun-zamanı kurallarını izler.
+
+Ev pazarı beş kalıcı seçenek içerir: Bahçeli Başlangıç Evi ₺3.500.000, Şehir Rezidans Dairesi ₺3.850.000, Teraslı Dubleks ₺4.250.000, Taş Avlulu Ev ₺4.700.000 ve Sahil Yamaç Villası ₺5.250.000. Oyuncu yalnız görünür durumdaki ve nakdini karşıladığı evi seçebilir. Seçilmeyen evler otomatik satın alınmaz; envanter otomatik satılmaz. Satın alınan evin kimliği finalde ve kariyer kaydında korunur.
+
+Ev satın alındıktan sonra pazarlık ve kariyer açık kalır. Bir sonraki uzun dönem hedefi v1.0 kapsamına yeni mekanik olarak eklenmez; arayüzde eylemsiz ve açıkça “Yakında” durumuyla gösterilir.
+
 ## Kişisel final
 > **[KİLİTLİ] Kişisel final:** Final montajı careerEvents ve owned history’den türetilir. Oyuncunun hiç ticaretini yapmadığı telefon/araba asset’i başarı sembolü olarak zorla gösterilmez.
 

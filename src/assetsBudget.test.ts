@@ -37,4 +37,23 @@ describe("product asset delivery budget", () => {
       192 * 1024,
     );
   });
+
+  it("keeps all five home listing scenes mobile-sized", async () => {
+    const homeFiles = [
+      "./assets/homes/home_garden_edge.webp",
+      "./assets/homes/home_city_residence.webp",
+      "./assets/homes/home_terrace_duplex.webp",
+      "./assets/homes/home_stone_courtyard.webp",
+      "./assets/homes/home_coastal_villa.webp",
+    ];
+    const sizes = await Promise.all(
+      homeFiles.map((source) => stat(new URL(source, import.meta.url))),
+    );
+    expect(Math.max(...sizes.map((item) => item.size))).toBeLessThan(
+      140 * 1024,
+    );
+    expect(sizes.reduce((total, item) => total + item.size, 0)).toBeLessThan(
+      600 * 1024,
+    );
+  });
 });

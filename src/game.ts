@@ -30,7 +30,7 @@ export type {
   TransactionJournalEntry,
 } from "./domain/models";
 export { families } from "./content/families";
-export const SAVE_VERSION = 16;
+export const SAVE_VERSION = 17;
 export const HOME_GOAL_MINOR = 350_000_000;
 
 const attributeDefinitionSchema = z.object({
@@ -319,7 +319,9 @@ const followSchema = z.object({
 const homeSchema = z.object({
   unlocked: z.boolean(),
   revealedAtGameMin: z.number().int().nonnegative().optional(),
+  searchStartedAtGameMin: z.number().int().nonnegative().optional(),
   purchased: z.boolean(),
+  purchasedHomeId: z.string().optional(),
   progressMilestones: z.array(
     z.union([z.literal(25), z.literal(50), z.literal(75), z.literal(90)]),
   ),

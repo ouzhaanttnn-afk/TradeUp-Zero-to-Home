@@ -1634,8 +1634,8 @@ export default function App() {
               <JourneyPanel
                 game={game}
                 homeProgress={homeProgress}
-                onBuyHome={() => {
-                  if (buyHome()) setHomeFinaleOpen(true);
+                onBuyHome={(homeId) => {
+                  if (buyHome(homeId)) setHomeFinaleOpen(true);
                 }}
                 onOpenPortfolio={() => navigate("portfolio")}
               />
@@ -1703,6 +1703,7 @@ export default function App() {
         <Suspense fallback={null}>
           <HomeFinale
             highlights={finaleHighlights}
+            homeId={game.home.purchasedHomeId}
             buttonRef={homeFinaleButtonRef}
             onClose={() => setHomeFinaleOpen(false)}
           />

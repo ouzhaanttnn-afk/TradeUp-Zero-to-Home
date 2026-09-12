@@ -3,6 +3,8 @@ import { money } from "../game";
 import { Icon } from "./Icon";
 import { simplifyLegacyPlayerCopy } from "./playerLanguage";
 import { useModalFocus } from "./useModalFocus";
+import { homeOptionById } from "../content/homes";
+import { homeAssets } from "./homeAssets";
 
 type FinaleHighlight = {
   id: string;
@@ -12,14 +14,17 @@ type FinaleHighlight = {
 
 export default function HomeFinale({
   highlights,
+  homeId,
   buttonRef,
   onClose,
 }: {
   highlights: FinaleHighlight[];
+  homeId?: string;
   buttonRef: RefObject<HTMLButtonElement | null>;
   onClose: () => void;
 }) {
   const panelRef = useRef<HTMLElement>(null);
+  const home = homeOptionById(homeId);
   useModalFocus(true, panelRef, buttonRef, onClose);
   return (
     <section
@@ -31,12 +36,17 @@ export default function HomeFinale({
     >
       <div className="home-finale-glow" aria-hidden="true" />
       <div className="home-finale-house" aria-hidden="true">
-        <Icon name="home" />
+        {home ? (
+          <img src={homeAssets[home.assetKey]} alt="" />
+        ) : (
+          <Icon name="home" />
+        )}
       </div>
       <small>ZERO TO HOME</small>
       <h2 id="home-finale-title">Anahtar artık sende.</h2>
       <p>
-        Sıfırdan başladın. Aldın, hazırladın, sattın ve kendi evine ulaştın.
+        Sıfırdan başladın. Aldın, hazırladın, sattın ve{" "}
+        {home?.name ?? "kendi evine"} ulaştın.
       </p>
       {highlights.length ? (
         <div

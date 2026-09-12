@@ -8,12 +8,14 @@ test("wealth atmosphere culminates in an accessible home purchase finale", async
   await page.setViewportSize({ width: 390, height: 844 });
   const saved = initialState(Date.now(), "SANDBOX");
   saved.cashMinor = HOME_GOAL_MINOR;
+  saved.gameTimeMin = 180;
   saved.transactionJournal[0] = {
     ...saved.transactionJournal[0],
     cashDeltaMinor: HOME_GOAL_MINOR,
   };
   saved.home = {
     unlocked: true,
+    searchStartedAtGameMin: 0,
     purchased: false,
     progressMilestones: [25, 50, 75, 90],
   };
@@ -60,10 +62,15 @@ test("wealth atmosphere culminates in an accessible home purchase finale", async
     "0.92",
   );
   await page.getByRole("button", { name: "Yolculuk", exact: true }).click();
+  await expect(page.getByText("2 ev bulundu")).toBeVisible();
   await expect(
-    page.getByRole("button", { name: `Evi satın al · ₺3.500.000` }),
+    page.getByRole("heading", { name: "Bahçeli Başlangıç Evi" }),
   ).toBeVisible();
-  await page.getByRole("button", { name: `Evi satın al · ₺3.500.000` }).click();
+  await page.screenshot({
+    path: testInfo.outputPath("home-market-390.png"),
+    animations: "disabled",
+  });
+  await page.getByRole("button", { name: "Bu evi seç" }).first().click();
 
   const finale = page.getByRole("dialog", { name: "Anahtar artık sende." });
   await expect(finale).toBeVisible();
@@ -98,4 +105,5 @@ test("wealth atmosphere culminates in an accessible home purchase finale", async
   await expect(
     page.getByRole("heading", { name: "Evin artık senin" }),
   ).toBeVisible();
+  await expect(page.getByText("YAKINDA", { exact: true })).toBeVisible();
 });

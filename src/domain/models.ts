@@ -289,7 +289,9 @@ export type FollowState = {
 export type HomeState = {
   unlocked: boolean;
   revealedAtGameMin?: number;
+  searchStartedAtGameMin?: number;
   purchased: boolean;
+  purchasedHomeId?: string;
   progressMilestones: number[];
 };
 

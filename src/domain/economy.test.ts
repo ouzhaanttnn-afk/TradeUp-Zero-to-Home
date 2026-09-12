@@ -40,13 +40,22 @@ describe("canonical ownership and accounting", () => {
     const state = initialState(0, "SANDBOX");
     const priceMinor = 350_000_000;
     state.cashMinor = priceMinor;
-    state.home = { ...state.home, unlocked: true };
+    state.home = {
+      ...state.home,
+      unlocked: true,
+      searchStartedAtGameMin: 0,
+    };
     state.transactionJournal[0] = {
       ...state.transactionJournal[0],
       cashDeltaMinor: priceMinor,
     };
 
-    const result = purchaseHome(state, priceMinor, "home-purchase:career", 480);
+    const result = purchaseHome(
+      state,
+      "garden_edge",
+      "home-purchase:career",
+      480,
+    );
     if (!result.ok) throw new Error(result.reason);
 
     expect(result.state.cashMinor).toBe(0);
@@ -67,7 +76,7 @@ describe("canonical ownership and accounting", () => {
 
     const repeated = purchaseHome(
       result.state,
-      priceMinor,
+      "garden_edge",
       "home-purchase:career",
       480,
     );
@@ -77,11 +86,15 @@ describe("canonical ownership and accounting", () => {
 
   it("does not auto-sell inventory when home cash is insufficient", () => {
     const state = initialState(0, "SANDBOX");
-    state.home = { ...state.home, unlocked: true };
+    state.home = {
+      ...state.home,
+      unlocked: true,
+      searchStartedAtGameMin: 0,
+    };
     const beforeAssets = state.ownedAssets;
     const result = purchaseHome(
       state,
-      350_000_000,
+      "garden_edge",
       "home-purchase:insufficient",
       480,
     );

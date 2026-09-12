@@ -520,31 +520,35 @@ export function migrateStateToV4(value: unknown): unknown {
 }
 
 export function migrateStateToCurrent(value: unknown): unknown {
-  return migrateStateToV16(
-    migrateStateToV15(
-      migrateStateToV14(
-        migrateStateToV13(
-          migrateStateToV12(
-            migrateStateToV11(
-              migrateStateToV10(
-                migrateStateToV9(
-                  migrateStateToV8(
-                    migrateStateToV7(
-                      migrateStateToV6(
-                        migrateStateToV5(
-                          migrateStateToV4(migrateStateToV3(value)),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    ),
-  );
+  let next = migrateStateToV3(value);
+  next = migrateStateToV4(next);
+  next = migrateStateToV5(next);
+  next = migrateStateToV6(next);
+  next = migrateStateToV7(next);
+  next = migrateStateToV8(next);
+  next = migrateStateToV9(next);
+  next = migrateStateToV10(next);
+  next = migrateStateToV11(next);
+  next = migrateStateToV12(next);
+  next = migrateStateToV13(next);
+  next = migrateStateToV14(next);
+  next = migrateStateToV15(next);
+  next = migrateStateToV16(next);
+  return migrateStateToV17(next);
+}
+
+export function migrateStateToV17(value: unknown): unknown {
+  const source = record(value);
+  if (integer(source.version) >= 17) return value;
+  const home = record(source.home);
+  return {
+    ...source,
+    version: 17,
+    home: {
+      ...home,
+      ...(home.purchased ? { purchasedHomeId: "garden_edge" } : {}),
+    },
+  };
 }
 
 export function migrateStateToV16(value: unknown): unknown {

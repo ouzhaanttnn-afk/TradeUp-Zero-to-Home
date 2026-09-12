@@ -1,4 +1,5 @@
-import { market, rng } from "../game";
+import { HOME_GOAL_MINOR, market, rng } from "../game";
+import { startHomeSearch } from "../content/homes";
 import { BUYER_TEMPO_CONFIG, WORLD_CONFIG } from "./config";
 import { netWorthMinor } from "./economy";
 import { completeDuePreparations } from "./preparation";
@@ -430,6 +431,17 @@ export function advanceWorldTo(
     Math.floor(requestedTime),
   );
   let state = initial;
+  if (
+    state.home.unlocked &&
+    !state.home.purchased &&
+    state.home.searchStartedAtGameMin === undefined
+  ) {
+    state = startHomeSearch(
+      state,
+      netWorthMinor(state) >= HOME_GOAL_MINOR,
+      Math.min(targetGameTimeMin, initial.gameTimeMin + 1),
+    );
+  }
   let closureCount = 0;
   let npcSales = 0;
   let marketExpirations = 0;
@@ -478,6 +490,17 @@ export function advanceWorldTo(
       : 0;
   const arrivalResult = appendArrivals(state, requestedArrivals);
   state = pruneTerminalHistory(arrivalResult.state);
+  if (
+    state.home.unlocked &&
+    !state.home.purchased &&
+    state.home.searchStartedAtGameMin === undefined
+  ) {
+    state = startHomeSearch(
+      state,
+      netWorthMinor(state) >= HOME_GOAL_MINOR,
+      targetGameTimeMin,
+    );
+  }
 
   return {
     state,

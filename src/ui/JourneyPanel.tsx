@@ -7,7 +7,14 @@ import {
 } from "../domain/meta";
 import type { GameState } from "../domain/models";
 import { HOME_GOAL_MINOR, money } from "../game";
+import {
+  availableHomeOptions,
+  homeOptionById,
+  homeSearchElapsedMin,
+  nextHomeResult,
+} from "../content/homes";
 import { Icon } from "./Icon";
+import { homeAssets } from "./homeAssets";
 import {
   careerEventPresentation,
   completedSalesPresentation,
@@ -27,7 +34,7 @@ export default function JourneyPanel({
 }: {
   game: GameState;
   homeProgress: number;
-  onBuyHome: () => void;
+  onBuyHome: (homeId: string) => void;
   onOpenPortfolio: () => void;
 }) {
   const timelinePageSize = 4;
@@ -56,6 +63,13 @@ export default function JourneyPanel({
   const estimates = wealthPresentation(game);
   const marketLevel = marketExpertiseLevel(game);
   const marketXpTarget = nextExpertiseThreshold(game.expertise.marketXp);
+  const availableHomes = availableHomeOptions(game.home, game.gameTimeMin);
+  const nextHome = nextHomeResult(game.home, game.gameTimeMin);
+  const searchElapsed = homeSearchElapsedMin(game.home, game.gameTimeMin);
+  const nextHomeWaitMin = nextHome
+    ? Math.max(0, nextHome.revealOffsetMin - searchElapsed)
+    : 0;
+  const purchasedHome = homeOptionById(game.home.purchasedHomeId);
 
   return (
     <>
@@ -98,10 +112,45 @@ export default function JourneyPanel({
             <div className="xp-bar">
               <i style={{ width: `${homeProgress}%` }} />
             </div>
-            {!game.home.purchased && game.cashMinor >= HOME_GOAL_MINOR ? (
-              <button className="home-purchase-button" onClick={onBuyHome}>
-                Evi satın al · {money(HOME_GOAL_MINOR)}
-              </button>
+            {!game.home.purchased && homeProgress >= 100 ? (
+              <div className="home-market">
+                <div className="home-market-status" role="status">
+                  <span>
+                    {availableHomes.length
+                      ? `${availableHomes.length} ev bulundu`
+                      : "Emlak araştırması sürüyor"}
+                  </span>
+                  {nextHome ? (
+                    <b>Yeni sonuç yaklaşık {nextHomeWaitMin} oyun dk.</b>
+                  ) : (
+                    <b>Tüm seçenekler bulundu</b>
+                  )}
+                </div>
+                {availableHomes.length ? (
+                  <div className="home-market-list" aria-label="Ev seçenekleri">
+                    {availableHomes.map((home) => (
+                      <article className="home-option-card" key={home.id}>
+                        <img src={homeAssets[home.assetKey]} alt="" />
+                        <div>
+                          <small>{home.location}</small>
+                          <h4>{home.name}</h4>
+                          <p>{home.summary}</p>
+                          <strong>{money(home.priceMinor)}</strong>
+                          {game.cashMinor >= home.priceMinor ? (
+                            <button onClick={() => onBuyHome(home.id)}>
+                              Bu evi seç
+                            </button>
+                          ) : (
+                            <span className="home-option-shortfall">
+                              {money(home.priceMinor - game.cashMinor)} eksik
+                            </span>
+                          )}
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
             ) : null}
             {!game.home.purchased &&
             homeProgress >= 100 &&
@@ -130,6 +179,19 @@ export default function JourneyPanel({
           </div>
         </section>
       )}
+      {game.home.purchased ? (
+        <section className="next-goal-card">
+          <div>
+            <small>EVİN ARDINDAKİ HEDEF</small>
+            <h3>{purchasedHome?.name ?? "Kendi evin"} ile yeni dönem</h3>
+            <p>
+              Kariyer devam ediyor. Bir sonraki uzun dönem hedefi yeni içerik
+              güncellemesiyle açılacak.
+            </p>
+          </div>
+          <span>YAKINDA</span>
+        </section>
+      ) : null}
       <section className={`score-card journey-score ${completedSales.tone}`}>
         <div className="journey-score-heading">
           <small>{completedSales.label}</small>

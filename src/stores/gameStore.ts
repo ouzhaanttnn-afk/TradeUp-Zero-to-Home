@@ -55,6 +55,7 @@ import {
   rechargeMarketScanCredits,
 } from "../domain/monetization";
 import { isAnimatedAvatar, ownsAnimatedAvatars } from "../domain/profile";
+import { homeOptionById } from "../content/homes";
 import type {
   AvatarId,
   InspectionKind,
@@ -71,7 +72,6 @@ import {
 } from "../domain/world";
 import {
   initialState,
-  HOME_GOAL_MINOR,
   money,
   playerOfferMinor,
   resolveOffer,
@@ -112,7 +112,7 @@ type Store = {
   refreshMarketScanCredits: () => void;
   tick: () => void;
   buy: (item: Listing, priceMinor?: number) => boolean;
-  buyHome: () => boolean;
+  buyHome: (homeId: string) => boolean;
   offer: (item: Listing, mode?: PlayerOfferMode) => void;
   sell: (item: OwnedAsset, quick: boolean) => void;
   list: (item: OwnedAsset, askingPriceMinor: number) => void;
@@ -508,22 +508,32 @@ export const useGameStore = create<Store>((set, get) => ({
     sound(game, "PURCHASE");
     return true;
   },
-  buyHome: () => {
+  buyHome: (homeId) => {
     const game = get().game;
-    recordReplayCommand(game, "BUY_HOME", { priceMinor: HOME_GOAL_MINOR });
+    const home = homeOptionById(homeId);
+    if (!home) {
+      set({ notice: "Bu ev ilanı artık bulunamıyor." });
+      return false;
+    }
+    recordReplayCommand(game, "BUY_HOME", {
+      homeId,
+      priceMinor: home.priceMinor,
+    });
     const result = purchaseHome(
       game,
-      HOME_GOAL_MINOR,
-      "home-purchase:career",
+      homeId,
+      `home-purchase:${homeId}`,
       game.gameTimeMin,
     );
     if (!result.ok) {
       const notice =
         result.reason === "INSUFFICIENT_CASH"
-          ? `${money(HOME_GOAL_MINOR - game.cashMinor)} nakit eksik. Portföyün otomatik satılmaz.`
+          ? `${money(home.priceMinor - game.cashMinor)} nakit eksik. Portföyün otomatik satılmaz.`
           : result.reason === "HOME_NOT_UNLOCKED"
             ? "Ev yolculuğu henüz açılmadı."
-            : "Bu ev zaten senin.";
+            : result.reason === "HOME_NOT_AVAILABLE"
+              ? "Bu ev için emlak araştırması henüz tamamlanmadı."
+              : "Bu ev zaten senin.";
       set({ notice });
       buzz(game);
       sound(game, "WARNING");
@@ -535,7 +545,7 @@ export const useGameStore = create<Store>((set, get) => ({
     }
     set({
       game: stampAndPersist(result.state),
-      notice: "Kendi evini aldın. Yolculuğun burada bitmiyor.",
+      notice: `${home.name} artık senin. Yolculuğun burada bitmiyor.`,
     });
     buzz(game, true);
     sound(game, "SALE_PROFIT");

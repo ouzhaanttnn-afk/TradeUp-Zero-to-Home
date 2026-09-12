@@ -12,11 +12,13 @@ import type {
 import { WORLD_CONFIG } from "./config";
 import { exitPricingBps } from "./valuation";
 import { buyerPersona } from "./buyers";
+import { availableHomeOptions, homeOptionById } from "../content/homes";
 
 type EconomyFailureReason =
   | "INSUFFICIENT_CASH"
   | "HOME_NOT_UNLOCKED"
   | "HOME_ALREADY_PURCHASED"
+  | "HOME_NOT_AVAILABLE"
   | "LISTING_NOT_ACTIVE"
   | "ASSET_NOT_FOUND"
   | "ASSET_NOT_AVAILABLE"
@@ -221,7 +223,7 @@ export function purchaseListing(
 
 export function purchaseHome(
   state: GameState,
-  purchasePriceMinor: number,
+  homeId: string,
   transactionId: string,
   gameTime: number,
 ): EconomyCommandResult {
@@ -234,6 +236,16 @@ export function purchaseHome(
   if (state.home.purchased) {
     return { ok: false, state, reason: "HOME_ALREADY_PURCHASED" };
   }
+  const home = homeOptionById(homeId);
+  if (
+    !home ||
+    !availableHomeOptions(state.home, gameTime).some(
+      (option) => option.id === homeId,
+    )
+  ) {
+    return { ok: false, state, reason: "HOME_NOT_AVAILABLE" };
+  }
+  const purchasePriceMinor = home.priceMinor;
   if (!Number.isInteger(purchasePriceMinor) || purchasePriceMinor <= 0) {
     return { ok: false, state, reason: "INVALID_AMOUNT" };
   }
@@ -247,7 +259,7 @@ export function purchaseHome(
     state: {
       ...state,
       cashMinor: state.cashMinor - purchasePriceMinor,
-      home: { ...state.home, purchased: true },
+      home: { ...state.home, purchased: true, purchasedHomeId: home.id },
       career: [
         ...state.career,
         {
@@ -255,7 +267,7 @@ export function purchaseHome(
           type: "HOME_PURCHASE",
           group: "HOME",
           atGameMin: gameTime,
-          label: "Kendi evini aldın",
+          label: `${home.name} artık senin`,
           amountMinor: purchasePriceMinor,
         },
       ],
@@ -269,7 +281,7 @@ export function purchaseHome(
           -purchasePriceMinor,
           0,
           0,
-          { purchasePriceMinor },
+          { purchasePriceMinor, homeId },
         ),
       ],
     },

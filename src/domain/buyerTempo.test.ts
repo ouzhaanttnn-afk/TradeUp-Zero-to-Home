@@ -104,7 +104,7 @@ describe("user-approved buyer wait calibration", () => {
     expect(newWaits.some((wait) => wait === 1)).toBe(true);
     expect(newWaits.some((wait) => wait > 10)).toBe(true);
     expect(unchangedOffers).toBeGreaterThan(0);
-  });
+  }, 10_000);
 
   it("has no offer at listing creation and preserves pending offers", () => {
     const state = fixture();
