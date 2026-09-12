@@ -215,19 +215,19 @@
     {
       "assetKey": "prd_cordless_vacuum",
       "familyId": "cordless_vacuum",
-      "source": "../products/prd_cordless_vacuum.webp",
+      "source": "../products/prd_cordless_vacuum_v2.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_handheld_vacuum",
       "familyId": "handheld_vacuum",
-      "source": "../products/prd_handheld_vacuum.webp",
+      "source": "../products/prd_handheld_vacuum_v2.webp",
       "dedicated": true
     },
     {
       "assetKey": "prd_stick_vacuum",
       "familyId": "stick_vacuum",
-      "source": "../products/prd_stick_vacuum.webp",
+      "source": "../products/prd_stick_vacuum_v2.webp",
       "dedicated": true
     },
     {

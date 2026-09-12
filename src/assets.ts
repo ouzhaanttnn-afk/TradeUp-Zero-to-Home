@@ -29,6 +29,9 @@ import camera from "./assets/products/prd_camera.webp";
 import laptop from "./assets/products/prd_laptop.webp";
 import vrHeadset from "./assets/products/prd_vr_headset.webp";
 import robotVacuum from "./assets/products/prd_robot_vacuum.webp";
+import cordlessVacuum from "./assets/products/prd_cordless_vacuum_v2.webp";
+import handheldVacuum from "./assets/products/prd_handheld_vacuum_v2.webp";
+import stickVacuum from "./assets/products/prd_stick_vacuum_v2.webp";
 import cameraLens from "./assets/products/prd_camera_lens.webp";
 import foldPhone from "./assets/products/prd_fold_phone.webp";
 import racingWheel from "./assets/products/prd_racing_wheel.webp";
@@ -181,6 +184,9 @@ const dedicatedAssets: Record<string, string> = {
   prd_laptop: laptop,
   prd_vr_headset: vrHeadset,
   prd_robot_vacuum: robotVacuum,
+  prd_cordless_vacuum: cordlessVacuum,
+  prd_handheld_vacuum: handheldVacuum,
+  prd_stick_vacuum: stickVacuum,
   prd_camera_lens: cameraLens,
   prd_fold_phone: foldPhone,
   prd_racing_wheel: racingWheel,

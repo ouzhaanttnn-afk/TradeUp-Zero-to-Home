@@ -427,3 +427,41 @@ test("upper-mid expansion artwork loads without category fallbacks", async ({
     ),
   ).toBe(true);
 });
+
+test("vacuum families use distinct dedicated artwork", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const state = initialState(Date.now(), "SANDBOX");
+  const rows = [
+    ["cordless_vacuum", "prd_cordless_vacuum_v2"],
+    ["handheld_vacuum", "prd_handheld_vacuum_v2"],
+    ["stick_vacuum", "prd_stick_vacuum_v2"],
+  ] as const;
+
+  for (const [index, [familyId]] of rows.entries()) {
+    const family = familyById(familyId);
+    if (!family) throw new Error(`Vacuum family is missing: ${familyId}`);
+    state.listings[index] = {
+      ...state.listings[index],
+      familyId: family.id,
+      instance: { ...state.listings[index].instance, family },
+    };
+  }
+
+  await page.goto("/");
+  await completeFirstLaunch(page);
+  await persistGame(page, validateState(state));
+  await page.reload();
+
+  for (const [, assetName] of rows) {
+    const image = page.locator(`.market-card img[src*="${assetName}"]`);
+    await expect(image).toHaveCount(1);
+    await expect
+      .poll(() =>
+        image.evaluate(
+          (element: HTMLImageElement) =>
+            element.complete && element.naturalWidth === 512,
+        ),
+      )
+      .toBe(true);
+  }
+});
