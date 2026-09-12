@@ -41,4 +41,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         config.delegateClass = SceneDelegate.self
         return config
     }
+
+    // iPad must declare landscape support in Info.plist for App Store
+    // multitasking validation, but TradeUp's UI is portrait-only.
+    func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
+        return .portrait
+    }
 }
