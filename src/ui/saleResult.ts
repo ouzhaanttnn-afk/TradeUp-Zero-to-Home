@@ -11,6 +11,7 @@ export function latestSaleResult(state: GameState) {
   return {
     transactionId: entry.id,
     assetName: asset.instance.family.name,
+    instance: asset.instance,
     proceedsMinor: entry.cashDeltaMinor,
     bookCostMinor: -entry.costBasisDeltaMinor,
     profitMinor: entry.realizedProfitDeltaMinor,

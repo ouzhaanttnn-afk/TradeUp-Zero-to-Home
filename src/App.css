@@ -1925,7 +1925,7 @@ main {
 }
 .sale-result {
   margin-top: 12px;
-  padding: 18px;
+  padding: 14px;
   border: 1px solid rgba(94, 230, 160, 0.34);
   border-radius: 18px;
   background: linear-gradient(
@@ -1940,12 +1940,73 @@ main {
   font-weight: 800;
   letter-spacing: 0.1em;
 }
+.sale-result-heading {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 11px;
+}
+.sale-result-heading > div {
+  min-width: 0;
+}
+.sale-result-heading small {
+  color: var(--accent);
+  font-size: calc(8px + var(--text-size-boost));
+  font-weight: 850;
+  letter-spacing: 0.11em;
+}
+.sale-result-art {
+  width: 58px;
+  height: 58px;
+  overflow: hidden;
+  border: 1px solid rgba(125, 233, 177, 0.24);
+  border-radius: 15px;
+  background: radial-gradient(circle at 50% 20%, #315b48, #10241a 76%);
+  box-shadow:
+    inset 0 -12px 20px rgba(0, 0, 0, 0.2),
+    0 8px 20px rgba(0, 0, 0, 0.2);
+}
+.sale-result-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
 .sale-result-copy h3 {
-  margin: 7px 0 16px;
-  font-size: calc(19px + var(--text-size-boost));
+  margin: 3px 0 0;
+  font-size: calc(17px + var(--text-size-boost));
+  line-height: 1.12;
+}
+.sale-result .sale-breakdown {
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid rgba(137, 205, 171, 0.14);
+  border-radius: 13px;
+  background: rgba(5, 19, 12, 0.55);
+}
+.sale-result .sale-breakdown > div {
+  min-height: 38px;
+  align-items: center;
+  padding: 7px 9px;
+  border-bottom: 1px solid rgba(137, 205, 171, 0.1);
+}
+.sale-result .sale-breakdown > div:last-child {
+  border-bottom: 0;
+}
+.sale-result .sale-breakdown > .profit,
+.sale-result .sale-breakdown > .loss {
+  background: rgba(94, 230, 160, 0.07);
+}
+.sale-result .sale-breakdown > .loss {
+  background: rgba(223, 111, 101, 0.08);
+}
+.sale-result .sale-breakdown > .profit dd,
+.sale-result .sale-breakdown > .loss dd {
+  font-size: calc(17px + var(--text-size-boost));
+  font-variant-numeric: tabular-nums;
 }
 .sale-result-copy > p {
-  margin: 15px 0 12px;
+  margin: 11px 0 9px;
   color: #afc4b9;
   font-size: calc(12px + var(--text-size-boost));
 }

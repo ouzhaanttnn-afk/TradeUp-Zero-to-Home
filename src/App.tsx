@@ -1543,8 +1543,17 @@ export default function App() {
               latestSale ? (
                 <section className="sale-result" aria-label="Son satış sonucu">
                   <div className="sale-result-copy" role="status">
-                    <small>SATIŞ TAMAMLANDI</small>
-                    <h3>{latestSale.assetName} satıldı</h3>
+                    <div className="sale-result-heading">
+                      <ProductVisual
+                        instance={latestSale.instance}
+                        className="sale-result-art"
+                        alt={latestSale.assetName}
+                      />
+                      <div>
+                        <small>SATIŞ TAMAMLANDI</small>
+                        <h3>{latestSale.assetName} satıldı</h3>
+                      </div>
+                    </div>
                     <dl className="sale-breakdown">
                       <div>
                         <dt>Hesabına giren</dt>

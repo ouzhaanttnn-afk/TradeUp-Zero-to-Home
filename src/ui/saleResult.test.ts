@@ -18,9 +18,14 @@ describe("latest sale result", () => {
     );
     if (!sale.ok) throw new Error(sale.reason);
     const restored = validateState(JSON.parse(JSON.stringify(sale.state)));
+    const restoredAsset = restored.ownedAssets.find(
+      (item) => item.id === asset.id,
+    );
+    if (!restoredAsset) throw new Error("Restored sold asset is missing");
     expect(latestSaleResult(restored)).toEqual({
       transactionId: "sale:test",
-      assetName: asset.instance.family.name,
+      assetName: restoredAsset.instance.family.name,
+      instance: restoredAsset.instance,
       proceedsMinor: 25_000,
       bookCostMinor: 20_000,
       profitMinor: 5_000,

@@ -388,6 +388,10 @@ for (const choice of [
     await expect(saleResult).toContainText(
       `Net kârın${signedMoney(sale.realizedProfitDeltaMinor)}`,
     );
+    await expect(saleResult.locator(".sale-result-art img")).toBeVisible();
+    await expect(
+      saleResult.locator(".sale-breakdown .profit dd"),
+    ).toContainText(signedMoney(sale.realizedProfitDeltaMinor));
     await expect(
       page.getByRole("complementary", { name: "İlk oturum rehberi" }),
     ).toHaveCount(0);
@@ -433,9 +437,9 @@ for (const choice of [
         .toBe(loaded.cashMinor - 14_000);
       await stage("COMPLETE");
       const purchased = await readSave();
-      await expect(page.getByRole("button", { name: /^Hemen sat/ })).toHaveCount(
-        0,
-      );
+      await expect(
+        page.getByRole("button", { name: /^Hemen sat/ }),
+      ).toHaveCount(0);
       await page
         .getByRole("button", { name: "Satışa çıkar", exact: true })
         .click();
