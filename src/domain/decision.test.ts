@@ -17,6 +17,7 @@ import {
 } from "./decision";
 import { purchaseListing, reconcileJournal } from "./economy";
 import { completeDuePreparations, startPreparation } from "./preparation";
+import { MARKET_ACCESS_CONFIG } from "./config";
 
 describe("decision vertical slice", () => {
   it("keeps selected first and excludes inactive and unrelated listings", () => {
@@ -215,14 +216,20 @@ describe("decision vertical slice", () => {
     ).toBe(true);
     expect(
       Array.from({ length: 80 }, (_, cycle) =>
-        market(91_300, 24_999_999, cycle, cycle, 24),
+        market(
+          91_300,
+          MARKET_ACCESS_CONFIG.tier4WealthMinor - 1,
+          cycle,
+          cycle,
+          24,
+        ),
       )
         .flat()
         .some((listing) => listing.instance.family.category === "Araç"),
     ).toBe(false);
     expect(
       Array.from({ length: 80 }, (_, cycle) =>
-        market(91_300, 25_000_000, cycle, cycle, 24),
+        market(91_300, MARKET_ACCESS_CONFIG.tier4WealthMinor, cycle, cycle, 24),
       )
         .flat()
         .some((listing) => listing.familyId === "urban_motorcycle"),

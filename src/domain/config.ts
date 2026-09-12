@@ -22,6 +22,16 @@ export const BUYER_TEMPO_CONFIG = {
   arrivalMultiplier: 2,
 } as const;
 
+// User-approved career pacing calibration. This only broadens access to
+// higher-ticket families; it does not change valuation, margins or rewards.
+export const MARKET_ACCESS_CONFIG = {
+  revision: "career-pacing-2026-09-12",
+  tier2WealthMinor: 1_000_000,
+  tier3WealthMinor: 4_000_000,
+  tier4WealthMinor: 10_000_000,
+  tier5WealthMinor: 30_000_000,
+} as const;
+
 // Calibrated against broad 2026 Turkish second-hand asking-price bands.
 // Family reference values remain fictional and brand-independent.
 export const VALUATION_CONFIG = {

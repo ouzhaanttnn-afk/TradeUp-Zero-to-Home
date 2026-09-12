@@ -880,6 +880,12 @@ Her trade timeline’a girmez. Sistem, anlamlı olayları append-only biçimde k
 
 Unlock yalnız net worth’e bağlanmaz; temel sistemleri kullanmış olma ve doğrulanmış işlem sayısı da gerekebilir. Böylece tek ultra şanslı satış oyuncuyu anlamadığı yüksek biletli pazara fırlatmaz. Ancak bu koşullar grind duvarı değildir; oyuncuya hangi becerinin eksik olduğu açıkça söylenir.
 
+### Kullanıcı onaylı kariyer temposu revizyonu — 12 Eylül 2026
+
+Oyuncunun kariyerin gereğinden uzun sürdüğü geri bildirimi üzerine yüksek biletli family erişimi, yukarıdaki kilitli aşama aralıklarının içinde kalacak biçimde öne çekilir. `MARKET_ACCESS_CONFIG` eşikleri Tier 2 için ₺10.000, Tier 3 için ₺40.000, Tier 4 için ₺100.000 ve Tier 5 için ₺300.000 toplam servettir. Bu revizyon yalnız erişimi genişletir; ürün referans fiyatlarını, değerleme eğrisini, satıcı tabanını, işlem marjını, ev bedelini, reklamları veya ödülleri değiştirmez. Eski düşük fiyatlı pazar açık kalır ve pahalı ürünün görünmesi satın alınabilirlik garantisi vermez.
+
+100 sabit seed’li dikkatli oyuncu simülasyonunda medyan ev yolculuğu 489’dan 383 tamamlanmış satışa, P90 530’dan 447 satışa iner. Bu sonuç yaklaşık %22 kısalma hedefini kilitler; medyan 400 ve P90 460 satışın üstüne çıkarsa içerik/erişim regresyonu kabul edilir. Simülasyon bir telemetri vekilidir; soft-launch verisinin yerini tutmaz.
+
 ## Progression ergonomisi
 - Düşük fiyatlı fırsatlar late-game’de de ekonomik olarak anlamlı kalır: hızlı likidite, bundle veya koleksiyon değeri.
 - Kategori içerikleri servete göre kapanmaz; yalnız yüksek riskli segmentler açılır.

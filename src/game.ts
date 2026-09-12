@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { families } from "./content/families";
+import { MARKET_ACCESS_CONFIG } from "./domain/config";
 import { netWorthMinor } from "./domain/economy";
 import {
   instanceFairValueMinor,
@@ -690,13 +691,13 @@ export function market(
 ): Listing[] {
   const r = rng(seed + cycle * 7_919);
   const tier =
-    totalWealthMinor < 1_000_000
+    totalWealthMinor < MARKET_ACCESS_CONFIG.tier2WealthMinor
       ? 1
-      : totalWealthMinor < 7_500_000
+      : totalWealthMinor < MARKET_ACCESS_CONFIG.tier3WealthMinor
         ? 2
-        : totalWealthMinor < 25_000_000
+        : totalWealthMinor < MARKET_ACCESS_CONFIG.tier4WealthMinor
           ? 3
-          : totalWealthMinor < 100_000_000
+          : totalWealthMinor < MARKET_ACCESS_CONFIG.tier5WealthMinor
             ? 4
             : 5;
   const pool = families.filter((family) => family.tier <= tier);
