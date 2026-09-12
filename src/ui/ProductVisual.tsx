@@ -32,30 +32,40 @@ export function ProductVisual({
         alt={alt}
       />
       <span className="condition-overlay" aria-hidden="true" />
-      {visual.revealedDefect ? (
-        <span
-          className="visual-badge visual-badge--defect"
-          aria-label="Doğrulanmış kusur"
-        >
-          !
-        </span>
-      ) : null}
-      {visual.missingAccessory ? (
-        <span
-          className="visual-badge visual-badge--accessory"
-          aria-label="Eksik aksesuar"
-        >
-          −
-        </span>
-      ) : null}
-      {visual.verifiedEvidence ? (
-        <span
-          className="visual-badge visual-badge--verified"
-          aria-label="Kanıt doğrulandı"
-        >
-          ✓
-        </span>
-      ) : null}
+      <span
+        className="visual-condition-bar"
+        title={`Kondisyon: ${visual.conditionLabel}`}
+        aria-hidden="true"
+      />
+      <span className="visual-statuses">
+        {visual.revealedDefect ? (
+          <span
+            className="visual-badge visual-badge--defect"
+            aria-label={`${visual.revealedDefectCount} doğrulanmış kusur`}
+          >
+            <b aria-hidden="true">!</b>
+            <em>Kusur</em>
+          </span>
+        ) : null}
+        {visual.missingAccessory ? (
+          <span
+            className="visual-badge visual-badge--accessory"
+            aria-label="Eksik aksesuar"
+          >
+            <b aria-hidden="true">−</b>
+            <em>Eksik</em>
+          </span>
+        ) : null}
+        {visual.verifiedEvidence ? (
+          <span
+            className="visual-badge visual-badge--verified"
+            aria-label={`${visual.verifiedEvidenceCount} kanıt doğrulandı`}
+          >
+            <b aria-hidden="true">✓</b>
+            <em>Kontrollü</em>
+          </span>
+        ) : null}
+      </span>
     </div>
   );
 }

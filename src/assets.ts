@@ -384,10 +384,23 @@ export const visualTreatmentFor = (instance: ItemInstance) => ({
       : instance.condition < 80
         ? ("used" as const)
         : ("clean" as const),
+  conditionLabel:
+    instance.condition < 55
+      ? "Yıpranmış"
+      : instance.condition < 80
+        ? "Kullanılmış"
+        : "Temiz",
+  revealedDefectCount: instance.defects.filter(
+    (defect) => defect.present && defect.revealed,
+  ).length,
   revealedDefect: instance.defects.some(
     (defect) => defect.present && defect.revealed,
   ),
   missingAccessory: !instance.accessoryComplete,
+  verifiedEvidenceCount: instance.evidence.filter(
+    (evidence) =>
+      evidence.status === "VERIFIED" || evidence.status === "CHECKED",
+  ).length,
   verifiedEvidence: instance.evidence.some(
     (evidence) =>
       evidence.status === "VERIFIED" || evidence.status === "CHECKED",

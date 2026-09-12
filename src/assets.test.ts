@@ -33,12 +33,8 @@ describe("asset manifest and visual treatments", () => {
     expect(hasDedicatedAsset("prd_leather_bag")).toBe(true);
     expect(hasDedicatedAsset("prd_vr_headset")).toBe(true);
     expect(hasDedicatedAsset("prd_robot_vacuum")).toBe(true);
-    expect(assetFor("prd_cordless_vacuum")).toContain(
-      "prd_cordless_vacuum_v2",
-    );
-    expect(assetFor("prd_handheld_vacuum")).toContain(
-      "prd_handheld_vacuum_v2",
-    );
+    expect(assetFor("prd_cordless_vacuum")).toContain("prd_cordless_vacuum_v2");
+    expect(assetFor("prd_handheld_vacuum")).toContain("prd_handheld_vacuum_v2");
     expect(assetFor("prd_stick_vacuum")).toContain("prd_stick_vacuum_v2");
     expect(hasDedicatedAsset("prd_camera_lens")).toBe(true);
     expect(hasDedicatedAsset("prd_fold_phone")).toBe(true);
@@ -90,6 +86,7 @@ describe("asset manifest and visual treatments", () => {
       })),
     };
     expect(visualTreatmentFor(hiddenDefect).revealedDefect).toBe(false);
+    expect(visualTreatmentFor(hiddenDefect).revealedDefectCount).toBe(0);
     const revealed = {
       ...hiddenDefect,
       defects: hiddenDefect.defects.map((defect, index) => ({
@@ -98,5 +95,7 @@ describe("asset manifest and visual treatments", () => {
       })),
     };
     expect(visualTreatmentFor(revealed).revealedDefect).toBe(true);
+    expect(visualTreatmentFor(revealed).revealedDefectCount).toBe(1);
+    expect(visualTreatmentFor(revealed).conditionLabel).toBeTruthy();
   });
 });
