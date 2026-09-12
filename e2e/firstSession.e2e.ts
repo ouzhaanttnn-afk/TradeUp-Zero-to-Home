@@ -433,6 +433,12 @@ for (const choice of [
         .toBe(loaded.cashMinor - 14_000);
       await stage("COMPLETE");
       const purchased = await readSave();
+      await expect(page.getByRole("button", { name: /^Hemen sat/ })).toHaveCount(
+        0,
+      );
+      await page
+        .getByRole("button", { name: "Satışa çıkar", exact: true })
+        .click();
       await page.getByRole("button", { name: /^Hemen sat/ }).click();
       await expect(
         page.getByRole("group", { name: "Hızlı satış onayı" }),
@@ -449,6 +455,9 @@ for (const choice of [
         page.getByRole("tab", { name: "Hazırlık", exact: true }),
       ).toHaveAttribute("aria-selected", "true");
       // Preparation stays optional after the first session; navigation must not charge a fee.
+      await page
+        .getByRole("button", { name: "Satışa çıkar", exact: true })
+        .click();
       await page.getByRole("button", { name: /^İlan oluştur/ }).click();
       await expect(
         page.getByRole("tab", { name: "İlanlarım", exact: true }),

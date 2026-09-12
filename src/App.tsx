@@ -168,6 +168,9 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsReturnTab, setSettingsReturnTab] = useState<Tab>("market");
   const [quickSaleAssetId, setQuickSaleAssetId] = useState<string | null>(null);
+  const [listingStrategyAssetId, setListingStrategyAssetId] = useState<
+    string | null
+  >(null);
   const [manualListingAssetId, setManualListingAssetId] = useState<
     string | null
   >(null);
@@ -505,6 +508,7 @@ export default function App() {
     setSelectedId(null);
     setComparing(false);
     setQuickSaleAssetId(null);
+    setListingStrategyAssetId(null);
     setManualListingAssetId(null);
     setFocusedAssetId(assetId);
     setPortfolioSegment(segment);
@@ -649,13 +653,46 @@ export default function App() {
               Hazırlık tamam. Ürününü satışa çıkarabilirsin.
             </p>
           ) : null}
+          {!ftueActive &&
+          quickSaleAssetId !== item.id &&
+          (item.state === "IN_INVENTORY" || item.state === "READY") ? (
+            <div className="portfolio-card-actions">
+              {!showPreparation && availablePreparations.length > 0 ? (
+                <button
+                  aria-label="Ürünü hazırla"
+                  onClick={() => showOwnedAsset(item.id, "preparation")}
+                >
+                  Hazırla
+                </button>
+              ) : null}
+              <button
+                className="primary"
+                type="button"
+                aria-expanded={listingStrategyAssetId === item.id}
+                aria-controls={`listing-strategies-${item.id}`}
+                onClick={() => {
+                  const opening = listingStrategyAssetId !== item.id;
+                  setListingStrategyAssetId(opening ? item.id : null);
+                  setManualListingAssetId(null);
+                }}
+              >
+                {listingStrategyAssetId === item.id
+                  ? "Seçenekleri kapat"
+                  : "Satışa çıkar"}
+              </button>
+            </div>
+          ) : null}
           {(item.state === "IN_INVENTORY" || item.state === "READY") &&
           quickSaleAssetId !== item.id &&
+          (ftueActive || listingStrategyAssetId === item.id) &&
           (!ftueActive || game.ftue.stage === "LISTING") ? (
             <div
+              id={`listing-strategies-${item.id}`}
               className={`portfolio-next-action${ftueActive ? "" : " listing-strategies"}`}
             >
-              <small>SIRADAKİ ADIM</small>
+              <small>
+                {ftueActive ? "SIRADAKİ ADIM" : "SATIŞ SEÇENEKLERİ"}
+              </small>
               <b>
                 {ftueActive
                   ? "Dengeli fiyatla satışa çıkar"
@@ -853,11 +890,6 @@ export default function App() {
                 Vazgeç
               </button>
             </div>
-          ) : null}
-          {!showPreparation && availablePreparations.length > 0 ? (
-            <button onClick={() => showOwnedAsset(item.id, "preparation")}>
-              Ürünü hazırla
-            </button>
           ) : null}
         </div>
       </article>
@@ -1186,12 +1218,11 @@ export default function App() {
         ) : null}
         {tab === "portfolio" ? (
           <>
-            <div className="section-title">
+            <div className="section-title portfolio-title">
               <div>
                 <small>ÜRÜNLERİN</small>
                 <h2>Portföy</h2>
               </div>
-              <span>{activeOwnedAssets(game).length} ürün</span>
             </div>
             <div
               className="segments"

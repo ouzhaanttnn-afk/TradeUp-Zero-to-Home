@@ -1310,8 +1310,10 @@ main {
 }
 .decision-cause {
   display: grid;
-  gap: 2px;
-  padding: 7px 9px;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  padding: 5px 8px;
   border-left: 2px solid #d7b96d;
   border-radius: 0 9px 9px 0;
   background: rgba(215, 185, 109, 0.07);
@@ -1324,6 +1326,7 @@ main {
   text-transform: uppercase;
 }
 .decision-cause span {
+  min-width: 0;
   color: #bdcbc4;
 }
 .owned-icon {
@@ -1348,6 +1351,22 @@ main {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 6px;
+}
+.portfolio-card-actions {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 1px;
+}
+.portfolio-card-actions button {
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+}
+.portfolio-card-actions button:only-child {
+  grid-column: 1 / -1;
 }
 .buyer-actions {
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2538,6 +2557,20 @@ nav .active .nav-icon {
 
 .app-shell main > .section-title:first-child h2 {
   text-shadow: 0 2px 14px rgba(0, 0, 0, 0.52);
+}
+
+.app-shell.tab-portfolio main > .portfolio-title:first-child {
+  min-height: 50px;
+  margin-bottom: 6px;
+  padding: 7px 10px;
+}
+
+.app-shell.tab-portfolio .segments {
+  margin-bottom: 6px;
+}
+
+.app-shell.tab-portfolio .segments button {
+  min-height: 46px;
 }
 
 .app-shell main > .section-title:first-child > span,
