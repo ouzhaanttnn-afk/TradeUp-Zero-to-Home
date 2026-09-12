@@ -5,5 +5,12 @@ const config: CapacitorConfig = {
   webDir: "dist",
   backgroundColor: "#07100d",
   server: { androidScheme: "https" },
+  ios: {
+    backgroundColor: "#050a08",
+    contentInset: "never",
+    scrollEnabled: true,
+    preferredContentMode: "mobile",
+    allowsLinkPreview: false,
+  },
 };
 export default config;

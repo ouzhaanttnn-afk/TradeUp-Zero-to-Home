@@ -215,6 +215,13 @@ body {
   );
   overflow-x: clip;
 }
+@media (hover: none) and (pointer: coarse) {
+  input,
+  select,
+  textarea {
+    font-size: max(16px, calc(1rem + var(--text-size-boost, 0px)));
+  }
+}
 button {
   font: inherit;
   color: inherit;
@@ -3873,6 +3880,7 @@ nav .active .nav-icon {
   overscroll-behavior-inline: contain;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 .home-market-list::-webkit-scrollbar {
   display: none;
