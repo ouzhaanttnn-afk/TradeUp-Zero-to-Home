@@ -886,6 +886,12 @@ Oyuncunun kariyerin gereğinden uzun sürdüğü geri bildirimi üzerine yüksek
 
 100 sabit seed’li dikkatli oyuncu simülasyonunda medyan ev yolculuğu 489’dan 383 tamamlanmış satışa, P90 530’dan 447 satışa iner. Bu sonuç yaklaşık %22 kısalma hedefini kilitler; medyan 400 ve P90 460 satışın üstüne çıkarsa içerik/erişim regresyonu kabul edilir. Simülasyon bir telemetri vekilidir; soft-launch verisinin yerini tutmaz.
 
+### Kullanıcı onaylı geç kariyer çeşitlilik paketi — 12 Eylül 2026
+
+Geç kariyerin az sayıda benzer pahalı ürüne dayanması ve yolculuğun hâlâ uzun hissedilmesi üzerine 16 özgün ürün ailesi eklenir. Paket; canlı yayın, ses, profesyonel baskı, endüstriyel temizlik, atölye, fotoğraf, bilgisayar ve araç kategorilerine dağılmış 13 profesyonel ekipman ile 3 araçtan oluşur. Her ürünün kendine ait görseli, kanıtları, kusurları, varyantları ve hazırlık metinleri vardır. Bu bir içerik genişlemesidir; yeni mekanik, ek pazarlık hakkı, yüksek kâr garantisi, reklam yerleşimi veya fiyat motoru ayrıcalığı yaratmaz.
+
+Toplam ürün ailesi 185 olur. Aynı 100 seed’li simülasyonda medyan ev yolculuğu 282, P90 314 tamamlanmış satış ölçülür; ₺3.000.000 eşiğine medyan 261 satışta ulaşılır. İçerik paketi için regresyon sınırı medyanda 300, P90’da 330 satıştır. Bu değerler yayın sonrası telemetriyle yeniden kalibre edilir; ürünler arası gerçek fark değer, talep, satış hızı, kanıt ve kusur riskinden doğar.
+
 ## Progression ergonomisi
 - Düşük fiyatlı fırsatlar late-game’de de ekonomik olarak anlamlı kalır: hızlı likidite, bundle veya koleksiyon değeri.
 - Kategori içerikleri servete göre kapanmaz; yalnız yüksek riskli segmentler açılır.

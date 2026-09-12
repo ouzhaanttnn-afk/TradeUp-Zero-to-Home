@@ -169,6 +169,22 @@ import prosumerEspresso from "./assets/products/prd_prosumer_espresso.webp";
 import massageChair from "./assets/products/prd_massage_chair.webp";
 import potteryWheel from "./assets/products/prd_pottery_wheel.webp";
 import vinylCuttingPlotter from "./assets/products/prd_vinyl_cutting_plotter.webp";
+import djMediaPlayerSet from "./assets/products/prd_dj_media_player_set.webp";
+import thermalLabelPrinter from "./assets/products/prd_thermal_label_printer.webp";
+import professionalHeatPress from "./assets/products/prd_professional_heat_press.webp";
+import mobileLiveSwitcher from "./assets/products/prd_mobile_live_switcher.webp";
+import floorScrubberMachine from "./assets/products/prd_floor_scrubber_machine.webp";
+import stageLightingConsole from "./assets/products/prd_stage_lighting_console.webp";
+import ultrasonicCleaningSystem from "./assets/products/prd_ultrasonic_cleaning_system.webp";
+import cameraMotionRail from "./assets/products/prd_camera_motion_rail.webp";
+import storageServerArray from "./assets/products/prd_storage_server_array.webp";
+import wirelessMicrophoneRack from "./assets/products/prd_wireless_microphone_rack.webp";
+import woodworkingShopSet from "./assets/products/prd_woodworking_shop_set.webp";
+import mappingDroneKit from "./assets/products/prd_mapping_drone_kit.webp";
+import gpuRenderWorkstation from "./assets/products/prd_gpu_render_workstation.webp";
+import maxiScooter from "./assets/products/prd_maxi_scooter.webp";
+import usedLightCommercial from "./assets/products/prd_used_light_commercial.webp";
+import camperVan from "./assets/products/prd_camper_van.webp";
 
 const dedicatedAssets: Record<string, string> = {
   prd_notebook: notebook,
@@ -340,6 +356,22 @@ const dedicatedAssets: Record<string, string> = {
   prd_massage_chair: massageChair,
   prd_pottery_wheel: potteryWheel,
   prd_vinyl_cutting_plotter: vinylCuttingPlotter,
+  prd_dj_media_player_set: djMediaPlayerSet,
+  prd_thermal_label_printer: thermalLabelPrinter,
+  prd_professional_heat_press: professionalHeatPress,
+  prd_mobile_live_switcher: mobileLiveSwitcher,
+  prd_floor_scrubber_machine: floorScrubberMachine,
+  prd_stage_lighting_console: stageLightingConsole,
+  prd_ultrasonic_cleaning_system: ultrasonicCleaningSystem,
+  prd_camera_motion_rail: cameraMotionRail,
+  prd_storage_server_array: storageServerArray,
+  prd_wireless_microphone_rack: wirelessMicrophoneRack,
+  prd_woodworking_shop_set: woodworkingShopSet,
+  prd_mapping_drone_kit: mappingDroneKit,
+  prd_gpu_render_workstation: gpuRenderWorkstation,
+  prd_maxi_scooter: maxiScooter,
+  prd_used_light_commercial: usedLightCommercial,
+  prd_camper_van: camperVan,
 };
 
 const fallbackSvg = (category: string, symbol: string, color: string) =>

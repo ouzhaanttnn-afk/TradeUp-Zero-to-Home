@@ -541,3 +541,67 @@ test("capital bridge families load dedicated premium artwork", async ({
     animations: "disabled",
   });
 });
+
+test("late-career variety families load distinct dedicated artwork", async ({
+  page,
+}, testInfo) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const state = initialState(Date.now(), "SANDBOX");
+  const rows = [
+    ["dj_media_player_set", "prd_dj_media_player_set"],
+    ["thermal_label_printer", "prd_thermal_label_printer"],
+    ["professional_heat_press", "prd_professional_heat_press"],
+    ["mobile_live_switcher", "prd_mobile_live_switcher"],
+    ["floor_scrubber_machine", "prd_floor_scrubber_machine"],
+    ["stage_lighting_console", "prd_stage_lighting_console"],
+    ["ultrasonic_cleaning_system", "prd_ultrasonic_cleaning_system"],
+    ["camera_motion_rail", "prd_camera_motion_rail"],
+    ["storage_server_array", "prd_storage_server_array"],
+    ["wireless_microphone_rack", "prd_wireless_microphone_rack"],
+    ["woodworking_shop_set", "prd_woodworking_shop_set"],
+    ["mapping_drone_kit", "prd_mapping_drone_kit"],
+    ["gpu_render_workstation", "prd_gpu_render_workstation"],
+    ["maxi_scooter", "prd_maxi_scooter"],
+    ["used_light_commercial", "prd_used_light_commercial"],
+    ["camper_van", "prd_camper_van"],
+  ] as const;
+
+  for (const [index, [familyId]] of rows.entries()) {
+    const family = familyById(familyId);
+    if (!family) throw new Error(`Late-career family missing: ${familyId}`);
+    state.listings[index] = {
+      ...state.listings[index],
+      familyId: family.id,
+      priceMinor: family.baseValueMinor,
+      instance: { ...state.listings[index].instance, family },
+    };
+  }
+
+  await page.goto("/");
+  await completeFirstLaunch(page);
+  await persistGame(page, validateState(state));
+  await page.reload();
+
+  for (const [, assetName] of rows) {
+    const image = page.locator(`.market-card img[src*="${assetName}"]`);
+    await expect(image).toHaveCount(1);
+    await expect
+      .poll(() =>
+        image.evaluate(
+          (element: HTMLImageElement) =>
+            element.complete && element.naturalWidth === 800,
+        ),
+      )
+      .toBe(true);
+  }
+
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: testInfo.outputPath("late-career-variety-390.png"),
+    animations: "disabled",
+  });
+});

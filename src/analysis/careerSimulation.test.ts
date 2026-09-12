@@ -38,19 +38,19 @@ describe("career balance simulation", () => {
     const summary = summarizeCareerSample();
     expect(summary).toEqual({
       sampleSize: 100,
-      homeTrades: { fastP10: 325, median: 383, slowP90: 447 },
-      medianRefreshes: 34,
+      homeTrades: { fastP10: 255, median: 282, slowP90: 314 },
+      medianRefreshes: 32,
       milestones: [
         { wealthMinor: 500_000, medianTrades: 12, goldPercent: 5 },
-        { wealthMinor: 87_500_000, medianTrades: 201, goldPercent: 22 },
-        { wealthMinor: 175_000_000, medianTrades: 270, goldPercent: 42 },
-        { wealthMinor: 262_500_000, medianTrades: 327, goldPercent: 65 },
-        { wealthMinor: 300_000_000, medianTrades: 356, goldPercent: 77.1 },
-        { wealthMinor: 315_000_000, medianTrades: 362, goldPercent: 82 },
-        { wealthMinor: 350_000_000, medianTrades: 383, goldPercent: 92 },
+        { wealthMinor: 87_500_000, medianTrades: 164, goldPercent: 22 },
+        { wealthMinor: 175_000_000, medianTrades: 208, goldPercent: 42 },
+        { wealthMinor: 262_500_000, medianTrades: 244, goldPercent: 65 },
+        { wealthMinor: 300_000_000, medianTrades: 261, goldPercent: 77.1 },
+        { wealthMinor: 315_000_000, medianTrades: 268, goldPercent: 82 },
+        { wealthMinor: 350_000_000, medianTrades: 282, goldPercent: 92 },
       ],
     });
-    expect(summary.homeTrades.median).toBeLessThanOrEqual(400);
-    expect(summary.homeTrades.slowP90).toBeLessThanOrEqual(460);
+    expect(summary.homeTrades.median).toBeLessThanOrEqual(300);
+    expect(summary.homeTrades.slowP90).toBeLessThanOrEqual(330);
   }, 20_000);
 });

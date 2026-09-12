@@ -1015,6 +1015,102 @@
       "familyId": "grand_digital_piano",
       "source": "../products/prd_grand_digital_piano.webp",
       "dedicated": true
+    },
+    {
+      "assetKey": "prd_dj_media_player_set",
+      "familyId": "dj_media_player_set",
+      "source": "../products/prd_dj_media_player_set.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_thermal_label_printer",
+      "familyId": "thermal_label_printer",
+      "source": "../products/prd_thermal_label_printer.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_professional_heat_press",
+      "familyId": "professional_heat_press",
+      "source": "../products/prd_professional_heat_press.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_mobile_live_switcher",
+      "familyId": "mobile_live_switcher",
+      "source": "../products/prd_mobile_live_switcher.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_floor_scrubber_machine",
+      "familyId": "floor_scrubber_machine",
+      "source": "../products/prd_floor_scrubber_machine.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_stage_lighting_console",
+      "familyId": "stage_lighting_console",
+      "source": "../products/prd_stage_lighting_console.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_ultrasonic_cleaning_system",
+      "familyId": "ultrasonic_cleaning_system",
+      "source": "../products/prd_ultrasonic_cleaning_system.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_camera_motion_rail",
+      "familyId": "camera_motion_rail",
+      "source": "../products/prd_camera_motion_rail.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_storage_server_array",
+      "familyId": "storage_server_array",
+      "source": "../products/prd_storage_server_array.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_wireless_microphone_rack",
+      "familyId": "wireless_microphone_rack",
+      "source": "../products/prd_wireless_microphone_rack.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_woodworking_shop_set",
+      "familyId": "woodworking_shop_set",
+      "source": "../products/prd_woodworking_shop_set.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_mapping_drone_kit",
+      "familyId": "mapping_drone_kit",
+      "source": "../products/prd_mapping_drone_kit.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_gpu_render_workstation",
+      "familyId": "gpu_render_workstation",
+      "source": "../products/prd_gpu_render_workstation.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_maxi_scooter",
+      "familyId": "maxi_scooter",
+      "source": "../products/prd_maxi_scooter.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_used_light_commercial",
+      "familyId": "used_light_commercial",
+      "source": "../products/prd_used_light_commercial.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_camper_van",
+      "familyId": "camper_van",
+      "source": "../products/prd_camper_van.webp",
+      "dedicated": true
     }
   ],
   "overlays": [
