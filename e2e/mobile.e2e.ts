@@ -166,7 +166,13 @@ for (const width of [320, 390, 430]) {
       "loading",
       "eager",
     );
-    await expect(page.locator(".hero-art img")).toHaveCSS("height", "170px");
+    await expect(page.locator(".hero-art img")).toHaveCSS("height", "112px");
+    await expect(page.locator(".sheet-summary")).toHaveCSS("display", "grid");
+    expect(
+      await page
+        .locator(".sheet-hero-shell")
+        .evaluate((element) => element.getBoundingClientRect().height),
+    ).toBeLessThanOrEqual(120);
     await expect(page.locator(".sheet-decision-heading")).toContainText(
       "KARARIN",
     );
