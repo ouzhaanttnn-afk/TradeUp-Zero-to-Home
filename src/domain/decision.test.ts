@@ -171,6 +171,26 @@ describe("decision vertical slice", () => {
           family.baseValueMinor <= 56_000_000,
       ),
     ).toBe(true);
+    expect(
+      capitalBridgeFamilies.every(
+        (family) =>
+          family.evidence.every(
+            (item) => !item.claim.endsWith("satıcı beyanı"),
+          ) &&
+          family.variants.every(
+            (item) => item.label !== "Standart" && item.label !== "Üst Paket",
+          ) &&
+          family.preparation.map((item) => item.kind).join(",") ===
+            "CLEAN,TEST,COMPLETE",
+      ),
+    ).toBe(true);
+    expect(
+      new Set(
+        capitalBridgeFamilies.flatMap((family) =>
+          family.preparation.map((item) => item.label),
+        ),
+      ).size,
+    ).toBeGreaterThan(20);
   });
 
   it("adds six vehicle families only to the matching high-ticket tiers", () => {

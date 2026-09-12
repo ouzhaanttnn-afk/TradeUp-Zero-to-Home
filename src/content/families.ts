@@ -1698,6 +1698,236 @@ export const starterExpansionFamilies: Family[] =
   starterExpansionSeeds.map(defineFamily);
 export const upperMidFamilies: Family[] = upperMidSeeds.map(defineFamily);
 
+type CapitalBridgeProfile = {
+  evidenceClaims: [string, string];
+  checkedCopy: [string, string];
+  defectLabels: [string, string];
+  variantLabels: [string, string];
+  preparationLabels: [string, string, string];
+};
+
+const capitalBridgeProfiles: Record<string, CapitalBridgeProfile> = {
+  cinema_camera_kit: {
+    evidenceClaims: ["Gövde darbeye maruz kalmadı", "Sensörde leke yok"],
+    checkedCopy: [
+      "Bağlantılar ve kafes yuvaları görüldü",
+      "Sensör kaydı incelendi",
+    ],
+    defectLabels: ["Kafes yuvası deformasyonu", "Sensör lekesi"],
+    variantLabels: ["Gövde Kiti", "Prodüksiyon Kiti"],
+    preparationLabels: ["Gövdeyi temizle", "Sensör kaydı al", "Kiti tamamla"],
+  },
+  workstation_laptop: {
+    evidenceClaims: ["Kasada darbe izi yok", "Yük altında kararlı çalışıyor"],
+    checkedCopy: ["Kasa ve bağlantılar görüldü", "Isı ve pil testi tamamlandı"],
+    defectLabels: ["Kasa veya menteşe hasarı", "Isınma ve pil sorunu"],
+    variantLabels: ["İş İstasyonu", "Stüdyo Paketi"],
+    preparationLabels: ["Kasayı temizle", "Yük testi yap", "Adaptörü tamamla"],
+  },
+  digital_mixing_console: {
+    evidenceClaims: ["Panel ve faderlar temiz", "Tüm kanallar sinyal alıyor"],
+    checkedCopy: ["Panel aşınması görüldü", "Kanallar tek tek denendi"],
+    defectLabels: ["Fader ve panel aşınması", "Kanal veya çıkış arızası"],
+    variantLabels: ["Konsol", "Sahne Kutulu Paket"],
+    preparationLabels: [
+      "Paneli temizle",
+      "Kanalları test et",
+      "Sahne setini tamamla",
+    ],
+  },
+  commercial_espresso_machine: {
+    evidenceClaims: ["Gövde ve grup başlıkları temiz", "Kazan basıncı kararlı"],
+    checkedCopy: ["Gövde ve contalar görüldü", "Basınç ve buhar testi yapıldı"],
+    defectLabels: ["Conta ve gövde yıpranması", "Kazan basınç sorunu"],
+    variantLabels: ["Makine", "Servis Hazır Paket"],
+    preparationLabels: [
+      "Grupları temizle",
+      "Basıncı test et",
+      "Aksesuarı tamamla",
+    ],
+  },
+  broadcast_lens_set: {
+    evidenceClaims: ["Optiklerde çizik ve mantar yok", "Odak halkaları akıcı"],
+    checkedCopy: [
+      "Cam ve kaplamalar ışıkta görüldü",
+      "Odak hareketi test edildi",
+    ],
+    defectLabels: ["Optik çizik veya mantar", "Odak mekanizması boşluğu"],
+    variantLabels: ["Objektif Seti", "Yayın Hazır Set"],
+    preparationLabels: [
+      "Optikleri temizle",
+      "Odağı test et",
+      "Çantayı tamamla",
+    ],
+  },
+  synthesizer_workstation: {
+    evidenceClaims: ["Panel ve ekran temiz", "Tüm tuşlar tepki veriyor"],
+    checkedCopy: ["Panel kontrolleri görüldü", "Tuş ve ses çıkışı denendi"],
+    defectLabels: ["Panel ve encoder aşınması", "Tuş veya ses motoru arızası"],
+    variantLabels: ["Enstrüman", "Sahne Paketi"],
+    preparationLabels: [
+      "Paneli temizle",
+      "Tuşları test et",
+      "Taşıma setini tamamla",
+    ],
+  },
+  premium_arcade_cabinet: {
+    evidenceClaims: [
+      "Kabinde şişme ve kırık yok",
+      "Kontroller gecikmesiz çalışıyor",
+    ],
+    checkedCopy: ["Kabin köşeleri görüldü", "Ekran ve kontroller denendi"],
+    defectLabels: ["Kabin yüzeyi hasarı", "Ekran veya kontrol arızası"],
+    variantLabels: ["Arcade Kabini", "Salon Hazır Paket"],
+    preparationLabels: [
+      "Kabini temizle",
+      "Kontrolleri test et",
+      "Paneli tamamla",
+    ],
+  },
+  professional_ceramic_kiln: {
+    evidenceClaims: ["Haznede çatlak yok", "Isı programı kararlı tamamlanıyor"],
+    checkedCopy: ["Hazne ve rezistans görüldü", "Isı döngüsü test edildi"],
+    defectLabels: ["Hazne veya rezistans yıpranması", "Isı kontrol arızası"],
+    variantLabels: ["Fırın", "Atölye Hazır Paket"],
+    preparationLabels: [
+      "Hazneyi temizle",
+      "Isı döngüsü çalıştır",
+      "Raf setini tamamla",
+    ],
+  },
+  compact_cnc_router: {
+    evidenceClaims: ["Raylarda boşluk yok", "Mil yük altında düzgün kesiyor"],
+    checkedCopy: ["Ray ve tabla hassasiyeti görüldü", "Örnek kesim tamamlandı"],
+    defectLabels: ["Ray ve tabla boşluğu", "Mil veya kontrolcü arızası"],
+    variantLabels: ["Tezgâh", "Üretim Hazır Paket"],
+    preparationLabels: [
+      "Tezgâhı temizle",
+      "Örnek kesim yap",
+      "Kontrol setini tamamla",
+    ],
+  },
+  industrial_embroidery_machine: {
+    evidenceClaims: [
+      "Gövde ve iğne yatağı temiz",
+      "Tüm kafalar düzgün dikiş atıyor",
+    ],
+    checkedCopy: ["Gövde ve kasnaklar görüldü", "Örnek desen işlendi"],
+    defectLabels: [
+      "Kasnak ve gövde yıpranması",
+      "İğne kafası zamanlama sorunu",
+    ],
+    variantLabels: ["Makine", "Üretim Hazır Paket"],
+    preparationLabels: [
+      "Makineyi temizle",
+      "Örnek desen işle",
+      "Kasnak setini tamamla",
+    ],
+  },
+  concert_pa_system: {
+    evidenceClaims: [
+      "Kabinlerde darbe ve çatlak yok",
+      "Sistem yükte temiz ses veriyor",
+    ],
+    checkedCopy: ["Kabin ve bağlantılar görüldü", "Tam güç ses testi yapıldı"],
+    defectLabels: ["Kabin veya sürücü hasarı", "Güç ünitesi ve çıkış arızası"],
+    variantLabels: ["Ses Sistemi", "Turne Hazır Paket"],
+    preparationLabels: [
+      "Kabinleri temizle",
+      "Yük testi yap",
+      "Taşıma setini tamamla",
+    ],
+  },
+  server_rack_bundle: {
+    evidenceClaims: [
+      "Kabin ve raylar düzgün",
+      "Donanım hata vermeden açılıyor",
+    ],
+    checkedCopy: [
+      "Kabin, ray ve yuvalar görüldü",
+      "Bellek ve disk testi tamamlandı",
+    ],
+    defectLabels: ["Kabin ve ray deformasyonu", "Donanım veya disk arızası"],
+    variantLabels: ["Sunucu Kabini", "Kurulum Hazır Paket"],
+    preparationLabels: [
+      "Kabini temizle",
+      "Donanımı test et",
+      "Ray setini tamamla",
+    ],
+  },
+  broadcast_camera_package: {
+    evidenceClaims: ["Gövde ve bağlantılar sağlam", "Görüntüde ölü piksel yok"],
+    checkedCopy: [
+      "Gövde ve tripod yuvaları görüldü",
+      "Kayıt ve çıkışlar test edildi",
+    ],
+    defectLabels: [
+      "Gövde veya bağlantı hasarı",
+      "Sensör ve görüntü çıkışı arızası",
+    ],
+    variantLabels: ["Kamera Paketi", "Stüdyo Hazır Paket"],
+    preparationLabels: [
+      "Gövdeyi temizle",
+      "Görüntüyü test et",
+      "Tripodu tamamla",
+    ],
+  },
+  event_led_wall: {
+    evidenceClaims: [
+      "Panellerde darbe yok",
+      "Tüm modüller eşit görüntü veriyor",
+    ],
+    checkedCopy: [
+      "Panel kasaları ve kilitler görüldü",
+      "Tam ekran görüntü testi yapıldı",
+    ],
+    defectLabels: ["Panel ve kilit hasarı", "Ölü modül veya kontrolcü arızası"],
+    variantLabels: ["LED Ekran", "Etkinlik Hazır Paket"],
+    preparationLabels: [
+      "Panelleri temizle",
+      "Görüntüyü test et",
+      "Kasaları tamamla",
+    ],
+  },
+  industrial_3d_printer: {
+    evidenceClaims: [
+      "Kabin ve hareket sistemi temiz",
+      "Uzun baskıyı hatasız tamamlıyor",
+    ],
+    checkedCopy: [
+      "Kabin, ray ve filtre görüldü",
+      "Kalibrasyon baskısı tamamlandı",
+    ],
+    defectLabels: [
+      "Kabin ve ray yıpranması",
+      "Nozül veya hareket sistemi arızası",
+    ],
+    variantLabels: ["3D Yazıcı", "Üretim Hazır Paket"],
+    preparationLabels: [
+      "Kabini temizle",
+      "Kalibrasyon baskısı al",
+      "Filtre setini tamamla",
+    ],
+  },
+  grand_digital_piano: {
+    evidenceClaims: [
+      "Gövde ve tuş yüzeyi temiz",
+      "Tüm tuş ve pedallar tepki veriyor",
+    ],
+    checkedCopy: ["Gövde ve kapak görüldü", "Tuş, pedal ve hoparlör denendi"],
+    defectLabels: [
+      "Gövde ve tuş yüzeyi hasarı",
+      "Tuş sensörü veya ses sistemi arızası",
+    ],
+    variantLabels: ["Dijital Piyano", "Salon Hazır Paket"],
+    preparationLabels: [
+      "Gövdeyi temizle",
+      "Tuşları test et",
+      "Pedal setini tamamla",
+    ],
+  },
+};
+
 const capitalBridgeSeeds: Seed[] = [
   [
     "cinema_camera_kit",
@@ -1888,8 +2118,36 @@ const capitalBridgeSeeds: Seed[] = [
   }),
 );
 
-export const capitalBridgeFamilies: Family[] =
-  capitalBridgeSeeds.map(defineFamily);
+const defineCapitalBridgeFamily = (seed: Seed): Family => {
+  const family = defineFamily(seed);
+  const profile = capitalBridgeProfiles[seed.id];
+  if (!profile) return family;
+
+  return {
+    ...family,
+    evidence: family.evidence.map((item, index) => ({
+      ...item,
+      claim: profile.evidenceClaims[index],
+      checkedCopy: profile.checkedCopy[index],
+    })),
+    defects: family.defects.map((item, index) => ({
+      ...item,
+      label: profile.defectLabels[index],
+    })),
+    variants: family.variants.map((item, index) => ({
+      ...item,
+      label: profile.variantLabels[index],
+    })),
+    preparation: family.preparation.map((item, index) => ({
+      ...item,
+      label: profile.preparationLabels[index],
+    })),
+  };
+};
+
+export const capitalBridgeFamilies: Family[] = capitalBridgeSeeds.map(
+  defineCapitalBridgeFamily,
+);
 
 type VehicleSeed = {
   id: string;
