@@ -1,8 +1,12 @@
 import { market } from "../game";
 import type { FtueStage, GameState } from "./models";
 
-export const isFtueActive = (state: GameState) =>
-  state.ftue.stage !== "COMPLETE";
+// The guided first-purchase walkthrough (compare/evidence/negotiation
+// gating and its coach card) is disabled. The underlying stage machine
+// below still runs in the background — it's what reveals the market
+// after the player sells their starting notebook — but the UI no longer
+// treats any stage as "active" for gating or coaching purposes.
+export const isFtueActive = (_state: GameState) => false;
 
 export function dismissFtueStage(state: GameState): GameState {
   if (state.ftue.dismissedStages.includes(state.ftue.stage)) return state;
