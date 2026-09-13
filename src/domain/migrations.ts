@@ -534,7 +534,32 @@ export function migrateStateToCurrent(value: unknown): unknown {
   next = migrateStateToV14(next);
   next = migrateStateToV15(next);
   next = migrateStateToV16(next);
-  return migrateStateToV17(next);
+  next = migrateStateToV17(next);
+  return migrateStateToV18(next);
+}
+
+// The guided first-purchase walkthrough was removed; saves left stuck
+// mid-walkthrough (nothing advances those stages anymore, so the market
+// arrival gate in world.ts never reopens) are fast-forwarded to COMPLETE.
+const stuckFtueStages = new Set([
+  "COMPARE",
+  "EVIDENCE",
+  "NEGOTIATION",
+  "PREPARATION",
+  "LISTING",
+  "BUYER_SALE",
+]);
+
+export function migrateStateToV18(value: unknown): unknown {
+  const source = record(value);
+  if (integer(source.version) >= 18) return value;
+  const ftue = record(source.ftue);
+  const stage = string(ftue.stage);
+  return {
+    ...source,
+    version: 18,
+    ftue: stuckFtueStages.has(stage) ? { ...ftue, stage: "COMPLETE" } : ftue,
+  };
 }
 
 export function migrateStateToV17(value: unknown): unknown {

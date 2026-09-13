@@ -4,6 +4,36 @@ import { reconcileJournal } from "./economy";
 import { migrateStateToCurrent } from "./migrations";
 
 describe("save migration", () => {
+  it("fast-forwards a v17 save stuck mid-walkthrough to FTUE COMPLETE", () => {
+    const current = initialState(500, "SANDBOX");
+    const v17 = {
+      ...current,
+      version: 17,
+      ftue: { stage: "NEGOTIATION", dismissedStages: ["STARTING_SALE"] },
+    };
+
+    const state = validateState(migrateStateToCurrent(v17));
+
+    expect(state.version).toBe(SAVE_VERSION);
+    expect(state.ftue.stage).toBe("COMPLETE");
+    expect(reconcileJournal(state)).toEqual({
+      cash: true,
+      activeBookCost: true,
+      realizedProfit: true,
+    });
+  });
+  it("leaves a v17 save already at FTUE COMPLETE or STARTING_SALE untouched", () => {
+    const current = initialState(500, "SANDBOX");
+    const v17 = {
+      ...current,
+      version: 17,
+      ftue: { stage: "STARTING_SALE", dismissedStages: [] },
+    };
+
+    const state = validateState(migrateStateToCurrent(v17));
+
+    expect(state.ftue.stage).toBe("STARTING_SALE");
+  });
   it("grants the approved 25-scan allowance to v13 saves", () => {
     const current = initialState(500, "SANDBOX");
     const monetization = { ...current.monetization } as Record<string, unknown>;
