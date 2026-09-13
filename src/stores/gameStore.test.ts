@@ -18,6 +18,7 @@ vi.mock("../services/persistence", () => ({
 }));
 
 import { initialState, validateState } from "../game";
+import { WORLD_CONFIG } from "../domain/config";
 import {
   addAssetCost,
   quoteAssetExit,
@@ -803,64 +804,15 @@ describe("FTUE store integration", () => {
     ).toHaveLength(1);
   });
 
-  it("wires the full first-session loop through player actions", () => {
+  it("reveals a full, unrestricted market once the starting notebook sells", () => {
     useGameStore.setState({ game: initialState(), ready: true, notice: "" });
     useGameStore.getState().acceptBuyer("offer:ftue-starting-notebook");
-    expect(useGameStore.getState().game.ftue.stage).toBe("COMPARE");
-    expect(useGameStore.getState().game.listings).toHaveLength(3);
+    const game = useGameStore.getState().game;
 
-    useGameStore
-      .getState()
-      .markCompared(useGameStore.getState().game.listings[0].id);
-    let game = useGameStore.getState().game;
-    const choice = game.listings.find(
-      (listing) => listing.priceMinor <= game.cashMinor,
-    )!;
-    useGameStore.getState().inspect(choice.id, "QUICK_TEST");
-    expect(useGameStore.getState().game.ftue.stage).toBe("NEGOTIATION");
-    useGameStore.getState().offer(choice);
-    if (useGameStore.getState().game.ftue.stage === "NEGOTIATION")
-      useGameStore.getState().offer(choice);
-    game = useGameStore.getState().game;
-    expect(game.ftue.stage).toBe("PREPARATION");
-
-    const assetId = game.ftue.firstAssetId!;
-    useGameStore.getState().prepare(assetId, "CLEAN");
-    game = useGameStore.getState().game;
-    expect(game.ftue.stage).toBe("LISTING");
-    const asset = game.ownedAssets.find((item) => item.id === assetId)!;
-    useGameStore
-      .getState()
-      .list(asset, quoteAssetExit(asset).balancedAskingMinor);
-    game = useGameStore.getState().game;
-    expect(game.ftue.stage).toBe("BUYER_SALE");
-    const offer = game.buyerOffers.find((item) =>
-      item.id.startsWith("offer:ftue-first-flip:"),
-    )!;
-    expect(
-      game.analytics.events.find(
-        (event) => event.id === `analytics:buyer_offer:${offer.id}`,
-      )?.properties,
-    ).toMatchObject({
-      buyerTempoRevision: "buyer-tempo-2026-09-05",
-      scripted: true,
-      listingAgeAtOfferMin: 0,
-    });
-    useGameStore.getState().acceptBuyer(offer.id);
-    game = useGameStore.getState().game;
+    // The guided walkthrough is disabled: no compare/evidence/negotiation
+    // gating stands between the player and a normal, full-size market.
     expect(game.ftue.stage).toBe("COMPLETE");
-    expect(game.analytics.events.map((event) => event.name)).toEqual(
-      expect.arrayContaining([
-        "compare_started",
-        "evidence_action",
-        "offer_submitted",
-        "purchase_complete",
-        "preparation_started",
-        "listing_created",
-        "buyer_offer",
-        "sale_complete",
-      ]),
-    );
+    expect(game.listings).toHaveLength(WORLD_CONFIG.minActiveListings);
     expect(reconcileJournal(game)).toEqual({
       cash: true,
       activeBookCost: true,

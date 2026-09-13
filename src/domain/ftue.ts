@@ -1,4 +1,6 @@
 import { market } from "../game";
+import { WORLD_CONFIG } from "./config";
+import { netWorthMinor } from "./economy";
 import type { FtueStage, GameState } from "./models";
 
 // The guided first-purchase walkthrough (compare/evidence/negotiation
@@ -21,25 +23,22 @@ export function dismissFtueStage(state: GameState): GameState {
 
 export function revealFirstMarket(state: GameState): GameState {
   if (state.ftue.stage !== "STARTING_SALE") return state;
-  const listings = market(1_972, state.cashMinor, 0, state.gameTimeMin, 3).map(
-    (listing, index) => ({
-      ...listing,
-      id: `ftue-choice:${index}`,
-      seller: "urgent" as const,
-      urgency: 0,
-      interest: 12 + index * 9,
-      priceMinor: Math.max(
-        2_000,
-        Math.round((listing.instance.fairValueMinor * 0.95) / 1_000) * 1_000,
-      ),
-      expiresAtGameMin: state.gameTimeMin + 60,
-    }),
+  const marketCycle = 1;
+  const listings = market(
+    state.seed,
+    netWorthMinor(state),
+    marketCycle,
+    state.gameTimeMin,
+    WORLD_CONFIG.minActiveListings,
   );
   return {
     ...state,
     listings,
-    marketCycle: 1,
-    ftue: { ...state.ftue, stage: "COMPARE" },
+    marketCycle,
+    // The guided walkthrough is disabled (see isFtueActive above); jump
+    // straight to COMPLETE so normal market arrivals start flowing right
+    // away instead of waiting on tutorial steps nothing triggers anymore.
+    ftue: { ...state.ftue, stage: "COMPLETE" },
   };
 }
 
