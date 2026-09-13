@@ -24,12 +24,16 @@ describe("listing waiting and offer presentation", () => {
     expect(listingActivity(listing, [], 10)).toEqual({
       offers: [],
       waiting: true,
+      remainingLabel: "90 dk. içinde otomatik kapanır",
       ageLabel: "Az önce yayınlandı",
     });
     expect(listingActivity(listing, [], 17).ageLabel).toBe(
       "7 oyun dakikasıdır yayında",
     );
     expect(listingActivity(listing, [], 9).ageLabel).toBe("Az önce yayınlandı");
+    expect(listingActivity(listing, [], 17).remainingLabel).toBe(
+      "83 dk. içinde otomatik kapanır",
+    );
   });
   it("replaces waiting with only this listing's unexpired offers", () => {
     const unrelated = { ...offer, id: "unrelated", listingId: "other" };

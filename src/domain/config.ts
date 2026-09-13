@@ -8,7 +8,7 @@ export const WORLD_CONFIG = {
   firstSessionProtectionMin: 5,
   minimumNpcAgeMin: 2,
   buyerOfferLifetimeMin: 60,
-  playerListingLifetimeMin: 1_440,
+  playerListingLifetimeMin: 480,
   offlineFullRateMin: 15,
   offlineCapWallMin: 240,
   offlineDiminishingRate: 0.35,
@@ -19,7 +19,7 @@ export const WORLD_CONFIG = {
 export const BUYER_TEMPO_CONFIG = {
   revision: "buyer-tempo-2026-09-05",
   minimumAgeMin: 1,
-  arrivalMultiplier: 2,
+  arrivalMultiplier: 2.75,
 } as const;
 
 // User-approved career pacing calibration. This only broadens access to

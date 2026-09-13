@@ -1365,7 +1365,10 @@ export default function App() {
                             >
                               <div className="listing-wait-copy">
                                 <b>Yayında · {activity.ageLabel}</b>
-                                <span>Alıcı teklifi bekleniyor</span>
+                                <span>Alıcı teklifi bekleniyor.</span>
+                                <span>
+                                  {activity.remainingLabel} · Teklif gelirse anında bildirim alırsın.
+                                </span>
                                 {activity.diagnosis ? (
                                   <span className="listing-diagnosis">
                                     {activity.diagnosis}

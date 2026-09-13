@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { families } from "./content/families";
-import { MARKET_ACCESS_CONFIG } from "./domain/config";
+import { MARKET_ACCESS_CONFIG, WORLD_CONFIG } from "./domain/config";
 import { netWorthMinor } from "./domain/economy";
 import {
   instanceFairValueMinor,
@@ -952,7 +952,7 @@ export const initialState = (
         askingPriceMinor: 42_000,
         interest: 1,
         createdAtGameMin: 0,
-        expiresAtGameMin: 1_440,
+        expiresAtGameMin: WORLD_CONFIG.playerListingLifetimeMin,
         state: "ACTIVE",
       },
     ],

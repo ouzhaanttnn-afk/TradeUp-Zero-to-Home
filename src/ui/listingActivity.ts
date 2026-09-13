@@ -23,10 +23,8 @@ export function listingActivity(
           offer.expiresAtGameMin > gameTimeMin,
       )
     : [];
-  const ageMin = Math.max(
-    0,
-    Math.floor(gameTimeMin - listing.createdAtGameMin),
-  );
+  const ageMin = Math.max(0, Math.floor(gameTimeMin - listing.createdAtGameMin));
+  const remainingMin = Math.max(0, listing.expiresAtGameMin - gameTimeMin);
   let diagnosis: string | undefined;
   if (active && offers.length === 0 && signals) {
     if (listing.askingPriceMinor > signals.estimateHighMinor) {
@@ -53,5 +51,6 @@ export function listingActivity(
       ageMin === 0
         ? "Az önce yayınlandı"
         : `${ageMin} oyun dakikasıdır yayında`,
+    remainingLabel: `${remainingMin} dk. içinde otomatik kapanır`,
   };
 }
