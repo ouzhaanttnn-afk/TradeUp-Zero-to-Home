@@ -412,6 +412,14 @@ header h1 {
   letter-spacing: -0.7px;
   line-height: 1.08;
 }
+.game-clock {
+  display: block;
+  margin-top: 1px;
+  color: #6f8a7d;
+  font-size: calc(9px + var(--text-size-boost));
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
 .eyebrow,
 .section-title small {
   color: #79e2a7;
@@ -560,6 +568,35 @@ main {
   display: flex;
   align-items: center;
   gap: 5px;
+}
+.market-follow-entry {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid #294338;
+  border-radius: 12px;
+  color: #b9cec3;
+  background: #14251e;
+}
+.market-follow-entry svg {
+  width: 17px;
+  height: 17px;
+}
+.market-follow-entry span {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 16px;
+  padding: 1px 4px;
+  border-radius: 999px;
+  background: #5ee6a0;
+  color: #082116;
+  font-size: calc(9px + var(--text-size-boost));
+  font-weight: 800;
+  line-height: 1.3;
 }
 .market-event {
   display: grid;
@@ -2039,6 +2076,16 @@ main {
   font-size: calc(10px + var(--text-size-boost));
   font-weight: 800;
 }
+.nav-dot {
+  position: absolute;
+  right: 12px;
+  top: 3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f0c568;
+  box-shadow: 0 0 0 2px rgba(8, 20, 15, 0.9);
+}
 .sr-only {
   position: absolute;
   width: 1px;
@@ -2953,7 +3000,8 @@ nav .active .nav-icon {
 .settings-card,
 .expertise-card,
 .home-card,
-.locked-home {
+.locked-home,
+.radar-card {
   border: 1px solid rgba(137, 193, 164, 0.18);
   border-radius: 19px;
   background:
@@ -2961,6 +3009,91 @@ nav .active .nav-icon {
     linear-gradient(140deg, #12251d, #0b1712);
   padding: 9px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14);
+}
+.radar-card {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.radar-card--HIGH {
+  border-color: rgba(240, 197, 104, 0.4);
+  background:
+    radial-gradient(circle at 100% 0, rgba(240, 197, 104, 0.14), transparent 40%),
+    linear-gradient(140deg, #12251d, #0b1712);
+}
+.radar-card--RISING {
+  border-color: rgba(105, 226, 162, 0.4);
+}
+.radar-card-heading {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+.radar-card-heading > div {
+  display: grid;
+  gap: 2px;
+}
+.radar-card-heading b {
+  font-size: calc(14px + var(--text-size-boost));
+}
+.radar-card-heading small {
+  color: #93aa9f;
+  font-size: calc(10px + var(--text-size-boost));
+}
+.radar-badge {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(240, 197, 104, 0.14);
+  color: #f0c568;
+}
+.radar-card--RISING .radar-badge {
+  background: rgba(105, 226, 162, 0.13);
+  color: #6ee5a3;
+}
+.radar-card--calm .radar-badge {
+  background: rgba(137, 193, 164, 0.12);
+  color: #89a297;
+}
+.radar-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.radar-categories button {
+  display: grid;
+  gap: 1px;
+  padding: 7px 11px;
+  border: 1px solid rgba(137, 193, 164, 0.22);
+  border-radius: 12px;
+  background: rgba(8, 20, 15, 0.6);
+  color: #e5f5ec;
+  text-align: left;
+}
+.radar-categories button small {
+  color: #93aa9f;
+  font-size: calc(8px + var(--text-size-boost));
+}
+.radar-effect-note {
+  margin: 0;
+  color: #93aa9f;
+  font-size: calc(10px + var(--text-size-boost));
+  line-height: 1.35;
+}
+.radar-footnote {
+  margin: 0 0 8px;
+  color: #789084;
+  font-size: calc(9px + var(--text-size-boost));
+  line-height: 1.4;
+}
+.radar-footnote .icon {
+  width: 12px;
+  height: 12px;
+  vertical-align: -1px;
 }
 .follow-card small,
 .expertise-card small,
@@ -3744,6 +3877,27 @@ nav .active .nav-icon {
   margin-top: 4px;
   overflow-wrap: anywhere;
   font-size: calc(13px + var(--text-size-boost));
+}
+.journey-metrics-primary div {
+  border-color: rgba(137, 193, 164, 0.16);
+  background: linear-gradient(145deg, #15281f, #0d1a14);
+}
+.journey-metrics-primary span {
+  color: #9fb6ab;
+}
+.journey-metrics-primary b {
+  font-size: calc(17px + var(--text-size-boost));
+  font-weight: 780;
+}
+.journey-metrics-secondary {
+  margin-top: 6px;
+}
+.journey-metrics-secondary span {
+  font-size: calc(8px + var(--text-size-boost));
+}
+.journey-metrics-secondary b {
+  font-size: calc(11px + var(--text-size-boost));
+  color: #cfe0d7;
 }
 .expertise-card,
 .home-card,

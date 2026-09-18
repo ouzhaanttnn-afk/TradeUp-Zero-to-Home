@@ -97,7 +97,7 @@ export default function JourneyPanel({
               {game.home.purchased
                 ? "Hedef tamamlandı; pazar ve kariyerin açık kalmaya devam ediyor."
                 : homeProgress < 50
-                  ? "İlk kârlı satışınla hedef görünür oldu."
+                  ? "İlk kârlı satışından sonra ev hedefin görünür olur."
                   : `Kalan tahmini mesafe ${formatEstimate({
                       lowMinor: Math.max(
                         0,
@@ -212,7 +212,7 @@ export default function JourneyPanel({
         </div>
         <span>{activeOwnedAssets(game).length} ürün</span>
       </div>
-      <div className="metric-grid journey-metrics">
+      <div className="metric-grid journey-metrics journey-metrics-primary">
         <div>
           <span>Nakit</span>
           <b>{money(game.cashMinor)}</b>
@@ -221,6 +221,8 @@ export default function JourneyPanel({
           <span>Toplam tahmini değer</span>
           <b>{formatEstimate(estimates.total)}</b>
         </div>
+      </div>
+      <div className="metric-grid journey-metrics journey-metrics-secondary">
         <div>
           <span>Ürünlerin tahmini değeri</span>
           <b>{formatEstimate(estimates.portfolio)}</b>

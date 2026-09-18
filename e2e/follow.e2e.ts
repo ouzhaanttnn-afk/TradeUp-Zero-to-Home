@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { initialState, validateState } from "../src/game";
 import { completeFirstLaunch } from "./helpers";
 
-test("watched listing remains actionable after the Follow tab loads on demand", async ({
+test("watched listing remains actionable from the Pazar Takip entry point, with the Takip tab gone", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -50,7 +50,13 @@ test("watched listing remains actionable after the Follow tab loads on demand", 
   await expect(firstListing).toBeFocused();
   expect(await page.evaluate(() => document.body.style.overflow)).toBe("");
 
-  await page.getByRole("button", { name: "Takip", exact: true }).click();
+  // The bottom nav no longer has a standalone Takip tab -- Radar took its
+  // place, and the watch list lives behind a small entry point in Pazar.
+  await expect(
+    page.getByRole("button", { name: "Takip", exact: true }),
+  ).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Radar" })).toBeVisible();
+  await page.getByRole("button", { name: /^Takip/ }).click();
   await expect(page.getByRole("heading", { name: "Takip" })).toBeVisible();
   await expect(page.locator(".watch-listing")).toHaveCount(1);
   await expect(page.locator(".watch-listing h3")).toHaveText(listingName!);

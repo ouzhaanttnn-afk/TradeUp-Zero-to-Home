@@ -9,6 +9,7 @@ const iconNames: IconName[] = [
   "journey",
   "offer",
   "portfolio",
+  "radar",
   "refresh",
 ];
 

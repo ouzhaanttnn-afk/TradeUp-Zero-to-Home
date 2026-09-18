@@ -8,6 +8,7 @@ export type IconName =
   | "motion"
   | "offer"
   | "portfolio"
+  | "radar"
   | "refresh"
   | "settings"
   | "sound"
@@ -78,6 +79,14 @@ const paths: Record<IconName, React.ReactNode> = {
       <path d="M9 6.5V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1.5" />
       <path d="M3 12h18" />
       <path d="M10 12v2h4v-2" />
+    </>
+  ),
+  radar: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <circle cx="12" cy="12" r="4.5" />
+      <path d="M12 12 17.5 7.5" />
+      <circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none" />
     </>
   ),
   refresh: (

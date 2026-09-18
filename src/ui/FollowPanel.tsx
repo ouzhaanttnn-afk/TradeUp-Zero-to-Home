@@ -29,7 +29,7 @@ export default function FollowPanel({
       <div className="section-title">
         <div>
           <small>GERİ DÖNÜŞ NOKTAN</small>
-          <h2>Takip</h2>
+          <h2 id="follow-sheet-title">Takip</h2>
         </div>
         <span>{watchedListings.length} canlı</span>
       </div>
