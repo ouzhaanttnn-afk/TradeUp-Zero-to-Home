@@ -28,9 +28,132 @@
       content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
     />
     <title>TradeUp: Zero to Home</title>
+    <style>
+      #boot-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        padding: 24px;
+        background: #07100d;
+        color: #edf4ef;
+        font-family:
+          Inter,
+          Aptos,
+          system-ui,
+          sans-serif;
+        text-align: center;
+        transition: opacity 0.25s ease;
+      }
+      #boot-splash.boot-splash--gone {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #boot-splash .boot-mark {
+        display: grid;
+        place-items: center;
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        background: linear-gradient(145deg, #a9f4c8, #54d894);
+        color: #0a2418;
+        font-size: 28px;
+        font-weight: 900;
+        box-shadow: 0 10px 26px rgba(44, 196, 118, 0.2);
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        #boot-splash .boot-mark {
+          animation: boot-pulse 1.8s ease-in-out infinite;
+        }
+      }
+      @keyframes boot-pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.06);
+        }
+      }
+      #boot-splash .boot-eyebrow {
+        color: #79e2a7;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1.8px;
+      }
+      #boot-splash h1 {
+        margin: 2px 0 0;
+        font-size: 22px;
+        letter-spacing: -0.7px;
+      }
+      #boot-splash .boot-tip {
+        max-width: 320px;
+        min-height: 32px;
+        margin-top: 6px;
+        color: #93aa9f;
+        font-size: 13px;
+        line-height: 1.4;
+      }
+    </style>
   </head>
   <body>
+    <div id="boot-splash" role="status" aria-live="polite">
+      <span class="boot-mark" aria-hidden="true">↑</span>
+      <div>
+        <span class="boot-eyebrow">TRADEUP</span>
+        <h1>Zero to Home</h1>
+      </div>
+      <p class="boot-tip" id="boot-tip"></p>
+    </div>
     <div id="root"></div>
+    <script>
+      (function () {
+        var tips = [
+          "Ucuz ilan her zaman fırsat değildir.",
+          "Talep yükselen kategoriler daha hızlı alıcı bulabilir.",
+          "Nakit, servetten farklıdır.",
+          "İki teklif hakkını doğru kullan.",
+        ];
+        var tipEl = document.getElementById("boot-tip");
+        var index = 0;
+        function showTip() {
+          if (!tipEl) return;
+          tipEl.textContent = tips[index % tips.length];
+          index += 1;
+        }
+        showTip();
+        var tipTimer = window.setInterval(showTip, 2200);
+
+        function hideSplash() {
+          var splash = document.getElementById("boot-splash");
+          if (!splash) return;
+          window.clearInterval(tipTimer);
+          splash.classList.add("boot-splash--gone");
+          window.setTimeout(function () {
+            splash.remove();
+          }, 300);
+        }
+
+        var root = document.getElementById("root");
+        if (root && root.childElementCount > 0) {
+          hideSplash();
+        } else if (root) {
+          var observer = new MutationObserver(function () {
+            if (root.childElementCount > 0) {
+              observer.disconnect();
+              hideSplash();
+            }
+          });
+          observer.observe(root, { childList: true });
+        }
+        // Safety net: never let a stalled bundle leave the splash up forever.
+        window.setTimeout(hideSplash, 12000);
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
