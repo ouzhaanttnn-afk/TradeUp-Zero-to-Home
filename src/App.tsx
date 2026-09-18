@@ -1399,7 +1399,8 @@ export default function App() {
                                 <b>Yayında · {activity.ageLabel}</b>
                                 <span>Alıcı teklifi bekleniyor.</span>
                                 <span>
-                                  {activity.remainingLabel} · Teklif gelirse anında bildirim alırsın.
+                                  {activity.remainingLabel} · Teklif gelirse
+                                  anında bildirim alırsın.
                                 </span>
                                 {activity.diagnosis ? (
                                   <span className="listing-diagnosis">
@@ -1728,7 +1729,8 @@ export default function App() {
                 <>
                   <span className="nav-dot" aria-hidden="true" />
                   <span id="radar-signal-active" className="sr-only">
-                    {radarSignalNow.headline}: {radarSignalNow.categories.join(", ")}
+                    {radarSignalNow.headline}:{" "}
+                    {radarSignalNow.categories.join(", ")}
                   </span>
                 </>
               ) : null}

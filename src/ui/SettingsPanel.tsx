@@ -2,14 +2,12 @@ import { useRef, useState } from "react";
 import { avatars } from "../content/avatars";
 import { marketExpertiseLevel } from "../domain/meta";
 import { ownsAnimatedAvatars } from "../domain/profile";
-import type {
-  AccessibilityPreferences,
-  MonetizationProductId,
-} from "../domain/models";
+import type { AccessibilityPreferences } from "../domain/models";
 import { HOME_GOAL_MINOR, wealth } from "../game";
 import { useGameStore } from "../stores/gameStore";
 import { AvatarPortrait } from "./AvatarPortrait";
 import { Icon } from "./Icon";
+import PurchasesSheet from "./PurchasesSheet";
 import { useModalFocus } from "./useModalFocus";
 
 type SoundLevel = AccessibilityPreferences["soundLevel"];
@@ -24,32 +22,6 @@ const nextSoundLevel: Record<SoundLevel, SoundLevel> = {
   OFF: "LOW",
   LOW: "NORMAL",
   NORMAL: "OFF",
-};
-
-const storeCopy: Record<
-  MonetizationProductId,
-  { title: string; detail: string }
-> = {
-  tradeup_premium_lifetime: {
-    title: "TradeUp Premium",
-    detail: "Uygun hızlandırmaları video izlemeden kullan; limitler değişmez.",
-  },
-  tradeup_theme_night_market: {
-    title: "Gece Pazarı teması",
-    detail: "Yalnız arayüz görünümünü kişiselleştirir.",
-  },
-  tradeup_theme_workshop: {
-    title: "Endüstriyel Atölye teması",
-    detail: "Yalnız arayüz görünümünü kişiselleştirir.",
-  },
-  tradeup_home_styles_01: {
-    title: "Ev stilleri paketi",
-    detail: "Ev finali için üç görsel stil; ilerlemeye para eklemez.",
-  },
-  tradeup_animated_avatars_01: {
-    title: "Canlı avatar koleksiyonu",
-    detail: "Üç hareketli profil görünümü; yalnız kozmetiktir.",
-  },
 };
 
 export default function SettingsPanel({ onClose }: { onClose: () => void }) {
@@ -109,83 +81,86 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
           <Icon name="close" />
         </button>
       </div>
-      <form
-        className="profile-card"
-        onSubmit={(event) => {
-          event.preventDefault();
-          setProfileName(profileDraft);
-          setProfileDraft(
-            profileDraft.trim().replace(/\s+/g, " ").slice(0, 20),
-          );
-        }}
-      >
-        <AvatarPortrait
-          avatarId={game.profile.avatarId}
-          className="profile-avatar"
-        />
-        <div className="profile-identity">
-          <span className="profile-kicker">Pazar seviyesi {marketLevel}</span>
-          <label>
-            <span>Oyuncu adı</span>
-            <input
-              value={profileDraft}
-              maxLength={20}
-              autoComplete="nickname"
-              onChange={(event) => setProfileDraft(event.target.value)}
-            />
-          </label>
-        </div>
-        <button
-          className="primary"
-          disabled={
-            !profileDraft.trim() ||
-            profileDraft.trim().replace(/\s+/g, " ") ===
-              game.profile.displayName
-          }
-          type="submit"
-        >
-          Kaydet
-        </button>
-        <div className="profile-stats" role="group" aria-label="Profil özeti">
-          <span>
-            <small>Pazar seviyesi</small>
-            <b>{marketLevel}</b>
-          </span>
-          <span>
-            <small>Satış</small>
-            <b>{completedSales}</b>
-          </span>
-          <span>
-            <small>Ev hedefi</small>
-            <b>%{homeProgress}</b>
-          </span>
-        </div>
-      </form>
-      <fieldset className="avatar-picker avatar-picker--settings">
-        <legend>Profil avatarı</legend>
-        <div className="avatar-options">
-          {avatars.map((avatar) => {
-            const locked = avatar.premium && !animatedAvatarsOwned;
-            return (
-              <button
-                key={avatar.id}
-                type="button"
-                disabled={locked}
-                aria-pressed={game.profile.avatarId === avatar.id}
-                aria-label={`${avatar.name}${locked ? ", canlı avatar paketi gerekli" : ""}`}
-                onClick={() => setProfileAvatar(avatar.id)}
-              >
-                <AvatarPortrait avatarId={avatar.id} />
-                <span>
-                  <b>{avatar.name}</b>
-                  <small>{locked ? "Canlı · Yakında" : avatar.role}</small>
-                </span>
-                {locked ? <i aria-hidden="true">◇</i> : null}
-              </button>
+      <div className="settings-identity-group">
+        <small className="settings-group-label">OYUNCU KİMLİĞİ</small>
+        <form
+          className="profile-card"
+          onSubmit={(event) => {
+            event.preventDefault();
+            setProfileName(profileDraft);
+            setProfileDraft(
+              profileDraft.trim().replace(/\s+/g, " ").slice(0, 20),
             );
-          })}
-        </div>
-      </fieldset>
+          }}
+        >
+          <AvatarPortrait
+            avatarId={game.profile.avatarId}
+            className="profile-avatar"
+          />
+          <div className="profile-identity">
+            <span className="profile-kicker">Pazar seviyesi {marketLevel}</span>
+            <label>
+              <span>Oyuncu adı</span>
+              <input
+                value={profileDraft}
+                maxLength={20}
+                autoComplete="nickname"
+                onChange={(event) => setProfileDraft(event.target.value)}
+              />
+            </label>
+          </div>
+          <button
+            className="primary"
+            disabled={
+              !profileDraft.trim() ||
+              profileDraft.trim().replace(/\s+/g, " ") ===
+                game.profile.displayName
+            }
+            type="submit"
+          >
+            Kaydet
+          </button>
+          <div className="profile-stats" role="group" aria-label="Profil özeti">
+            <span>
+              <small>Pazar seviyesi</small>
+              <b>{marketLevel}</b>
+            </span>
+            <span>
+              <small>Satış</small>
+              <b>{completedSales}</b>
+            </span>
+            <span>
+              <small>Ev hedefi</small>
+              <b>%{homeProgress}</b>
+            </span>
+          </div>
+        </form>
+        <fieldset className="avatar-picker avatar-picker--settings">
+          <legend>Profil avatarı</legend>
+          <div className="avatar-options">
+            {avatars.map((avatar) => {
+              const locked = avatar.premium && !animatedAvatarsOwned;
+              return (
+                <button
+                  key={avatar.id}
+                  type="button"
+                  disabled={locked}
+                  aria-pressed={game.profile.avatarId === avatar.id}
+                  aria-label={`${avatar.name}${locked ? ", canlı avatar paketi gerekli" : ""}`}
+                  onClick={() => setProfileAvatar(avatar.id)}
+                >
+                  <AvatarPortrait avatarId={avatar.id} />
+                  <span>
+                    <b>{avatar.name}</b>
+                    <small>{locked ? "Canlı · Yakında" : avatar.role}</small>
+                  </span>
+                  {locked ? <i aria-hidden="true">◇</i> : null}
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
+      </div>
       <section
         className="settings-section"
         aria-labelledby="experience-settings-title"
@@ -288,11 +263,9 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
       <button
         className="settings-link-card"
         aria-label="Satın Almalar ve Görünüm"
-        aria-expanded={purchasesOpen}
         onClick={() => {
-          const next = !purchasesOpen;
-          setPurchasesOpen(next);
-          if (next) void openPurchases();
+          setPurchasesOpen(true);
+          void openPurchases();
         }}
       >
         <span className="settings-link-icon" aria-hidden="true">
@@ -302,76 +275,18 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
           <b>Satın almalar &amp; görünüm</b>
           <small>Kalıcı paketler ve geri yükleme</small>
         </span>
-        <i aria-hidden="true">{purchasesOpen ? "−" : "+"}</i>
+        <i aria-hidden="true">→</i>
       </button>
       {purchasesOpen ? (
-        <section
-          className="purchase-panel"
-          aria-label="Satın Almalar ve Görünüm"
-        >
-          <div className="purchase-panel-heading">
-            <div>
-              <strong>Kalıcı paketler</strong>
-              <p>Oynanış ekonomisini değiştirmez.</p>
-            </div>
-            <span>{storeProducts.length ? "Mağaza hazır" : "Yakında"}</span>
-          </div>
-          <div className="purchase-list">
-            {(Object.keys(storeCopy) as MonetizationProductId[]).map(
-              (productId) => {
-                const metadata = storeProducts.find(
-                  (product) => product.productId === productId,
-                );
-                const entitlement = game.monetization.entitlements.find(
-                  (entry) => entry.productId === productId,
-                );
-                const owned = entitlement?.status === "OWNED";
-                const pending = entitlement?.status === "PENDING";
-                return (
-                  <article key={productId}>
-                    <div>
-                      <strong>{storeCopy[productId].title}</strong>
-                      <p>{storeCopy[productId].detail}</p>
-                    </div>
-                    {owned || pending ? (
-                      <span className="entitlement-state">
-                        {owned ? "Sahipsin" : "Ödeme beklemede"}
-                      </span>
-                    ) : metadata ? (
-                      <button
-                        disabled={monetizationBusy}
-                        onClick={() => void purchaseProduct(productId)}
-                      >
-                        Satın al · {metadata.localizedPrice}
-                      </button>
-                    ) : (
-                      <span className="store-unavailable">Yakında</span>
-                    )}
-                  </article>
-                );
-              },
-            )}
-          </div>
-          <p className="purchase-note">
-            Paketler mobil mağaza bağlantısı tamamlandığında açılır. O zamana
-            kadar oynanışın ve ilerlemen değişmez.
-          </p>
-          <div className="purchase-footer-actions">
-            <button
-              className="secondary"
-              disabled={monetizationBusy || !storeProducts.length}
-              onClick={() => void restorePurchases()}
-            >
-              Satın alımları geri yükle
-            </button>
-            <button
-              className="text-button"
-              onClick={() => void showPrivacyOptions()}
-            >
-              Gizlilik
-            </button>
-          </div>
-        </section>
+        <PurchasesSheet
+          game={game}
+          storeProducts={storeProducts}
+          monetizationBusy={monetizationBusy}
+          purchaseProduct={purchaseProduct}
+          restorePurchases={restorePurchases}
+          showPrivacyOptions={showPrivacyOptions}
+          onClose={() => setPurchasesOpen(false)}
+        />
       ) : null}
       <section className="settings-danger-zone" aria-label="Kayıt yönetimi">
         <div>

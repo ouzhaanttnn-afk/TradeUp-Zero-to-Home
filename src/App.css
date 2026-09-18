@@ -3019,7 +3019,11 @@ nav .active .nav-icon {
 .radar-card--HIGH {
   border-color: rgba(240, 197, 104, 0.4);
   background:
-    radial-gradient(circle at 100% 0, rgba(240, 197, 104, 0.14), transparent 40%),
+    radial-gradient(
+      circle at 100% 0,
+      rgba(240, 197, 104, 0.14),
+      transparent 40%
+    ),
     linear-gradient(140deg, #12251d, #0b1712);
 }
 .radar-card--RISING {
@@ -3278,12 +3282,23 @@ nav .active .nav-icon {
 .settings-sheet-heading .icon-button {
   flex: 0 0 auto;
 }
+.settings-identity-group {
+  margin-bottom: 4px;
+}
+.settings-group-label {
+  display: block;
+  margin: 2px 0 8px 2px;
+  color: #79e2a7;
+  font-size: calc(9px + var(--text-size-boost));
+  font-weight: 800;
+  letter-spacing: 1.6px;
+}
 .profile-card {
   display: grid;
   grid-template-columns: 52px minmax(0, 1fr) auto;
   gap: 10px;
   align-items: end;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   padding: 12px 12px 10px;
   border: 1px solid rgba(137, 230, 180, 0.24);
   border-radius: 20px;
