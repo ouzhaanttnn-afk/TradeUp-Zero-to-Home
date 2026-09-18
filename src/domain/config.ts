@@ -22,6 +22,28 @@ export const BUYER_TEMPO_CONFIG = {
   arrivalMultiplier: 2.75,
 } as const;
 
+// Early-game pacing support: eases the "sell into an empty room" and
+// "nobody's buying my first listing" friction without guaranteeing profit
+// or resetting on relist/app restart. Both taper off by real trade volume
+// (completedTradeCount from economy.ts), never by wall-clock or session
+// state, so neither can be gamed by relisting the same asset, withdrawing
+// and relisting, or reopening the app.
+export const EARLY_GAME_CONFIG = {
+  revision: "early-game-pacing-2026-09-18",
+  // Market scan cap: 50 credits while under this many completed trades
+  // (the gifted starting notebook doesn't count), 25 once past it. Regen
+  // speed, the MARKET_SCOUT ad-reward amount (25) and any banked credits
+  // above 25 are untouched.
+  completedTradeThreshold: 30,
+  scanCapBoosted: 50,
+  // Buyer tempo: per-trade arrival-chance multipliers layered on top of
+  // BUYER_TEMPO_CONFIG.arrivalMultiplier for the first N completed trades,
+  // stepping back down to the steady-state multiplier by trade N. Values
+  // stay well short of guaranteeing an offer -- shouldNpcPurchase-style
+  // rolls still gate every arrival.
+  buyerTempoBoostByTradeIndex: [2, 1.6, 1.3] as readonly number[],
+} as const;
+
 // User-approved career pacing calibration. This only broadens access to
 // higher-ticket families; it does not change valuation, margins or rewards.
 export const MARKET_ACCESS_CONFIG = {

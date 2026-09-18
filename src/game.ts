@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { families } from "./content/families";
 import { MARKET_ACCESS_CONFIG, WORLD_CONFIG } from "./domain/config";
-import { netWorthMinor } from "./domain/economy";
+import { FTUE_STARTING_ASSET_ID, netWorthMinor } from "./domain/economy";
 import {
   instanceFairValueMinor,
   listingAskMinor,
@@ -925,7 +925,7 @@ export const initialState = (
     fairValueMinor: 38_000,
     accessoryComplete: false,
   };
-  const assetId = "asset:ftue-starting-notebook";
+  const assetId = FTUE_STARTING_ASSET_ID;
   const listingId = "player-listing:ftue-starting-notebook";
   return {
     ...base,

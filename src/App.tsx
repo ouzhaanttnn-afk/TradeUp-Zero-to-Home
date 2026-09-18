@@ -1097,7 +1097,8 @@ export default function App() {
                           <span className="market-refresh-copy">
                             <b>Yenile</b>
                             <small>
-                              {game.monetization.marketScanCredits}/25
+                              {game.monetization.marketScanCredits}/
+                              {scanRefill.cap}
                               {!scanRefill.full
                                 ? ` · +1 ${shortDuration(scanRefill.nextCreditSeconds)}`
                                 : ""}

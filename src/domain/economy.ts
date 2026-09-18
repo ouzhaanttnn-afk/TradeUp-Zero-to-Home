@@ -34,6 +34,23 @@ export type EconomyCommandResult =
 
 const isOwned = (asset: OwnedAsset) => asset.state !== "SOLD_COMPLETE";
 
+// The scripted FTUE notebook is gifted (purchasePriceMinor 0) and sold
+// through the same settleAssetSale path as any other asset, so it needs a
+// stable identity to exclude from "completed trade" counters that gate
+// early-game pacing support.
+export const FTUE_STARTING_ASSET_ID = "asset:ftue-starting-notebook";
+
+// A completed trade is a market purchase later closed by a sale, excluding
+// the gifted starting notebook. Used to taper early-game pacing support
+// (scan cap, buyer tempo) back to steady-state as the player gains footing.
+export const completedTradeCount = (
+  state: Pick<GameState, "ownedAssets">,
+) =>
+  state.ownedAssets.filter(
+    (asset) =>
+      asset.state === "SOLD_COMPLETE" && asset.id !== FTUE_STARTING_ASSET_ID,
+  ).length;
+
 export const bookCostMinor = (asset: OwnedAsset) =>
   asset.purchasePriceMinor +
   asset.preparationCostMinor +

@@ -18,7 +18,7 @@ vi.mock("../services/persistence", () => ({
 }));
 
 import { initialState, validateState } from "../game";
-import { WORLD_CONFIG } from "../domain/config";
+import { EARLY_GAME_CONFIG, WORLD_CONFIG } from "../domain/config";
 import {
   addAssetCost,
   quoteAssetExit,
@@ -176,8 +176,27 @@ describe("application lifecycle", () => {
   });
 });
 
+const veteranOwnedAssets = (game: ReturnType<typeof initialState>) =>
+  Array.from(
+    { length: EARLY_GAME_CONFIG.completedTradeThreshold },
+    (_, index) => ({
+      id: `veteran-sale-${index}`,
+      familyId: game.listings[0].instance.family.id,
+      sourceListingId: `veteran-listing-${index}`,
+      instance: game.listings[0].instance,
+      state: "SOLD_COMPLETE" as const,
+      purchasePriceMinor: 10_000,
+      preparationCostMinor: 0,
+      inspectionCostMinor: 0,
+      transparentFeesMinor: 0,
+      bookCostMinor: 10_000,
+      acquiredAtGameMin: 0,
+    }),
+  );
+
 describe("market scan allowance", () => {
   it("consumes 25 manual scans and never makes the counter negative", () => {
+    vi.spyOn(systemTimeProvider, "nowWallMs").mockReturnValue(0);
     const game = initialState(0, "SANDBOX");
     game.ftue.stage = "COMPLETE";
     useGameStore.setState({ game, ready: true, sessionActive: true });
@@ -189,6 +208,47 @@ describe("market scan allowance", () => {
     useGameStore.getState().scan();
     expect(useGameStore.getState().game).toEqual(exhausted);
     expect(useGameStore.getState().notice).toContain("Tarama hakkın bitti");
+  });
+
+  it("regenerates past 25 up to 50 while under the early-game trade threshold, and only up to 25 once past it", () => {
+    vi.spyOn(systemTimeProvider, "nowWallMs").mockReturnValue(0);
+    const fresh = initialState(0, "SANDBOX");
+    fresh.ftue.stage = "COMPLETE";
+    fresh.monetization.marketScanCredits = 25;
+    fresh.monetization.marketScanRefillAnchorWallMs = 0;
+    useGameStore.setState({ game: fresh, ready: true, sessionActive: true });
+    vi.spyOn(systemTimeProvider, "nowWallMs").mockReturnValue(60 * 60_000);
+    useGameStore.getState().refreshMarketScanCredits();
+    expect(useGameStore.getState().game.monetization.marketScanCredits).toBe(
+      EARLY_GAME_CONFIG.scanCapBoosted,
+    );
+
+    const veteran = initialState(0, "SANDBOX");
+    veteran.ftue.stage = "COMPLETE";
+    veteran.ownedAssets = veteranOwnedAssets(veteran);
+    veteran.monetization.marketScanCredits = 25;
+    veteran.monetization.marketScanRefillAnchorWallMs = 0;
+    vi.spyOn(systemTimeProvider, "nowWallMs").mockReturnValue(0);
+    useGameStore.setState({ game: veteran, ready: true, sessionActive: true });
+    vi.spyOn(systemTimeProvider, "nowWallMs").mockReturnValue(60 * 60_000);
+    useGameStore.getState().refreshMarketScanCredits();
+    expect(useGameStore.getState().game.monetization.marketScanCredits).toBe(
+      25,
+    );
+  });
+
+  it("does not delete banked credits above 25 once the early-game window ends", () => {
+    vi.spyOn(systemTimeProvider, "nowWallMs").mockReturnValue(0);
+    const game = initialState(0, "SANDBOX");
+    game.ftue.stage = "COMPLETE";
+    game.monetization.marketScanCredits = 40;
+    game.monetization.marketScanRefillAnchorWallMs = 0;
+    game.ownedAssets = veteranOwnedAssets(game);
+    useGameStore.setState({ game, ready: true, sessionActive: true });
+    useGameStore.getState().refreshMarketScanCredits();
+    expect(
+      useGameStore.getState().game.monetization.marketScanCredits,
+    ).toBe(40);
   });
 });
 
