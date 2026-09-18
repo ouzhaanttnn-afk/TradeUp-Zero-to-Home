@@ -210,4 +210,4 @@ export const MONETIZATION_CONFIG = {
     },
   },
 } as const;
-export const GAME_CONFIG_VERSION = "gdd-2.2-r1";
+export const GAME_CONFIG_VERSION = "gdd-2.2-r2";
