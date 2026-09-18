@@ -12,6 +12,7 @@
   --accent: #69e2a2;
   --muted: #91a99e;
   --shadow-card: 0 8px 20px rgba(0, 0, 0, 0.13);
+  --text-size-boost: 0px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1482,6 +1483,8 @@ main {
 }
 .listing-strategy-options button,
 .offer-mode-picker button {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   min-height: 62px;
   padding: 7px 4px;
@@ -1494,7 +1497,7 @@ main {
   max-width: 100%;
   color: #e5f5ec;
   font-size: calc(10px + var(--text-size-boost));
-  overflow-wrap: anywhere;
+  white-space: nowrap;
 }
 .listing-strategy-options small,
 .offer-mode-picker small {
@@ -3234,6 +3237,14 @@ nav .active .nav-icon {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.avatar-picker--onboarding .avatar-options button b,
+.avatar-picker--onboarding .avatar-options button small {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: break-word;
+  line-height: 1.15;
 }
 .avatar-options button b {
   font-size: calc(8px + var(--text-size-boost));
