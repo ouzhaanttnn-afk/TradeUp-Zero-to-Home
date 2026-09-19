@@ -33,12 +33,7 @@
         position: fixed;
         inset: 0;
         z-index: 9999;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 18px;
-        padding: 24px;
+        overflow: hidden;
         background: #07100d;
         color: #edf4ef;
         font-family:
@@ -46,24 +41,64 @@
           Aptos,
           system-ui,
           sans-serif;
-        text-align: center;
-        transition: opacity 0.25s ease;
+        transition: opacity 0.3s ease;
       }
       #boot-splash.boot-splash--gone {
         opacity: 0;
         pointer-events: none;
       }
+      #boot-splash .boot-scene {
+        position: absolute;
+        inset: -12px;
+        background-image: url("./src/assets/brand/ui_market_table_atmosphere_v2.webp");
+        background-size: cover;
+        background-position: center 32%;
+        filter: blur(1.5px) brightness(0.5) saturate(1.05);
+        transform: scale(1.04);
+      }
+      #boot-splash .boot-scrim {
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(
+            120% 90% at 12% 100%,
+            rgba(6, 14, 10, 0.35),
+            transparent 55%
+          ),
+          linear-gradient(
+            180deg,
+            rgba(4, 10, 7, 0.6) 0%,
+            rgba(4, 10, 7, 0.22) 34%,
+            rgba(3, 9, 6, 0.9) 100%
+          );
+      }
+      #boot-splash .boot-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+        padding: calc(20px + env(safe-area-inset-top)) 22px
+          calc(22px + env(safe-area-inset-bottom));
+      }
+      #boot-splash .boot-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
       #boot-splash .boot-mark {
         display: grid;
         place-items: center;
-        width: 56px;
-        height: 56px;
-        border-radius: 16px;
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+        border-radius: 13px;
         background: linear-gradient(145deg, #a9f4c8, #54d894);
         color: #0a2418;
-        font-size: 28px;
+        font-size: 22px;
         font-weight: 900;
-        box-shadow: 0 10px 26px rgba(44, 196, 118, 0.2);
+        box-shadow: 0 10px 26px rgba(44, 196, 118, 0.25);
       }
       @media (prefers-reduced-motion: no-preference) {
         #boot-splash .boot-mark {
@@ -80,38 +115,72 @@
         }
       }
       #boot-splash .boot-eyebrow {
-        color: #79e2a7;
-        font-size: 11px;
+        display: block;
+        color: #8de8b3;
+        font-size: 10px;
         font-weight: 800;
         letter-spacing: 1.8px;
       }
-      #boot-splash h1 {
+      #boot-splash .boot-brand h1 {
         margin: 2px 0 0;
-        font-size: 22px;
-        letter-spacing: -0.7px;
+        font-size: 17px;
+        letter-spacing: -0.4px;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+      }
+      #boot-splash .boot-status {
+        max-width: 340px;
       }
       #boot-splash .boot-tip {
-        max-width: 320px;
-        min-height: 32px;
-        margin-top: 6px;
-        color: #93aa9f;
+        min-height: 34px;
+        margin: 0 0 10px;
+        color: #d7e6dd;
         font-size: 13px;
+        font-weight: 600;
         line-height: 1.4;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+      }
+      #boot-splash .boot-progress {
+        height: 3px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.14);
+        overflow: hidden;
+      }
+      #boot-splash .boot-progress i {
+        display: block;
+        height: 100%;
+        width: 6%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #4fbf85, #d9c46a);
+        transition: width 1.1s cubic-bezier(0.22, 0.7, 0.3, 1);
       }
     </style>
   </head>
   <body>
     <div id="boot-splash" role="status" aria-live="polite">
-      <span class="boot-mark" aria-hidden="true">↑</span>
-      <div>
-        <span class="boot-eyebrow">TRADEUP</span>
-        <h1>Zero to Home</h1>
+      <div class="boot-scene" aria-hidden="true"></div>
+      <div class="boot-scrim" aria-hidden="true"></div>
+      <div class="boot-content">
+        <div class="boot-brand">
+          <span class="boot-mark" aria-hidden="true">↑</span>
+          <div>
+            <span class="boot-eyebrow">TRADEUP</span>
+            <h1>Zero to Home</h1>
+          </div>
+        </div>
+        <div class="boot-status">
+          <p class="boot-tip" id="boot-tip"></p>
+          <div class="boot-progress"><i id="boot-progress-fill"></i></div>
+        </div>
       </div>
-      <p class="boot-tip" id="boot-tip"></p>
     </div>
     <div id="root"></div>
     <script>
       (function () {
+        // A fast CDN can mount React inside a single frame, which would
+        // otherwise remove the splash before anyone can read the brand
+        // mark or a tip -- so hiding always waits out this minimum first.
+        var MIN_VISIBLE_MS = 700;
+        var shownAt = Date.now();
         var tips = [
           "Ucuz ilan her zaman fırsat değildir.",
           "Talep yükselen kategoriler daha hızlı alıcı bulabilir.",
@@ -128,14 +197,42 @@
         showTip();
         var tipTimer = window.setInterval(showTip, 2200);
 
-        function hideSplash() {
+        var fillEl = document.getElementById("boot-progress-fill");
+        function setProgress(percent, transitionMs) {
+          if (!fillEl) return;
+          if (transitionMs !== undefined) {
+            fillEl.style.transition = "width " + transitionMs + "ms ease";
+          }
+          fillEl.style.width = percent + "%";
+        }
+        // Double rAF so the browser paints the 6% start width first,
+        // otherwise it can coalesce straight to the end state.
+        window.requestAnimationFrame(function () {
+          window.requestAnimationFrame(function () {
+            setProgress(88);
+          });
+        });
+
+        function removeSplash() {
           var splash = document.getElementById("boot-splash");
           if (!splash) return;
           window.clearInterval(tipTimer);
-          splash.classList.add("boot-splash--gone");
+          setProgress(100, 220);
           window.setTimeout(function () {
-            splash.remove();
-          }, 300);
+            splash.classList.add("boot-splash--gone");
+            window.setTimeout(function () {
+              splash.remove();
+            }, 320);
+          }, 180);
+        }
+
+        function hideSplash() {
+          var elapsed = Date.now() - shownAt;
+          if (elapsed >= MIN_VISIBLE_MS) {
+            removeSplash();
+          } else {
+            window.setTimeout(removeSplash, MIN_VISIBLE_MS - elapsed);
+          }
         }
 
         var root = document.getElementById("root");
@@ -151,7 +248,7 @@
           observer.observe(root, { childList: true });
         }
         // Safety net: never let a stalled bundle leave the splash up forever.
-        window.setTimeout(hideSplash, 12000);
+        window.setTimeout(removeSplash, 12000);
       })();
     </script>
     <script type="module" src="/src/main.tsx"></script>

@@ -2205,7 +2205,12 @@ main {
   margin-top: 3px;
   font-size: calc(16px + var(--text-size-boost));
 }
-.journey-block-heading > span {
+.journey-metrics-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.journey-metrics-toggle-row > span {
   color: #849c90;
   font-size: calc(10px + var(--text-size-boost));
 }
@@ -2291,6 +2296,32 @@ nav .active::before {
 }
 nav .active .nav-icon {
   transform: translateY(-1px);
+}
+.purchases-bubble {
+  position: fixed;
+  z-index: 15;
+  right: 14px;
+  bottom: calc(84px + env(safe-area-inset-bottom));
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 1px solid rgba(232, 197, 108, 0.45);
+  background: radial-gradient(
+      circle at 32% 28%,
+      rgba(255, 226, 150, 0.35),
+      transparent 55%
+    ),
+    linear-gradient(150deg, #2f6b4b, #133023);
+  color: #ffe9ae;
+  display: grid;
+  place-items: center;
+  box-shadow:
+    0 12px 26px rgba(0, 0, 0, 0.4),
+    inset 0 1px rgba(255, 255, 255, 0.08);
+}
+.purchases-bubble .icon {
+  width: 24px;
+  height: 24px;
 }
 .scrim {
   position: fixed;
