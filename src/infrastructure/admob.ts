@@ -27,6 +27,19 @@ const IOS_PRODUCTION_REWARDED_IDS: Record<RewardPlacementId, string> = {
   LISTING_REACH: "ca-app-pub-4229088811556918/4992979324",
 };
 
+const TEST_IOS_INTERSTITIAL_ID = "ca-app-pub-3940256099942544/4411468910";
+const IOS_PRODUCTION_INTERSTITIAL_ID = "ca-app-pub-4229088811556918/1985851659";
+
+export const resolveTradeInterstitialId = (
+  platform: NativeAdPlatform,
+  productionEnabled: boolean,
+) =>
+  platform !== "ios"
+    ? null
+    : productionEnabled
+      ? IOS_PRODUCTION_INTERSTITIAL_ID
+      : TEST_IOS_INTERSTITIAL_ID;
+
 export const isProductionAdServingEnabled = (value: unknown) =>
   value === "true";
 
@@ -56,6 +69,8 @@ type AdMobPort = Pick<
   | "showPrivacyOptionsForm"
   | "prepareRewardVideoAd"
   | "showRewardVideoAd"
+  | "prepareInterstitial"
+  | "showInterstitial"
 >;
 
 const consentSnapshot = (info: AdmobConsentInfo): ConsentSnapshot => ({
@@ -71,7 +86,11 @@ export const createAdMobAdapters = (
     platform?: NativeAdPlatform;
     productionEnabled?: boolean;
   } = {},
-): { consent: ConsentAdapter; rewarded: RewardedAdAdapter } => {
+): {
+  consent: ConsentAdapter;
+  rewarded: RewardedAdAdapter;
+  showTradeInterstitial: () => Promise<boolean>;
+} => {
   const nativePlatform = options.platform ?? Capacitor.getPlatform();
   const platform =
     nativePlatform === "ios" || nativePlatform === "android"
@@ -79,11 +98,10 @@ export const createAdMobAdapters = (
       : null;
   const productionEnabled =
     options.productionEnabled ??
-    isProductionAdServingEnabled(
-      import.meta.env.VITE_ADMOB_PRODUCTION_ENABLED,
-    );
+    isProductionAdServingEnabled(import.meta.env.VITE_ADMOB_PRODUCTION_ENABLED);
   let initialized: Promise<void> | undefined;
   let canRequestAds = false;
+  let showingInterstitial = false;
 
   const initialize = () => {
     initialized ??= port.initialize({
@@ -152,6 +170,25 @@ export const createAdMobAdapters = (
           };
         }
       },
+    },
+    async showTradeInterstitial() {
+      if (!platform || !canRequestAds || showingInterstitial) return false;
+      const adId = resolveTradeInterstitialId(platform, productionEnabled);
+      if (!adId) return false;
+      showingInterstitial = true;
+      try {
+        await port.prepareInterstitial({
+          adId,
+          isTesting: !productionEnabled,
+          npa: true,
+        });
+        await port.showInterstitial({ adId });
+        return true;
+      } catch {
+        return false;
+      } finally {
+        showingInterstitial = false;
+      }
     },
   };
 };

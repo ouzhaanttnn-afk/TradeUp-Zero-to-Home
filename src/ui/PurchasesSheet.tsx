@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { Capacitor } from "@capacitor/core";
 import type { GameState, MonetizationProductId } from "../domain/models";
 import type { StoreProductMetadata } from "../infrastructure/monetization";
 import { Icon } from "./Icon";
@@ -10,7 +11,8 @@ const storeCopy: Record<
 > = {
   tradeup_premium_lifetime: {
     title: "TradeUp Premium",
-    detail: "Uygun hızlandırmaları video izlemeden kullan; limitler değişmez.",
+    detail:
+      "Hızlandırmaları video izlemeden kullan; 30 ticaret reklamını atla. Hak sınırları değişmez.",
   },
   tradeup_theme_night_market: {
     title: "Gece Pazarı teması",
@@ -102,7 +104,9 @@ export default function PurchasesSheet({
                   return (
                     <article key={productId}>
                       <div>
-                        <strong>{storeCopy[productId].title}</strong>
+                        <strong>
+                          {metadata?.title || storeCopy[productId].title}
+                        </strong>
                         <p>{storeCopy[productId].detail}</p>
                       </div>
                       {owned || pending ? (
@@ -125,13 +129,13 @@ export default function PurchasesSheet({
               )}
             </div>
             <p className="purchase-note">
-              Paketler mobil mağaza bağlantısı tamamlandığında açılır. O zamana
-              kadar oynanışın ve ilerlemen değişmez.
+              Satın almalar yalnız cihaz mağazası fiyatları yüklenince açılır.
+              Premium, reklamları atlar; oyun içi hak sınırları değişmez.
             </p>
             <div className="purchase-footer-actions">
               <button
                 className="secondary"
-                disabled={monetizationBusy || !storeProducts.length}
+                disabled={monetizationBusy || Capacitor.getPlatform() !== "ios"}
                 onClick={() => void restorePurchases()}
               >
                 Satın alımları geri yükle

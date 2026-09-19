@@ -39,6 +39,34 @@ const unlockedState = () => {
 };
 
 describe("monetization application service", () => {
+  it("revokes an iOS entitlement missing from the current verified StoreKit snapshot", async () => {
+    const state = initialState(0, "SANDBOX");
+    state.monetization.entitlements = [
+      {
+        productId: "tradeup_premium_lifetime",
+        entitlementId: "premium_lifetime",
+        status: "OWNED",
+        platform: "ios",
+      },
+    ];
+    const billing = createSandboxBillingAdapter({ products: [product] });
+    billing.completeEntitlementSnapshot = true;
+    billing.currentEntitlements = async () => [];
+    const refreshed = await refreshMonetization(state, {
+      billing,
+      consent: createSandboxConsentAdapter({
+        canRequestAds: false,
+        adPersonalizationAllowed: false,
+      }),
+      rewarded: createSandboxRewardedAdAdapter([]),
+    });
+    expect(refreshed.state.monetization.entitlements[0].status).toBe("REVOKED");
+    expect(reconcileJournal(refreshed.state)).toEqual({
+      cash: true,
+      activeBookCost: true,
+      realizedProfit: true,
+    });
+  });
   it("preserves live progress when consent refresh resolves late", async () => {
     const state = initialState(0, "SANDBOX");
     let live = state;

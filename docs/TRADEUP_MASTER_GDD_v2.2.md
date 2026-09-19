@@ -1011,7 +1011,7 @@ Görevler varsa “3 reklam izle” veya “10 rastgele ürün al” şeklinde o
 | Alan | v1.0 kilitli karar |
 | --- | --- |
 | Dağıtım | Ücretsiz indirilebilir; ev finali ödeme yapmadan ulaşılabilir. |
-| Reklam | Yalnız açık kullanıcı seçimiyle standart rewarded video. Banner, interstitial, app-open ve rewarded-interstitial yoktur. |
+| Reklam | Standart isteğe bağlı rewarded video; ayrıca 2026-09-19 onaylı her 30 tamamlanmış pazar ticaretinden sonra tek geçiş reklamı. Banner, app-open ve rewarded-interstitial yoktur. |
 | IAP tipi | Yalnız kalıcı, geri yüklenebilir non-consumable ürünler. |
 | Abonelik | v1.0’da yoktur; canlı içerik yükümlülüğü kanıtlanmadan eklenmez. |
 | Premium para / consumable | Yoktur. Satın alınabilir coin, bilet, enerji, cash veya tekrar kullanılabilir booster bulunmaz. |
@@ -1048,7 +1048,7 @@ Görevler varsa “3 reklam izle” veya “10 rastgele ürün al” şeklinde o
 
 > **[ONAYLI REVİZYON · 2026-09-19] Erken oyun tarama hakkı:** Oyuncu 50 ücretsiz aktif tarama hakkıyla başlar. İlk 30 tamamlanmış pazar alım-satımında üst sınır 50, 30. tamamlanmış ticaretten itibaren 25'tir; hediye başlangıç defteri bu sayıya dahil değildir. Eşik geçişinde 25'i aşan kullanılmamış haklar 25'e indirilir. Her `Pazarı yenile` kullanımı bir hak tüketir ve dünya saatini 2 oyun dakikası ilerletir; doğal pazar akışı ve temel ticaret hak olmasa da sürer. Haklar çevrimiçi veya çevrimdışı geçen gerçek zamanda 72 saniyede bir yenilenir; boş sayaç erken oyunda 60 dakikada 50/50, sonrasında 30 dakikada 25/25 olur. Hak sıfıra indiğinde `MARKET_SCOUT`, açık kullanıcı seçimiyle sayacı tam 25'e yeniler; erken oyunda 50'ye doldurmaz. Premium aynı yenilemeyi video olmadan aynı cap ve cooldown ile uygular. Hak satın alınamaz, aşama sınırının üstünde biriktirilemez, cihaz saatini geri almak hak üretmez. Önceki 2026-09-08 revizyonunun sabit 25 başlangıç ve üst sınır bölümlerinin yerini bu revizyon alır; yeni reklam yerleşimi veya ekonomi ödülü oluşturmaz. Eski kayıtlar mevcut hakkını korur, erken oyunda zamanla 50'ye yenilenebilir.
 
-> **[KİLİTLİ] Zorunlu reklam yok:** Para/servet eşikleri dahil hiçbir gameplay olayı reklamı otomatik başlatamaz. Bu eşikler yalnız uygun, isteğe bağlı rewarded CTA’yı bağlamsal olarak görünür kılabilir; oyuncu reddederse ekonomi, ilerleme ve pazar akışı kilitlenmez.
+> **[ONAYLI REVİZYON · 2026-09-19] Ticaret geçiş reklamı:** İlk 29 tamamlanmış pazar ticareti reklamsızdır. 30., 60., 90. ve sonraki 30'un katı tamamlanmış ticaretten sonra yalnız iOS'ta tek standart interstitial denenir; hediye başlangıç defteri sayılmaz. Satış önce atomik biçimde tamamlanır ve kaydedilir; reklamın yüklenmemesi, izin verilmemesi, iptali veya kapanması satışa ve pazar akışına etki etmez. Doğrulanmış Premium hak sahibi bu reklamı görmez. Reklam yalnız izin varsa ve yayın kapısı açıksa istenir; test sürümünde resmi test birimi kullanılır. Para/servet eşiği reklam başlatmaz. Önceki zorunlu reklam yasağının yalnız bu tanımlı ticaret sonu istisnası değişmiştir.
 
 ## Global uygunluk ve frekans
 | Kural | Kilitli değer |
@@ -1149,7 +1149,7 @@ REQUESTED/AD_LOADED/AD_STARTED -> CANCELLED | FAILED
 | Alan | Kilitli uygulama |
 | --- | --- |
 | Reklam sağlayıcısı | AdMob rewarded video; v1.0’da mediation yok. Provider adapter değiştirilebilir fakat placement davranışı değişmez. |
-| Yasak formatlar | Banner, interstitial, app-open, rewarded-interstitial ve otomatik açılan tam ekran reklam. |
+| Yasak formatlar | Banner, app-open ve rewarded-interstitial. Standart interstitial yalnız 2026-09-19 tarihli ticaret sonu istisnasında kullanılır. |
 | IAP | iOS StoreKit / Android Google Play Billing üzerinden `BillingAdapter`; dijital içerik için harici checkout veya lisans anahtarı yok. |
 | Consent | İlgili bölgelerde UMP/CMP sonucu alınmadan reklam isteği yapılmaz; ayarlarda privacy options entry point bulunur. |
 | ATT | Tracking izni reddedildiğinde gameplay ve reward uygunluğu kilitlenmez. İzin yoksa izin verilen non-personalized/limited ad yolu kullanılır veya reklam gösterilmez. Tracking izni karşılığında ödül verilmez. |
@@ -1571,7 +1571,7 @@ Offline dönüş özeti; hangi player listing’in teklif aldığı, hangi marke
 | FTUE | Completion ≥ %70; median first profit ≤ 12 dk |
 | Karar tezi | İlk 15 dk compare kullanımı ≥ %60 |
 | Retention hipotezi | D1 ≥ %30; D7 ≥ %10 |
-| Ad baskısı | İlk 20 dk / ilk satış öncesi 0 CTA; reklamsız core tamamlanabilir; zorunlu reklam 0 |
+| Ad baskısı | İlk 20 dk / ilk satış öncesi 0 CTA; reklamsız core tamamlanabilir; yalnız 2026-09-19 revizyonundaki her 30 tamamlanmış ticaret sonrası tek geçiş reklamı istisnası vardır ve hiçbir reklam ekonomik akışı kilitlemez. |
 | Reward güvenliği | Duplicate reward 0; cap/target ihlali 0; no-fill core loop’u durdurmaz |
 | IAP güvenliği | Sandbox purchase/restore/revoke senaryoları %100 geçer; local save ile sahte entitlement yok |
 
@@ -1641,7 +1641,7 @@ Bu eşikler sektör garantisi değil, Studio Nostos’un karar kapılarıdır. �
 - Production build’de test ad unit, sandbox product ID, sahte indirim, hard-coded mağaza fiyatı ve harici dijital checkout bulunmaz.
 - Soft launch; sayfa 48’deki kalite kapıları geçmeden takvim gerekçesiyle başlatılmaz.
 
-> MASTER DIRECTIVE: Bu v2.2 belgeyi tek source of truth kabul et. Önce ekonomik gerçeği ve deterministik pazarı düzelt; ardından Compare + Evidence + tam iki haklı pazarlık + Preparation + Sale zincirini 24 derin family ile tamamla. Sonra yalnız sayfa 34–37’de tanımlı dört rewarded placement’ı ve beş non-consumable SKU’yu, entitlement/consent/restore akışını aynen uygula. Yeni mekanik, ekstra teklif, premium para, cash pack, zorunlu reklam, ikinci görüş, garantili fırsat veya görünmez büyük kusur icat etme. Asset eksikliğini blocker yapma. Her fazda testleri çalıştır; Definition of Done geçmeden build’i tamamlandı sayma. Kullanıcının “devam” komutu sıradaki faza geçiştir, tasarımı yeniden açma.
+> MASTER DIRECTIVE: Bu v2.2 belgeyi tek source of truth kabul et. Önce ekonomik gerçeği ve deterministik pazarı düzelt; ardından Compare + Evidence + tam iki haklı pazarlık + Preparation + Sale zincirini 24 derin family ile tamamla. Sonra yalnız sayfa 34–37’de tanımlı dört rewarded placement’ı, beş non-consumable SKU’yu ve 2026-09-19 tarihli tek ticaret geçiş reklamı istisnasını, entitlement/consent/restore akışını aynen uygula. Yeni mekanik, ekstra teklif, premium para, cash pack, başka zorunlu reklam, ikinci görüş, garantili fırsat veya görünmez büyük kusur icat etme. Asset eksikliğini blocker yapma. Her fazda testleri çalıştır; Definition of Done geçmeden build’i tamamlandı sayma. Kullanıcının “devam” komutu sıradaki faza geçiştir, tasarımı yeniden açma.
 
 | R&D referansları | Kullanım amacı |
 | --- | --- |

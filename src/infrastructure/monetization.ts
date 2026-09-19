@@ -30,6 +30,8 @@ export interface BillingAdapter {
   loadProducts(): Promise<StoreProductMetadata[]>;
   purchase(productId: MonetizationProductId): Promise<BillingPurchaseResult>;
   restore(): Promise<VerifiedEntitlementEvent[]>;
+  currentEntitlements?(): Promise<VerifiedEntitlementEvent[]>;
+  completeEntitlementSnapshot?: boolean;
 }
 
 export type ConsentSnapshot = {

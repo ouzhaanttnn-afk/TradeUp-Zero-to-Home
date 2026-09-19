@@ -54,6 +54,7 @@ import {
   advanceRewardState,
   rechargeMarketScanCredits,
 } from "../domain/monetization";
+import { shouldShowTradeInterstitial } from "../domain/tradeInterstitial";
 import { isAnimatedAvatar, ownsAnimatedAvatars } from "../domain/profile";
 import { homeOptionById, isTopTierHome } from "../content/homes";
 import type {
@@ -146,6 +147,7 @@ type Store = {
   openPurchases: () => Promise<void>;
   purchaseProduct: (productId: MonetizationProductId) => Promise<void>;
   restorePurchases: () => Promise<void>;
+  syncStoreEntitlements: () => Promise<void>;
   showPrivacyOptions: () => Promise<void>;
   claimReward: (placementId: RewardPlacementId) => Promise<void>;
   dismissCoach: () => void;
@@ -164,6 +166,18 @@ const sound = (state: GameState, event: FeedbackSound) => {
   void playFeedbackSound(event, state.accessibility.soundLevel).catch(
     () => undefined,
   );
+};
+
+const showTradeInterstitialAfterSale = (
+  before: GameState,
+  after: GameState,
+) => {
+  if (!shouldShowTradeInterstitial(before, after) || persistenceSuspended)
+    return;
+  // Show only after the sale save resolves; failure never rolls back the sale.
+  void saveQueue
+    .then(() => getMonetizationAdapters().showTradeInterstitial?.())
+    .catch(() => false);
 };
 
 let saveQueue = Promise.resolve();
@@ -745,6 +759,7 @@ export const useGameStore = create<Store>((set, get) => ({
         `${currentAsset.instance.family.name} ${money(saleMinor)} fiyatına satıldı. ${cause}`,
       ),
     });
+    showTradeInterstitialAfterSale(game, progressed.state);
     const profitable = saleMinor >= currentAsset.bookCostMinor;
     buzz(game, profitable);
     sound(game, profitable ? "SALE_PROFIT" : "SALE_LOSS");
@@ -924,6 +939,7 @@ export const useGameStore = create<Store>((set, get) => ({
         `Alıcı teklifi kabul edildi: ${money(buyerOffer.amountMinor)}.`,
       ),
     });
+    showTradeInterstitialAfterSale(game, progressed.state);
     const soldAsset = game.ownedAssets.find(
       (item) => item.id === listing.ownedAssetId,
     );
@@ -1415,6 +1431,18 @@ export const useGameStore = create<Store>((set, get) => ({
         : result.synced
           ? `${result.synced} mağaza hakkı doğrulandı.`
           : "Geri yüklenecek doğrulanmış satın alma bulunamadı.",
+    });
+  },
+  syncStoreEntitlements: async () => {
+    if (!get().ready || get().monetizationBusy) return;
+    const refreshed = await refreshMonetization(
+      get().game,
+      getMonetizationAdapters(),
+      () => get().game,
+    );
+    set({
+      game: stampAndPersist(refreshed.state),
+      storeProducts: refreshed.products,
     });
   },
   showPrivacyOptions: async () => {

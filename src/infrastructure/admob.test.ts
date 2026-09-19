@@ -4,6 +4,7 @@ import {
   createAdMobAdapters,
   isProductionAdServingEnabled,
   resolveRewardedAdId,
+  resolveTradeInterstitialId,
 } from "./admob";
 
 describe("AdMob production safety", () => {
@@ -40,6 +41,16 @@ describe("AdMob production safety", () => {
     expect(new Set(ids).size).toBe(4);
     expect(ids.every((id) => id?.startsWith("ca-app-pub-"))).toBe(true);
   });
+
+  it("uses a test interstitial until the iOS production gate opens", () => {
+    expect(resolveTradeInterstitialId("ios", false)).toBe(
+      "ca-app-pub-3940256099942544/4411468910",
+    );
+    expect(resolveTradeInterstitialId("ios", true)).toBe(
+      "ca-app-pub-4229088811556918/1985851659",
+    );
+    expect(resolveTradeInterstitialId("android", true)).toBeNull();
+  });
 });
 
 describe("AdMob native adapters", () => {
@@ -66,6 +77,36 @@ describe("AdMob native adapters", () => {
       reason: "PROVIDER",
     });
     expect(port.prepareRewardVideoAd).not.toHaveBeenCalled();
+    expect(await adapters.showTradeInterstitial()).toBe(false);
+  });
+
+  it("tries one interstitial with the official test unit after consent", async () => {
+    const port = {
+      initialize: vi.fn().mockResolvedValue(undefined),
+      requestConsentInfo: vi.fn().mockResolvedValue({
+        status: "NOT_REQUIRED",
+        canRequestAds: true,
+        privacyOptionsRequirementStatus: "NOT_REQUIRED",
+      }),
+      showConsentForm: vi.fn(),
+      showPrivacyOptionsForm: vi.fn(),
+      prepareRewardVideoAd: vi.fn(),
+      showRewardVideoAd: vi.fn(),
+      prepareInterstitial: vi.fn().mockResolvedValue({ adUnitId: "test" }),
+      showInterstitial: vi.fn().mockResolvedValue(undefined),
+    };
+    const adapters = createAdMobAdapters(port as never, {
+      platform: "ios",
+      productionEnabled: false,
+    });
+    await adapters.consent.refresh();
+    expect(await adapters.showTradeInterstitial()).toBe(true);
+    expect(port.prepareInterstitial).toHaveBeenCalledWith({
+      adId: "ca-app-pub-3940256099942544/4411468910",
+      isTesting: true,
+      npa: true,
+    });
+    expect(port.showInterstitial).toHaveBeenCalledOnce();
   });
 
   it("grants only after the rewarded show promise resolves", async () => {

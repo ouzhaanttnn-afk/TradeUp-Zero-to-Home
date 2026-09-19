@@ -16,15 +16,16 @@
 - Inventory, Preparing, Ready, Listed, Reserved, and SoldPending remain player-owned. Only SoldComplete closes ownership.
 - Listing an asset cannot remove it from net worth; withdrawal returns it losslessly; a transaction ID can apply only once; an atomic purchase cannot make cash negative.
 - Production UI never reveals exact fair value. It may show the GDD-defined estimate range and evidence-dependent confidence.
-- Negotiation has exactly two player offer rights. Do not add extra offers, retries, guaranteed deals, premium currency, cash packs, forced ads, a second sight, or invisible major defects.
+- Negotiation has exactly two player offer rights. Do not add extra offers, retries, guaranteed deals, premium currency, cash packs, any ad beyond the approved 2026-09-19 trade interstitial exception, a second sight, or invisible major defects.
 - Keep the four-tab portrait shell: Pazar, Takip, Portföy, Yolculuk. Envanter, Hazırlık, and İlanlarım are Portföy segments. Respect safe areas, 320–430 px widths, text scaling, reduced motion, haptics-off, and missing-asset fallback.
 - Assets are not a gameplay blocker. Follow: manifest and placeholder, 24 hero families, condition/evidence overlays, then measured expansion.
-- Approved 2026-09-19 scan amendment: new careers start with 50 active scans until 30 completed market trades (the gifted notebook does not count), then cap at 25 and clamp excess immediately. Each manual refresh consumes one and advances two game minutes. Credits regenerate one per 72 real seconds, including validated offline time; 0→50 takes 60 minutes early and 0→25 takes 30 minutes later. At zero, `MARKET_SCOUT` still restores exactly 25 through an explicit rewarded choice or premium bypass with unchanged caps/cooldown. Natural market flow never stops, credits never exceed the phase cap, clock rollback grants nothing, and no currency/wealth event may automatically show an ad.
+- Approved 2026-09-19 scan amendment: new careers start with 50 active scans until 30 completed market trades (the gifted notebook does not count), then cap at 25 and clamp excess immediately. Each manual refresh consumes one and advances two game minutes. Credits regenerate one per 72 real seconds, including validated offline time; 0→50 takes 60 minutes early and 0→25 takes 30 minutes later. At zero, `MARKET_SCOUT` still restores exactly 25 through an explicit rewarded choice or premium bypass with unchanged caps/cooldown. Natural market flow never stops, credits never exceed the phase cap, and clock rollback grants nothing.
+- Approved 2026-09-19 ad amendment: after the 30th, 60th, 90th etc. completed market trade, a single iOS interstitial may be attempted after sale settlement and persistence. The gifted notebook does not count. No consent, no fill, offline, or ad failure never blocks play. Verified Premium skips it. Production serving stays gated; no other automatic ad or wealth/currency trigger is allowed.
 - Approved GDD v2.2 profile amendment: a clean first launch asks for a 1–20 character player name and one of three free static avatars before FTUE. Existing saves migrate as already onboarded. `tradeup_animated_avatars_01` is the fifth permanent SKU and grants exactly three animated profile avatars; it is cosmetic-only, store-priced, restorable, and must stop moving under reduced motion.
 
 ## Scope freeze
 
-Until v1.0, do not add a gameplay mechanic, ad placement, IAP type, premium currency, mission system, negotiation right, or economy layer. Allowed changes are limited to:
+Until v1.0, do not add a gameplay mechanic, ad placement beyond the approved 2026-09-19 trade interstitial, IAP type, premium currency, mission system, negotiation right, or economy layer. Allowed changes are limited to:
 
 - GDD-compliance bug fixes;
 - performance, crash, accessibility, localization, and store-policy fixes;

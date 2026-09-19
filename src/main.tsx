@@ -5,15 +5,27 @@ import "./index.css";
 import App from "./App.tsx";
 import { createAdMobAdapters } from "./infrastructure/admob";
 import { unavailableBillingAdapter } from "./infrastructure/monetization";
+import { createIosBillingAdapter } from "./infrastructure/nativeBilling";
+import { NativePurchases } from "@capgo/native-purchases";
+import { useGameStore } from "./stores/gameStore";
 import { configureMonetizationAdapters } from "./services/monetization";
 
 if (Capacitor.isNativePlatform()) {
   const admob = createAdMobAdapters();
   configureMonetizationAdapters({
-    billing: unavailableBillingAdapter,
+    billing:
+      Capacitor.getPlatform() === "ios"
+        ? createIosBillingAdapter()
+        : unavailableBillingAdapter,
     consent: admob.consent,
     rewarded: admob.rewarded,
+    showTradeInterstitial: admob.showTradeInterstitial,
   });
+  if (Capacitor.getPlatform() === "ios") {
+    void NativePurchases.addListener("transactionUpdated", () => {
+      void useGameStore.getState().syncStoreEntitlements();
+    }).catch(() => undefined);
+  }
 }
 
 createRoot(document.getElementById("root")!).render(

@@ -26,6 +26,7 @@ export type MonetizationAdapters = {
   billing: BillingAdapter;
   consent: ConsentAdapter;
   rewarded: RewardedAdAdapter;
+  showTradeInterstitial?: () => Promise<boolean>;
 };
 
 export const unavailableMonetizationAdapters: MonetizationAdapters = {
@@ -82,6 +83,44 @@ const isMatchingEvent = (
   return catalog?.entitlementId === event.entitlementId;
 };
 
+const reconcileStoreSnapshot = (
+  state: GameState,
+  events: VerifiedEntitlementEvent[],
+  platform: "ios" | "android",
+): GameState => {
+  const owned = new Set(
+    events
+      .filter((event) => event.status === "OWNED")
+      .map((event) => event.productId),
+  );
+  let next = state;
+  for (const entitlement of state.monetization.entitlements) {
+    if (
+      entitlement.platform === platform &&
+      entitlement.status === "OWNED" &&
+      !owned.has(entitlement.productId)
+    ) {
+      next = syncVerifiedEntitlement(
+        next,
+        entitlement.productId,
+        "REVOKED",
+        platform,
+      );
+    }
+  }
+  for (const event of events) {
+    if (isMatchingEvent(event)) {
+      next = syncVerifiedEntitlement(
+        next,
+        event.productId,
+        event.status,
+        platform,
+      );
+    }
+  }
+  return next;
+};
+
 export type MonetizationRefreshResult = {
   state: GameState;
   products: StoreProductMetadata[];
@@ -93,11 +132,12 @@ export const refreshMonetization = async (
   adapters: MonetizationAdapters,
   currentState: () => GameState = () => state,
 ): Promise<MonetizationRefreshResult> => {
-  const [consent, products] = await Promise.allSettled([
+  const [consent, products, entitlements] = await Promise.allSettled([
     adapters.consent.refresh(),
     adapters.billing.loadProducts(),
+    adapters.billing.currentEntitlements?.() ?? Promise.resolve(null),
   ]);
-  const next =
+  let next =
     consent.status === "fulfilled"
       ? syncConsentState(
           currentState(),
@@ -105,6 +145,13 @@ export const refreshMonetization = async (
           consent.value.adPersonalizationAllowed,
         )
       : syncConsentState(currentState(), false, false);
+  if (
+    entitlements.status === "fulfilled" &&
+    entitlements.value &&
+    adapters.billing.completeEntitlementSnapshot
+  ) {
+    next = reconcileStoreSnapshot(next, entitlements.value, "ios");
+  }
   const metadata =
     products.status === "fulfilled" ? validMetadata(products.value) : [];
   return {
@@ -175,6 +222,9 @@ export const restoreStoreProducts = async (
         event.platform,
       );
       synced += 1;
+    }
+    if (billing.completeEntitlementSnapshot) {
+      next = reconcileStoreSnapshot(next, events, "ios");
     }
     return { state: next, synced, failed: false };
   } catch {

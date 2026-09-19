@@ -26,6 +26,9 @@ importers:
       '@capacitor/ios':
         specifier: 8.5.1
         version: 8.5.1(@capacitor/core@8.5.1)
+      '@capgo/native-purchases':
+        specifier: 8.7.0
+        version: 8.7.0(@capacitor/core@8.5.1)
       idb:
         specifier: ^8.0.3
         version: 8.0.3
@@ -147,6 +150,11 @@ packages:
     resolution: {integrity: sha512-0EVqwCYf3RUp2JAjUGZ04xmG6dSpIsPmPacI9zKxn6mu9RSiHhmFF230ghe00HrkyB6ig6SfNdoADvVODxYhlQ==}
     peerDependencies:
       '@capacitor/core': ^8.5.0
+
+  '@capgo/native-purchases@8.7.0':
+    resolution: {integrity: sha512-sfnV5rZZOeUx/a/IVFX98HdEQX8f7/h9/oLyeo23QuTRnltVb6PxJhvmBOqIl02R7Pp5BaafNIEStvcacxLgnA==}
+    peerDependencies:
+      '@capacitor/core': '>=8.0.0'
 
   '@emnapi/runtime@1.11.3':
     resolution: {integrity: sha512-Xz4Tpyki7XyrpbUK1jR1AhdAdaXyhhY4lZ3neLodmhpuWfy2PAQN5B46sAiU4liOXGLkHypn/qU+jvfWSCYYLA==}
@@ -1475,6 +1483,10 @@ snapshots:
       '@capacitor/core': 8.5.1
 
   '@capacitor/ios@8.5.1(@capacitor/core@8.5.1)':
+    dependencies:
+      '@capacitor/core': 8.5.1
+
+  '@capgo/native-purchases@8.7.0(@capacitor/core@8.5.1)':
     dependencies:
       '@capacitor/core': 8.5.1
 
