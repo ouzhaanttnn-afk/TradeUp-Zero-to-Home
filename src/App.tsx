@@ -118,25 +118,18 @@ export function StartupSkeleton() {
       aria-busy="true"
       aria-label="Kayıt yükleniyor"
     >
-      <header className="startup-header">
-        <div>
-          <span className="eyebrow">TRADEUP</span>
-          <h1>Zero to Home</h1>
-        </div>
-      </header>
-      <section className="startup-wallet" aria-hidden="true">
-        <i />
-        <i />
-      </section>
-      <main className="startup-content" aria-hidden="true">
-        <i className="startup-line startup-line--short" />
-        <i className="startup-line startup-line--title" />
-        <div className="startup-grid">
-          {Array.from({ length: 9 }, (_, index) => (
-            <i key={index} />
-          ))}
-        </div>
-      </main>
+      <div className="startup-art" aria-hidden="true" />
+      <div className="startup-brand">
+        <span className="startup-brand__mark" aria-hidden="true">
+          ↗
+        </span>
+        <h1>TRADEUP</h1>
+        <p>ZERO TO HOME</p>
+      </div>
+      <div className="startup-progress">
+        <span className="startup-progress__spinner" aria-hidden="true" />
+        <p>Kariyerin hazırlanıyor</p>
+      </div>
     </div>
   );
 }

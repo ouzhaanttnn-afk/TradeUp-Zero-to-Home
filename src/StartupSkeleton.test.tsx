@@ -8,7 +8,9 @@ describe("startup skeleton", () => {
 
     expect(markup).toContain('aria-busy="true"');
     expect(markup).toContain('aria-label="Kayıt yükleniyor"');
-    expect(markup.match(/class="startup-grid"/g)).toHaveLength(1);
+    expect(markup).toContain("TRADEUP");
+    expect(markup).toContain("Kariyerin hazırlanıyor");
+    expect(markup).toContain('class="startup-progress__spinner"');
     expect(markup.match(/<button/g)).toBeNull();
     expect(markup).not.toContain("₺");
   });
