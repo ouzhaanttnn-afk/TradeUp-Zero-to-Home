@@ -36,6 +36,7 @@ import {
   hasPremiumEntitlement,
 } from "./domain/monetization";
 import { activeMarketListings, npcRiskSignal } from "./domain/world";
+import { nextLadderHome } from "./content/homes";
 import {
   HOME_GOAL_MINOR,
   money,
@@ -433,9 +434,12 @@ export default function App() {
   const marketLevel = marketExpertiseLevel(game);
   const estimates = wealthPresentation(game);
   const recovery = ftueActive ? null : recoveryPlan(game);
-  const homeProgress = game.home.purchased
-    ? 100
-    : Math.min(100, Math.floor((total / HOME_GOAL_MINOR) * 100));
+  const homeLadderTarget = nextLadderHome(game.home);
+  const homeProgress = !game.home.purchased
+    ? Math.min(100, Math.floor((total / HOME_GOAL_MINOR) * 100))
+    : homeLadderTarget
+      ? Math.min(100, Math.floor((total / homeLadderTarget.priceMinor) * 100))
+      : 100;
   const goldPercent = homeGoldPercent(
     total,
     HOME_GOAL_MINOR,
@@ -1681,7 +1685,8 @@ export default function App() {
                 game={game}
                 homeProgress={homeProgress}
                 onBuyHome={(homeId) => {
-                  if (buyHome(homeId)) setHomeFinaleOpen(true);
+                  const wasFirstHome = !game.home.purchasedHomeId;
+                  if (buyHome(homeId) && wasFirstHome) setHomeFinaleOpen(true);
                 }}
                 onOpenPortfolio={() => navigate("portfolio")}
               />

@@ -12,6 +12,7 @@ import {
   homeOptionById,
   homeSearchElapsedMin,
   nextHomeResult,
+  nextLadderHome,
 } from "../content/homes";
 import { Icon } from "./Icon";
 import { homeAssets } from "./homeAssets";
@@ -71,6 +72,20 @@ export default function JourneyPanel({
     ? Math.max(0, nextHome.revealOffsetMin - searchElapsed)
     : 0;
   const purchasedHome = homeOptionById(game.home.purchasedHomeId);
+  const ladderTarget = nextLadderHome(game.home);
+  const upgradeOptions = availableHomes.filter(
+    (option) => !purchasedHome || option.priceMinor > purchasedHome.priceMinor,
+  );
+  const showHomeMarket = game.home.purchased
+    ? Boolean(ladderTarget)
+    : homeProgress >= 100;
+  const cashTargetMinor = game.home.purchased
+    ? ladderTarget?.priceMinor
+    : HOME_GOAL_MINOR;
+  const showCashPlan =
+    cashTargetMinor !== undefined &&
+    showHomeMarket &&
+    game.cashMinor < cashTargetMinor;
 
   return (
     <>
@@ -90,14 +105,15 @@ export default function JourneyPanel({
           <div>
             <small>EV YOLCULUĞU · %{homeProgress}</small>
             <h3>
-              {game.home.purchased
-                ? "Evin artık senin"
-                : "Kendi alanına giden yol"}
+              {!game.home.purchased
+                ? "Kendi alanına giden yol"
+                : ladderTarget
+                  ? `${purchasedHome?.name ?? "Evin"} sonrası: ${ladderTarget.name}`
+                  : "Emlak merdiveninin zirvesi"}
             </h3>
             <p>
-              {game.home.purchased
-                ? "Hedef tamamlandı; pazar ve kariyerin açık kalmaya devam ediyor."
-                : homeProgress < 50
+              {!game.home.purchased
+                ? homeProgress < 50
                   ? "İlk kârlı satışından sonra ev hedefin görünür olur."
                   : `Kalan tahmini mesafe ${formatEstimate({
                       lowMinor: Math.max(
@@ -108,17 +124,31 @@ export default function JourneyPanel({
                         0,
                         HOME_GOAL_MINOR - estimates.total.lowMinor,
                       ),
-                    })}. Ev alımı için hedefte nakit gerekecek.`}
+                    })}. Ev alımı için hedefte nakit gerekecek.`
+                : ladderTarget
+                  ? `Sıradaki hedef ${ladderTarget.name}. Kalan tahmini mesafe ${formatEstimate(
+                      {
+                        lowMinor: Math.max(
+                          0,
+                          ladderTarget.priceMinor - estimates.total.highMinor,
+                        ),
+                        highMinor: Math.max(
+                          0,
+                          ladderTarget.priceMinor - estimates.total.lowMinor,
+                        ),
+                      },
+                    )}.`
+                  : "Emlak merdiveninin zirvesindesin; pazar ve kariyerin açık kalmaya devam ediyor."}
             </p>
             <div className="xp-bar">
               <i style={{ width: `${homeProgress}%` }} />
             </div>
-            {!game.home.purchased && homeProgress >= 100 ? (
+            {showHomeMarket ? (
               <div className="home-market">
                 <div className="home-market-status" role="status">
                   <span>
-                    {availableHomes.length
-                      ? `${availableHomes.length} ev bulundu`
+                    {upgradeOptions.length
+                      ? `${upgradeOptions.length} ev bulundu`
                       : "Emlak araştırması sürüyor"}
                   </span>
                   {nextHome ? (
@@ -127,9 +157,9 @@ export default function JourneyPanel({
                     <b>Tüm seçenekler bulundu</b>
                   )}
                 </div>
-                {availableHomes.length ? (
+                {upgradeOptions.length ? (
                   <div className="home-market-list" aria-label="Ev seçenekleri">
-                    {availableHomes.map((home) => (
+                    {upgradeOptions.map((home) => (
                       <article className="home-option-card" key={home.id}>
                         <img src={homeAssets[home.assetKey]} alt="" />
                         <div>
@@ -153,12 +183,10 @@ export default function JourneyPanel({
                 ) : null}
               </div>
             ) : null}
-            {!game.home.purchased &&
-            homeProgress >= 100 &&
-            game.cashMinor < HOME_GOAL_MINOR ? (
+            {showCashPlan ? (
               <div className="home-cash-plan">
                 <span>
-                  Nakit eksiği {money(HOME_GOAL_MINOR - game.cashMinor)}.
+                  Nakit eksiği {money(cashTargetMinor! - game.cashMinor)}.
                   Ürünlerin otomatik satılmaz.
                 </span>
                 <button onClick={onOpenPortfolio}>Portföyü aç</button>
@@ -180,17 +208,17 @@ export default function JourneyPanel({
           </div>
         </section>
       )}
-      {game.home.purchased ? (
+      {game.home.purchased && !ladderTarget ? (
         <section className="next-goal-card">
           <div>
-            <small>EVİN ARDINDAKİ HEDEF</small>
-            <h3>{purchasedHome?.name ?? "Kendi evin"} ile yeni dönem</h3>
+            <small>KARİYER ZİRVESİ</small>
+            <h3>{purchasedHome?.name ?? "Kendi evin"} ile tamamlandı</h3>
             <p>
-              Kariyer devam ediyor. Bir sonraki uzun dönem hedefi yeni içerik
-              güncellemesiyle açılacak.
+              Emlak merdiveninin en üst basamağındasın. Pazar ve kariyerin
+              açık kalmaya devam ediyor.
             </p>
           </div>
-          <span>YAKINDA</span>
+          <span>TAMAMLANDI</span>
         </section>
       ) : null}
       <section className={`score-card journey-score ${completedSales.tone}`}>

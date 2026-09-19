@@ -106,6 +106,64 @@ describe("canonical ownership and accounting", () => {
     expect(result.state.home.purchased).toBe(false);
   });
 
+  it("lets a purchased home be upgraded to a pricier one, but never downgraded", () => {
+    const state = initialState(0, "SANDBOX");
+    const [cheap, pricier] = HOME_OPTIONS;
+    state.cashMinor = cheap.priceMinor + pricier.priceMinor;
+    state.transactionJournal[0] = {
+      ...state.transactionJournal[0],
+      cashDeltaMinor: state.cashMinor,
+    };
+    state.home = {
+      ...state.home,
+      unlocked: true,
+      searchStartedAtGameMin: 0,
+    };
+    const gameTime = pricier.revealOffsetMin;
+
+    const first = purchaseHome(
+      state,
+      cheap.id,
+      "home-purchase:first",
+      gameTime,
+    );
+    if (!first.ok) throw new Error(first.reason);
+    expect(first.state.home.purchasedHomeId).toBe(cheap.id);
+    expect(first.state.cashMinor).toBe(pricier.priceMinor);
+
+    // Buying the same or a cheaper home again is rejected as a downgrade.
+    const downgrade = purchaseHome(
+      first.state,
+      cheap.id,
+      "home-purchase:downgrade-attempt",
+      gameTime,
+    );
+    expect(downgrade).toMatchObject({
+      ok: false,
+      reason: "HOME_ALREADY_PURCHASED",
+    });
+
+    // A pricier home is a genuine upgrade.
+    const upgrade = purchaseHome(
+      first.state,
+      pricier.id,
+      "home-purchase:upgrade",
+      gameTime,
+    );
+    if (!upgrade.ok) throw new Error(upgrade.reason);
+    expect(upgrade.state.home.purchasedHomeId).toBe(pricier.id);
+    expect(upgrade.state.cashMinor).toBe(0);
+    expect(upgrade.state.career.at(-1)).toMatchObject({
+      type: "HOME_PURCHASE",
+      amountMinor: pricier.priceMinor,
+    });
+    expect(reconcileJournal(upgrade.state)).toEqual({
+      cash: true,
+      activeBookCost: true,
+      realizedProfit: true,
+    });
+  });
+
   it.each([15_000, 20_000, 30_000])(
     "previews the same profit as settlement for %s minor-unit proceeds",
     (proceeds) => {
