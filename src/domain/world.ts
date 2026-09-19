@@ -1,7 +1,7 @@
 import { HOME_GOAL_MINOR, market, rng } from "../game";
 import { startHomeSearch } from "../content/homes";
-import { BUYER_TEMPO_CONFIG, WORLD_CONFIG } from "./config";
-import { netWorthMinor } from "./economy";
+import { BUYER_TEMPO_CONFIG, EARLY_GAME_CONFIG, WORLD_CONFIG } from "./config";
+import { completedTradeCount, netWorthMinor } from "./economy";
 import { completeDuePreparations } from "./preparation";
 import { recordMarketExits } from "./meta";
 import { BUYER_PERSONAS, eligibleBuyerTypes } from "./buyers";
@@ -168,6 +168,22 @@ function advanceMarketMinute(
 const activePlayerListing = (listing: PlayerListing) =>
   listing.state === "ACTIVE";
 
+// Eases "why is nobody buying" friction for the first few real trades: a
+// decaying arrival-chance boost on top of the steady-state buyer tempo,
+// derived purely from completedTradeCount (persisted, deterministic) so it
+// can't be reset by relisting the same asset, closing the app, or waiting
+// out the clock, and it never guarantees an offer -- buyerOfferForMinute
+// still rolls against the (boosted) chance every minute.
+export const earlyGameTempo = (state: Pick<GameState, "ownedAssets">) => {
+  const boost =
+    EARLY_GAME_CONFIG.buyerTempoBoostByTradeIndex[completedTradeCount(state)];
+  if (!boost) return BUYER_TEMPO_CONFIG;
+  return {
+    ...BUYER_TEMPO_CONFIG,
+    arrivalMultiplier: BUYER_TEMPO_CONFIG.arrivalMultiplier * boost,
+  };
+};
+
 export const buyerOfferForMinute = (
   state: GameState,
   listing: PlayerListing,
@@ -196,6 +212,11 @@ export const buyerOfferForMinute = (
   const priceRatio =
     listing.askingPriceMinor / Math.max(1, asset.instance.fairValueMinor);
   const priceFit = clamp01((1.3 - priceRatio) / 0.55);
+  // Also the source of the Pazar Radarı signal (see marketEvents.radarSignal):
+  // an active HIGH/RISING event multiplies arrival chance directly (its
+  // full demandMultiplier, ~+15% to +30%) and offer amount lightly (20% of
+  // the same excess, so a +30% arrival window nets roughly a +6% offer,
+  // well inside the "controlled bonus" the radar promises).
   const marketEvent = activeMarketEvent(state.seed, gameTimeMin);
   const eventDemandMultiplier =
     marketEvent &&
@@ -245,7 +266,7 @@ export const buyerOfferForMinute = (
         demandFactor *
         (0.94 + amountRoll * 0.1) *
         persona.amountMultiplier *
-        (1 + (eventDemandMultiplier - 1) * 0.5)) /
+        (1 + (eventDemandMultiplier - 1) * 0.2)) /
         1_000,
     ) * 1_000;
   return {
@@ -275,6 +296,7 @@ export function rollBuyerExposure(
     listing,
     state.gameTimeMin,
     hashString(exposureId),
+    earlyGameTempo(state),
   );
   return {
     ...state,
@@ -356,10 +378,17 @@ function advancePlayerListingsMinute(state: GameState, gameTimeMin: number) {
     transactionJournal,
     buyerOffers: unexpiredOffers,
   };
+  const tempo = earlyGameTempo(offerState);
   const newOffers = playerListings
     .filter(activePlayerListing)
     .flatMap((listing) => {
-      const offer = buyerOfferForMinute(offerState, listing, gameTimeMin);
+      const offer = buyerOfferForMinute(
+        offerState,
+        listing,
+        gameTimeMin,
+        0,
+        tempo,
+      );
       return offer ? [offer] : [];
     });
   const offeredListingIds = new Set(newOffers.map((offer) => offer.listingId));

@@ -1,15 +1,44 @@
 import { describe, expect, it } from "vitest";
-import { createPlayerListing, purchaseListing } from "./economy";
+import {
+  createPlayerListing,
+  FTUE_STARTING_ASSET_ID,
+  purchaseListing,
+  settleAssetSale,
+} from "./economy";
+import { activeMarketEvent } from "./marketEvents";
+import { BUYER_TEMPO_CONFIG, EARLY_GAME_CONFIG } from "./config";
 import { initialState, market } from "../game";
 import {
   activeMarketListings,
   advanceOffline,
   advanceWorldTo,
+  buyerOfferForMinute,
+  earlyGameTempo,
   effectiveOfflineGameMinutes,
   npcRiskSignal,
   scanMarket,
   WORLD_CONFIG,
 } from "./world";
+
+const withOwnedAssets = (
+  count: number,
+  extra: Partial<ReturnType<typeof initialState>["ownedAssets"][number]> = {},
+) => ({
+  ownedAssets: Array.from({ length: count }, (_, index) => ({
+    id: `sold-${index}`,
+    familyId: "notebook",
+    sourceListingId: `listing-${index}`,
+    instance: initialState(1_000, "SANDBOX").listings[0].instance,
+    state: "SOLD_COMPLETE" as const,
+    purchasePriceMinor: 10_000,
+    preparationCostMinor: 0,
+    inspectionCostMinor: 0,
+    transparentFeesMinor: 0,
+    bookCostMinor: 10_000,
+    acquiredAtGameMin: 0,
+    ...extra,
+  })),
+});
 
 describe("deterministic market world", () => {
   it("keeps the medium-demand card signal short enough for the mobile grid", () => {
@@ -180,5 +209,169 @@ describe("deterministic market world", () => {
       state: "IN_INVENTORY",
     });
     expect(expired.state.ownedAssets[0].currentListingId).toBeUndefined();
+  });
+
+  it("tapers early-game buyer tempo support by real completed trades, not session state", () => {
+    const boosts = EARLY_GAME_CONFIG.buyerTempoBoostByTradeIndex;
+    const freshPlayer = { ownedAssets: [] as never[] };
+    expect(earlyGameTempo(freshPlayer).arrivalMultiplier).toBeCloseTo(
+      BUYER_TEMPO_CONFIG.arrivalMultiplier * boosts[0],
+    );
+
+    const afterOneTrade = withOwnedAssets(1);
+    expect(earlyGameTempo(afterOneTrade).arrivalMultiplier).toBeCloseTo(
+      BUYER_TEMPO_CONFIG.arrivalMultiplier * boosts[1],
+    );
+
+    const afterSupportWindow = withOwnedAssets(boosts.length);
+    expect(earlyGameTempo(afterSupportWindow)).toEqual(BUYER_TEMPO_CONFIG);
+
+    // The gifted starting notebook is not a "real" trade: it must not count
+    // toward tapering off the support it exists to provide.
+    const onlyStartingNotebookSold = withOwnedAssets(1, {
+      id: FTUE_STARTING_ASSET_ID,
+      purchasePriceMinor: 0,
+      bookCostMinor: 0,
+    });
+    expect(earlyGameTempo(onlyStartingNotebookSold)).toEqual(
+      earlyGameTempo(freshPlayer),
+    );
+  });
+
+  it("does not reset buyer tempo support by relisting the same asset or restarting", () => {
+    let state = initialState(1_000, "SANDBOX");
+    state.cashMinor = 200_000;
+    state.transactionJournal[0] = {
+      ...state.transactionJournal[0],
+      cashDeltaMinor: 200_000,
+    };
+    const purchase = purchaseListing(state, state.listings[0], 20_000, 0);
+    if (!purchase.ok) throw new Error(purchase.reason);
+    let working = purchase.state;
+    const assetId = working.ownedAssets[0].id;
+    const firstListing = createPlayerListing(working, assetId, 25_000, 0);
+    if (!firstListing.ok) throw new Error(firstListing.reason);
+    working = firstListing.state;
+    const beforeSale = earlyGameTempo(working);
+
+    // Withdraw and relist the same asset several times without completing a
+    // sale: tempo support must be unaffected, since it only counts real
+    // completed trades.
+    for (let round = 0; round < 3; round += 1) {
+      working = {
+        ...working,
+        playerListings: working.playerListings.map((listing) => ({
+          ...listing,
+          state: "WITHDRAWN" as const,
+        })),
+        ownedAssets: working.ownedAssets.map((asset) => ({
+          ...asset,
+          state: "IN_INVENTORY" as const,
+          currentListingId: undefined,
+        })),
+      };
+      const relisted = createPlayerListing(
+        working,
+        assetId,
+        25_000 + round,
+        round + 1,
+      );
+      if (!relisted.ok) throw new Error(relisted.reason);
+      working = relisted.state;
+      expect(earlyGameTempo(working)).toEqual(beforeSale);
+    }
+
+    // Completing the sale is the only thing that should move the taper.
+    const sold = settleAssetSale(working, assetId, 30_000, "sale:test", 10);
+    if (!sold.ok) throw new Error(sold.reason);
+    expect(earlyGameTempo(sold.state)).not.toEqual(beforeSale);
+
+    // Simulating an app restart (a fresh initialState-less reload just
+    // resumes the same persisted state) does not change the derived tempo.
+    const reloaded = structuredClone(sold.state);
+    expect(earlyGameTempo(reloaded)).toEqual(earlyGameTempo(sold.state));
+  });
+
+  it("gives Pazar Radarı HIGH/RISING categories a real, bounded arrival edge and never blocks other categories", () => {
+    let state = initialState(1_000, "SANDBOX");
+    state.cashMinor = 200_000;
+    state.transactionJournal[0] = {
+      ...state.transactionJournal[0],
+      cashDeltaMinor: 200_000,
+    };
+    const purchase = purchaseListing(state, state.listings[0], 20_000, 0);
+    if (!purchase.ok) throw new Error(purchase.reason);
+    const listed = createPlayerListing(
+      purchase.state,
+      purchase.state.ownedAssets[0].id,
+      Math.round(purchase.state.ownedAssets[0].instance.fairValueMinor * 0.75),
+      0,
+    );
+    if (!listed.ok) throw new Error(listed.reason);
+    const playerListing = listed.state.playerListings[0];
+
+    let gameTimeMin = 180;
+    let event = activeMarketEvent(listed.state.seed, gameTimeMin);
+    while (event?.radarTier !== "HIGH") {
+      gameTimeMin += 1;
+      event = activeMarketEvent(listed.state.seed, gameTimeMin);
+      if (gameTimeMin > 180 + 360 * 20) {
+        throw new Error("No HIGH radar window found in a reasonable range");
+      }
+    }
+    const boostedCategory = event.affectedCategories[0];
+    const unaffectedCategory = "unrelated-category";
+
+    const withCategory = (category: string) => ({
+      ...listed.state,
+      ownedAssets: listed.state.ownedAssets.map((asset) =>
+        asset.id === playerListing.ownedAssetId
+          ? {
+              ...asset,
+              instance: {
+                ...asset.instance,
+                family: {
+                  ...asset.instance.family,
+                  category,
+                  demand: 1,
+                  liquidity: 1,
+                },
+              },
+            }
+          : asset,
+      ),
+    });
+    const boostedState = withCategory(boostedCategory);
+    const plainState = withCategory(unaffectedCategory);
+
+    // buyerOfferForMinute's roll is a single-step LCG keyed by rollSalt, so
+    // consecutive salts advance the roll by a fixed step (~1664525/2^32)
+    // rather than sampling independently. 2,600+ consecutive salts guarantee
+    // at least one full sweep through [0, 1), so the loop is certain (not
+    // merely likely) to land inside the plain/boosted threshold gap once.
+    let plainCount = 0;
+    let gapSaltFound = false;
+    for (let salt = 0; salt < 3_000; salt += 1) {
+      const plain = buyerOfferForMinute(
+        plainState,
+        playerListing,
+        gameTimeMin,
+        salt,
+      );
+      const boosted = buyerOfferForMinute(
+        boostedState,
+        playerListing,
+        gameTimeMin,
+        salt,
+      );
+      if (plain) plainCount += 1;
+      // The event multiplier only ever scales the same underlying roll up,
+      // never down, for an affected category: this must never fail.
+      if (plain) expect(boosted).toBeTruthy();
+      if (!plain && boosted) gapSaltFound = true;
+    }
+
+    expect(plainCount).toBeGreaterThan(0); // unaffected categories still sell
+    expect(gapSaltFound).toBe(true); // the radar boost is a real, visible edge
   });
 });

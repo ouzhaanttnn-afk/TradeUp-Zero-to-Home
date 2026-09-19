@@ -28,7 +28,7 @@ import {
 } from "./domain/decision";
 import { WORLD_CONFIG } from "./domain/config";
 import { buyerPersona } from "./domain/buyers";
-import { activeMarketEvent } from "./domain/marketEvents";
+import { activeMarketEvent, radarSignal } from "./domain/marketEvents";
 import { ftueCopy, ftueStageLabel, isFtueActive } from "./domain/ftue";
 import { categoryExpertiseLevel, marketExpertiseLevel } from "./domain/meta";
 import {
@@ -72,6 +72,7 @@ import {
 } from "./ui/manualListingPrice";
 import { homeAtmosphereStage, homeGoldPercent } from "./ui/homeAtmosphere";
 import { marketScanRefillStatus, shortDuration } from "./ui/marketScan";
+import { gameClockLabel } from "./ui/gameClock";
 import { recoveryPlan } from "./ui/recoveryPlan";
 import { ProductVisual } from "./ui/ProductVisual";
 import { AvatarPortrait } from "./ui/AvatarPortrait";
@@ -82,12 +83,14 @@ import { useModalFocus } from "./ui/useModalFocus";
 const loadSettingsPanel = () => import("./ui/SettingsPanel");
 const loadFollowPanel = () => import("./ui/FollowPanel");
 const loadJourneyPanel = () => import("./ui/JourneyPanel");
+const loadRadarPanel = () => import("./ui/RadarPanel");
 const SettingsPanel = lazy(loadSettingsPanel);
 const HomeFinale = lazy(() => import("./ui/HomeFinale"));
 const FollowPanel = lazy(loadFollowPanel);
 const JourneyPanel = lazy(loadJourneyPanel);
+const RadarPanel = lazy(loadRadarPanel);
 
-type Tab = "market" | "follow" | "portfolio" | "journey";
+type Tab = "market" | "radar" | "portfolio" | "journey";
 type PortfolioSegment = "inventory" | "preparation" | "listings";
 
 const evidenceLabel = (confidence: number) =>
@@ -185,10 +188,13 @@ export default function App() {
   const [homeFinaleOpen, setHomeFinaleOpen] = useState(false);
   const [homePulseStage, setHomePulseStage] = useState<number | null>(null);
   const [wallClockNow, setWallClockNow] = useState(() => Date.now());
+  const [followSheetOpen, setFollowSheetOpen] = useState(false);
   const settingsButtonRef = useRef<HTMLButtonElement>(null);
   const restoreSettingsFocusRef = useRef(false);
   const sheetCloseRef = useRef<HTMLButtonElement>(null);
   const sheetRef = useRef<HTMLElement>(null);
+  const followSheetCloseRef = useRef<HTMLButtonElement>(null);
+  const followSheetRef = useRef<HTMLElement>(null);
   const comparisonRef = useRef<HTMLDivElement>(null);
   const homeFinaleButtonRef = useRef<HTMLButtonElement>(null);
   const previousHomeStageRef = useRef<number | undefined>(undefined);
@@ -283,6 +289,9 @@ export default function App() {
   useModalFocus(selectedId !== null, sheetRef, sheetCloseRef, () =>
     setSelectedId(null),
   );
+  useModalFocus(followSheetOpen, followSheetRef, followSheetCloseRef, () =>
+    setFollowSheetOpen(false),
+  );
 
   useEffect(() => {
     if (tab !== "portfolio" || !focusedAssetId) return;
@@ -296,6 +305,7 @@ export default function App() {
 
   const total = wealth(game);
   const marketEvent = activeMarketEvent(game.seed, game.gameTimeMin);
+  const radarSignalNow = radarSignal(game.seed, game.gameTimeMin);
   const scanRefill = marketScanRefillStatus(game, wallClockNow);
   useEffect(() => {
     if (tab !== "market" || scanRefill.full) return undefined;
@@ -917,6 +927,9 @@ export default function App() {
             <div>
               <span className="eyebrow">TRADEUP</span>
               <h1>Zero to Home</h1>
+              <small className="game-clock">
+                {gameClockLabel(game.gameTimeMin)}
+              </small>
             </div>
           </div>
           <button
@@ -1046,6 +1059,23 @@ export default function App() {
                   <span className="market-listing-count">
                     {visibleMarketListings.length} ilan
                   </span>
+                  <button
+                    className="market-follow-entry"
+                    onPointerEnter={() => void loadFollowPanel()}
+                    onFocus={() => void loadFollowPanel()}
+                    onClick={() => {
+                      void loadFollowPanel();
+                      setFollowSheetOpen(true);
+                    }}
+                    aria-label={`Takip${game.follow.watchedListingIds.length ? ` · ${game.follow.watchedListingIds.length} ilan` : ""}`}
+                  >
+                    <Icon name="follow" />
+                    {game.follow.watchedListingIds.length ? (
+                      <span aria-hidden="true">
+                        {game.follow.watchedListingIds.length}
+                      </span>
+                    ) : null}
+                  </button>
                   {!ftueActive ? (
                     <>
                       <label
@@ -1097,7 +1127,8 @@ export default function App() {
                           <span className="market-refresh-copy">
                             <b>Yenile</b>
                             <small>
-                              {game.monetization.marketScanCredits}/25
+                              {game.monetization.marketScanCredits}/
+                              {scanRefill.cap}
                               {!scanRefill.full
                                 ? ` · +1 ${shortDuration(scanRefill.nextCreditSeconds)}`
                                 : ""}
@@ -1208,14 +1239,15 @@ export default function App() {
             </div>
           </>
         ) : null}
-        {tab === "follow" ? (
-          <Suspense fallback={<p role="status">Takip listesi hazırlanıyor…</p>}>
-            <FollowPanel
+        {tab === "radar" ? (
+          <Suspense fallback={<p role="status">Radar hazırlanıyor…</p>}>
+            <RadarPanel
               game={game}
-              marketListings={marketListings}
-              onSelectListing={selectListing}
-              onOpenMarket={() => navigate("market")}
-              onRemoveSearch={removeSearch}
+              signal={radarSignalNow}
+              onOpenMarketCategory={(category) => {
+                setMarketCategory(category);
+                navigate("market");
+              }}
             />
           </Suspense>
         ) : null}
@@ -1367,7 +1399,8 @@ export default function App() {
                                 <b>Yayında · {activity.ageLabel}</b>
                                 <span>Alıcı teklifi bekleniyor.</span>
                                 <span>
-                                  {activity.remainingLabel} · Teklif gelirse anında bildirim alırsın.
+                                  {activity.remainingLabel} · Teklif gelirse
+                                  anında bildirim alırsın.
                                 </span>
                                 {activity.diagnosis ? (
                                   <span className="listing-diagnosis">
@@ -1655,7 +1688,7 @@ export default function App() {
           {(
             [
               ["market", "home", "Pazar"],
-              ["follow", "follow", "Takip"],
+              ["radar", "radar", "Radar"],
               ["portfolio", "portfolio", "Portföy"],
               ["journey", "journey", "Yolculuk"],
             ] as const satisfies ReadonlyArray<readonly [Tab, IconName, string]>
@@ -1664,15 +1697,15 @@ export default function App() {
               className={tab === item ? "active" : ""}
               key={item}
               onPointerEnter={
-                item === "follow"
-                  ? () => void loadFollowPanel()
+                item === "radar"
+                  ? () => void loadRadarPanel()
                   : item === "journey"
                     ? () => void loadJourneyPanel()
                     : undefined
               }
               onFocus={
-                item === "follow"
-                  ? () => void loadFollowPanel()
+                item === "radar"
+                  ? () => void loadRadarPanel()
                   : item === "journey"
                     ? () => void loadJourneyPanel()
                     : undefined
@@ -1682,7 +1715,9 @@ export default function App() {
               aria-describedby={
                 item === "portfolio" && pendingBuyerOfferCount > 0
                   ? "pending-buyer-offers"
-                  : undefined
+                  : item === "radar" && radarSignalNow
+                    ? "radar-signal-active"
+                    : undefined
               }
               aria-current={tab === item ? "page" : undefined}
             >
@@ -1690,6 +1725,15 @@ export default function App() {
                 <Icon name={icon} />
               </span>
               <span className="nav-label">{label}</span>
+              {item === "radar" && radarSignalNow ? (
+                <>
+                  <span className="nav-dot" aria-hidden="true" />
+                  <span id="radar-signal-active" className="sr-only">
+                    {radarSignalNow.headline}:{" "}
+                    {radarSignalNow.categories.join(", ")}
+                  </span>
+                </>
+              ) : null}
               {item === "portfolio" && pendingBuyerOfferCount > 0 ? (
                 <>
                   <span className="nav-offer-count" aria-hidden="true">
@@ -2151,6 +2195,47 @@ export default function App() {
                   ) : null}
                 </>
               )}
+            </div>
+          </section>
+        </div>
+      ) : null}
+      {followSheetOpen ? (
+        <div className="scrim" onClick={() => setFollowSheetOpen(false)}>
+          <section
+            ref={followSheetRef}
+            className="sheet follow-sheet"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="follow-sheet-title"
+          >
+            <div className="sheet-scroll">
+              <div className="grab" aria-hidden="true" />
+              <button
+                ref={followSheetCloseRef}
+                className="close"
+                onClick={() => setFollowSheetOpen(false)}
+                aria-label="Kapat"
+              >
+                <Icon name="close" />
+              </button>
+              <Suspense
+                fallback={<p role="status">Takip listesi hazırlanıyor…</p>}
+              >
+                <FollowPanel
+                  game={game}
+                  marketListings={marketListings}
+                  onSelectListing={(listingId) => {
+                    setFollowSheetOpen(false);
+                    selectListing(listingId);
+                  }}
+                  onOpenMarket={() => {
+                    setFollowSheetOpen(false);
+                    navigate("market");
+                  }}
+                  onRemoveSearch={removeSearch}
+                />
+              </Suspense>
             </div>
           </section>
         </div>

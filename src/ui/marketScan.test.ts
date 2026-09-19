@@ -1,18 +1,39 @@
 import { describe, expect, it } from "vitest";
 import { initialState } from "../game";
+import { EARLY_GAME_CONFIG } from "../domain/config";
 import { marketScanRefillStatus, shortDuration } from "./marketScan";
 
 describe("market scan refill presentation", () => {
-  it("shows the next credit and full refill from the persisted anchor", () => {
+  it("shows the next credit and full refill from the persisted anchor, boosted to 50 in the early game", () => {
     const state = initialState(1_000, "SANDBOX");
     state.monetization.marketScanCredits = 0;
     state.monetization.marketScanRefillAnchorWallMs = 1_000;
     expect(marketScanRefillStatus(state, 1_000)).toEqual({
       full: false,
       nextCreditSeconds: 72,
-      fullRechargeSeconds: 1_800,
+      fullRechargeSeconds: 3_600,
+      cap: EARLY_GAME_CONFIG.scanCapBoosted,
     });
     expect(marketScanRefillStatus(state, 61_000).nextCreditSeconds).toBe(12);
+  });
+
+  it("reverts the cap to 25 once past the early-game completed-trade threshold", () => {
+    const state = initialState(1_000, "SANDBOX");
+    state.ownedAssets = Array.from(
+      { length: EARLY_GAME_CONFIG.completedTradeThreshold },
+      (_, index) => ({
+        ...state.ownedAssets[0],
+        id: `veteran-sale-${index}`,
+        state: "SOLD_COMPLETE" as const,
+        instance: state.listings[0].instance,
+      }),
+    );
+    state.monetization.marketScanCredits = 0;
+    state.monetization.marketScanRefillAnchorWallMs = 1_000;
+    expect(marketScanRefillStatus(state, 1_000)).toMatchObject({
+      fullRechargeSeconds: 1_800,
+      cap: 25,
+    });
   });
 
   it("formats a compact mobile countdown", () => {

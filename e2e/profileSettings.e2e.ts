@@ -72,6 +72,10 @@ test("profile and settings stay accessible from the mobile game header", async (
     })),
   ).toEqual({ fits: true, smallTargets: 0 });
 
+  // Satın Almalar & Görünüm is its own sheet stacked on top of Settings now
+  // (not an inline accordion), so it closes first before Settings' own
+  // close button becomes reachable again.
+  await page.getByRole("button", { name: "Kapat", exact: true }).click();
   await dialog.getByRole("button", { name: "Ayarları kapat" }).click();
   await expect(settingsButton).toBeFocused();
   expect(await page.evaluate(() => document.body.style.overflow)).toBe("");

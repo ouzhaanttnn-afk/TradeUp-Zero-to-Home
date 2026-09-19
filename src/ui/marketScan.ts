@@ -1,20 +1,22 @@
 import { MONETIZATION_CONFIG } from "../domain/config";
+import { marketScanRegenCap } from "../domain/monetization";
 import type { GameState } from "../domain/models";
 
-const cap =
+const steadyStateCap =
   MONETIZATION_CONFIG.reward.placementReward.MARKET_SCOUT_SCAN_CREDITS;
 const intervalMs =
   (MONETIZATION_CONFIG.reward.placementReward.MARKET_SCOUT_FULL_REFILL_MINUTES *
     60_000) /
-  cap;
+  steadyStateCap;
 
 export function marketScanRefillStatus(
-  state: Pick<GameState, "lastWallClockMs" | "monetization">,
+  state: Pick<GameState, "lastWallClockMs" | "monetization" | "ownedAssets">,
   requestedWallMs: number,
 ) {
   const credits = state.monetization.marketScanCredits;
+  const cap = marketScanRegenCap(state);
   if (credits >= cap)
-    return { full: true, nextCreditSeconds: 0, fullRechargeSeconds: 0 };
+    return { full: true, nextCreditSeconds: 0, fullRechargeSeconds: 0, cap };
   const nowWallMs = Math.max(
     requestedWallMs,
     state.lastWallClockMs,
@@ -34,6 +36,7 @@ export function marketScanRefillStatus(
       1,
       Math.ceil(((cap - credits) * intervalMs - elapsedMs) / 1_000),
     ),
+    cap,
   };
 }
 

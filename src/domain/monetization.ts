@@ -1,4 +1,4 @@
-import { activePlayerListings } from "./economy";
+import { activePlayerListings, completedTradeCount } from "./economy";
 import { completeDuePreparations } from "./preparation";
 import { rollBuyerExposure } from "./world";
 import type {
@@ -10,7 +10,7 @@ import type {
   RewardPlacementId,
 } from "./models";
 import { isAnimatedAvatar } from "./profile";
-import { MONETIZATION_CONFIG } from "./config";
+import { EARLY_GAME_CONFIG, MONETIZATION_CONFIG } from "./config";
 
 type RewardRequestReason =
   | "COOLDOWN"
@@ -78,21 +78,35 @@ export const createDefaultMonetizationState = (
 
 const MARKET_SCAN_CAP =
   MONETIZATION_CONFIG.reward.placementReward.MARKET_SCOUT_SCAN_CREDITS;
+// Fixed per-credit regen speed, derived from the steady-state cap. Early-game
+// support raises the ceiling credits can regen up to, never how fast a
+// single credit regenerates.
 const MARKET_SCAN_REFILL_INTERVAL_MS =
   (MONETIZATION_CONFIG.reward.placementReward.MARKET_SCOUT_FULL_REFILL_MINUTES *
     60_000) /
   MARKET_SCAN_CAP;
 
+// Natural-regen ceiling: boosted while under the early-game completed-trade
+// threshold, steady-state after. Never clamps existing credits down --
+// callers only ever compare against or add up to this value.
+export const marketScanRegenCap = (
+  state: Pick<GameState, "ownedAssets">,
+): number =>
+  completedTradeCount(state) < EARLY_GAME_CONFIG.completedTradeThreshold
+    ? EARLY_GAME_CONFIG.scanCapBoosted
+    : MARKET_SCAN_CAP;
+
 export const rechargeMarketScanCredits = (
   state: GameState,
   requestedWallMs: number,
 ): GameState => {
+  const regenCap = marketScanRegenCap(state);
   const nowWallMs = Math.max(
     state.lastWallClockMs,
     state.monetization.marketScanRefillAnchorWallMs,
     requestedWallMs,
   );
-  if (state.monetization.marketScanCredits >= MARKET_SCAN_CAP) {
+  if (state.monetization.marketScanCredits >= regenCap) {
     if (state.monetization.marketScanRefillAnchorWallMs === nowWallMs)
       return state;
     return {
@@ -110,7 +124,7 @@ export const rechargeMarketScanCredits = (
   const earned = Math.floor(elapsedMs / MARKET_SCAN_REFILL_INTERVAL_MS);
   if (earned <= 0) return state;
   const marketScanCredits = Math.min(
-    MARKET_SCAN_CAP,
+    regenCap,
     state.monetization.marketScanCredits + earned,
   );
   return {
@@ -119,7 +133,7 @@ export const rechargeMarketScanCredits = (
       ...state.monetization,
       marketScanCredits,
       marketScanRefillAnchorWallMs:
-        marketScanCredits === MARKET_SCAN_CAP
+        marketScanCredits === regenCap
           ? nowWallMs
           : state.monetization.marketScanRefillAnchorWallMs +
             earned * MARKET_SCAN_REFILL_INTERVAL_MS,
