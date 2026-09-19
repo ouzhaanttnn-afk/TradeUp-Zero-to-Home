@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { avatars } from "../content/avatars";
+import { nextLadderHome } from "../content/homes";
 import { marketExpertiseLevel } from "../domain/meta";
 import { ownsAnimatedAvatars } from "../domain/profile";
 import type { AccessibilityPreferences } from "../domain/models";
@@ -51,9 +52,15 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
   useModalFocus(true, panelRef, closeRef, onClose);
 
   const marketLevel = marketExpertiseLevel(game);
-  const homeProgress = game.home.purchased
-    ? 100
-    : Math.min(100, Math.floor((wealth(game) / HOME_GOAL_MINOR) * 100));
+  const settingsLadderTarget = nextLadderHome(game.home);
+  const homeProgress = !game.home.purchased
+    ? Math.min(100, Math.floor((wealth(game) / HOME_GOAL_MINOR) * 100))
+    : settingsLadderTarget
+      ? Math.min(
+          100,
+          Math.floor((wealth(game) / settingsLadderTarget.priceMinor) * 100),
+        )
+      : 100;
   const animatedAvatarsOwned = ownsAnimatedAvatars(game);
   const completedSales = game.transactionJournal.filter(
     (entry) => entry.kind === "SALE",

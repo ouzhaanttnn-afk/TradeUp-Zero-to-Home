@@ -55,7 +55,7 @@ import {
   rechargeMarketScanCredits,
 } from "../domain/monetization";
 import { isAnimatedAvatar, ownsAnimatedAvatars } from "../domain/profile";
-import { homeOptionById } from "../content/homes";
+import { homeOptionById, isTopTierHome } from "../content/homes";
 import type {
   AvatarId,
   InspectionKind,
@@ -543,9 +543,15 @@ export const useGameStore = create<Store>((set, get) => ({
       set({ notice: "Bu ev zaten senin." });
       return true;
     }
+    const wasFirstHome = !game.home.purchasedHomeId;
+    const notice = wasFirstHome
+      ? `${home.name} artık senin. Yolculuğun burada bitmiyor.`
+      : isTopTierHome(homeId)
+        ? `${home.name} ile emlak merdiveninin zirvesindesin. Kariyerin burada bitmiyor.`
+        : `${home.name} ile yükseldin. Sıradaki hedef için pazar açık.`;
     set({
       game: stampAndPersist(result.state),
-      notice: `${home.name} artık senin. Yolculuğun burada bitmiyor.`,
+      notice,
     });
     buzz(game, true);
     sound(game, "SALE_PROFIT");

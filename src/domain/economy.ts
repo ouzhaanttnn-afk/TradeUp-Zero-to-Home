@@ -250,9 +250,6 @@ export function purchaseHome(
   if (!state.home.unlocked) {
     return { ok: false, state, reason: "HOME_NOT_UNLOCKED" };
   }
-  if (state.home.purchased) {
-    return { ok: false, state, reason: "HOME_ALREADY_PURCHASED" };
-  }
   const home = homeOptionById(homeId);
   if (
     !home ||
@@ -261,6 +258,13 @@ export function purchaseHome(
     )
   ) {
     return { ok: false, state, reason: "HOME_NOT_AVAILABLE" };
+  }
+  // The home ladder: owning a home never blocks a *pricier* one -- it only
+  // blocks re-buying the same or a cheaper option (a downgrade makes no
+  // sense and the UI never offers one).
+  const currentHome = homeOptionById(state.home.purchasedHomeId);
+  if (currentHome && home.priceMinor <= currentHome.priceMinor) {
+    return { ok: false, state, reason: "HOME_ALREADY_PURCHASED" };
   }
   const purchasePriceMinor = home.priceMinor;
   if (!Number.isInteger(purchasePriceMinor) || purchasePriceMinor <= 0) {
@@ -284,7 +288,9 @@ export function purchaseHome(
           type: "HOME_PURCHASE",
           group: "HOME",
           atGameMin: gameTime,
-          label: `${home.name} artık senin`,
+          label: currentHome
+            ? `${home.name} ile yükseldin`
+            : `${home.name} artık senin`,
           amountMinor: purchasePriceMinor,
         },
       ],

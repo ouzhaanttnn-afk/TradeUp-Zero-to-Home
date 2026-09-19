@@ -81,6 +81,19 @@ export const nextHomeResult = (home: HomeState, gameTimeMin: number) => {
   return HOME_OPTIONS.find((option) => elapsed < option.revealOffsetMin);
 };
 
+// The home ladder: cheapest option pricier than whatever is currently
+// owned (or the cheapest option overall, before any purchase). Undefined
+// once the priciest home is owned -- there is nothing left to upgrade to.
+export const nextLadderHome = (home: HomeState) => {
+  const ownedPriceMinor = homeOptionById(home.purchasedHomeId)?.priceMinor ?? -1;
+  return HOME_OPTIONS.find((option) => option.priceMinor > ownedPriceMinor);
+};
+
+export const isTopTierHome = (homeId?: string) => {
+  const priceMinor = homeOptionById(homeId)?.priceMinor ?? -1;
+  return !HOME_OPTIONS.some((option) => option.priceMinor > priceMinor);
+};
+
 export const startHomeSearch = (
   state: GameState,
   eligible: boolean,

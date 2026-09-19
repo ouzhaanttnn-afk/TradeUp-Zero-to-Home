@@ -104,8 +104,14 @@ test("wealth atmosphere culminates in an accessible home purchase finale", async
   });
   await finale.getByRole("button", { name: "Yolculuğa devam et" }).click();
   await expect(finale).toBeHidden();
+  // The home ladder continues: garden_edge was the cheapest option, so the
+  // next-priciest already-revealed home becomes the new goal instead of a
+  // dead "coming soon" placeholder.
   await expect(
-    page.getByRole("heading", { name: "Evin artık senin" }),
+    page.getByRole("heading", {
+      name: "Bahçeli Başlangıç Evi sonrası: Şehir Rezidans Dairesi",
+    }),
   ).toBeVisible();
-  await expect(page.getByText("YAKINDA", { exact: true })).toBeVisible();
+  await expect(page.getByText("1 ev bulundu")).toBeVisible();
+  await expect(page.getByText("YAKINDA", { exact: true })).toHaveCount(0);
 });
