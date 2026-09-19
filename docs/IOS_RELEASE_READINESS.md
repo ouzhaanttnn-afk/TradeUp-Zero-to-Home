@@ -12,6 +12,11 @@
 
 ## 19 Eylül 2026 denetimi
 
+- App Store Connect'te TradeUp iOS 1.0 (13) ve `tradeup_premium_lifetime`, 19 Eylül 2026 23:03 (Türkiye saati) itibarıyla aynı [inceleme başvurusunda](https://appstoreconnect.apple.com/apps/6811362281/distribution/reviewsubmissions/details/e97088ee-b903-4823-8c08-863730136506) **Waiting for Review** durumunda. Onay sonrası yayın manuel seçili; henüz mağazada yayımlanmış değildir.
+- Uygulama fiyatı ücretsiz, dağıtım 175 bölgede ayarlı. 13 inç iPad ekran görüntüsü eklendi. Test edilmemiş Mac ve Vision Pro dağıtımı kapatıldı. Premium fiyatı ABD'de $4.99, Apple'ın otomatik Türkiye karşılığı ₺249,99.
+- Diğer dört GDD ürünü (`tradeup_theme_night_market`, `tradeup_theme_workshop`, `tradeup_home_styles_01`, `tradeup_animated_avatars_01`) henüz App Store Connect'te oluşturulup incelemeye gönderilmedi; bu başvurunun parçası değildir. Bunlar canlı satın almaya hazır sayılmamalı.
+- App Store inceleme iletişim bilgileri kullanıcının onayıyla girildi. App Privacy beyanı yayımlanmış ve "Data Not Collected" gösteriyor; üretim reklamları açılmadan önce SDK'nın gerçek veri akışıyla tekrar mutabakat zorunlu.
+
 - Son başarılı iOS arşivleme, imzalı IPA dışa aktarma ve App Store Connect yükleme iş akışı: [GitHub Actions #35461822510](https://github.com/ouzhaanttnn-afk/TradeUp-Zero-to-Home/actions/runs/35461822510), `a90d36a` commit'i. Bu, gerçek cihazda StoreKit/AdMob testi veya App Store inceleme onayı değildir.
 - GitHub üretim dağıtımı Vercel'e bağlıdır. App Store Connect'e şu sabit URL'ler girilmeli: `https://trade-up-zero-to-home.vercel.app/privacy.html` (gizlilik) ve `https://trade-up-zero-to-home.vercel.app/support.html` (destek). Bu URL'lerin dış ağdan erişimi yayın öncesi tekrar doğrulanmalıdır.
 - Gizlilik, kullanım koşulları ve destek sayfaları uygulamanın Profil ve Ayarlar ekranından erişilebilir.
@@ -20,13 +25,12 @@
 - 19 Eylül onaylı erken oyun kuralında ilk 30 tamamlanmış pazar ticaretine kadar tarama sınırı 50, sonrasında 25. Yeni kayıt 50 hakla başlar; mevcut kayıt hakkını korur ve 30. satışta fazlası 25'e indirilir. Kayıt geçişi, hak yenilenmesi ve eşik birim testlerinden geçiyor; satış sonrası kaydın gerçek cihazda kalması yine doğrulanmalı.
 - Güncel ilk oturumda rehber aşamalar kaldırıldığı hâlde bazı eski `firstSession.e2e.ts` ve `mobile.e2e.ts` senaryoları bu adımları bekliyor. Bu testler yeni kullanıcı akışına göre yenilenmeden tam tarayıcı kalite kapısı yeşil değil.
 
-## Mac/Xcode ve App Store Connect üzerinde yayın öncesi kalanlar
+## İnceleme sonrası ve yayından önce kalanlar
 
-1. Apple Developer Team ve signing profilini Xcode target'ına bağla.
-2. App Store Connect'te aynı bundle kimliğiyle uygulama kaydı oluştur.
-3. Xcode target'ına In-App Purchase capability ekle; beş ürünün App Store Connect kayıtlarını oluştur; gerçek iPhone'da sandbox satın alma, geri yükleme, iptal ve iade akışlarını doğrula.
-4. Gerçek iPhone'da ödüllü reklam izni, çevrimdışı kayıt, safe-area ve düşük bellek smoke testlerini çalıştır.
-5. App Privacy veri beyanını AdMob SDK davranışına göre doldur; yaş derecelendirmesi, mağaza metinleri ve ekran görüntülerini tamamla.
-6. Son `main` sürümünden yeni bir release archive al, TestFlight internal beta turunu tamamla, ardından App Review'a gönder.
+1. Apple'ın inceleme sonucunu izle; onay gelmeden sürümü yayımlanmış sayma. Manuel yayın seçimi korunur.
+2. Kalan dört kalıcı ürünü App Store Connect'te oluşturup fiyat, yerelleştirme ve inceleme görselleriyle ayrı incelemeye gönder.
+3. Gerçek iPhone'da sandbox satın alma, geri yükleme, iptal/iade, reklam izinleri, çevrimdışı kayıt, safe-area ve düşük bellek smoke testlerini tamamla.
+4. Üretim reklamları etkinleşirse App Privacy beyanını AdMob SDK'nın gerçek veri akışıyla uyumlu hâle getir.
+5. Eski ilk oturum adımlarını bekleyen tarayıcı e2e senaryolarını güncelle ve tam tarayıcı kalite kapısını yeniden çalıştır.
 
 Üretim reklam ve IAP anahtarları yayın kalitesinden önce repository'ye yazılmaz; Xcode/CI secret alanlarında tutulur.

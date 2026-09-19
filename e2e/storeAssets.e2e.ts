@@ -82,6 +82,21 @@ test("generate App Store screenshots for TradeUp", async ({
   ).toBeVisible();
   await capture(page, "02-canli-pazar", testInfo.outputPath("market.png"));
 
+  await page.setViewportSize({ width: 1032, height: 1376 });
+  await mkdir(path.resolve("store-assets/ios/ipad-13"), { recursive: true });
+  const iPadSource = testInfo.outputPath("ipad-market.png");
+  await page.screenshot({ path: iPadSource, animations: "disabled" });
+  await sharp(iPadSource)
+    .resize(2064, 2752, { fit: "fill" })
+    .png({ compressionLevel: 9 })
+    .toFile(path.resolve("store-assets/ios/ipad-13/01-canli-pazar.png"));
+  await page.setViewportSize({ width: 428, height: 926 });
+
+  await page.getByRole("button", { name: "Satın Almalar ve Görünüm" }).click();
+  await expect(page.getByText("TradeUp Premium", { exact: false })).toBeVisible();
+  await capture(page, "06-premium-inceleme", testInfo.outputPath("premium.png"));
+  await page.getByRole("button", { name: "Kapat", exact: true }).click();
+
   await page.locator(".market-card").first().click();
   await expect(
     page.getByRole("group", { name: "Satın alma adımları" }),
