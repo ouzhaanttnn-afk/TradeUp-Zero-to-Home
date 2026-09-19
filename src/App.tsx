@@ -1769,7 +1769,7 @@ export default function App() {
           }}
           aria-label="Satın Almalar ve Görünüm"
         >
-          <Icon name="store" />
+          <Icon name="basket" />
         </button>
       ) : null}
 

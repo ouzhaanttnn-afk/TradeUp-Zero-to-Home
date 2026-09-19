@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { Icon, type IconName } from "./Icon";
 
 const iconNames: IconName[] = [
+  "basket",
   "close",
   "follow",
   "home",
