@@ -295,6 +295,25 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
           onClose={() => setPurchasesOpen(false)}
         />
       ) : null}
+      <section className="settings-section" aria-label="Yardım ve belgeler">
+        <div className="settings-section-heading">
+          <div>
+            <h3>Yardım ve belgeler</h3>
+            <p>Destek ve açık kullanım bilgileri</p>
+          </div>
+        </div>
+        <div className="settings-document-links">
+          <a href="/support.html">
+            Destek <span aria-hidden="true">↗</span>
+          </a>
+          <a href="/privacy.html">
+            Gizlilik <span aria-hidden="true">↗</span>
+          </a>
+          <a href="/terms.html">
+            Kullanım koşulları <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+      </section>
       <section className="settings-danger-zone" aria-label="Kayıt yönetimi">
         <div>
           <b>Kayıt yönetimi</b>

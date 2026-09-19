@@ -10,12 +10,23 @@
 - `pnpm cap:sync:ios` komutu eklendi ve güncel production build iOS projesine başarıyla senkronlandı.
 - Unit, lint, production build ve 320–430 px tarayıcı kalite kapıları geçiyor.
 
-## Mac/Xcode üzerinde yayın öncesi kalanlar
+## 19 Eylül 2026 denetimi
+
+- Son başarılı TestFlight yükleme iş akışı: [GitHub Actions #35422483213](https://github.com/ouzhaanttnn-afk/TradeUp-Zero-to-Home/actions/runs/35422483213), `185eb00` commit'i. Bu, son `main` commit'i için yeni bir cihaz testi veya App Store inceleme onayı değildir.
+- GitHub üretim dağıtımı Vercel'e bağlıdır. App Store Connect'e şu sabit URL'ler girilmeli: `https://trade-up-zero-to-home.vercel.app/privacy.html` (gizlilik) ve `https://trade-up-zero-to-home.vercel.app/support.html` (destek). Bu URL'lerin dış ağdan erişimi yayın öncesi tekrar doğrulanmalıdır.
+- Gizlilik, kullanım koşulları ve destek sayfaları uygulamanın Profil ve Ayarlar ekranından erişilebilir.
+- `src/services/monetization.ts` hâlâ `unavailableBillingAdapter` kullanıyor. StoreKit satın alma/geri yükleme canlı değil; beş ürün mağazada kullanıma hazır sayılmaz.
+- iOS AdMob köprüsü ve dört ödüllü reklam birimi kodda var; yayın reklamı çevre değişkeniyle kapalı. Google Mobile Ads SDK olası veri toplama türleri için gizlilik metni ve App Store veri beyanı birbirine uygun tutulmalı.
+- Tam tarayıcı turunda bulunan 50 tarama hakkı / 25 sınırı çelişkisi giderildi. v18 kayıtlarında fazla haklar 25'e indirilerek journal ve oyun varlıkları korunuyor; satış sonrası kaydın cihazda kalması otomatik testte yeniden doğrulanmalı.
+- Güncel ilk oturumda rehber aşamalar kaldırıldığı hâlde bazı eski `firstSession.e2e.ts` ve `mobile.e2e.ts` senaryoları bu adımları bekliyor. Bu testler yeni kullanıcı akışına göre yenilenmeden tam tarayıcı kalite kapısı yeşil değil.
+
+## Mac/Xcode ve App Store Connect üzerinde yayın öncesi kalanlar
 
 1. Apple Developer Team ve signing profilini Xcode target'ına bağla.
 2. App Store Connect'te aynı bundle kimliğiyle uygulama kaydı oluştur.
-3. Gerçek iPhone'da billing, rewarded reklam, çevrimdışı kayıt, safe-area ve düşük bellek smoke testlerini çalıştır.
-4. Gizlilik beyanları, yaş derecelendirmesi, mağaza metinleri ve ekran görüntülerini tamamla.
-5. Release archive al, TestFlight'a gönder ve önce internal beta kalite kapısından geçir.
+3. StoreKit adapter'ını ve beş ürünün App Store Connect kayıtlarını bağla; sandbox satın alma, geri yükleme, iptal ve iade akışlarını doğrula.
+4. Gerçek iPhone'da ödüllü reklam izni, çevrimdışı kayıt, safe-area ve düşük bellek smoke testlerini çalıştır.
+5. App Privacy veri beyanını AdMob SDK davranışına göre doldur; yaş derecelendirmesi, mağaza metinleri ve ekran görüntülerini tamamla.
+6. Son `main` sürümünden yeni bir release archive al, TestFlight internal beta turunu tamamla, ardından App Review'a gönder.
 
 Üretim reklam ve IAP anahtarları yayın kalitesinden önce repository'ye yazılmaz; Xcode/CI secret alanlarında tutulur.

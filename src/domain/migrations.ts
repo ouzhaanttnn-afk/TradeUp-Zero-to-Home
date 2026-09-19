@@ -535,7 +535,27 @@ export function migrateStateToCurrent(value: unknown): unknown {
   next = migrateStateToV15(next);
   next = migrateStateToV16(next);
   next = migrateStateToV17(next);
-  return migrateStateToV18(next);
+  next = migrateStateToV18(next);
+  return migrateStateToV19(next);
+}
+
+// An interim early-game configuration could regenerate more than 25 scan
+// credits, although the save schema and GDD never allowed that amount.
+export function migrateStateToV19(value: unknown): unknown {
+  const source = record(value);
+  if (integer(source.version) >= 19) return value;
+  const monetization = record(source.monetization);
+  return {
+    ...source,
+    version: 19,
+    monetization: {
+      ...monetization,
+      marketScanCredits: Math.min(
+        25,
+        Math.max(0, integer(monetization.marketScanCredits, 25)),
+      ),
+    },
+  };
 }
 
 // The guided first-purchase walkthrough was removed; saves left stuck

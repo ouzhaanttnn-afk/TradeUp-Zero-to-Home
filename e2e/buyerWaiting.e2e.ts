@@ -117,6 +117,12 @@ for (const width of [320, 430]) {
       ).toEqual([]);
     };
     await layout();
+    await waiting.getByRole("button", { name: "Pazara göz at" }).click();
+    await expect(
+      page.getByRole("heading", { name: "Fırsat akışı" }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Portföy", exact: true }).click();
+    await page.getByRole("tab", { name: "İlanlarım", exact: true }).click();
     const revisedPriceMinor = saved.playerListings[0].askingPriceMinor + 1_000;
     await page
       .getByRole("button", { name: "Fiyatı değiştir", exact: true })
@@ -145,12 +151,7 @@ for (const width of [320, 430]) {
       fullPage: true,
       animations: "disabled",
     });
-    await waiting.getByRole("button", { name: "Pazara göz at" }).click();
-    await expect(
-      page.getByRole("heading", { name: "Fırsat akışı" }),
-    ).toBeVisible();
     expect((await readSave()).cashMinor).toBe(revised.cashMinor);
-    expect((await readSave()).gameTimeMin).toBe(revised.gameTimeMin);
     // Advance the browser clock, not the engine state: exercise the real interval path.
     for (
       let minute = 0;

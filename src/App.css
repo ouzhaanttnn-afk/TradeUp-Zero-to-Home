@@ -3852,6 +3852,28 @@ nav .active .nav-icon {
   margin: 0;
   padding: 6px 9px;
 }
+.settings-document-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+.settings-document-links a {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid rgba(136, 204, 164, 0.27);
+  border-radius: 12px;
+  color: #d7f5e5;
+  text-decoration: none;
+}
+.settings-document-links a:focus-visible {
+  outline: 2px solid #9ef4c2;
+  outline-offset: 2px;
+}
 .settings-danger-zone {
   display: flex;
   min-height: 54px;

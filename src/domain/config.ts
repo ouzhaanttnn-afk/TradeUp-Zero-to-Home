@@ -30,12 +30,9 @@ export const BUYER_TEMPO_CONFIG = {
 // and relisting, or reopening the app.
 export const EARLY_GAME_CONFIG = {
   revision: "early-game-pacing-2026-09-18",
-  // Market scan cap: 50 credits while under this many completed trades
-  // (the gifted starting notebook doesn't count), 25 once past it. Regen
-  // speed, the MARKET_SCOUT ad-reward amount (25) and any banked credits
-  // above 25 are untouched.
+  // Buyer tempo support ends after the first completed trades. Scan credits
+  // keep the GDD's fixed 25-credit cap throughout the career.
   completedTradeThreshold: 30,
-  scanCapBoosted: 50,
   // Buyer tempo: per-trade arrival-chance multipliers layered on top of
   // BUYER_TEMPO_CONFIG.arrivalMultiplier for the first N completed trades,
   // stepping back down to the steady-state multiplier by trade N. Values
@@ -46,7 +43,7 @@ export const EARLY_GAME_CONFIG = {
 
 // Mid-game momentum: EARLY_GAME_CONFIG's buyer-tempo boost only covers the
 // first 3 completed trades (see buyerTempoBoostByTradeIndex above); trades
-// 30-150 (after the scan-cap support in EARLY_GAME_CONFIG also ends) get one
+// 30-150 get one
 // flat, much gentler arrival-chance bump instead of a hard cliff back to
 // steady state. Same non-gameable basis as EARLY_GAME_CONFIG: keyed off real
 // completedTradeCount only, never wall-clock or session state.

@@ -40,6 +40,16 @@ test("profile and settings stay accessible from the mobile game header", async (
   await expect(
     dialog.getByRole("group", { name: "Profil özeti" }),
   ).toContainText("Pazar seviyesi");
+  for (const [name, path] of [
+    ["Destek", "/support.html"],
+    ["Gizlilik", "/privacy.html"],
+    ["Kullanım koşulları", "/terms.html"],
+  ]) {
+    await expect(dialog.getByRole("link", { name })).toHaveAttribute(
+      "href",
+      path,
+    );
+  }
   await dialog
     .getByRole("button", { name: "Satın Almalar ve Görünüm" })
     .click();
@@ -85,4 +95,26 @@ test("profile and settings stay accessible from the mobile game header", async (
   await page.reload();
   await page.getByRole("button", { name: "Ayarlar", exact: true }).click();
   await expect(page.getByLabel("Oyuncu adı")).toHaveValue("Pazar Ustası");
+});
+
+test("public help pages expose working policy and support navigation", async ({
+  page,
+}) => {
+  for (const [path, heading] of [
+    ["/support.html", "Nasıl yardımcı olabiliriz?"],
+    ["/privacy.html", "Verileriniz hakkında açık bilgi."],
+    ["/terms.html", "Adil oyun, açık kurallar."],
+  ]) {
+    const response = await page.goto(path);
+    expect(response?.status()).toBe(200);
+    await expect(page.getByRole("heading", { name: heading })).toBeVisible();
+    await expect(page.getByRole("link", { name: "TRADEUP" })).toHaveAttribute(
+      "href",
+      "/",
+    );
+  }
+  await page.getByRole("link", { name: "Destek", exact: true }).click();
+  await expect(
+    page.getByRole("link", { name: "nostoscomp@gmail.com" }),
+  ).toHaveAttribute("href", /mailto:nostoscomp@gmail.com/);
 });

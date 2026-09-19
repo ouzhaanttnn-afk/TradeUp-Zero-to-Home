@@ -176,11 +176,8 @@
     <div id="root"></div>
     <script>
       (function () {
-        // A fast CDN can mount React inside a single frame, which would
-        // otherwise remove the splash before anyone can read the brand
-        // mark or a tip -- so hiding always waits out this minimum first.
-        var MIN_VISIBLE_MS = 700;
-        var shownAt = Date.now();
+        // The splash must stop intercepting input as soon as the app mounts.
+        // A paused system clock must never leave it over the onboarding UI.
         var tips = [
           "Ucuz ilan her zaman fırsat değildir.",
           "Talep yükselen kategoriler daha hızlı alıcı bulabilir.",
@@ -218,21 +215,14 @@
           if (!splash) return;
           window.clearInterval(tipTimer);
           setProgress(100, 220);
+          splash.classList.add("boot-splash--gone");
           window.setTimeout(function () {
-            splash.classList.add("boot-splash--gone");
-            window.setTimeout(function () {
-              splash.remove();
-            }, 320);
-          }, 180);
+            splash.remove();
+          }, 320);
         }
 
         function hideSplash() {
-          var elapsed = Date.now() - shownAt;
-          if (elapsed >= MIN_VISIBLE_MS) {
-            removeSplash();
-          } else {
-            window.setTimeout(removeSplash, MIN_VISIBLE_MS - elapsed);
-          }
+          removeSplash();
         }
 
         var root = document.getElementById("root");

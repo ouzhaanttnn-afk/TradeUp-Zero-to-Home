@@ -39,6 +39,8 @@ nav {
   align-items: center;
   gap: 10px 18px;
   margin-bottom: 48px;
+  padding: 12px 0 16px;
+  border-bottom: 1px solid rgba(142, 240, 187, 0.16);
 }
 .brand {
   margin-right: auto;
@@ -51,6 +53,15 @@ nav a:not(.brand) {
   color: #9eb6aa;
   font-size: 14px;
   text-decoration: none;
+}
+nav a[aria-current="page"] {
+  color: #d8ffe9;
+  font-weight: 750;
+}
+a:focus-visible {
+  outline: 2px solid #8ef0bb;
+  outline-offset: 4px;
+  border-radius: 3px;
 }
 .eyebrow {
   color: #6ee7a5;
@@ -82,9 +93,14 @@ h1 {
 h2 {
   margin: 26px 0 8px;
   font-size: 21px;
+  letter-spacing: -0.02em;
 }
 h2:first-child {
   margin-top: 0;
+}
+.card h2:not(:first-child) {
+  padding-top: 24px;
+  border-top: 1px solid rgba(126, 235, 177, 0.12);
 }
 p,
 li {
@@ -106,6 +122,11 @@ footer {
   color: #758a80;
   font-size: 13px;
 }
+@media (prefers-reduced-motion: no-preference) {
+  a { transition: color 150ms ease, background-color 150ms ease; }
+  nav a:hover { color: #fff; }
+  .mail:hover { background: #90f1bb; }
+}
 @media (max-width: 520px) {
   .shell {
     width: min(100% - 24px, 760px);
@@ -117,5 +138,9 @@ footer {
   }
   nav {
     margin-bottom: 34px;
+    gap: 12px 16px;
+  }
+  .brand {
+    width: 100%;
   }
 }

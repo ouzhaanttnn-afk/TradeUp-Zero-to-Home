@@ -7,7 +7,10 @@
 - [x] Native haptik ve App lifecycle bağımlılıkları
 - [x] Özgün ikon ve ürün assetleri
 - [x] PWA manifesti ve offline cache
-- [ ] Yayıncı adı, destek e-postası ve gizlilik URL'si
+- [x] Yayıncı adı, destek e-postası ve gizlilik/destek sayfası kaynakları hazır
+- [ ] Gizlilik ve destek URL'lerinin dış ağdan açıldığını doğrula; App Store Connect'e gir
+- [ ] App Privacy veri beyanını mevcut AdMob SDK davranışıyla eşleştir
+- [ ] StoreKit satın alma/geri yükleme adapter'ı ve beş ürünün sandbox testi
 - [ ] Android upload keystore ve Play App Signing
 - [ ] Google Play Console uygulama kaydı ve içerik derecelendirmesi
 - [ ] Apple Developer hesabı, bundle kaydı ve iOS platformunun macOS üzerinde eklenmesi

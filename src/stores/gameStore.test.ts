@@ -210,7 +210,7 @@ describe("market scan allowance", () => {
     expect(useGameStore.getState().notice).toContain("Tarama hakkın bitti");
   });
 
-  it("regenerates past 25 up to 50 while under the early-game trade threshold, and only up to 25 once past it", () => {
+  it("never regenerates past 25, regardless of completed trades", () => {
     vi.spyOn(systemTimeProvider, "nowWallMs").mockReturnValue(0);
     const fresh = initialState(0, "SANDBOX");
     fresh.ftue.stage = "COMPLETE";
@@ -220,7 +220,7 @@ describe("market scan allowance", () => {
     vi.spyOn(systemTimeProvider, "nowWallMs").mockReturnValue(60 * 60_000);
     useGameStore.getState().refreshMarketScanCredits();
     expect(useGameStore.getState().game.monetization.marketScanCredits).toBe(
-      EARLY_GAME_CONFIG.scanCapBoosted,
+      25,
     );
 
     const veteran = initialState(0, "SANDBOX");
@@ -237,7 +237,7 @@ describe("market scan allowance", () => {
     );
   });
 
-  it("does not delete banked credits above 25 once the early-game window ends", () => {
+  it("clamps credits from an invalid interim save back to 25", () => {
     vi.spyOn(systemTimeProvider, "nowWallMs").mockReturnValue(0);
     const game = initialState(0, "SANDBOX");
     game.ftue.stage = "COMPLETE";
@@ -246,9 +246,9 @@ describe("market scan allowance", () => {
     game.ownedAssets = veteranOwnedAssets(game);
     useGameStore.setState({ game, ready: true, sessionActive: true });
     useGameStore.getState().refreshMarketScanCredits();
-    expect(
-      useGameStore.getState().game.monetization.marketScanCredits,
-    ).toBe(40);
+    expect(useGameStore.getState().game.monetization.marketScanCredits).toBe(
+      25,
+    );
   });
 });
 

@@ -4,6 +4,23 @@ import { reconcileJournal } from "./economy";
 import { migrateStateToCurrent } from "./migrations";
 
 describe("save migration", () => {
+  it("repairs v18 saves with excess scan credits without changing the journal", () => {
+    const previous = initialState(500, "SANDBOX");
+    const v18 = {
+      ...previous,
+      version: 18,
+      monetization: { ...previous.monetization, marketScanCredits: 50 },
+    };
+    const state = validateState(migrateStateToCurrent(v18));
+    expect(state.version).toBe(SAVE_VERSION);
+    expect(state.monetization.marketScanCredits).toBe(25);
+    expect(state.transactionJournal).toEqual(previous.transactionJournal);
+    expect(reconcileJournal(state)).toEqual({
+      cash: true,
+      activeBookCost: true,
+      realizedProfit: true,
+    });
+  });
   it("fast-forwards a v17 save stuck mid-walkthrough to FTUE COMPLETE", () => {
     const current = initialState(500, "SANDBOX");
     const v17 = {
