@@ -12,12 +12,13 @@
 
 ## 19 Eylül 2026 denetimi
 
-- App Store Connect'te TradeUp iOS 1.0 (13) ve `tradeup_premium_lifetime`, 19 Eylül 2026 23:03 (Türkiye saati) itibarıyla aynı [inceleme başvurusunda](https://appstoreconnect.apple.com/apps/6811362281/distribution/reviewsubmissions/details/e97088ee-b903-4823-8c08-863730136506) **Waiting for Review** durumunda. Onay sonrası yayın manuel seçili; henüz mağazada yayımlanmış değildir.
+- Önceki iOS 1.0 (13) inceleme başvurusu kaldırıldı. TradeUp iOS **1.0.1 (14)** ve `tradeup_premium_lifetime`, 19 Eylül 2026 23:58 (Türkiye saati) itibarıyla aynı [yeni inceleme başvurusunda](https://appstoreconnect.apple.com/apps/6811362281/distribution/reviewsubmissions/details/eef19a40-c8f2-477e-ae49-b61650b23d11) **Waiting for Review** durumunda. Onay sonrası yayın manuel seçili; henüz mağazada yayımlanmış değildir.
+- 1.0.1 için dört açıklamalı iPhone mağaza görseli pazar, portföy, ev yolculuğu ve profil sırasıyla yüklendi. İlk üç görsel kurulum sayfasında kullanılacak.
 - Uygulama fiyatı ücretsiz, dağıtım 175 bölgede ayarlı. 13 inç iPad ekran görüntüsü eklendi. Test edilmemiş Mac ve Vision Pro dağıtımı kapatıldı. Premium fiyatı ABD'de $4.99, Apple'ın otomatik Türkiye karşılığı ₺249,99.
 - Diğer dört GDD ürünü (`tradeup_theme_night_market`, `tradeup_theme_workshop`, `tradeup_home_styles_01`, `tradeup_animated_avatars_01`) henüz App Store Connect'te oluşturulup incelemeye gönderilmedi; bu başvurunun parçası değildir. Bunlar canlı satın almaya hazır sayılmamalı.
 - App Store inceleme iletişim bilgileri kullanıcının onayıyla girildi. App Privacy beyanı yayımlanmış ve "Data Not Collected" gösteriyor; üretim reklamları açılmadan önce SDK'nın gerçek veri akışıyla tekrar mutabakat zorunlu.
 
-- Son başarılı iOS arşivleme, imzalı IPA dışa aktarma ve App Store Connect yükleme iş akışı: [GitHub Actions #35461822510](https://github.com/ouzhaanttnn-afk/TradeUp-Zero-to-Home/actions/runs/35461822510), `a90d36a` commit'i. Bu, gerçek cihazda StoreKit/AdMob testi veya App Store inceleme onayı değildir.
+- Son başarılı iOS arşivleme, imzalı IPA dışa aktarma ve App Store Connect yükleme iş akışı: [GitHub Actions #35468044444](https://github.com/ouzhaanttnn-afk/TradeUp-Zero-to-Home/actions/runs/35468044444), `f909df9` commit'i. Bu, gerçek cihazda StoreKit/AdMob testi veya App Store inceleme onayı değildir.
 - GitHub üretim dağıtımı Vercel'e bağlıdır. App Store Connect'e şu sabit URL'ler girilmeli: `https://trade-up-zero-to-home.vercel.app/privacy.html` (gizlilik) ve `https://trade-up-zero-to-home.vercel.app/support.html` (destek). Bu URL'lerin dış ağdan erişimi yayın öncesi tekrar doğrulanmalıdır.
 - Gizlilik, kullanım koşulları ve destek sayfaları uygulamanın Profil ve Ayarlar ekranından erişilebilir.
 - iOS StoreKit 2 köprüsü ve beş kalıcı ürünün mağaza fiyatı/satın alma/geri yükleme akışı bağlandı. Hak yalnız StoreKit'in güncel doğrulanmış entitlement listesinde işlem görüldüğünde veriliyor; eksik/iade edilmiş hak geri alınıyor. Web ve Android satın alma kapalı. App Store Connect'te beş ürün kaydı ve gerçek cihazda sandbox testi tamamlanmadan canlı satış hazır sayılmaz.
