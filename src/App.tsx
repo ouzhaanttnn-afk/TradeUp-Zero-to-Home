@@ -84,11 +84,13 @@ const loadSettingsPanel = () => import("./ui/SettingsPanel");
 const loadFollowPanel = () => import("./ui/FollowPanel");
 const loadJourneyPanel = () => import("./ui/JourneyPanel");
 const loadRadarPanel = () => import("./ui/RadarPanel");
+const loadPurchasesSheet = () => import("./ui/PurchasesSheet");
 const SettingsPanel = lazy(loadSettingsPanel);
 const HomeFinale = lazy(() => import("./ui/HomeFinale"));
 const FollowPanel = lazy(loadFollowPanel);
 const JourneyPanel = lazy(loadJourneyPanel);
 const RadarPanel = lazy(loadRadarPanel);
+const PurchasesSheet = lazy(loadPurchasesSheet);
 
 type Tab = "market" | "radar" | "portfolio" | "journey";
 type PortfolioSegment = "inventory" | "preparation" | "listings";
@@ -189,6 +191,7 @@ export default function App() {
   const [homePulseStage, setHomePulseStage] = useState<number | null>(null);
   const [wallClockNow, setWallClockNow] = useState(() => Date.now());
   const [followSheetOpen, setFollowSheetOpen] = useState(false);
+  const [purchasesBubbleOpen, setPurchasesBubbleOpen] = useState(false);
   const settingsButtonRef = useRef<HTMLButtonElement>(null);
   const restoreSettingsFocusRef = useRef(false);
   const sheetCloseRef = useRef<HTMLButtonElement>(null);
@@ -244,6 +247,10 @@ export default function App() {
     completeProfileOnboarding,
     restorePurchases,
     claimReward,
+    storeProducts,
+    purchaseProduct,
+    openPurchases,
+    showPrivacyOptions,
   } = useGameStore();
 
   const openSettingsPanel = useCallback(() => {
@@ -1747,6 +1754,37 @@ export default function App() {
             </button>
           ))}
         </nav>
+      ) : null}
+
+      {!settingsOpen ? (
+        <button
+          type="button"
+          className="purchases-bubble"
+          onPointerEnter={() => void loadPurchasesSheet()}
+          onFocus={() => void loadPurchasesSheet()}
+          onClick={() => {
+            void loadPurchasesSheet();
+            void openPurchases();
+            setPurchasesBubbleOpen(true);
+          }}
+          aria-label="Satın Almalar ve Görünüm"
+        >
+          <Icon name="store" />
+        </button>
+      ) : null}
+
+      {purchasesBubbleOpen ? (
+        <Suspense fallback={<p role="status">Mağaza hazırlanıyor…</p>}>
+          <PurchasesSheet
+            game={game}
+            storeProducts={storeProducts}
+            monetizationBusy={monetizationBusy}
+            purchaseProduct={purchaseProduct}
+            restorePurchases={restorePurchases}
+            showPrivacyOptions={showPrivacyOptions}
+            onClose={() => setPurchasesBubbleOpen(false)}
+          />
+        </Suspense>
       ) : null}
 
       {homeFinaleOpen ? (
