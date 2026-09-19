@@ -29,10 +29,11 @@ export const BUYER_TEMPO_CONFIG = {
 // state, so neither can be gamed by relisting the same asset, withdrawing
 // and relisting, or reopening the app.
 export const EARLY_GAME_CONFIG = {
-  revision: "early-game-pacing-2026-09-18",
-  // Buyer tempo support ends after the first completed trades. Scan credits
-  // keep the GDD's fixed 25-credit cap throughout the career.
+  revision: "early-game-pacing-2026-09-19",
+  // The larger refresh allowance ends after 30 completed market trades.
+  // The gifted starting notebook does not count toward the threshold.
   completedTradeThreshold: 30,
+  scanCapBoosted: 50,
   // Buyer tempo: per-trade arrival-chance multipliers layered on top of
   // BUYER_TEMPO_CONFIG.arrivalMultiplier for the first N completed trades,
   // stepping back down to the steady-state multiplier by trade N. Values

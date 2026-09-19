@@ -1,4 +1,4 @@
-import { WORLD_CONFIG } from "./config";
+import { EARLY_GAME_CONFIG, MONETIZATION_CONFIG, WORLD_CONFIG } from "./config";
 import { familyById, families } from "../content/families";
 import type {
   BuyerOffer,
@@ -536,7 +536,38 @@ export function migrateStateToCurrent(value: unknown): unknown {
   next = migrateStateToV16(next);
   next = migrateStateToV17(next);
   next = migrateStateToV18(next);
-  return migrateStateToV19(next);
+  next = migrateStateToV19(next);
+  return migrateStateToV20(next);
+}
+
+// Existing careers retain their balance when early access expands to 50.
+// A career already past 30 completed trades remains capped at 25.
+export function migrateStateToV20(value: unknown): unknown {
+  const source = record(value);
+  if (integer(source.version) >= 20) return value;
+  const completedTrades = array(source.ownedAssets)
+    .map(record)
+    .filter(
+      (asset) =>
+        asset.state === "SOLD_COMPLETE" &&
+        asset.id !== "asset:ftue-starting-notebook",
+    ).length;
+  const cap =
+    completedTrades < EARLY_GAME_CONFIG.completedTradeThreshold
+      ? EARLY_GAME_CONFIG.scanCapBoosted
+      : MONETIZATION_CONFIG.reward.placementReward.MARKET_SCOUT_SCAN_CREDITS;
+  const monetization = record(source.monetization);
+  return {
+    ...source,
+    version: 20,
+    monetization: {
+      ...monetization,
+      marketScanCredits: Math.min(
+        cap,
+        Math.max(0, integer(monetization.marketScanCredits, 25)),
+      ),
+    },
+  };
 }
 
 // An interim early-game configuration could regenerate more than 25 scan

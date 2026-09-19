@@ -9,7 +9,7 @@ import type {
   TransactionJournalEntry,
   TransactionKind,
 } from "./models";
-import { WORLD_CONFIG } from "./config";
+import { EARLY_GAME_CONFIG, WORLD_CONFIG } from "./config";
 import { exitPricingBps } from "./valuation";
 import { buyerPersona } from "./buyers";
 import { availableHomeOptions, homeOptionById } from "../content/homes";
@@ -43,9 +43,7 @@ export const FTUE_STARTING_ASSET_ID = "asset:ftue-starting-notebook";
 // A completed trade is a market purchase later closed by a sale, excluding
 // the gifted starting notebook. Used to taper early-game pacing support
 // (scan cap, buyer tempo) back to steady-state as the player gains footing.
-export const completedTradeCount = (
-  state: Pick<GameState, "ownedAssets">,
-) =>
+export const completedTradeCount = (state: Pick<GameState, "ownedAssets">) =>
   state.ownedAssets.filter(
     (asset) =>
       asset.state === "SOLD_COMPLETE" && asset.id !== FTUE_STARTING_ASSET_ID,
@@ -725,6 +723,14 @@ export function settleAssetSale(
   }
 
   const { profitMinor } = quoteAssetSale(asset, proceedsMinor);
+  const ownedAssets: OwnedAsset[] = state.ownedAssets.map((item) =>
+    item.id === assetId
+      ? { ...item, state: "SOLD_COMPLETE", currentListingId: undefined }
+      : item,
+  );
+  const crossedScanThreshold =
+    completedTradeCount({ ownedAssets }) >=
+    EARLY_GAME_CONFIG.completedTradeThreshold;
   return {
     ok: true,
     idempotent: false,
@@ -732,11 +738,16 @@ export function settleAssetSale(
       ...state,
       cashMinor: state.cashMinor + proceedsMinor,
       realizedProfitMinor: state.realizedProfitMinor + profitMinor,
-      ownedAssets: state.ownedAssets.map((item) =>
-        item.id === assetId
-          ? { ...item, state: "SOLD_COMPLETE", currentListingId: undefined }
-          : item,
-      ),
+      ownedAssets,
+      monetization: crossedScanThreshold
+        ? {
+            ...state.monetization,
+            marketScanCredits: Math.min(
+              25,
+              state.monetization.marketScanCredits,
+            ),
+          }
+        : state.monetization,
       playerListings: listingId
         ? state.playerListings.map((item) =>
             item.id === listingId ? { ...item, state: "SOLD_COMPLETE" } : item,

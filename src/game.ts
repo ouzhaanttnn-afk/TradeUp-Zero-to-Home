@@ -1,7 +1,15 @@
 import { z } from "zod";
 import { families } from "./content/families";
-import { MARKET_ACCESS_CONFIG, WORLD_CONFIG } from "./domain/config";
-import { FTUE_STARTING_ASSET_ID, netWorthMinor } from "./domain/economy";
+import {
+  EARLY_GAME_CONFIG,
+  MARKET_ACCESS_CONFIG,
+  WORLD_CONFIG,
+} from "./domain/config";
+import {
+  FTUE_STARTING_ASSET_ID,
+  completedTradeCount,
+  netWorthMinor,
+} from "./domain/economy";
 import {
   instanceFairValueMinor,
   listingAskMinor,
@@ -30,7 +38,7 @@ export type {
   TransactionJournalEntry,
 } from "./domain/models";
 export { families } from "./content/families";
-export const SAVE_VERSION = 19;
+export const SAVE_VERSION = 20;
 export const HOME_GOAL_MINOR = 350_000_000;
 
 const attributeDefinitionSchema = z.object({
@@ -430,7 +438,7 @@ const monetizationSchema = z.object({
   lifetimeActivePlayMinutes: z.number().int().nonnegative(),
   rewardCooldownUntilGameMin: z.number().nonnegative().optional(),
   rewardTransactions: z.array(rewardTransactionSchema),
-  marketScanCredits: z.number().int().nonnegative().max(25),
+  marketScanCredits: z.number().int().nonnegative().max(50),
   marketScanRefillAnchorWallMs: z.number().nonnegative(),
 });
 const negotiationSchema = z.object({
@@ -484,6 +492,16 @@ const stateSchema = z
     lastWallClockMs: z.number().nonnegative(),
   })
   .superRefine((state, context) => {
+    if (
+      completedTradeCount(state) >= EARLY_GAME_CONFIG.completedTradeThreshold &&
+      state.monetization.marketScanCredits > 25
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "Market scan credits exceed the post-threshold cap",
+        path: ["monetization", "marketScanCredits"],
+      });
+    }
     const unique = (values: string[], path: string, message: string) => {
       if (new Set(values).size !== values.length)
         context.addIssue({ code: "custom", message, path: [path] });
@@ -847,7 +865,7 @@ const createDefaultMonetizationState = (
   lifetimeActivePlayMinutes: 0,
   rewardCooldownUntilGameMin: undefined,
   rewardTransactions: [],
-  marketScanCredits: 25,
+  marketScanCredits: EARLY_GAME_CONFIG.scanCapBoosted,
   marketScanRefillAnchorWallMs: wallClockMs,
 });
 

@@ -37,6 +37,37 @@ function purchasedState(): GameState {
 }
 
 describe("canonical ownership and accounting", () => {
+  it("drops the scan cap to 25 on the 30th completed market sale without touching money", () => {
+    const purchased = purchasedState();
+    const asset = purchased.ownedAssets[0];
+    const previousSales = Array.from({ length: 29 }, (_, index) => ({
+      ...asset,
+      id: `old-sale:${index}`,
+      state: "SOLD_COMPLETE" as const,
+      currentListingId: undefined,
+    }));
+    const before: GameState = {
+      ...purchased,
+      ownedAssets: [...previousSales, asset],
+      monetization: { ...purchased.monetization, marketScanCredits: 48 },
+    };
+    const sale = settleAssetSale(
+      before,
+      asset.id,
+      30_000,
+      "sale:threshold",
+      10,
+    );
+    if (!sale.ok) throw new Error(sale.reason);
+    expect(sale.state.monetization.marketScanCredits).toBe(25);
+    expect(sale.state.cashMinor).toBe(before.cashMinor + 30_000);
+    expect(validateState(sale.state).version).toBe(before.version);
+    expect(reconcileJournal(sale.state)).toEqual({
+      cash: true,
+      activeBookCost: true,
+      realizedProfit: true,
+    });
+  });
   it("purchases the home atomically with cash and preserves journal reconciliation", () => {
     const state = initialState(0, "SANDBOX");
     const priceMinor = HOME_OPTIONS[0].priceMinor;

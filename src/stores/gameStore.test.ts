@@ -195,13 +195,13 @@ const veteranOwnedAssets = (game: ReturnType<typeof initialState>) =>
   );
 
 describe("market scan allowance", () => {
-  it("consumes 25 manual scans and never makes the counter negative", () => {
+  it("consumes 50 early manual scans and never makes the counter negative", () => {
     vi.spyOn(systemTimeProvider, "nowWallMs").mockReturnValue(0);
     const game = initialState(0, "SANDBOX");
     game.ftue.stage = "COMPLETE";
     useGameStore.setState({ game, ready: true, sessionActive: true });
 
-    for (let index = 0; index < 25; index += 1) useGameStore.getState().scan();
+    for (let index = 0; index < 50; index += 1) useGameStore.getState().scan();
 
     expect(useGameStore.getState().game.monetization.marketScanCredits).toBe(0);
     const exhausted = structuredClone(useGameStore.getState().game);
@@ -210,7 +210,7 @@ describe("market scan allowance", () => {
     expect(useGameStore.getState().notice).toContain("Tarama hakkın bitti");
   });
 
-  it("never regenerates past 25, regardless of completed trades", () => {
+  it("regenerates to 50 early and 25 after the completed-trade threshold", () => {
     vi.spyOn(systemTimeProvider, "nowWallMs").mockReturnValue(0);
     const fresh = initialState(0, "SANDBOX");
     fresh.ftue.stage = "COMPLETE";
@@ -220,7 +220,7 @@ describe("market scan allowance", () => {
     vi.spyOn(systemTimeProvider, "nowWallMs").mockReturnValue(60 * 60_000);
     useGameStore.getState().refreshMarketScanCredits();
     expect(useGameStore.getState().game.monetization.marketScanCredits).toBe(
-      25,
+      50,
     );
 
     const veteran = initialState(0, "SANDBOX");

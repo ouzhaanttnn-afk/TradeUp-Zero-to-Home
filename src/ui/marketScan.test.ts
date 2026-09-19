@@ -4,15 +4,15 @@ import { EARLY_GAME_CONFIG } from "../domain/config";
 import { marketScanRefillStatus, shortDuration } from "./marketScan";
 
 describe("market scan refill presentation", () => {
-  it("shows the next credit and 30-minute full refill from the persisted anchor", () => {
+  it("shows the next credit and 60-minute early refill from the persisted anchor", () => {
     const state = initialState(1_000, "SANDBOX");
     state.monetization.marketScanCredits = 0;
     state.monetization.marketScanRefillAnchorWallMs = 1_000;
     expect(marketScanRefillStatus(state, 1_000)).toEqual({
       full: false,
       nextCreditSeconds: 72,
-      fullRechargeSeconds: 1_800,
-      cap: 25,
+      fullRechargeSeconds: 3_600,
+      cap: 50,
     });
     expect(marketScanRefillStatus(state, 61_000).nextCreditSeconds).toBe(12);
   });

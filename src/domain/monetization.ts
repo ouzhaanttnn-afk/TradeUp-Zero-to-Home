@@ -1,4 +1,4 @@
-import { activePlayerListings } from "./economy";
+import { activePlayerListings, completedTradeCount } from "./economy";
 import { completeDuePreparations } from "./preparation";
 import { rollBuyerExposure } from "./world";
 import type {
@@ -10,7 +10,7 @@ import type {
   RewardPlacementId,
 } from "./models";
 import { isAnimatedAvatar } from "./profile";
-import { MONETIZATION_CONFIG } from "./config";
+import { EARLY_GAME_CONFIG, MONETIZATION_CONFIG } from "./config";
 
 type RewardRequestReason =
   | "COOLDOWN"
@@ -71,22 +71,25 @@ export const createDefaultMonetizationState = (
   lifetimeActivePlayMinutes: 0,
   rewardCooldownUntilGameMin: undefined,
   rewardTransactions: [],
-  marketScanCredits:
-    MONETIZATION_CONFIG.reward.placementReward.MARKET_SCOUT_SCAN_CREDITS,
+  marketScanCredits: EARLY_GAME_CONFIG.scanCapBoosted,
   marketScanRefillAnchorWallMs: wallClockMs,
 });
 
 const MARKET_SCAN_CAP =
   MONETIZATION_CONFIG.reward.placementReward.MARKET_SCOUT_SCAN_CREDITS;
-// Fixed per-credit regen speed and a lifetime 25-credit ceiling.
+// Each credit still regenerates in 72 real seconds; a full early allowance
+// therefore takes 60 minutes, while 0→25 after the threshold takes 30.
 const MARKET_SCAN_REFILL_INTERVAL_MS =
   (MONETIZATION_CONFIG.reward.placementReward.MARKET_SCOUT_FULL_REFILL_MINUTES *
     60_000) /
   MARKET_SCAN_CAP;
 
 export const marketScanRegenCap = (
-  _state: Pick<GameState, "ownedAssets">,
-): number => MARKET_SCAN_CAP;
+  state: Pick<GameState, "ownedAssets">,
+): number =>
+  completedTradeCount(state) < EARLY_GAME_CONFIG.completedTradeThreshold
+    ? EARLY_GAME_CONFIG.scanCapBoosted
+    : MARKET_SCAN_CAP;
 
 export const rechargeMarketScanCredits = (
   state: GameState,

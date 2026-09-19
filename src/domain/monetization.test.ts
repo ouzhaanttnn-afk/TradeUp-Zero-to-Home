@@ -49,7 +49,7 @@ const inspectionEntry = {
 };
 
 describe("monetization reward eligibility", () => {
-  it("refills one scan per 72 seconds and reaches 25 after 30 minutes", () => {
+  it("refills one scan per 72 seconds and reaches 50 after 60 early-game minutes", () => {
     const base = initialState(1_000, "SANDBOX");
     const empty = {
       ...base,
@@ -64,9 +64,9 @@ describe("monetization reward eligibility", () => {
     expect(oneCredit.monetization.marketScanCredits).toBe(1);
     expect(oneCredit.monetization.marketScanRefillAnchorWallMs).toBe(73_000);
 
-    const full = rechargeMarketScanCredits(empty, 1_801_000);
-    expect(full.monetization.marketScanCredits).toBe(25);
-    expect(full.monetization.marketScanRefillAnchorWallMs).toBe(1_801_000);
+    const full = rechargeMarketScanCredits(empty, 3_601_000);
+    expect(full.monetization.marketScanCredits).toBe(50);
+    expect(full.monetization.marketScanRefillAnchorWallMs).toBe(3_601_000);
   });
 
   it("does not grant scans when the device clock moves backwards", () => {

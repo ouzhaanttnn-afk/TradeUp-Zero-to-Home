@@ -4,6 +4,31 @@ import { reconcileJournal } from "./economy";
 import { migrateStateToCurrent } from "./migrations";
 
 describe("save migration", () => {
+  it("retains a v19 early balance and clamps only post-threshold careers", () => {
+    const early = initialState(500, "SANDBOX");
+    const earlyV19 = {
+      ...early,
+      version: 19,
+      monetization: { ...early.monetization, marketScanCredits: 25 },
+    };
+    expect(
+      validateState(migrateStateToCurrent(earlyV19)).monetization
+        .marketScanCredits,
+    ).toBe(25);
+    const veteran = {
+      ...earlyV19,
+      ownedAssets: Array.from({ length: 30 }, (_, index) => ({
+        id: `old-sale:${index}`,
+        state: "SOLD_COMPLETE",
+      })),
+      monetization: { ...early.monetization, marketScanCredits: 50 },
+    };
+    const migrated = migrateStateToCurrent(veteran) as Record<string, unknown>;
+    expect(
+      (migrated.monetization as { marketScanCredits: number })
+        .marketScanCredits,
+    ).toBe(25);
+  });
   it("repairs v18 saves with excess scan credits without changing the journal", () => {
     const previous = initialState(500, "SANDBOX");
     const v18 = {

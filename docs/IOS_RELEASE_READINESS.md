@@ -17,7 +17,7 @@
 - Gizlilik, kullanım koşulları ve destek sayfaları uygulamanın Profil ve Ayarlar ekranından erişilebilir.
 - `src/services/monetization.ts` hâlâ `unavailableBillingAdapter` kullanıyor. StoreKit satın alma/geri yükleme canlı değil; beş ürün mağazada kullanıma hazır sayılmaz.
 - iOS AdMob köprüsü ve dört ödüllü reklam birimi kodda var; yayın reklamı çevre değişkeniyle kapalı. Google Mobile Ads SDK olası veri toplama türleri için gizlilik metni ve App Store veri beyanı birbirine uygun tutulmalı.
-- Tam tarayıcı turunda bulunan 50 tarama hakkı / 25 sınırı çelişkisi giderildi. v18 kayıtlarında fazla haklar 25'e indirilerek journal ve oyun varlıkları korunuyor; satış sonrası kaydın cihazda kalması otomatik testte yeniden doğrulanmalı.
+- 19 Eylül onaylı erken oyun kuralında ilk 30 tamamlanmış pazar ticaretine kadar tarama sınırı 50, sonrasında 25. Yeni kayıt 50 hakla başlar; mevcut kayıt hakkını korur ve 30. satışta fazlası 25'e indirilir. Kayıt geçişi, hak yenilenmesi ve eşik birim testlerinden geçiyor; satış sonrası kaydın gerçek cihazda kalması yine doğrulanmalı.
 - Güncel ilk oturumda rehber aşamalar kaldırıldığı hâlde bazı eski `firstSession.e2e.ts` ve `mobile.e2e.ts` senaryoları bu adımları bekliyor. Bu testler yeni kullanıcı akışına göre yenilenmeden tam tarayıcı kalite kapısı yeşil değil.
 
 ## Mac/Xcode ve App Store Connect üzerinde yayın öncesi kalanlar
