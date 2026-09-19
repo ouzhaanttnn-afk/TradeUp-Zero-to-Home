@@ -12,7 +12,7 @@
 
 ## 19 Eylül 2026 denetimi
 
-- Son başarılı TestFlight yükleme iş akışı: [GitHub Actions #35422483213](https://github.com/ouzhaanttnn-afk/TradeUp-Zero-to-Home/actions/runs/35422483213), `185eb00` commit'i. Bu, son `main` commit'i için yeni bir cihaz testi veya App Store inceleme onayı değildir.
+- Son başarılı iOS arşivleme, imzalı IPA dışa aktarma ve App Store Connect yükleme iş akışı: [GitHub Actions #35461822510](https://github.com/ouzhaanttnn-afk/TradeUp-Zero-to-Home/actions/runs/35461822510), `a90d36a` commit'i. Bu, gerçek cihazda StoreKit/AdMob testi veya App Store inceleme onayı değildir.
 - GitHub üretim dağıtımı Vercel'e bağlıdır. App Store Connect'e şu sabit URL'ler girilmeli: `https://trade-up-zero-to-home.vercel.app/privacy.html` (gizlilik) ve `https://trade-up-zero-to-home.vercel.app/support.html` (destek). Bu URL'lerin dış ağdan erişimi yayın öncesi tekrar doğrulanmalıdır.
 - Gizlilik, kullanım koşulları ve destek sayfaları uygulamanın Profil ve Ayarlar ekranından erişilebilir.
 - iOS StoreKit 2 köprüsü ve beş kalıcı ürünün mağaza fiyatı/satın alma/geri yükleme akışı bağlandı. Hak yalnız StoreKit'in güncel doğrulanmış entitlement listesinde işlem görüldüğünde veriliyor; eksik/iade edilmiş hak geri alınıyor. Web ve Android satın alma kapalı. App Store Connect'te beş ürün kaydı ve gerçek cihazda sandbox testi tamamlanmadan canlı satış hazır sayılmaz.
