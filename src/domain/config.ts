@@ -44,6 +44,18 @@ export const EARLY_GAME_CONFIG = {
   buyerTempoBoostByTradeIndex: [2, 1.6, 1.3] as readonly number[],
 } as const;
 
+// Mid-game momentum: EARLY_GAME_CONFIG's buyer-tempo boost only covers the
+// first 3 completed trades (see buyerTempoBoostByTradeIndex above); trades
+// 30-150 (after the scan-cap support in EARLY_GAME_CONFIG also ends) get one
+// flat, much gentler arrival-chance bump instead of a hard cliff back to
+// steady state. Same non-gameable basis as EARLY_GAME_CONFIG: keyed off real
+// completedTradeCount only, never wall-clock or session state.
+export const MID_GAME_CONFIG = {
+  revision: "mid-game-momentum-2026-09-19",
+  completedTradeWindow: [30, 150] as readonly [number, number],
+  buyerTempoMultiplier: 1.12,
+} as const;
+
 // User-approved career pacing calibration. This only broadens access to
 // higher-ticket families; it does not change valuation, margins or rewards.
 export const MARKET_ACCESS_CONFIG = {

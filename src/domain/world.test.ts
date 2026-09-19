@@ -6,7 +6,7 @@ import {
   settleAssetSale,
 } from "./economy";
 import { activeMarketEvent } from "./marketEvents";
-import { BUYER_TEMPO_CONFIG, EARLY_GAME_CONFIG } from "./config";
+import { BUYER_TEMPO_CONFIG, EARLY_GAME_CONFIG, MID_GAME_CONFIG } from "./config";
 import { initialState, market } from "../game";
 import {
   activeMarketListings,
@@ -236,6 +236,29 @@ describe("deterministic market world", () => {
     expect(earlyGameTempo(onlyStartingNotebookSold)).toEqual(
       earlyGameTempo(freshPlayer),
     );
+  });
+
+  it("gives a gentle mid-game momentum bump between the early-game and wealth-tier windows", () => {
+    const [windowStart, windowEnd] = MID_GAME_CONFIG.completedTradeWindow;
+
+    // Strictly between the early-game cliff (trade 3) and the mid-game
+    // window start: back to plain steady state, same as before this change.
+    const betweenWindows = withOwnedAssets(windowStart - 1);
+    expect(earlyGameTempo(betweenWindows)).toEqual(BUYER_TEMPO_CONFIG);
+
+    const atWindowStart = withOwnedAssets(windowStart);
+    expect(earlyGameTempo(atWindowStart).arrivalMultiplier).toBeCloseTo(
+      BUYER_TEMPO_CONFIG.arrivalMultiplier * MID_GAME_CONFIG.buyerTempoMultiplier,
+    );
+
+    const justBeforeWindowEnd = withOwnedAssets(windowEnd - 1);
+    expect(earlyGameTempo(justBeforeWindowEnd).arrivalMultiplier).toBeCloseTo(
+      BUYER_TEMPO_CONFIG.arrivalMultiplier * MID_GAME_CONFIG.buyerTempoMultiplier,
+    );
+
+    // The window is exclusive of its end: back to plain steady state past it.
+    const atWindowEnd = withOwnedAssets(windowEnd);
+    expect(earlyGameTempo(atWindowEnd)).toEqual(BUYER_TEMPO_CONFIG);
   });
 
   it("does not reset buyer tempo support by relisting the same asset or restarting", () => {

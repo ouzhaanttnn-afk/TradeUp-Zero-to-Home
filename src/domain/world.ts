@@ -1,6 +1,11 @@
 import { HOME_GOAL_MINOR, market, rng } from "../game";
 import { startHomeSearch } from "../content/homes";
-import { BUYER_TEMPO_CONFIG, EARLY_GAME_CONFIG, WORLD_CONFIG } from "./config";
+import {
+  BUYER_TEMPO_CONFIG,
+  EARLY_GAME_CONFIG,
+  MID_GAME_CONFIG,
+  WORLD_CONFIG,
+} from "./config";
 import { completedTradeCount, netWorthMinor } from "./economy";
 import { completeDuePreparations } from "./preparation";
 import { recordMarketExits } from "./meta";
@@ -175,13 +180,24 @@ const activePlayerListing = (listing: PlayerListing) =>
 // out the clock, and it never guarantees an offer -- buyerOfferForMinute
 // still rolls against the (boosted) chance every minute.
 export const earlyGameTempo = (state: Pick<GameState, "ownedAssets">) => {
-  const boost =
-    EARLY_GAME_CONFIG.buyerTempoBoostByTradeIndex[completedTradeCount(state)];
-  if (!boost) return BUYER_TEMPO_CONFIG;
-  return {
-    ...BUYER_TEMPO_CONFIG,
-    arrivalMultiplier: BUYER_TEMPO_CONFIG.arrivalMultiplier * boost,
-  };
+  const trades = completedTradeCount(state);
+  const earlyBoost = EARLY_GAME_CONFIG.buyerTempoBoostByTradeIndex[trades];
+  if (earlyBoost) {
+    return {
+      ...BUYER_TEMPO_CONFIG,
+      arrivalMultiplier: BUYER_TEMPO_CONFIG.arrivalMultiplier * earlyBoost,
+    };
+  }
+  const [windowStart, windowEnd] = MID_GAME_CONFIG.completedTradeWindow;
+  if (trades >= windowStart && trades < windowEnd) {
+    return {
+      ...BUYER_TEMPO_CONFIG,
+      arrivalMultiplier:
+        BUYER_TEMPO_CONFIG.arrivalMultiplier *
+        MID_GAME_CONFIG.buyerTempoMultiplier,
+    };
+  }
+  return BUYER_TEMPO_CONFIG;
 };
 
 export const buyerOfferForMinute = (
