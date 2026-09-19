@@ -189,6 +189,30 @@ import compactPickup from "./assets/products/prd_compact_pickup.webp";
 import classicRoadster from "./assets/products/prd_classic_roadster.webp";
 import performanceCoupe from "./assets/products/prd_performance_coupe.webp";
 import electricSuv from "./assets/products/prd_electric_suv.webp";
+import kitchenScale from "./assets/products/prd_kitchen_scale.webp";
+import foldingUmbrella from "./assets/products/prd_folding_umbrella.webp";
+import lintRemover from "./assets/products/prd_lint_remover.webp";
+import manualCoffeeGrinder from "./assets/products/prd_manual_coffee_grinder.webp";
+import portableDeskFan from "./assets/products/prd_portable_desk_fan.webp";
+import deskOrganizer from "./assets/products/prd_desk_organizer.webp";
+import travelNeckPillow from "./assets/products/prd_travel_neck_pillow.webp";
+import smartDoorbell from "./assets/products/prd_smart_doorbell.webp";
+import cordlessJigsaw from "./assets/products/prd_cordless_jigsaw.webp";
+import portablePowerStation from "./assets/products/prd_portable_power_station.webp";
+import printingPenKit from "./assets/products/prd_printing_pen_kit.webp";
+import foldingBicycle from "./assets/products/prd_folding_bicycle.webp";
+import pressureCooker from "./assets/products/prd_pressure_cooker.webp";
+import labelCutter from "./assets/products/prd_label_cutter.webp";
+import spiralDoughMixer from "./assets/products/prd_spiral_dough_mixer.webp";
+import desktopLaserEngraver from "./assets/products/prd_desktop_laser_engraver.webp";
+import thermalCamera from "./assets/products/prd_thermal_camera.webp";
+import droneController from "./assets/products/prd_drone_controller.webp";
+import electricCargoBicycle from "./assets/products/prd_electric_cargo_bicycle.webp";
+import commercialIceMachine from "./assets/products/prd_commercial_ice_machine.webp";
+import photoLightKit from "./assets/products/prd_photo_light_kit.webp";
+import commercialVacuumSealer from "./assets/products/prd_commercial_vacuum_sealer.webp";
+import stageFogMachine from "./assets/products/prd_stage_fog_machine.webp";
+import electricPalletJack from "./assets/products/prd_electric_pallet_jack.webp";
 
 const dedicatedAssets: Record<string, string> = {
   prd_notebook: notebook,
@@ -380,6 +404,30 @@ const dedicatedAssets: Record<string, string> = {
   prd_classic_roadster: classicRoadster,
   prd_performance_coupe: performanceCoupe,
   prd_electric_suv: electricSuv,
+  prd_kitchen_scale: kitchenScale,
+  prd_folding_umbrella: foldingUmbrella,
+  prd_lint_remover: lintRemover,
+  prd_manual_coffee_grinder: manualCoffeeGrinder,
+  prd_portable_desk_fan: portableDeskFan,
+  prd_desk_organizer: deskOrganizer,
+  prd_travel_neck_pillow: travelNeckPillow,
+  prd_smart_doorbell: smartDoorbell,
+  prd_cordless_jigsaw: cordlessJigsaw,
+  prd_portable_power_station: portablePowerStation,
+  prd_printing_pen_kit: printingPenKit,
+  prd_folding_bicycle: foldingBicycle,
+  prd_pressure_cooker: pressureCooker,
+  prd_label_cutter: labelCutter,
+  prd_spiral_dough_mixer: spiralDoughMixer,
+  prd_desktop_laser_engraver: desktopLaserEngraver,
+  prd_thermal_camera: thermalCamera,
+  prd_drone_controller: droneController,
+  prd_electric_cargo_bicycle: electricCargoBicycle,
+  prd_commercial_ice_machine: commercialIceMachine,
+  prd_photo_light_kit: photoLightKit,
+  prd_commercial_vacuum_sealer: commercialVacuumSealer,
+  prd_stage_fog_machine: stageFogMachine,
+  prd_electric_pallet_jack: electricPalletJack,
 };
 
 const fallbackSvg = (category: string, symbol: string, color: string) =>

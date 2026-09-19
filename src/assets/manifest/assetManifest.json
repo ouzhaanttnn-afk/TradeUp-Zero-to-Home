@@ -1135,6 +1135,150 @@
       "familyId": "electric_suv",
       "source": "../products/prd_electric_suv.webp",
       "dedicated": true
+    },
+    {
+      "assetKey": "prd_kitchen_scale",
+      "familyId": "kitchen_scale",
+      "source": "../products/prd_kitchen_scale.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_folding_umbrella",
+      "familyId": "folding_umbrella",
+      "source": "../products/prd_folding_umbrella.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_lint_remover",
+      "familyId": "lint_remover",
+      "source": "../products/prd_lint_remover.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_manual_coffee_grinder",
+      "familyId": "manual_coffee_grinder",
+      "source": "../products/prd_manual_coffee_grinder.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_portable_desk_fan",
+      "familyId": "portable_desk_fan",
+      "source": "../products/prd_portable_desk_fan.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_desk_organizer",
+      "familyId": "desk_organizer",
+      "source": "../products/prd_desk_organizer.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_travel_neck_pillow",
+      "familyId": "travel_neck_pillow",
+      "source": "../products/prd_travel_neck_pillow.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_smart_doorbell",
+      "familyId": "smart_doorbell",
+      "source": "../products/prd_smart_doorbell.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_cordless_jigsaw",
+      "familyId": "cordless_jigsaw",
+      "source": "../products/prd_cordless_jigsaw.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_portable_power_station",
+      "familyId": "portable_power_station",
+      "source": "../products/prd_portable_power_station.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_printing_pen_kit",
+      "familyId": "printing_pen_kit",
+      "source": "../products/prd_printing_pen_kit.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_folding_bicycle",
+      "familyId": "folding_bicycle",
+      "source": "../products/prd_folding_bicycle.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_pressure_cooker",
+      "familyId": "pressure_cooker",
+      "source": "../products/prd_pressure_cooker.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_label_cutter",
+      "familyId": "label_cutter",
+      "source": "../products/prd_label_cutter.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_spiral_dough_mixer",
+      "familyId": "spiral_dough_mixer",
+      "source": "../products/prd_spiral_dough_mixer.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_desktop_laser_engraver",
+      "familyId": "desktop_laser_engraver",
+      "source": "../products/prd_desktop_laser_engraver.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_thermal_camera",
+      "familyId": "thermal_camera",
+      "source": "../products/prd_thermal_camera.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_drone_controller",
+      "familyId": "drone_controller",
+      "source": "../products/prd_drone_controller.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_electric_cargo_bicycle",
+      "familyId": "electric_cargo_bicycle",
+      "source": "../products/prd_electric_cargo_bicycle.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_commercial_ice_machine",
+      "familyId": "commercial_ice_machine",
+      "source": "../products/prd_commercial_ice_machine.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_photo_light_kit",
+      "familyId": "photo_light_kit",
+      "source": "../products/prd_photo_light_kit.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_commercial_vacuum_sealer",
+      "familyId": "commercial_vacuum_sealer",
+      "source": "../products/prd_commercial_vacuum_sealer.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_stage_fog_machine",
+      "familyId": "stage_fog_machine",
+      "source": "../products/prd_stage_fog_machine.webp",
+      "dedicated": true
+    },
+    {
+      "assetKey": "prd_electric_pallet_jack",
+      "familyId": "electric_pallet_jack",
+      "source": "../products/prd_electric_pallet_jack.webp",
+      "dedicated": true
     }
   ],
   "overlays": [

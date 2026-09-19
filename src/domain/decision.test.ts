@@ -124,7 +124,7 @@ describe("decision vertical slice", () => {
   });
 
   it("adds 32 more starter and mid-tier products with bounded prices", () => {
-    expect(families).toHaveLength(189);
+    expect(families).toHaveLength(213);
     expect(starterExpansionFamilies).toHaveLength(32);
     expect(
       new Set(starterExpansionFamilies.map((family) => family.id)).size,

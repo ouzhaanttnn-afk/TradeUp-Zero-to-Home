@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { families, initialState } from "./game";
-import { heroFamilies } from "./content/families";
+import { heroFamilies, nextUpdateFamilies } from "./content/families";
 import {
   assetFor,
   hasDedicatedAsset,
@@ -9,6 +9,28 @@ import {
 } from "./assets";
 
 describe("asset manifest and visual treatments", () => {
+  it("adds 24 distinct illustrated families across the career", () => {
+    expect(nextUpdateFamilies).toHaveLength(24);
+    expect(
+      nextUpdateFamilies.slice(0, 7).every((family) => family.tier <= 1),
+    ).toBe(true);
+    expect(
+      nextUpdateFamilies
+        .slice(7, 14)
+        .every((family) => family.tier >= 2 && family.tier <= 3),
+    ).toBe(true);
+    expect(
+      nextUpdateFamilies.slice(14).every((family) => family.tier >= 3),
+    ).toBe(true);
+    expect(new Set(nextUpdateFamilies.map((family) => family.id)).size).toBe(
+      24,
+    );
+    for (const family of nextUpdateFamilies) {
+      expect(family.baseValueMinor).toBeGreaterThan(0);
+      expect(family.evidence).toHaveLength(2);
+      expect(hasDedicatedAsset(family.assetKey)).toBe(true);
+    }
+  });
   it("registers a dedicated asset for every internal-alpha family", () => {
     expect(new Set(families.map((family) => family.assetKey)).size).toBe(
       families.length,

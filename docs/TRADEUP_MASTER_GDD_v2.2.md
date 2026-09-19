@@ -898,6 +898,12 @@ Sermayedar pazarına Kompakt Çift Kabin Pickup, Klasik Roadster, Performans Cou
 
 Güncel 100 seed’li simülasyonda ₺3.500.000 emlak arama eşiğine hızlı P10 koşusu 232, medyan koşu 255 ve yavaş P90 koşusu 291 tamamlanmış satışta ulaşır; medyan piyasa yenilemesi 31’dir. Regresyon sınırları medyanda 300 ve P90’da 330 satış olarak korunur. Bu eşik yalnız emlak araştırmasını başlatır; gerçek ev satın alımı seçilen evin nakit bedelini ayrıca gerektirir.
 
+### Kullanıcı onaylı sonraki sürüm içerik eki — 19 Eylül 2026
+
+İncelemede olan 1.0 build'i değiştirmeden sonraki sürüm için 24 markasız ürün ailesi eklenir. Kullanıcının 7-7-6 dağılımı 20 ettiği için 24 toplam hedefi korunur; dağılım 7 başlangıç, 7 orta ve 10 son oyun ürünüdür. Toplam katalog 213 aileye çıkar. Her yeni aile mevcut fiyat motorunu, kondisyon ve kanıt kurallarını kullanır ve kendine ait görsele sahiptir. Yeni mekanik, reklam, satın alma ayrıcalığı veya garantili kâr eklenmez.
+
+Aynı 100 seed’li simülasyonda emlak araştırma eşiği hızlı P10 222, medyan 260, yavaş P90 285 tamamlanmış satışta; medyan piyasa yenilemesi 28'dir. Önceki 189 ailelik sonucun yerini bu ek için alır. Regresyon sınırları medyan 300 ve P90 330 olarak değişmez. Gerçek oyuncu verisiyle karşılaştırılana kadar bunlar yalnızca deterministik model sonuçlarıdır.
+
 ## Progression ergonomisi
 - Düşük fiyatlı fırsatlar late-game’de de ekonomik olarak anlamlı kalır: hızlı likidite, bundle veya koleksiyon değeri.
 - Kategori içerikleri servete göre kapanmaz; yalnız yüksek riskli segmentler açılır.
