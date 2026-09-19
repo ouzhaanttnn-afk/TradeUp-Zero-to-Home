@@ -41,6 +41,7 @@ export default function JourneyPanel({
   const [timelineFilter, setTimelineFilter] = useState<TimelineFilter>("ALL");
   const [timelineExpanded, setTimelineExpanded] = useState(false);
   const [timelinePage, setTimelinePage] = useState(0);
+  const [metricsExpanded, setMetricsExpanded] = useState(false);
   const timeline = useMemo(
     () =>
       game.career
@@ -210,7 +211,19 @@ export default function JourneyPanel({
           <small>PARAN VE ÜRÜNLERİN</small>
           <h3>Bugünkü durum</h3>
         </div>
-        <span>{activeOwnedAssets(game).length} ürün</span>
+        <div className="journey-metrics-toggle-row">
+          <span>{activeOwnedAssets(game).length} ürün</span>
+          <button
+            className="timeline-toggle"
+            type="button"
+            aria-expanded={metricsExpanded}
+            aria-controls="journey-metrics-detail"
+            onClick={() => setMetricsExpanded((expanded) => !expanded)}
+          >
+            {metricsExpanded ? "Kapat" : "Detay"}
+            <span aria-hidden="true">{metricsExpanded ? "−" : "+"}</span>
+          </button>
+        </div>
       </div>
       <div className="metric-grid journey-metrics journey-metrics-primary">
         <div>
@@ -222,28 +235,33 @@ export default function JourneyPanel({
           <b>{formatEstimate(estimates.total)}</b>
         </div>
       </div>
-      <div className="metric-grid journey-metrics journey-metrics-secondary">
-        <div>
-          <span>Ürünlerin tahmini değeri</span>
-          <b>{formatEstimate(estimates.portfolio)}</b>
+      {metricsExpanded ? (
+        <div
+          className="metric-grid journey-metrics journey-metrics-secondary"
+          id="journey-metrics-detail"
+        >
+          <div>
+            <span>Ürünlerin tahmini değeri</span>
+            <b>{formatEstimate(estimates.portfolio)}</b>
+          </div>
+          <div>
+            <span>Ürünlere harcanan toplam</span>
+            <b>{money(activeBookCostMinor(game))}</b>
+          </div>
+          <div>
+            <span>Ürünlerdeki tahmini fark</span>
+            <b className={estimates.difference.highMinor < 0 ? "loss" : ""}>
+              {formatEstimate(estimates.difference, true)}
+            </b>
+          </div>
+          <div>
+            <span>Toplam değerin nakit kısmı</span>
+            <b>
+              %{estimates.cashShare.low}–%{estimates.cashShare.high}
+            </b>
+          </div>
         </div>
-        <div>
-          <span>Ürünlere harcanan toplam</span>
-          <b>{money(activeBookCostMinor(game))}</b>
-        </div>
-        <div>
-          <span>Ürünlerdeki tahmini fark</span>
-          <b className={estimates.difference.highMinor < 0 ? "loss" : ""}>
-            {formatEstimate(estimates.difference, true)}
-          </b>
-        </div>
-        <div>
-          <span>Toplam değerin nakit kısmı</span>
-          <b>
-            %{estimates.cashShare.low}–%{estimates.cashShare.high}
-          </b>
-        </div>
-      </div>
+      ) : null}
       <section className="expertise-card">
         <div className="expertise-heading">
           <div>

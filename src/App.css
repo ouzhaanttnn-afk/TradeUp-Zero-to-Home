@@ -2205,7 +2205,12 @@ main {
   margin-top: 3px;
   font-size: calc(16px + var(--text-size-boost));
 }
-.journey-block-heading > span {
+.journey-metrics-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.journey-metrics-toggle-row > span {
   color: #849c90;
   font-size: calc(10px + var(--text-size-boost));
 }
