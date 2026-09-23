@@ -1,13 +1,33 @@
 import type { Listing } from "../domain/models";
+import { getLanguage, type Language } from "../i18n";
 
 export const ALL_MARKET_CATEGORIES = "ALL";
 export type MarketSort = "MARKET" | "PRICE_ASC" | "PRICE_DESC";
 
-export function listingAgeLabel(createdAtGameMin: number, gameTimeMin: number) {
+export function listingAgeLabel(
+  createdAtGameMin: number,
+  gameTimeMin: number,
+  lang: Language = getLanguage(),
+) {
   const age = Math.max(0, gameTimeMin - createdAtGameMin);
-  if (age < 1) return "Yeni";
-  if (age < 60) return `${age} dk`;
-  return `${Math.floor(age / 60)} sa`;
+  if (lang === "tr") {
+    if (age < 1) return "Yeni";
+    if (age < 60) return `${age} dk`;
+    return `${Math.floor(age / 60)} sa`;
+  }
+  if (lang === "de") {
+    if (age < 1) return "Neu";
+    if (age < 60) return `${age} Min.`;
+    return `${Math.floor(age / 60)} Std.`;
+  }
+  if (lang === "es") {
+    if (age < 1) return "Nuevo";
+    if (age < 60) return `${age} min`;
+    return `${Math.floor(age / 60)} h`;
+  }
+  if (age < 1) return "New";
+  if (age < 60) return `${age}m`;
+  return `${Math.floor(age / 60)}h`;
 }
 
 export function marketCategories(listings: Listing[]) {

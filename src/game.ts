@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getLanguage, type Language, formatMoney } from "./i18n";
 import { families } from "./content/families";
 import {
   EARLY_GAME_CONFIG,
@@ -829,15 +830,14 @@ export function resolveOffer(
     };
   return { result: "rejected" as const, floorMinor };
 }
-const formatter = new Intl.NumberFormat("tr-TR", {
-  style: "currency",
-  currency: "TRY",
-  minimumFractionDigits: 0,
-  maximumFractionDigits: 2,
-});
-export const money = (minor: number) => formatter.format(minor / 100);
-export const signedMoney = (minor: number) =>
-  minor > 0 ? `+${money(minor)}` : minor < 0 ? money(minor) : `±${money(0)}`;
+export const money = (minor: number, lang?: Language) =>
+  formatMoney(minor, lang ?? getLanguage());
+export const signedMoney = (minor: number, lang?: Language) =>
+  minor > 0
+    ? `+${money(minor, lang)}`
+    : minor < 0
+      ? money(minor, lang)
+      : `±${money(0, lang)}`;
 
 const createDefaultMonetizationState = (
   gameTimeMin: number,

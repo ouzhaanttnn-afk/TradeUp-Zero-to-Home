@@ -6,7 +6,7 @@ import { money } from "../game";
 import { missedOpportunityPresentation } from "./followPresentation";
 import { Icon } from "./Icon";
 import { ProductVisual } from "./ProductVisual";
-import { useTranslation } from "../i18n";
+import { useTranslation, localizeProduct } from "../i18n";
 
 export default function FollowPanel({
   game,
@@ -21,7 +21,7 @@ export default function FollowPanel({
   onOpenMarket: () => void;
   onRemoveSearch: (searchId: string) => void;
 }) {
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const watchedListings = marketListings.filter((listing) =>
     game.follow.watchedListingIds.includes(listing.id),
   );
@@ -56,18 +56,18 @@ export default function FollowPanel({
             className="listing watch-listing"
             key={item.id}
             onClick={() => onSelectListing(item.id)}
-            aria-label={`${item.instance.family.name}, ${money(item.priceMinor)}, %${item.instance.condition}`}
+            aria-label={`${localizeProduct(item.instance.family.id, item.instance.family.name, lang)}, ${money(item.priceMinor, lang)}, %${item.instance.condition}`}
           >
             <ProductVisual instance={item.instance} className="product-art" />
             <div className="listing-copy">
               <small>CANLI · %{item.instance.condition}</small>
-              <h3>{item.instance.family.name}</h3>
+              <h3>{localizeProduct(item.instance.family.id, item.instance.family.name, lang)}</h3>
               <span className="subtle">
                 {npcRiskSignal(item, game.gameTimeMin).text}
               </span>
             </div>
             <div className="price">
-              <strong>{money(item.priceMinor)}</strong>
+              <strong>{money(item.priceMinor, lang)}</strong>
               <small>{t("follow.inspect")}</small>
             </div>
           </button>
@@ -157,10 +157,10 @@ export default function FollowPanel({
                 <span className="missed-age">{missedState.ageLabel}</span>
               </div>
               <div>
-                <h3>{missed.familyName}</h3>
+                <h3>{localizeProduct(missed.familyId, missed.familyName, lang)}</h3>
                 <p>
                   {t("follow.missedDesc", {
-                    price: money(missed.priceMinor),
+                    price: money(missed.priceMinor, lang),
                     condition: missed.condition,
                   })}
                 </p>

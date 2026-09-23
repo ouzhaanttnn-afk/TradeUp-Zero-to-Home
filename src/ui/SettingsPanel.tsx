@@ -10,7 +10,7 @@ import { AvatarPortrait } from "./AvatarPortrait";
 import { Icon } from "./Icon";
 import PurchasesSheet from "./PurchasesSheet";
 import { useModalFocus } from "./useModalFocus";
-import { useTranslation } from "../i18n";
+import { useTranslation, localizeAvatar } from "../i18n";
 
 type SoundLevel = AccessibilityPreferences["soundLevel"];
 
@@ -150,19 +150,25 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
           <div className="avatar-options">
             {avatars.map((avatar) => {
               const locked = avatar.premium && !animatedAvatarsOwned;
+              const localized = localizeAvatar(
+                avatar.id,
+                avatar.name,
+                avatar.role,
+                lang,
+              );
               return (
                 <button
                   key={avatar.id}
                   type="button"
                   disabled={locked}
                   aria-pressed={game.profile.avatarId === avatar.id}
-                  aria-label={`${avatar.name}${locked ? ", canlı avatar paketi gerekli" : ""}`}
+                  aria-label={`${localized.name}${locked ? ", " + (t("onboarding.comingSoon") || "canlı avatar paketi gerekli") : ""}`}
                   onClick={() => setProfileAvatar(avatar.id)}
                 >
                   <AvatarPortrait avatarId={avatar.id} />
                   <span>
-                    <b>{avatar.name}</b>
-                    <small>{locked ? "Canlı · Yakında" : avatar.role}</small>
+                    <b>{localized.name}</b>
+                    <small>{locked ? (t("onboarding.comingSoon") || "Canlı · Yakında") : localized.role}</small>
                   </span>
                   {locked ? <i aria-hidden="true">◇</i> : null}
                 </button>

@@ -80,7 +80,14 @@ import { AvatarPortrait } from "./ui/AvatarPortrait";
 import ProfileOnboarding from "./ui/ProfileOnboarding";
 import { MarketListingCard } from "./ui/MarketListingCard";
 import { useModalFocus } from "./ui/useModalFocus";
-import { useTranslation, localizeCategory } from "./i18n";
+import {
+  useTranslation,
+  localizeCategory,
+  localizeProduct,
+  localizePreparation,
+  localizeSeller,
+  currencySymbol,
+} from "./i18n";
 
 const loadSettingsPanel = () => import("./ui/SettingsPanel");
 const loadFollowPanel = () => import("./ui/FollowPanel");
@@ -156,7 +163,7 @@ const rewardCopy = {
 
 export default function App() {
   useTapHaptics();
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const [tab, setTab] = useState<Tab>("market");
   const [portfolioSegment, setPortfolioSegment] =
     useState<PortfolioSegment>("inventory");
@@ -605,26 +612,26 @@ export default function App() {
         className={`owned${focusedAssetId === item.id ? " owned--focused" : ""}`}
         id={`owned-${item.id}`}
         tabIndex={-1}
-        aria-label={item.instance.family.name}
+        aria-label={localizeProduct(item.instance.family.id, item.instance.family.name, lang)}
         key={`${showPreparation ? "prep" : "stock"}:${item.id}`}
       >
         <ProductVisual instance={item.instance} className="owned-icon" />
         <div className="owned-copy">
           <div className="owned-title-row">
-            <h3>{item.instance.family.name}</h3>
+            <h3>{localizeProduct(item.instance.family.id, item.instance.family.name, lang)}</h3>
             <span className={`asset-state ${ownershipState.tone}`}>
               {ownershipState.label}
             </span>
           </div>
           <div className="owned-metrics">
             <div>
-              <span>Toplam harcaman</span>
-              <b>{money(item.bookCostMinor)}</b>
+              <span>{t("portfolio.totalSpent")}</span>
+              <b>{money(item.bookCostMinor, lang)}</b>
             </div>
             <div>
-              <span>Tahmini satış</span>
+              <span>{t("portfolio.estimatedSale")}</span>
               <b>
-                {money(quote.quickSaleMinor)}–{money(quote.balancedAskingMinor)}
+                {money(quote.quickSaleMinor, lang)}–{money(quote.balancedAskingMinor, lang)}
               </b>
             </div>
           </div>
@@ -715,54 +722,54 @@ export default function App() {
               <b>
                 {ftueActive
                   ? "Dengeli fiyatla satışa çıkar"
-                  : "Nasıl satmak istersin?"}
+                  : t("listing.howToSell")}
               </b>
               {ftueActive ? (
                 <>
                   <span>
-                    Toplam harcaman {money(item.bookCostMinor)} · İlan fiyatı{" "}
-                    {money(quote.balancedAskingMinor)}
+                    {t("portfolio.totalSpent")} {money(item.bookCostMinor, lang)} · {t("market.listingPrice")}{" "}
+                    {money(quote.balancedAskingMinor, lang)}
                   </span>
                   <button
                     className="primary"
-                    aria-label={`İlan oluştur · ${money(quote.balancedAskingMinor)}`}
+                    aria-label={`${t("listing.createListing")} · ${money(quote.balancedAskingMinor, lang)}`}
                     onClick={() =>
                       listAndContinue(item, quote.balancedAskingMinor)
                     }
                   >
-                    İlan oluştur <b>{money(quote.balancedAskingMinor)}</b>
+                    {t("listing.createListing")} <b>{money(quote.balancedAskingMinor, lang)}</b>
                   </button>
                 </>
               ) : (
                 <>
                   <div className="listing-strategy-options">
                     <button
-                      aria-label={`Hemen sat · ${money(quote.quickSaleMinor)}`}
+                      aria-label={`${t("listing.quickSale")} · ${money(quote.quickSaleMinor, lang)}`}
                       onClick={() => setQuickSaleAssetId(item.id)}
                     >
-                      <b>Hızlı</b>
-                      <strong>{money(quote.quickSaleMinor)}</strong>
-                      <small>Şimdi sat</small>
+                      <b>{t("listing.fast")}</b>
+                      <strong>{money(quote.quickSaleMinor, lang)}</strong>
+                      <small>{t("listing.sellNow")}</small>
                     </button>
                     <button
                       className="primary"
-                      aria-label={`İlan oluştur · ${money(quote.balancedAskingMinor)}`}
+                      aria-label={`${t("listing.createListing")} · ${money(quote.balancedAskingMinor, lang)}`}
                       onClick={() =>
                         listAndContinue(item, quote.balancedAskingMinor)
                       }
                     >
-                      <b>Dengeli</b>
-                      <strong>{money(quote.balancedAskingMinor)}</strong>
-                      <small>Normal bekleme</small>
+                      <b>{t("listing.balanced")}</b>
+                      <strong>{money(quote.balancedAskingMinor, lang)}</strong>
+                      <small>{t("listing.normalWait")}</small>
                     </button>
                     <button
                       onClick={() =>
                         listAndContinue(item, quote.premiumAskingMinor)
                       }
                     >
-                      <b>Yüksek</b>
-                      <strong>{money(quote.premiumAskingMinor)}</strong>
-                      <small>Daha uzun bekle</small>
+                      <b>{t("listing.high")}</b>
+                      <strong>{money(quote.premiumAskingMinor, lang)}</strong>
+                      <small>{t("listing.longerWait")}</small>
                     </button>
                   </div>
                   <button
@@ -848,7 +855,7 @@ export default function App() {
               </summary>
               {!item.instance.preparationHistory.length ? (
                 <p className="preparation-guide">
-                  Birini seç. Ücret toplam harcamana eklenir.
+                  {t("portfolio.prepGuide")}
                 </p>
               ) : null}
               <div className="sell-actions">
@@ -859,11 +866,11 @@ export default function App() {
                     onClick={() => prepare(item.id, action.kind)}
                   >
                     <span className="preparation-action-title">
-                      <b>{action.label}</b>
-                      <strong>{money(action.costMinor)}</strong>
+                      <b>{localizePreparation(action.kind, action.label, lang)}</b>
+                      <strong>{money(action.costMinor, lang)}</strong>
                     </span>
                     <small>
-                      {action.durationMin} dk ·{" "}
+                      {action.durationMin} {lang === "tr" ? "dk" : lang === "de" ? "Min." : "min"} ·{" "}
                       {preparationPresentation(item, action).join(" · ")}
                     </small>
                   </button>
@@ -875,23 +882,23 @@ export default function App() {
             <div
               className="quick-sale-confirm"
               role="group"
-              aria-label="Hızlı satış onayı"
+              aria-label={t("portfolio.quickSaleConfirmGroup")}
             >
               <strong>
-                {quote.quickSaleProfitMinor >= 0 ? "Net kâr" : "Net zarar"}{" "}
+                {quote.quickSaleProfitMinor >= 0 ? t("portfolio.netProfit") : t("portfolio.netLoss")}{" "}
                 <span
                   className={quote.quickSaleProfitMinor < 0 ? "loss" : "profit"}
                 >
-                  {signedMoney(quote.quickSaleProfitMinor)}
+                  {signedMoney(quote.quickSaleProfitMinor, lang)}
                 </span>
               </strong>
               <small>
-                Satış tutarı {money(quote.quickSaleMinor)} · Toplam harcaman{" "}
-                {money(item.bookCostMinor)}
+                {t("portfolio.saleAmount")} {money(quote.quickSaleMinor, lang)} · {t("portfolio.totalSpent")}{" "}
+                {money(item.bookCostMinor, lang)}
               </small>
               <small>
-                Dengeli ilana göre kaçırılan tahmini ek kazanç{" "}
-                {money(quote.estimatedPremiumGivenUpMinor)}
+                {t("portfolio.missedProfit")}{" "}
+                {money(quote.estimatedPremiumGivenUpMinor, lang)}
               </small>
               <button
                 className="primary"
@@ -900,13 +907,13 @@ export default function App() {
                   sell(item, true);
                 }}
               >
-                Satışı onayla · {money(quote.quickSaleMinor)}
+                {t("portfolio.confirmSale")} · {money(quote.quickSaleMinor, lang)}
               </button>
               <button
                 className="text-button"
                 onClick={() => setQuickSaleAssetId(null)}
               >
-                Vazgeç
+                {t("common.cancel") || "Vazgeç"}
               </button>
             </div>
           ) : null}
@@ -1365,7 +1372,7 @@ export default function App() {
                           key={playerListing.id}
                           id={`owned-${asset.id}`}
                           tabIndex={-1}
-                          aria-label={asset.instance.family.name}
+                          aria-label={localizeProduct(asset.instance.family.id, asset.instance.family.name, lang)}
                         >
                           <ProductVisual
                             instance={asset.instance}
@@ -1373,7 +1380,7 @@ export default function App() {
                           />
                           <div className="owned-copy">
                             <div className="owned-title-row">
-                              <h3>{asset.instance.family.name}</h3>
+                              <h3>{localizeProduct(asset.instance.family.id, asset.instance.family.name, lang)}</h3>
                               <span
                                 className={`asset-state ${ownershipState.tone}`}
                               >
@@ -1382,11 +1389,11 @@ export default function App() {
                             </div>
                             <div className="owned-metrics listing-metrics">
                               <div>
-                                <span>Toplam harcaman</span>
-                                <b>{money(asset.bookCostMinor)}</b>
+                                <span>{t("portfolio.totalSpent")}</span>
+                                <b>{money(asset.bookCostMinor, lang)}</b>
                               </div>
                               <div>
-                                <span>İlan fiyatı</span>
+                                <span>{t("market.listingPrice")}</span>
                                 <b>{money(playerListing.askingPriceMinor)}</b>
                               </div>
                               <div>
@@ -1519,13 +1526,19 @@ export default function App() {
                               }}
                             >
                               <label>
-                                <span>Yeni fiyat</span>
+                                <span>{t("listing.newPrice")}</span>
                                 <span className="manual-price-input">
-                                  ₺
+                                  {currencySymbol(lang)}
                                   <input
                                     value={revisedListingPrice}
                                     inputMode="decimal"
-                                    aria-label={`${asset.instance.family.name} yeni ilan fiyatı`}
+                                    aria-label={t("listing.newPriceLabel", {
+                                      product: localizeProduct(
+                                        asset.instance.family.id,
+                                        asset.instance.family.name,
+                                        lang,
+                                      ),
+                                    })}
                                     onChange={(event) =>
                                       setRevisedListingPrice(event.target.value)
                                     }
@@ -1822,24 +1835,39 @@ export default function App() {
                 <ProductVisual
                   instance={selected.instance}
                   className="hero-art"
-                  alt={selected.instance.family.name}
+                  alt={localizeProduct(
+                    selected.instance.family.id,
+                    selected.instance.family.name,
+                    lang,
+                  )}
                   priority
                 />
                 <span className="sheet-category">
-                  {selected.instance.family.category}
+                  {localizeCategory(selected.instance.family.category, lang)}
                 </span>
               </div>
               <div className="sheet-summary">
                 <div className="sheet-title">
-                  <small>{sellerLabel[selected.seller]} satıcı</small>
+                  <small>
+                    {localizeSeller(
+                      selected.seller,
+                      sellerLabel[selected.seller],
+                      lang,
+                    )}{" "}
+                    {t("market.seller")}
+                  </small>
                   <h2 id="listing-detail-title">
-                    {selected.instance.family.name}
+                    {localizeProduct(
+                      selected.instance.family.id,
+                      selected.instance.family.name,
+                      lang,
+                    )}
                   </h2>
                 </div>
                 <div className="detail-price">
                   <div>
-                    <small>İLAN FİYATI</small>
-                    <strong>{money(selected.priceMinor)}</strong>
+                    <small>{t("market.listingPrice")}</small>
+                    <strong>{money(selected.priceMinor, lang)}</strong>
                   </div>
                   <span
                     className={

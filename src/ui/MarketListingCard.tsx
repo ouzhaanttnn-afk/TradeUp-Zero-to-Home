@@ -3,8 +3,13 @@ import { money } from "../game";
 import { Icon } from "./Icon";
 import { listingAgeLabel } from "./marketCard";
 import { ProductVisual } from "./ProductVisual";
-
-import { localizeCategory } from "../i18n";
+import {
+  useTranslation,
+  localizeProduct,
+  localizeCategory,
+  localizeConfidence,
+  localizeSignal,
+} from "../i18n";
 
 type MarketRisk = {
   level: "low" | "medium" | "high" | "critical";
@@ -15,9 +20,6 @@ type MarketSignal = {
   cls: string;
   text: string;
 };
-
-const evidenceLabel = (confidence: number) =>
-  confidence >= 0.72 ? "Yüksek" : confidence >= 0.46 ? "Orta" : "Düşük";
 
 export function MarketListingCard({
   item,
@@ -38,8 +40,14 @@ export function MarketListingCard({
   priority: boolean;
   onSelect: () => void;
 }) {
-  const ageLabel = listingAgeLabel(item.createdAtGameMin, gameTimeMin);
+  const { lang, t } = useTranslation();
+  const ageLabel = listingAgeLabel(item.createdAtGameMin, gameTimeMin, lang);
   const upperMarket = item.instance.family.tier >= 4;
+  const productName = localizeProduct(item.instance.family.id, item.instance.family.name, lang);
+  const categoryName = localizeCategory(item.instance.family.category, lang);
+  const confidence = localizeConfidence(item.instance.evidenceConfidence, lang);
+  const signalText = localizeSignal(itemSignal.text, lang);
+
   return (
     <button
       className={`listing market-card${upperMarket ? " market-card--upper-market" : ""}`}
@@ -47,7 +55,7 @@ export function MarketListingCard({
       data-price-minor={item.priceMinor}
       data-market-tier={item.instance.family.tier}
       onClick={onSelect}
-      aria-label={`${item.instance.family.name}, fiyat ${money(item.priceMinor)}, kondisyon yüzde ${item.instance.condition}, bilgi güveni ${evidenceLabel(item.instance.evidenceConfidence)}, ${ageLabel}, ${itemSignal.text}. İlan detaylarını aç`}
+      aria-label={`${productName}, ${money(item.priceMinor, lang)}, %${item.instance.condition}, ${confidence}, ${ageLabel}, ${signalText}. ${t("market.openDetail")}`}
     >
       <div className="market-visual-frame">
         <ProductVisual
@@ -66,27 +74,27 @@ export function MarketListingCard({
       ) : null}
       <div className="listing-copy">
         <small className="market-category">
-          {localizeCategory(item.instance.family.category)} · Sv. {categoryLevel}
+          {categoryName} · {t("journey.categoryLevel")} {categoryLevel}
         </small>
-        <h3>{item.instance.family.name}</h3>
+        <h3>{productName}</h3>
         <div className="market-price-row">
-          <strong>{money(item.priceMinor)}</strong>
+          <strong>{money(item.priceMinor, lang)}</strong>
           {watched ? (
             <span className="watch-state">
-              <Icon name="follow" /> Takipte
+              <Icon name="follow" /> {t("follow.badge") || "Takipte"}
             </span>
           ) : null}
         </div>
         <div className="tags">
-          <b className={itemSignal.cls}>{itemSignal.text}</b>
-          <span>%{item.instance.condition} kondisyon</span>
+          <b className={itemSignal.cls}>{signalText}</b>
+          <span>%{item.instance.condition} {t("market.conditionBadge") || "kondisyon"}</span>
         </div>
         <div className="market-card-facts">
-          <span>Bilgi: {evidenceLabel(item.instance.evidenceConfidence)}</span>
-          <span>İlgi %{item.interest}</span>
+          <span>{confidence}</span>
           <span>{ageLabel}</span>
         </div>
       </div>
     </button>
   );
 }
+

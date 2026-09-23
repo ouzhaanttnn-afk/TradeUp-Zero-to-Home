@@ -3,7 +3,7 @@ import { avatars, freeAvatars } from "../content/avatars";
 import { ownsAnimatedAvatars } from "../domain/profile";
 import type { AvatarId, GameState } from "../domain/models";
 import { AvatarPortrait } from "./AvatarPortrait";
-import { useTranslation } from "../i18n";
+import { useTranslation, localizeAvatar } from "../i18n";
 
 type ProfileOnboardingProps = {
   game: GameState;
@@ -20,7 +20,7 @@ export default function ProfileOnboarding({
   onComplete,
   onRestorePurchases,
 }: ProfileOnboardingProps) {
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const [name, setName] = useState("");
   const [avatarId, setAvatarId] = useState<AvatarId>("pazar-kasifi");
   const [restoreRequested, setRestoreRequested] = useState(false);
@@ -68,22 +68,30 @@ export default function ProfileOnboarding({
               : t("onboarding.avatarLegendFree")}
           </legend>
           <div className="avatar-options">
-            {(animatedAvatarsOwned ? avatars : freeAvatars).map((avatar) => (
-              <button
-                key={avatar.id}
-                type="button"
-                aria-pressed={avatarId === avatar.id}
-                aria-label={`${avatar.name}, ${avatar.role}`}
-                onClick={() => setAvatarId(avatar.id)}
-              >
-                <AvatarPortrait avatarId={avatar.id} />
-                <span>
-                  <b>{avatar.name}</b>
-                  <small>{avatar.role}</small>
-                </span>
-                <i aria-hidden="true">✓</i>
-              </button>
-            ))}
+            {(animatedAvatarsOwned ? avatars : freeAvatars).map((avatar) => {
+              const localized = localizeAvatar(
+                avatar.id,
+                avatar.name,
+                avatar.role,
+                lang,
+              );
+              return (
+                <button
+                  key={avatar.id}
+                  type="button"
+                  aria-pressed={avatarId === avatar.id}
+                  aria-label={`${localized.name}, ${localized.role}`}
+                  onClick={() => setAvatarId(avatar.id)}
+                >
+                  <AvatarPortrait avatarId={avatar.id} />
+                  <span>
+                    <b>{localized.name}</b>
+                    <small>{localized.role}</small>
+                  </span>
+                  <i aria-hidden="true">✓</i>
+                </button>
+              );
+            })}
           </div>
         </fieldset>
         {!animatedAvatarsOwned ? (

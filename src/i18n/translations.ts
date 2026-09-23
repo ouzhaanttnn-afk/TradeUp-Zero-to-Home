@@ -241,6 +241,46 @@ export const translations: Record<Language, Record<string, string>> = {
     "status.reserved": "Rezerve",
     "status.soldPending": "Ödeme bekleniyor",
     "status.soldComplete": "Satış tamamlandı",
+
+    // Listing & Selling
+    "listing.howToSell": "Nasıl satmak istersin?",
+    "listing.fast": "Hızlı",
+    "listing.sellNow": "Şimdi sat",
+    "listing.balanced": "Dengeli",
+    "listing.normalWait": "Normal bekleme",
+    "listing.high": "Yüksek",
+    "listing.longerWait": "Daha uzun bekle",
+    "listing.createListing": "İlan oluştur",
+    "listing.quickSale": "Hemen sat",
+    "listing.newPrice": "Yeni fiyat",
+    "listing.newPriceLabel": "{product} yeni ilan fiyatı",
+
+    // Portfolio & Preparation
+    "portfolio.totalSpent": "Toplam harcaman",
+    "portfolio.estimatedSale": "Tahmini satış",
+    "portfolio.netProfit": "Net kâr",
+    "portfolio.netLoss": "Net zarar",
+    "portfolio.confirmSale": "Satışı onayla",
+    "portfolio.saleAmount": "Satış tutarı",
+    "portfolio.missedProfit": "Dengeli ilana göre kaçırılan tahmini ek kazanç",
+    "portfolio.prepGuide": "Birini seç. Ücret toplam harcamana eklenir.",
+    "portfolio.quickSaleConfirmGroup": "Hızlı satış onayı",
+
+    // Journey & Homes
+    "journey.homeOptions": "Ev seçenekleri",
+    "journey.chooseHome": "Bu evi seç",
+    "journey.shortfall": "eksik",
+    "journey.cashShortfallDesc": "Nakit eksiği {amount}. Ürünlerin otomatik satılmaz.",
+    "journey.openPortfolio": "Portföyü aç",
+    "journey.categoryLevel": "Seviye",
+
+    // Market Details
+    "market.listingPrice": "İLAN FİYATI",
+    "market.seller": "satıcı",
+    "market.openDetail": "İlan detaylarını aç",
+    "market.ageNew": "Yeni",
+    "market.ageMinutes": "{min} dk",
+    "market.ageHours": "{hour} sa",
   },
 
   en: {
@@ -483,6 +523,46 @@ export const translations: Record<Language, Record<string, string>> = {
     "status.reserved": "Reserved",
     "status.soldPending": "Payment Pending",
     "status.soldComplete": "Sold Complete",
+
+    // Listing & Selling
+    "listing.howToSell": "How would you like to sell?",
+    "listing.fast": "Fast",
+    "listing.sellNow": "Sell now",
+    "listing.balanced": "Balanced",
+    "listing.normalWait": "Normal wait",
+    "listing.high": "High",
+    "listing.longerWait": "Longer wait",
+    "listing.createListing": "Create listing",
+    "listing.quickSale": "Quick sell",
+    "listing.newPrice": "New price",
+    "listing.newPriceLabel": "{product} new listing price",
+
+    // Portfolio & Preparation
+    "portfolio.totalSpent": "Total spent",
+    "portfolio.estimatedSale": "Estimated sale",
+    "portfolio.netProfit": "Net profit",
+    "portfolio.netLoss": "Net loss",
+    "portfolio.confirmSale": "Confirm sale",
+    "portfolio.saleAmount": "Sale proceeds",
+    "portfolio.missedProfit": "Estimated premium given up vs balanced listing",
+    "portfolio.prepGuide": "Choose one. Fee is added to your total book cost.",
+    "portfolio.quickSaleConfirmGroup": "Quick sale confirmation",
+
+    // Journey & Homes
+    "journey.homeOptions": "Home options",
+    "journey.chooseHome": "Choose this home",
+    "journey.shortfall": "shortfall",
+    "journey.cashShortfallDesc": "Cash shortfall {amount}. Your inventory is not auto-sold.",
+    "journey.openPortfolio": "Open portfolio",
+    "journey.categoryLevel": "Level",
+
+    // Market Details
+    "market.listingPrice": "LISTING PRICE",
+    "market.seller": "seller",
+    "market.openDetail": "Open listing details",
+    "market.ageNew": "New",
+    "market.ageMinutes": "{min}m",
+    "market.ageHours": "{hour}h",
   },
 
   de: {
@@ -725,6 +805,46 @@ export const translations: Record<Language, Record<string, string>> = {
     "status.reserved": "Reserviert",
     "status.soldPending": "Zahlung ausstehend",
     "status.soldComplete": "Verkauft",
+
+    // Listing & Selling
+    "listing.howToSell": "Wie möchtest du verkaufen?",
+    "listing.fast": "Schnell",
+    "listing.sellNow": "Jetzt verkaufen",
+    "listing.balanced": "Ausgewogen",
+    "listing.normalWait": "Normale Wartezeit",
+    "listing.high": "Hoch",
+    "listing.longerWait": "Längere Wartezeit",
+    "listing.createListing": "Inserat erstellen",
+    "listing.quickSale": "Sofortverkauf",
+    "listing.newPrice": "Neuer Preis",
+    "listing.newPriceLabel": "{product} neuer Inseratspreis",
+
+    // Portfolio & Preparation
+    "portfolio.totalSpent": "Gesamtausgaben",
+    "portfolio.estimatedSale": "Geschätzter Verkauf",
+    "portfolio.netProfit": "Nettogewinn",
+    "portfolio.netLoss": "Nettoverlust",
+    "portfolio.confirmSale": "Verkauf bestätigen",
+    "portfolio.saleAmount": "Verkaufserlös",
+    "portfolio.missedProfit": "Geschätzter Mehrerlös verpasst ggü. ausgewogen",
+    "portfolio.prepGuide": "Wähle eine Aktion. Kosten werden den Gesamtausgaben angerechnet.",
+    "portfolio.quickSaleConfirmGroup": "Sofortverkauf bestätigen",
+
+    // Journey & Homes
+    "journey.homeOptions": "Haus-Optionen",
+    "journey.chooseHome": "Dieses Haus wählen",
+    "journey.shortfall": "fehlen",
+    "journey.cashShortfallDesc": "Fehlender Betrag {amount}. Inventar wird nicht automatisch verkauft.",
+    "journey.openPortfolio": "Portfolio öffnen",
+    "journey.categoryLevel": "Stufe",
+
+    // Market Details
+    "market.listingPrice": "INSERATSPREIS",
+    "market.seller": "Verkäufer",
+    "market.openDetail": "Inseratdetails öffnen",
+    "market.ageNew": "Neu",
+    "market.ageMinutes": "{min} Min.",
+    "market.ageHours": "{hour} Std.",
   },
 
   es: {
@@ -967,5 +1087,45 @@ export const translations: Record<Language, Record<string, string>> = {
     "status.reserved": "Reservado",
     "status.soldPending": "Pago pendiente",
     "status.soldComplete": "Venta completada",
+
+    // Listing & Selling
+    "listing.howToSell": "¿Cómo te gustaría vender?",
+    "listing.fast": "Rápido",
+    "listing.sellNow": "Vender ahora",
+    "listing.balanced": "Equilibrado",
+    "listing.normalWait": "Espera normal",
+    "listing.high": "Alto",
+    "listing.longerWait": "Espera más larga",
+    "listing.createListing": "Crear anuncio",
+    "listing.quickSale": "Venta rápida",
+    "listing.newPrice": "Nuevo precio",
+    "listing.newPriceLabel": "{product} nuevo precio de anuncio",
+
+    // Portfolio & Preparation
+    "portfolio.totalSpent": "Gasto total",
+    "portfolio.estimatedSale": "Venta estimada",
+    "portfolio.netProfit": "Beneficio neto",
+    "portfolio.netLoss": "Pérdida neta",
+    "portfolio.confirmSale": "Confirmar venta",
+    "portfolio.saleAmount": "Importe de venta",
+    "portfolio.missedProfit": "Ganancia adicional estimada perdida vs anuncio equilibrado",
+    "portfolio.prepGuide": "Elige una. El coste se añade al gasto total de compra.",
+    "portfolio.quickSaleConfirmGroup": "Confirmación de venta rápida",
+
+    // Journey & Homes
+    "journey.homeOptions": "Opciones de vivienda",
+    "journey.chooseHome": "Elegir esta casa",
+    "journey.shortfall": "faltan",
+    "journey.cashShortfallDesc": "Faltan {amount} en efectivo. Tu inventario no se vende automáticamente.",
+    "journey.openPortfolio": "Abrir cartera",
+    "journey.categoryLevel": "Nivel",
+
+    // Market Details
+    "market.listingPrice": "PRECIO ANUNCIO",
+    "market.seller": "vendedor",
+    "market.openDetail": "Abrir detalles del anuncio",
+    "market.ageNew": "Nuevo",
+    "market.ageMinutes": "{min} min",
+    "market.ageHours": "{hour} h",
   },
 };

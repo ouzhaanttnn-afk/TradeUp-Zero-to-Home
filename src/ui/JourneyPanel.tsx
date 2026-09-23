@@ -26,6 +26,7 @@ import {
 import { simplifyLegacyPlayerCopy } from "./playerLanguage";
 import { saleHistoryCopy } from "./saleHistory";
 import { formatEstimate, wealthPresentation } from "./wealthPresentation";
+import { useTranslation, localizeHome, localizeCategory } from "../i18n";
 
 export default function JourneyPanel({
   game,
@@ -38,6 +39,7 @@ export default function JourneyPanel({
   onBuyHome: (homeId: string) => void;
   onOpenPortfolio: () => void;
 }) {
+  const { lang, t } = useTranslation();
   const timelinePageSize = 4;
   const [timelineFilter, setTimelineFilter] = useState<TimelineFilter>("ALL");
   const [timelineExpanded, setTimelineExpanded] = useState(false);
@@ -158,27 +160,36 @@ export default function JourneyPanel({
                   )}
                 </div>
                 {upgradeOptions.length ? (
-                  <div className="home-market-list" aria-label="Ev seçenekleri">
-                    {upgradeOptions.map((home) => (
-                      <article className="home-option-card" key={home.id}>
-                        <img src={homeAssets[home.assetKey]} alt="" />
-                        <div>
-                          <small>{home.location}</small>
-                          <h4>{home.name}</h4>
-                          <p>{home.summary}</p>
-                          <strong>{money(home.priceMinor)}</strong>
-                          {game.cashMinor >= home.priceMinor ? (
-                            <button onClick={() => onBuyHome(home.id)}>
-                              Bu evi seç
-                            </button>
-                          ) : (
-                            <span className="home-option-shortfall">
-                              {money(home.priceMinor - game.cashMinor)} eksik
-                            </span>
-                          )}
-                        </div>
-                      </article>
-                    ))}
+                  <div className="home-market-list" aria-label={t("journey.homeOptions")}>
+                    {upgradeOptions.map((home) => {
+                      const localized = localizeHome(
+                        home.id,
+                        home.name,
+                        home.location,
+                        home.summary,
+                        lang,
+                      );
+                      return (
+                        <article className="home-option-card" key={home.id}>
+                          <img src={homeAssets[home.assetKey]} alt="" />
+                          <div>
+                            <small>{localized.location}</small>
+                            <h4>{localized.name}</h4>
+                            <p>{localized.summary}</p>
+                            <strong>{money(home.priceMinor, lang)}</strong>
+                            {game.cashMinor >= home.priceMinor ? (
+                              <button onClick={() => onBuyHome(home.id)}>
+                                {t("journey.chooseHome")}
+                              </button>
+                            ) : (
+                              <span className="home-option-shortfall">
+                                {money(home.priceMinor - game.cashMinor, lang)} {t("journey.shortfall")}
+                              </span>
+                            )}
+                          </div>
+                        </article>
+                      );
+                    })}
                   </div>
                 ) : null}
               </div>
@@ -186,10 +197,11 @@ export default function JourneyPanel({
             {showCashPlan ? (
               <div className="home-cash-plan">
                 <span>
-                  Nakit eksiği {money(cashTargetMinor! - game.cashMinor)}.
-                  Ürünlerin otomatik satılmaz.
+                  {t("journey.cashShortfallDesc", {
+                    amount: money(cashTargetMinor! - game.cashMinor, lang),
+                  })}
                 </span>
-                <button onClick={onOpenPortfolio}>Portföyü aç</button>
+                <button onClick={onOpenPortfolio}>{t("journey.openPortfolio")}</button>
               </div>
             ) : null}
           </div>
@@ -322,8 +334,8 @@ export default function JourneyPanel({
             .sort((left, right) => right[1] - left[1])
             .map(([category, xp]) => (
               <span key={category}>
-                {category} · Seviye {categoryExpertiseLevel(game, category)}{" "}
-                <small>{xp} deneyim</small>
+                {localizeCategory(category, lang)} · {t("journey.categoryLevel")} {categoryExpertiseLevel(game, category)}{" "}
+                <small>{xp} {t("meta.xp") || "xp"}</small>
               </span>
             ))}
         </div>
