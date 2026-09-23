@@ -80,6 +80,7 @@ import { AvatarPortrait } from "./ui/AvatarPortrait";
 import ProfileOnboarding from "./ui/ProfileOnboarding";
 import { MarketListingCard } from "./ui/MarketListingCard";
 import { useModalFocus } from "./ui/useModalFocus";
+import { useTranslation, localizeCategory } from "./i18n";
 
 const loadSettingsPanel = () => import("./ui/SettingsPanel");
 const loadFollowPanel = () => import("./ui/FollowPanel");
@@ -155,6 +156,7 @@ const rewardCopy = {
 
 export default function App() {
   useTapHaptics();
+  const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>("market");
   const [portfolioSegment, setPortfolioSegment] =
     useState<PortfolioSegment>("inventory");
@@ -940,7 +942,7 @@ export default function App() {
             ref={settingsButtonRef}
             className="profile-settings-button"
             aria-expanded={settingsOpen}
-            aria-label="Ayarlar"
+            aria-label={t("header.settings")}
             onPointerEnter={() => void loadSettingsPanel()}
             onFocus={() => void loadSettingsPanel()}
             onClick={openSettingsPanel}
@@ -957,11 +959,11 @@ export default function App() {
       {!settingsOpen ? (
         <section className="wallet" aria-label="Finans özeti">
           <div>
-            <small>Nakit</small>
+            <small>{t("wallet.cash")}</small>
             <strong>{money(game.cashMinor)}</strong>
           </div>
           <div>
-            <small>Tahmini net servet</small>
+            <small>{t("wallet.netWorth")}</small>
             <strong>{formatEstimate(estimates.total)}</strong>
           </div>
           {game.home.unlocked ? (
@@ -969,7 +971,7 @@ export default function App() {
               className="goal"
               aria-label={`Ev yolculuğu yüzde ${homeProgress}`}
             >
-              <small>Ev yolculuğu · %{homeProgress}</small>
+              <small>{t("wallet.homeGoal")} · %{homeProgress}</small>
               <span>
                 <i style={{ width: `${homeProgress}%` }} />
               </span>
@@ -1170,7 +1172,7 @@ export default function App() {
                   aria-pressed={activeMarketCategory === ALL_MARKET_CATEGORIES}
                   onClick={() => setMarketCategory(ALL_MARKET_CATEGORIES)}
                 >
-                  Tümü
+                  {t("market.all")}
                 </button>
                 {marketCategoryOptions.map((category) => (
                   <button
@@ -1181,7 +1183,7 @@ export default function App() {
                     key={category}
                     onClick={() => setMarketCategory(category)}
                   >
-                    {category}
+                    {localizeCategory(category)}
                   </button>
                 ))}
               </div>
@@ -1270,9 +1272,9 @@ export default function App() {
             >
               {(
                 [
-                  ["inventory", "Envanter", inventory.length],
-                  ["preparation", "Hazırlık", workshop.length],
-                  ["listings", "İlanlarım", playerListings.length],
+                  ["inventory", t("portfolio.inventory"), inventory.length],
+                  ["preparation", t("portfolio.preparation"), workshop.length],
+                  ["listings", t("portfolio.listings"), playerListings.length],
                 ] as const
               ).map(([segment, label, count]) => (
                 <button
@@ -1692,10 +1694,10 @@ export default function App() {
         <nav aria-label="Ana bölümler">
           {(
             [
-              ["market", "home", "Pazar"],
-              ["radar", "radar", "Radar"],
-              ["portfolio", "portfolio", "Portföy"],
-              ["journey", "journey", "Yolculuk"],
+              ["market", "home", t("nav.market")],
+              ["radar", "radar", t("nav.radar")],
+              ["portfolio", "portfolio", t("nav.portfolio")],
+              ["journey", "journey", t("nav.journey")],
             ] as const satisfies ReadonlyArray<readonly [Tab, IconName, string]>
           ).map(([item, icon, label]) => (
             <button
@@ -2188,7 +2190,7 @@ export default function App() {
                           purchaseAndContinue(selected.id, () => buy(selected))
                         }
                       >
-                        Hemen al{" "}
+                        {t("sheet.buyDirect")}{" "}
                         <small>{money(budget.direct.amountMinor)}</small>
                         <small>{balanceCopy(budget.direct)}</small>
                       </button>
@@ -2197,8 +2199,7 @@ export default function App() {
                   {budget && budget.shortfallMinor > 0 ? (
                     <div className="cash-shortfall">
                       <p>
-                        Bu alış için en az {money(budget.shortfallMinor)} nakit
-                        eksik.
+                        {t("sheet.cashShortfall", { amount: money(budget.shortfallMinor) })}
                       </p>
                       <button
                         onClick={() => {
@@ -2207,7 +2208,7 @@ export default function App() {
                           setPortfolioSegment("inventory");
                         }}
                       >
-                        Satabileceğin ürünleri gör
+                        {t("sheet.viewInventoryToSell")}
                       </button>
                     </div>
                   ) : null}

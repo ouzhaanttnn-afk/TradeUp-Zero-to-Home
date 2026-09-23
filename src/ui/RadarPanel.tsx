@@ -1,20 +1,7 @@
 import type { GameState } from "../domain/models";
 import type { RadarSignal } from "../domain/marketEvents";
 import { Icon } from "./Icon";
-
-const TIER_COPY: Record<
-  RadarSignal["tier"],
-  { badge: string; detail: string }
-> = {
-  HIGH: {
-    badge: "Talep yüksek",
-    detail: "Alıcı hareketliliği arttı",
-  },
-  RISING: {
-    badge: "Yükselişte",
-    detail: "Talep güçleniyor",
-  },
-};
+import { useTranslation, localizeCategory } from "../i18n";
 
 export default function RadarPanel({
   game,
@@ -25,12 +12,27 @@ export default function RadarPanel({
   signal: RadarSignal | null;
   onOpenMarketCategory: (category: string) => void;
 }) {
+  const { t, lang } = useTranslation();
+
+  const getTierCopy = (tier: RadarSignal["tier"]) => {
+    if (tier === "HIGH") {
+      return {
+        badge: t("radar.tierHighBadge"),
+        detail: t("radar.tierHighDetail"),
+      };
+    }
+    return {
+      badge: t("radar.tierRisingBadge"),
+      detail: t("radar.tierRisingDetail"),
+    };
+  };
+
   return (
     <>
       <div className="section-title">
         <div>
-          <small>PAZAR RADARI</small>
-          <h2>Radar</h2>
+          <small>{t("radar.heading")}</small>
+          <h2>{t("radar.mainTitle")}</h2>
         </div>
       </div>
       {signal ? (
@@ -40,7 +42,7 @@ export default function RadarPanel({
               <Icon name="radar" />
             </span>
             <div>
-              <b>{TIER_COPY[signal.tier].badge}</b>
+              <b>{getTierCopy(signal.tier).badge}</b>
               <small>{signal.message}</small>
             </div>
           </div>
@@ -49,17 +51,14 @@ export default function RadarPanel({
               <button
                 key={category}
                 onClick={() => onOpenMarketCategory(category)}
-                aria-label={`${category} kategorisini pazarda gör`}
+                aria-label={`${localizeCategory(category, lang)}`}
               >
-                <span>{category}</span>
-                <small>{TIER_COPY[signal.tier].detail}</small>
+                <span>{localizeCategory(category, lang)}</span>
+                <small>{getTierCopy(signal.tier).detail}</small>
               </button>
             ))}
           </div>
-          <p className="radar-effect-note">
-            Bu kategorilerde ilanına alıcı teklifi normalden daha hızlı
-            gelebilir. Fiyatı mantıksızsa yine de gelmeyebilir.
-          </p>
+          <p className="radar-effect-note">{t("radar.activeNote")}</p>
         </section>
       ) : (
         <section className="radar-card radar-card--calm">
@@ -68,25 +67,21 @@ export default function RadarPanel({
               <Icon name="radar" />
             </span>
             <div>
-              <b>Pazar dengeli</b>
-              <small>Şu anda öne çıkan kategori yok</small>
+              <b>{t("radar.balancedTitle")}</b>
+              <small>{t("radar.balancedDesc")}</small>
             </div>
           </div>
-          <p className="radar-effect-note">
-            Radar zaman zaman 1-3 kategoride talep artışı gösterir. Aktif
-            olduğunda burada ve o kategorilerdeki ilanlarda görünür.
-          </p>
+          <p className="radar-effect-note">{t("radar.calmNote")}</p>
         </section>
       )}
-      <p className="radar-footnote">
-        Radar dışındaki kategorilerde satış normal şekilde devam eder.
-      </p>
+      <p className="radar-footnote">{t("radar.footnote")}</p>
       {game.follow.watchedListingIds.length ? (
         <p className="radar-footnote">
-          Takip ettiğin ilanlara Pazar sekmesindeki{" "}
-          <Icon name="follow" /> simgesinden ulaşabilirsin.
+          {t("radar.followHint").replace("{icon}", "")}{" "}
+          <Icon name="follow" />
         </p>
       ) : null}
     </>
   );
 }
+

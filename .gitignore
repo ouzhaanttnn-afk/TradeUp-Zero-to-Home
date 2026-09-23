@@ -15,6 +15,7 @@ playwright-report
 coverage
 .asset-benchmark
 *.local
+.tmp-review-video/
 
 # Editor directories and files
 .vscode/*

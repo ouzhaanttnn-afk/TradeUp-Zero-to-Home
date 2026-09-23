@@ -5,6 +5,7 @@ import { simplifyLegacyPlayerCopy } from "./playerLanguage";
 import { useModalFocus } from "./useModalFocus";
 import { homeOptionById } from "../content/homes";
 import { homeAssets } from "./homeAssets";
+import { useTranslation } from "../i18n";
 
 type FinaleHighlight = {
   id: string;
@@ -23,6 +24,7 @@ export default function HomeFinale({
   buttonRef: RefObject<HTMLButtonElement | null>;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const panelRef = useRef<HTMLElement>(null);
   const home = homeOptionById(homeId);
   useModalFocus(true, panelRef, buttonRef, onClose);
@@ -42,16 +44,17 @@ export default function HomeFinale({
           <Icon name="home" />
         )}
       </div>
-      <small>ZERO TO HOME</small>
-      <h2 id="home-finale-title">Anahtar artık sende.</h2>
+      <small>{t("finale.kicker")}</small>
+      <h2 id="home-finale-title">{t("finale.headline")}</h2>
       <p>
-        Sıfırdan başladın. Aldın, hazırladın, sattın ve{" "}
-        {home?.name ?? "kendi evine"} ulaştın.
+        {t("finale.desc", {
+          home: home?.name ?? t("finale.homeDefault"),
+        })}
       </p>
       {highlights.length ? (
         <div
           className="home-finale-highlights"
-          aria-label="Yolculuğundan anlar"
+          aria-label={t("finale.highlights")}
         >
           {highlights.map((event) => (
             <span key={event.id}>
@@ -64,8 +67,9 @@ export default function HomeFinale({
         </div>
       ) : null}
       <button ref={buttonRef} onClick={onClose}>
-        Yolculuğa devam et
+        {t("finale.continue")}
       </button>
     </section>
   );
 }
+

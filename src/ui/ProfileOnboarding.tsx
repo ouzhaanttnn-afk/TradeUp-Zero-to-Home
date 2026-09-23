@@ -3,6 +3,7 @@ import { avatars, freeAvatars } from "../content/avatars";
 import { ownsAnimatedAvatars } from "../domain/profile";
 import type { AvatarId, GameState } from "../domain/models";
 import { AvatarPortrait } from "./AvatarPortrait";
+import { useTranslation } from "../i18n";
 
 type ProfileOnboardingProps = {
   game: GameState;
@@ -19,6 +20,7 @@ export default function ProfileOnboarding({
   onComplete,
   onRestorePurchases,
 }: ProfileOnboardingProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [avatarId, setAvatarId] = useState<AvatarId>("pazar-kasifi");
   const [restoreRequested, setRestoreRequested] = useState(false);
@@ -38,30 +40,32 @@ export default function ProfileOnboarding({
             ↑
           </span>
           <span>
-            <small>TRADEUP · YENİ KARİYER</small>
-            <b>Zero to Home</b>
+            <small>{t("onboarding.kicker")}</small>
+            <b>{t("onboarding.brand")}</b>
           </span>
         </header>
         <div className="onboarding-copy">
-          <span>OYUNCU PROFİLİ</span>
-          <h1 id="profile-onboarding-title">Pazara kendi tarzınla gir.</h1>
-          <p>Adını belirle, seni temsil edecek karakteri seç.</p>
+          <span>{t("onboarding.subtitle")}</span>
+          <h1 id="profile-onboarding-title">{t("onboarding.headline")}</h1>
+          <p>{t("onboarding.desc")}</p>
         </div>
         <label className="onboarding-name">
-          <span>Oyuncu adı</span>
+          <span>{t("onboarding.nameLabel")}</span>
           <input
             autoFocus
             autoComplete="nickname"
             maxLength={20}
             value={name}
-            placeholder="Örn. Pazar Ustası"
+            placeholder={t("onboarding.placeholder")}
             onChange={(event) => setName(event.target.value)}
           />
           <small>{name.trim().length}/20</small>
         </label>
         <fieldset className="avatar-picker avatar-picker--onboarding">
           <legend>
-            {animatedAvatarsOwned ? "Karakterin" : "Ücretsiz karakterin"}
+            {animatedAvatarsOwned
+              ? t("onboarding.avatarLegend")
+              : t("onboarding.avatarLegendFree")}
           </legend>
           <div className="avatar-options">
             {(animatedAvatarsOwned ? avatars : freeAvatars).map((avatar) => (
@@ -88,16 +92,16 @@ export default function ProfileOnboarding({
             aria-label="Canlı avatar ön izlemesi"
           >
             <div>
-              <span>CANLI KOLEKSİYON</span>
-              <b>Hareketli avatarlar</b>
-              <small>Yalnız görünüm · oynanış avantajı yok</small>
+              <span>{t("onboarding.liveAvatars")}</span>
+              <b>{t("onboarding.animatedAvatars")}</b>
+              <small>{t("onboarding.cosmeticOnly")}</small>
             </div>
             <div className="premium-avatar-stack" aria-hidden="true">
               {avatars.slice(3).map((avatar) => (
                 <AvatarPortrait key={avatar.id} avatarId={avatar.id} />
               ))}
             </div>
-            <span className="premium-avatar-status">Yakında</span>
+            <span className="premium-avatar-status">{t("onboarding.comingSoon")}</span>
           </div>
         ) : null}
         <button
@@ -105,7 +109,7 @@ export default function ProfileOnboarding({
           disabled={!name.trim()}
           onClick={() => onComplete(name, avatarId)}
         >
-          Kariyere başla <span aria-hidden="true">→</span>
+          {t("onboarding.start")} <span aria-hidden="true">→</span>
         </button>
         <button
           className="onboarding-restore"
@@ -115,14 +119,15 @@ export default function ProfileOnboarding({
             void onRestorePurchases();
           }}
         >
-          Satın alımları geri yükle
+          {t("onboarding.restore")}
         </button>
         {restoreRequested ? (
           <p className="onboarding-restore-status" role="status">
-            {monetizationBusy ? "Mağaza kontrol ediliyor…" : notice}
+            {monetizationBusy ? t("onboarding.checking") : notice}
           </p>
         ) : null}
       </section>
     </main>
   );
 }
+

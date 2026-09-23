@@ -10,14 +10,9 @@ import { AvatarPortrait } from "./AvatarPortrait";
 import { Icon } from "./Icon";
 import PurchasesSheet from "./PurchasesSheet";
 import { useModalFocus } from "./useModalFocus";
+import { useTranslation } from "../i18n";
 
 type SoundLevel = AccessibilityPreferences["soundLevel"];
-
-const soundLevelLabel: Record<SoundLevel, string> = {
-  OFF: "Kapalı",
-  LOW: "Düşük",
-  NORMAL: "Normal",
-};
 
 const nextSoundLevel: Record<SoundLevel, SoundLevel> = {
   OFF: "LOW",
@@ -26,6 +21,7 @@ const nextSoundLevel: Record<SoundLevel, SoundLevel> = {
 };
 
 export default function SettingsPanel({ onClose }: { onClose: () => void }) {
+  const { t, lang, setLanguage, supportedLanguages } = useTranslation();
   const {
     game,
     storeProducts,
@@ -66,6 +62,13 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
     (entry) => entry.kind === "SALE",
   ).length;
 
+  const currentSoundLabel =
+    game.accessibility.soundLevel === "OFF"
+      ? t("settings.soundMute")
+      : game.accessibility.soundLevel === "LOW"
+        ? t("settings.soundLow")
+        : t("settings.soundStandard");
+
   return (
     <section
       ref={panelRef}
@@ -76,20 +79,20 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
     >
       <div className="settings-sheet-heading">
         <div>
-          <small>HESABIM</small>
-          <h2 id="settings-title">Profil ve Ayarlar</h2>
+          <small>{t("settings.heading")}</small>
+          <h2 id="settings-title">{t("settings.title")}</h2>
         </div>
         <button
           ref={closeRef}
           className="icon-button"
-          aria-label="Ayarları kapat"
+          aria-label={t("settings.close")}
           onClick={onClose}
         >
           <Icon name="close" />
         </button>
       </div>
       <div className="settings-identity-group">
-        <small className="settings-group-label">OYUNCU KİMLİĞİ</small>
+        <small className="settings-group-label">{t("settings.identity")}</small>
         <form
           className="profile-card"
           onSubmit={(event) => {
@@ -105,9 +108,9 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
             className="profile-avatar"
           />
           <div className="profile-identity">
-            <span className="profile-kicker">Pazar seviyesi {marketLevel}</span>
+            <span className="profile-kicker">{t("settings.level")} {marketLevel}</span>
             <label>
-              <span>Oyuncu adı</span>
+              <span>{t("settings.playerName")}</span>
               <input
                 value={profileDraft}
                 maxLength={20}
@@ -125,25 +128,25 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
             }
             type="submit"
           >
-            Kaydet
+            {t("settings.save")}
           </button>
           <div className="profile-stats" role="group" aria-label="Profil özeti">
             <span>
-              <small>Pazar seviyesi</small>
+              <small>{t("settings.level")}</small>
               <b>{marketLevel}</b>
             </span>
             <span>
-              <small>Satış</small>
+              <small>{t("settings.sales")}</small>
               <b>{completedSales}</b>
             </span>
             <span>
-              <small>Ev hedefi</small>
+              <small>{t("settings.homeGoal")}</small>
               <b>%{homeProgress}</b>
             </span>
           </div>
         </form>
         <fieldset className="avatar-picker avatar-picker--settings">
-          <legend>Profil avatarı</legend>
+          <legend>{t("settings.avatars")}</legend>
           <div className="avatar-options">
             {avatars.map((avatar) => {
               const locked = avatar.premium && !animatedAvatarsOwned;
@@ -177,8 +180,8 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
             <Icon name="settings" />
           </span>
           <div>
-            <h3 id="experience-settings-title">Oyun deneyimi</h3>
-            <p>Sana uygun oyun hissi</p>
+            <h3 id="experience-settings-title">{t("settings.experience")}</h3>
+            <p>{t("settings.experienceSub")}</p>
           </div>
         </div>
         <div className="settings-row">
@@ -186,13 +189,13 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
             <Icon name="haptics" />
           </span>
           <span className="settings-row-copy">
-            <b>Dokunsal geri bildirim</b>
-            <small>Önemli kararlarda titreşim</small>
+            <b>{t("settings.haptics")}</b>
+            <small>{t("settings.hapticsSub")}</small>
           </span>
           <button
             className="settings-switch"
             aria-pressed={game.accessibility.hapticsEnabled}
-            aria-label={`Dokunsal tepki: ${game.accessibility.hapticsEnabled ? "Açık" : "Kapalı"}`}
+            aria-label={`${t("settings.haptics")}: ${game.accessibility.hapticsEnabled ? t("settings.on") : t("settings.off")}`}
             onClick={() => setHaptics(!game.accessibility.hapticsEnabled)}
           >
             <span aria-hidden="true" />
@@ -203,13 +206,13 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
             <Icon name="motion" />
           </span>
           <span className="settings-row-copy">
-            <b>Azaltılmış hareket</b>
-            <small>Geçişleri ve parlamaları sakinleştirir</small>
+            <b>{t("settings.motion")}</b>
+            <small>{t("settings.motionSub")}</small>
           </span>
           <button
             className="settings-switch"
             aria-pressed={game.accessibility.reducedMotion}
-            aria-label={`Azaltılmış hareket: ${game.accessibility.reducedMotion ? "Açık" : "Kapalı"}`}
+            aria-label={`${t("settings.motion")}: ${game.accessibility.reducedMotion ? t("settings.on") : t("settings.off")}`}
             onClick={() => setReducedMotion(!game.accessibility.reducedMotion)}
           >
             <span aria-hidden="true" />
@@ -220,15 +223,15 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
             <Icon name="text" />
           </span>
           <span className="settings-row-copy">
-            <b>Metin boyutu</b>
-            <small>Okuma rahatlığı</small>
+            <b>{t("settings.textSize")}</b>
+            <small>{t("settings.textSizeSub")}</small>
           </span>
           <button
             className="settings-value"
             aria-pressed={game.accessibility.largeText}
             onClick={() => setLargeText(!game.accessibility.largeText)}
           >
-            {game.accessibility.largeText ? "Büyük" : "Standart"}
+            {game.accessibility.largeText ? t("settings.textSizeLarge") : t("settings.textSizeStandard")}
           </button>
         </div>
         <div className="settings-row">
@@ -236,31 +239,53 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
             <Icon name="sound" />
           </span>
           <span className="settings-row-copy">
-            <b>Ses seviyesi</b>
-            <small>Efektlerin yüksekliği</small>
+            <b>{t("settings.sound")}</b>
+            <small>{t("settings.soundSub")}</small>
           </span>
           <button
             className="settings-value"
-            aria-label={`Ses seviyesi: ${soundLevelLabel[game.accessibility.soundLevel]}. Değiştir`}
+            aria-label={`${t("settings.sound")}: ${currentSoundLabel}`}
             onClick={() =>
               setSoundLevel(nextSoundLevel[game.accessibility.soundLevel])
             }
           >
-            {soundLevelLabel[game.accessibility.soundLevel]}
+            {currentSoundLabel}
           </button>
+        </div>
+        <div className="settings-row">
+          <span className="settings-row-icon" aria-hidden="true">
+            <Icon name="language" />
+          </span>
+          <span className="settings-row-copy">
+            <b>{t("settings.language")}</b>
+            <small>{t("settings.languageSub")}</small>
+          </span>
+          <div className="language-selector" role="group" aria-label={t("settings.language")}>
+            {supportedLanguages.map((option) => (
+              <button
+                key={option.code}
+                type="button"
+                className={`lang-pill ${lang === option.code ? "active" : ""}`}
+                aria-pressed={lang === option.code}
+                onClick={() => setLanguage(option.code)}
+              >
+                {option.code.toUpperCase()}
+              </button>
+            ))}
+          </div>
         </div>
         <div className="settings-row">
           <span className="settings-row-icon" aria-hidden="true">
             <Icon name="analytics" />
           </span>
           <span className="settings-row-copy">
-            <b>İsteğe bağlı analitik</b>
-            <small>Kişisel bilgi içermez</small>
+            <b>{t("settings.analytics")}</b>
+            <small>{t("settings.analyticsSub")}</small>
           </span>
           <button
             className="settings-switch"
             aria-pressed={game.analytics.enabled}
-            aria-label={`İsteğe bağlı analitik: ${game.analytics.enabled ? "Açık" : "Kapalı"}`}
+            aria-label={`${t("settings.analytics")}: ${game.analytics.enabled ? t("settings.on") : t("settings.off")}`}
             onClick={() => setAnalytics(!game.analytics.enabled)}
           >
             <span aria-hidden="true" />
@@ -269,7 +294,7 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
       </section>
       <button
         className="settings-link-card"
-        aria-label="Satın Almalar ve Görünüm"
+        aria-label={t("settings.purchases")}
         onClick={() => {
           setPurchasesOpen(true);
           void openPurchases();
@@ -279,8 +304,8 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
           <Icon name="store" />
         </span>
         <span>
-          <b>Satın almalar &amp; görünüm</b>
-          <small>Kalıcı paketler ve geri yükleme</small>
+          <b>{t("settings.purchases")}</b>
+          <small>{t("settings.purchasesSub")}</small>
         </span>
         <i aria-hidden="true">→</i>
       </button>
@@ -295,29 +320,29 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
           onClose={() => setPurchasesOpen(false)}
         />
       ) : null}
-      <section className="settings-section" aria-label="Yardım ve belgeler">
+      <section className="settings-section" aria-label={t("settings.helpLegal")}>
         <div className="settings-section-heading">
           <div>
-            <h3>Yardım ve belgeler</h3>
-            <p>Destek ve açık kullanım bilgileri</p>
+            <h3>{t("settings.helpLegal")}</h3>
+            <p>{t("settings.helpLegalSub")}</p>
           </div>
         </div>
         <div className="settings-document-links">
           <a href="/support.html">
-            Destek <span aria-hidden="true">↗</span>
+            {t("settings.support")} <span aria-hidden="true">↗</span>
           </a>
           <a href="/privacy.html">
-            Gizlilik <span aria-hidden="true">↗</span>
+            {t("settings.privacy")} <span aria-hidden="true">↗</span>
           </a>
           <a href="/terms.html">
-            Kullanım koşulları <span aria-hidden="true">↗</span>
+            {t("settings.terms")} <span aria-hidden="true">↗</span>
           </a>
         </div>
       </section>
-      <section className="settings-danger-zone" aria-label="Kayıt yönetimi">
+      <section className="settings-danger-zone" aria-label={t("settings.saveManagement")}>
         <div>
-          <b>Kayıt yönetimi</b>
-          <small>Bu işlem geri alınamaz.</small>
+          <b>{t("settings.saveManagement")}</b>
+          <small>{t("settings.saveManagementSub")}</small>
         </div>
         <button
           className={resetArmed ? "danger-confirm" : "text-button"}
@@ -329,11 +354,11 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
             } else setResetArmed(true);
           }}
         >
-          {resetArmed ? "Kalıcı olarak sıfırla" : "Kariyeri sıfırla"}
+          {resetArmed ? t("settings.resetConfirm") : t("settings.resetCareer")}
         </button>
         {resetArmed ? (
           <button className="text-button" onClick={() => setResetArmed(false)}>
-            Vazgeç
+            {t("settings.cancel")}
           </button>
         ) : null}
       </section>

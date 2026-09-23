@@ -15,7 +15,8 @@ export type IconName =
   | "sound"
   | "store"
   | "text"
-  | "sort";
+  | "sort"
+  | "language";
 
 interface IconProps {
   name: IconName;
@@ -137,6 +138,14 @@ const paths: Record<IconName, React.ReactNode> = {
       <path d="m4 7 3-3 3 3" />
       <path d="M17 20V4" />
       <path d="m14 17 3 3 3-3" />
+    </>
+  ),
+  language: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 3a13 13 0 0 0 0 18" />
+      <path d="M12 3a13 13 0 0 1 0 18" />
+      <path d="M3 12h18" />
     </>
   ),
 };

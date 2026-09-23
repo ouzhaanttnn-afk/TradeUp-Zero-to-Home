@@ -14,7 +14,7 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   webServer: {
-    command: "pnpm preview --host 127.0.0.1 --port 4193 --strictPort",
+    command: "npx vite preview --host 127.0.0.1 --port 4193 --strictPort",
     url: "http://127.0.0.1:4193",
     reuseExistingServer: false,
   },

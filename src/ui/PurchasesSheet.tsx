@@ -4,6 +4,7 @@ import type { GameState, MonetizationProductId } from "../domain/models";
 import type { StoreProductMetadata } from "../infrastructure/monetization";
 import { Icon } from "./Icon";
 import { useModalFocus } from "./useModalFocus";
+import { useTranslation, localizeStoreProduct } from "../i18n";
 
 const storeCopy: Record<
   MonetizationProductId,
@@ -49,8 +50,10 @@ export default function PurchasesSheet({
   showPrivacyOptions: () => Promise<void>;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const closeRef = useRef<HTMLButtonElement>(null);
   const sheetRef = useRef<HTMLElement>(null);
+
   useModalFocus(true, sheetRef, closeRef, onClose);
 
   return (
@@ -69,26 +72,26 @@ export default function PurchasesSheet({
             ref={closeRef}
             className="close"
             onClick={onClose}
-            aria-label="Kapat"
+            aria-label={t("sheet.close")}
           >
             <Icon name="close" />
           </button>
           <div className="settings-sheet-heading">
             <div>
-              <small>MAĞAZA</small>
-              <h2 id="purchases-sheet-title">Satın Almalar &amp; Görünüm</h2>
+              <small>{t("store.badge")}</small>
+              <h2 id="purchases-sheet-title">{t("store.title")}</h2>
             </div>
           </div>
           <section
             className="purchase-panel"
-            aria-label="Satın Almalar ve Görünüm"
+            aria-label={t("store.title")}
           >
             <div className="purchase-panel-heading">
               <div>
-                <strong>Kalıcı paketler</strong>
-                <p>Oynanış ekonomisini değiştirmez.</p>
+                <strong>{t("store.permanentPacks")}</strong>
+                <p>{t("store.permanentSub")}</p>
               </div>
-              <span>{storeProducts.length ? "Mağaza hazır" : "Yakında"}</span>
+              <span>{storeProducts.length ? t("store.ready") : t("store.comingSoon")}</span>
             </div>
             <div className="purchase-list">
               {(Object.keys(storeCopy) as MonetizationProductId[]).map(
@@ -101,27 +104,32 @@ export default function PurchasesSheet({
                   );
                   const owned = entitlement?.status === "OWNED";
                   const pending = entitlement?.status === "PENDING";
+                  const localizedCopy = localizeStoreProduct(
+                    productId,
+                    storeCopy[productId].title,
+                    storeCopy[productId].detail,
+                  );
                   return (
                     <article key={productId}>
                       <div>
                         <strong>
-                          {metadata?.title || storeCopy[productId].title}
+                          {metadata?.title || localizedCopy.title}
                         </strong>
-                        <p>{storeCopy[productId].detail}</p>
+                        <p>{localizedCopy.detail}</p>
                       </div>
                       {owned || pending ? (
                         <span className="entitlement-state">
-                          {owned ? "Sahipsin" : "Ödeme beklemede"}
+                          {owned ? t("store.owned") : t("store.pending")}
                         </span>
                       ) : metadata ? (
                         <button
                           disabled={monetizationBusy}
                           onClick={() => void purchaseProduct(productId)}
                         >
-                          Satın al · {metadata.localizedPrice}
+                          {t("store.buy", { price: metadata.localizedPrice })}
                         </button>
                       ) : (
-                        <span className="store-unavailable">Yakında</span>
+                        <span className="store-unavailable">{t("store.comingSoon")}</span>
                       )}
                     </article>
                   );
@@ -129,8 +137,7 @@ export default function PurchasesSheet({
               )}
             </div>
             <p className="purchase-note">
-              Satın almalar yalnız cihaz mağazası fiyatları yüklenince açılır.
-              Premium, reklamları atlar; oyun içi hak sınırları değişmez.
+              {t("store.note")}
             </p>
             <div className="purchase-footer-actions">
               <button
@@ -138,13 +145,13 @@ export default function PurchasesSheet({
                 disabled={monetizationBusy || Capacitor.getPlatform() !== "ios"}
                 onClick={() => void restorePurchases()}
               >
-                Satın alımları geri yükle
+                {t("store.restore")}
               </button>
               <button
                 className="text-button"
                 onClick={() => void showPrivacyOptions()}
               >
-                Gizlilik
+                {t("store.privacy")}
               </button>
             </div>
           </section>

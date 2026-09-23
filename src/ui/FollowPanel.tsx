@@ -6,6 +6,7 @@ import { money } from "../game";
 import { missedOpportunityPresentation } from "./followPresentation";
 import { Icon } from "./Icon";
 import { ProductVisual } from "./ProductVisual";
+import { useTranslation } from "../i18n";
 
 export default function FollowPanel({
   game,
@@ -20,6 +21,7 @@ export default function FollowPanel({
   onOpenMarket: () => void;
   onRemoveSearch: (searchId: string) => void;
 }) {
+  const { t } = useTranslation();
   const watchedListings = marketListings.filter((listing) =>
     game.follow.watchedListingIds.includes(listing.id),
   );
@@ -28,10 +30,10 @@ export default function FollowPanel({
     <>
       <div className="section-title">
         <div>
-          <small>GERİ DÖNÜŞ NOKTAN</small>
-          <h2 id="follow-sheet-title">Takip</h2>
+          <small>{t("follow.heading")}</small>
+          <h2 id="follow-sheet-title">{t("follow.title")}</h2>
         </div>
-        <span>{watchedListings.length} canlı</span>
+        <span>{t("follow.activeCount", { count: watchedListings.length })}</span>
       </div>
       {!watchedListings.length &&
       !game.follow.savedSearches.length &&
@@ -40,16 +42,13 @@ export default function FollowPanel({
           <span className="empty-icon">
             <Icon name="follow" />
           </span>
-          <h3>Henüz takip yok</h3>
-          <p>
-            Bir ilanı takip et. Pazar deneyimin Seviye 3 olduğunda ürün alarmı
-            da kurabilirsin.
-          </p>
-          <button onClick={onOpenMarket}>Pazardan ürün seç</button>
+          <h3>{t("follow.emptyTitle")}</h3>
+          <p>{t("follow.emptyDesc")}</p>
+          <button onClick={onOpenMarket}>{t("follow.emptyAction")}</button>
         </div>
       ) : null}
       {watchedListings.length ? (
-        <h3 className="module-title">İzleme listesi</h3>
+        <h3 className="module-title">{t("follow.watchlistTitle")}</h3>
       ) : null}
       <div className="feed compact-feed">
         {watchedListings.map((item) => (
@@ -57,11 +56,11 @@ export default function FollowPanel({
             className="listing watch-listing"
             key={item.id}
             onClick={() => onSelectListing(item.id)}
-            aria-label={`${item.instance.family.name}, fiyat ${money(item.priceMinor)}, yüzde ${item.instance.condition} kondisyon. Takip edilen ilanı aç`}
+            aria-label={`${item.instance.family.name}, ${money(item.priceMinor)}, %${item.instance.condition}`}
           >
             <ProductVisual instance={item.instance} className="product-art" />
             <div className="listing-copy">
-              <small>CANLI · %{item.instance.condition} kondisyon</small>
+              <small>CANLI · %{item.instance.condition}</small>
               <h3>{item.instance.family.name}</h3>
               <span className="subtle">
                 {npcRiskSignal(item, game.gameTimeMin).text}
@@ -69,13 +68,13 @@ export default function FollowPanel({
             </div>
             <div className="price">
               <strong>{money(item.priceMinor)}</strong>
-              <small>incele</small>
+              <small>{t("follow.inspect")}</small>
             </div>
           </button>
         ))}
       </div>
       {game.follow.savedSearches.length ? (
-        <h3 className="module-title">Ürün alarmları</h3>
+        <h3 className="module-title">{t("follow.alertsTitle")}</h3>
       ) : null}
       <div className="follow-stack">
         {game.follow.savedSearches.map((search) => {
@@ -87,30 +86,32 @@ export default function FollowPanel({
             <article className="follow-card" key={search.id}>
               <div className="follow-card-heading">
                 <div>
-                  <small>ÜRÜN ALARMI</small>
-                  <h3>{family?.name ?? "Bilinmeyen ürün grubu"}</h3>
+                  <small>{t("follow.alertsTitle").toUpperCase()}</small>
+                  <h3>{family?.name ?? t("follow.unknownFamily")}</h3>
                 </div>
                 <span
                   className={`match-count${matches.length ? " has-matches" : ""}`}
                 >
-                  {matches.length ? `${matches.length} eşleşme` : "Bekliyor"}
+                  {matches.length
+                    ? t("follow.matches", { count: matches.length })
+                    : t("follow.waiting")}
                 </span>
               </div>
               <div className="alarm-criteria">
                 <span>
-                  <small>En yüksek fiyat</small>
+                  <small>{t("follow.maxPrice")}</small>
                   <b>{money(search.maxPriceMinor)}</b>
                 </span>
                 <span>
-                  <small>En düşük kondisyon</small>
+                  <small>{t("follow.minCondition")}</small>
                   <b>%{search.minCondition}</b>
                 </span>
                 <span>
-                  <small>Bilgi kontrolü</small>
+                  <small>{t("follow.evidence")}</small>
                   <b>
                     {search.evidencePreference === "CHECKED"
-                      ? "Gerekli"
-                      : "Fark etmez"}
+                      ? t("follow.evidenceRequired")
+                      : t("follow.evidenceAny")}
                   </b>
                 </span>
               </div>
@@ -120,14 +121,14 @@ export default function FollowPanel({
                     className="primary"
                     onClick={() => onSelectListing(matches[0].id)}
                   >
-                    Eşleşmeyi aç
+                    {t("follow.openMatch")}
                   </button>
                 ) : null}
                 <button
                   className="text-button"
                   onClick={() => onRemoveSearch(search.id)}
                 >
-                  Kaldır
+                  {t("follow.remove")}
                 </button>
               </div>
             </article>
@@ -135,7 +136,7 @@ export default function FollowPanel({
         })}
       </div>
       {game.follow.missedOpportunities.length ? (
-        <h3 className="module-title">Kaçan fırsatlar</h3>
+        <h3 className="module-title">{t("follow.missedTitle")}</h3>
       ) : null}
       <div className="follow-stack">
         {game.follow.missedOpportunities.toReversed().map((missed) => {
@@ -158,16 +159,18 @@ export default function FollowPanel({
               <div>
                 <h3>{missed.familyName}</h3>
                 <p>
-                  {money(missed.priceMinor)} · %{missed.condition} kondisyon.
-                  Fırsat kapandı; benzer ilanları aramaya devam edebilirsin.
+                  {t("follow.missedDesc", {
+                    price: money(missed.priceMinor),
+                    condition: missed.condition,
+                  })}
                 </p>
               </div>
               {similar ? (
                 <button onClick={() => onSelectListing(similar.id)}>
-                  Benzerini gör
+                  {t("follow.seeSimilar")}
                 </button>
               ) : (
-                <button onClick={onOpenMarket}>Pazara dön</button>
+                <button onClick={onOpenMarket}>{t("follow.returnMarket")}</button>
               )}
             </article>
           );
@@ -176,3 +179,4 @@ export default function FollowPanel({
     </>
   );
 }
+

@@ -4,6 +4,8 @@ import { Icon } from "./Icon";
 import { listingAgeLabel } from "./marketCard";
 import { ProductVisual } from "./ProductVisual";
 
+import { localizeCategory } from "../i18n";
+
 type MarketRisk = {
   level: "low" | "medium" | "high" | "critical";
   text: string;
@@ -64,7 +66,7 @@ export function MarketListingCard({
       ) : null}
       <div className="listing-copy">
         <small className="market-category">
-          {item.instance.family.category} · Sv. {categoryLevel}
+          {localizeCategory(item.instance.family.category)} · Sv. {categoryLevel}
         </small>
         <h3>{item.instance.family.name}</h3>
         <div className="market-price-row">
