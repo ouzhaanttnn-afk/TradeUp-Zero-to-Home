@@ -67,6 +67,11 @@ export function MarketListingCard({
         <span className="market-condition-signal">
           {lang === "tr" ? `%${item.instance.condition}` : `${item.instance.condition}%`}
         </span>
+        {upperMarket ? (
+          <span className="market-luxury-badge" title={t("market.luxuryTier") || "Lüks"}>
+            ✨
+          </span>
+        ) : null}
       </div>
       {risk.level !== "low" ? (
         <span className={`market-heat market-heat--${risk.level}`}>

@@ -10,6 +10,12 @@ export type SpecializationMeta = {
   icon: string;
 };
 
+export const SPEC_ICONS: Record<SpecializationId, string> = {
+  RESTORER: "🔧",
+  NEGOTIATOR: "💼",
+  SCOUT: "🧭",
+};
+
 export const SPECIALIZATIONS: Record<SpecializationId, SpecializationMeta> = {
   RESTORER: {
     id: "RESTORER",

@@ -54,6 +54,7 @@ import {
   getBuyerBadge,
 } from "./domain/dialogues";
 import { isShowcaseItem } from "./domain/showcase";
+import { SPECIALIZATIONS, SPEC_ICONS } from "./domain/specialization";
 import ShowcaseRoom from "./ui/ShowcaseRoom";
 import { evidencePresentation } from "./ui/evidencePresentation";
 import { ownershipPresentation } from "./ui/ownershipPresentation";
@@ -287,7 +288,17 @@ export default function App() {
     specialization,
     toggleShowcase,
     setSpecialization,
+    lastProfitGained,
+    clearProfitGained,
   } = useGameStore();
+
+  useEffect(() => {
+    if (!lastProfitGained) return undefined;
+    const timer = setTimeout(() => {
+      clearProfitGained();
+    }, 2400);
+    return () => clearTimeout(timer);
+  }, [lastProfitGained, clearProfitGained]);
 
   const openSettingsPanel = useCallback(() => {
     setSettingsReturnTab(tab);
@@ -643,6 +654,11 @@ export default function App() {
         ).length < action.maxUses,
     );
     const inShowcase = isShowcaseItem(showcaseAssetIds, item.id);
+    const maxProfitMinor = quote.balancedAskingMinor - item.bookCostMinor;
+    const profitPercent =
+      item.bookCostMinor > 0
+        ? Math.round((maxProfitMinor / item.bookCostMinor) * 100)
+        : 0;
     return (
       <article
         className={`owned${focusedAssetId === item.id ? " owned--focused" : ""}`}
@@ -656,6 +672,14 @@ export default function App() {
           <div className="owned-title-row">
             <h3>{localizeProduct(item.instance.family.id, item.instance.family.name, lang)}</h3>
             <div className="owned-title-badges">
+              {maxProfitMinor > 0 ? (
+                <span
+                  className="profit-margin-pill"
+                  title={t("portfolio.potentialProfit") || "Potansiyel Kâr"}
+                >
+                  +{profitPercent > 0 ? `%${profitPercent}` : money(maxProfitMinor, lang)}
+                </span>
+              ) : null}
               {inShowcase ? (
                 <span className="showcase-mini-badge" title={t("showcase.featured") || "Vitrinde"}>
                   <Icon name="star" />
@@ -1001,6 +1025,17 @@ export default function App() {
               </small>
             </div>
           </div>
+          {specialization ? (
+            <button
+              type="button"
+              className="header-spec-chip"
+              onClick={() => openJourney()}
+              title={SPECIALIZATIONS[specialization].title[lang]}
+            >
+              <span>{SPEC_ICONS[specialization]}</span>
+              <small>{SPECIALIZATIONS[specialization].title[lang]}</small>
+            </button>
+          ) : null}
           <button
             ref={settingsButtonRef}
             className="profile-settings-button"
@@ -2429,6 +2464,25 @@ export default function App() {
             </div>
           </section>
         </div>
+      ) : null}
+      {lastProfitGained ? (
+        <aside
+          className={`floating-cash-fx ${lastProfitGained.deltaMinor >= 0 ? "profit" : "loss"}`}
+          key={lastProfitGained.timestamp}
+          aria-live="polite"
+        >
+          <span className="cash-fx-icon">{lastProfitGained.deltaMinor >= 0 ? "💰 +" : "📉 "}</span>
+          <span className="cash-fx-amount">{money(Math.abs(lastProfitGained.deltaMinor), lang)}</span>
+          <small className="cash-fx-label">
+            {lastProfitGained.deltaMinor >= 0
+              ? lang === "tr"
+                ? "NET KÂR"
+                : "NET PROFIT"
+              : lang === "tr"
+                ? "ZARAR"
+                : "LOSS"}
+          </small>
+        </aside>
       ) : null}
     </div>
   );

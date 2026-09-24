@@ -194,6 +194,8 @@ type Store = {
   specialization: SpecializationId | null;
   toggleShowcase: (assetId: string) => void;
   setSpecialization: (spec: SpecializationId) => void;
+  lastProfitGained: { deltaMinor: number; timestamp: number } | null;
+  clearProfitGained: () => void;
 };
 
 const buzz = (state: GameState, success = false) => {
@@ -324,6 +326,8 @@ export const useGameStore = create<Store>((set, get) => ({
   monetizationBusy: false,
   showcaseAssetIds: loadShowcaseIds(),
   specialization: loadSpecialization(),
+  lastProfitGained: null,
+  clearProfitGained: () => set({ lastProfitGained: null }),
   hydrate: () => {
     if (hydration) return hydration;
     hydration = (async () => {
@@ -803,8 +807,10 @@ export const useGameStore = create<Store>((set, get) => ({
     });
     showTradeInterstitialAfterSale(game, progressed.state);
     const profitable = saleMinor >= currentAsset.bookCostMinor;
+    const profitMinor = saleMinor - currentAsset.bookCostMinor;
     buzz(game, profitable);
     sound(game, profitable ? "SALE_PROFIT" : "SALE_LOSS");
+    set({ lastProfitGained: { deltaMinor: profitMinor, timestamp: Date.now() } });
   },
   list: (item, askingPriceMinor) => {
     const game = get().game;
@@ -987,10 +993,11 @@ export const useGameStore = create<Store>((set, get) => ({
     const soldAsset = game.ownedAssets.find(
       (item) => item.id === listing.ownedAssetId,
     );
-    const profitable =
-      buyerOffer.amountMinor >= (soldAsset?.bookCostMinor ?? 0);
+    const profitMinor = buyerOffer.amountMinor - (soldAsset?.bookCostMinor ?? 0);
+    const profitable = profitMinor >= 0;
     buzz(game, profitable);
     sound(game, profitable ? "SALE_PROFIT" : "SALE_LOSS");
+    set({ lastProfitGained: { deltaMinor: profitMinor, timestamp: Date.now() } });
   },
   counterBuyer: (offerId) => {
     const game = get().game;

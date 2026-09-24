@@ -1,14 +1,9 @@
 import {
   SPECIALIZATIONS,
+  SPEC_ICONS,
   type SpecializationId,
 } from "../domain/specialization";
 import { useTranslation } from "../i18n";
-
-const SPEC_ICONS: Record<SpecializationId, string> = {
-  RESTORER: "🔧",
-  NEGOTIATOR: "💼",
-  SCOUT: "🧭",
-};
 
 export default function SpecializationPanel({
   activeSpecialization,
