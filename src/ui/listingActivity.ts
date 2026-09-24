@@ -1,4 +1,5 @@
 import type { BuyerOffer, PlayerListing } from "../domain/models";
+import { t, type Language } from "../i18n";
 
 type ListingSignals = {
   estimateLowMinor: number;
@@ -13,6 +14,7 @@ export function listingActivity(
   buyerOffers: readonly BuyerOffer[],
   gameTimeMin: number,
   signals?: ListingSignals,
+  lang?: Language,
 ) {
   const active =
     listing.state === "ACTIVE" && listing.expiresAtGameMin > gameTimeMin;
@@ -28,19 +30,19 @@ export function listingActivity(
   let diagnosis: string | undefined;
   if (active && offers.length === 0 && signals) {
     if (listing.askingPriceMinor > signals.estimateHighMinor) {
-      diagnosis = "Fiyat, tahmini piyasa aralığının üzerinde.";
+      diagnosis = t("activity.overpriced", undefined, lang);
     } else if (signals.evidenceConfidence < 0.45) {
-      diagnosis = "Ürün bilgisi zayıf; alıcılar temkinli davranıyor.";
+      diagnosis = t("activity.lowEvidence", undefined, lang);
     } else if (signals.competingListings >= 3) {
-      diagnosis = "Benzer ilan sayısı yüksek; ürünün öne çıkması zorlaşıyor.";
+      diagnosis = t("activity.highCompetition", undefined, lang);
     } else if (signals.demand < 0.45) {
-      diagnosis = "Bu ürüne talep şu an düşük.";
+      diagnosis = t("activity.lowDemand", undefined, lang);
     } else if (ageMin < 3) {
-      diagnosis = "İlan yeni; alıcıların görmesi biraz zaman alabilir.";
+      diagnosis = t("activity.tooNew", undefined, lang);
     } else if (listing.interest < 25) {
-      diagnosis = "İlan görülüyor ancak ilgi henüz sınırlı.";
+      diagnosis = t("activity.limitedInterest", undefined, lang);
     } else {
-      diagnosis = "İlgi var; uygun teklif için biraz daha zaman gerekebilir.";
+      diagnosis = t("activity.solidInterest", undefined, lang);
     }
   }
   return {
@@ -49,8 +51,8 @@ export function listingActivity(
     diagnosis,
     ageLabel:
       ageMin === 0
-        ? "Az önce yayınlandı"
-        : `${ageMin} oyun dakikasıdır yayında`,
-    remainingLabel: `${remainingMin} dk. içinde otomatik kapanır`,
+        ? t("activity.justPublished", undefined, lang)
+        : t("activity.publishedMins", { min: ageMin }, lang),
+    remainingLabel: t("activity.autoCloseIn", { min: remainingMin }, lang),
   };
 }

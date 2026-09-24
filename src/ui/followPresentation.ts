@@ -1,21 +1,21 @@
 import type { MarketExitReason } from "../domain/models";
-
-const missedReason: Record<
-  MarketExitReason,
-  { label: string; tone: "buyer" | "expired" }
-> = {
-  NPC_PURCHASE: { label: "Başka alıcı aldı", tone: "buyer" },
-  EXPIRED: { label: "Süresi doldu", tone: "expired" },
-};
+import { t, type Language } from "../i18n";
 
 export function missedOpportunityPresentation(
   reason: MarketExitReason,
   currentGameMin: number,
   occurredAtGameMin: number,
+  lang?: Language,
 ) {
   const ageMin = Math.max(0, currentGameMin - occurredAtGameMin);
+  const label =
+    reason === "NPC_PURCHASE"
+      ? t("follow.npcPurchased", undefined, lang)
+      : t("follow.expired", undefined, lang);
+  const tone = reason === "NPC_PURCHASE" ? "buyer" : "expired";
   return {
-    ...missedReason[reason],
-    ageLabel: ageMin === 0 ? "Az önce" : `${ageMin} dk önce`,
+    label,
+    tone,
+    ageLabel: ageMin === 0 ? t("follow.justNow", undefined, lang) : t("follow.minutesAgo", { min: ageMin }, lang),
   };
 }

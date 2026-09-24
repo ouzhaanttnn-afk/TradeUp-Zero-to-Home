@@ -82,6 +82,7 @@ import {
   type OwnedAsset,
   type PlayerOfferMode,
 } from "../game";
+import { t, localizeProduct } from "../i18n";
 import { systemTimeProvider } from "../infrastructure/time";
 import type { StoreProductMetadata } from "../infrastructure/monetization";
 import {
@@ -213,16 +214,16 @@ const stampAndPersist = (state: GameState) => {
 const worldEventNotice = (result: WorldAdvanceResult): string | undefined => {
   const { summary } = result;
   if (summary.buyerOffers > 0) {
-    return `${summary.buyerOffers} yeni alıcı teklifi geldi.`;
+    return t("notice.newBuyerOffers", { count: summary.buyerOffers });
   }
   if (summary.npcSales > 0) {
-    return `${summary.npcSales} ilan başka alıcılara gitti; pazar akmaya devam ediyor.`;
+    return t("notice.npcSales", { count: summary.npcSales });
   }
   if (summary.marketExpirations > 0) {
-    return `${summary.marketExpirations} ilanının süresi doldu.`;
+    return t("notice.marketExpirations", { count: summary.marketExpirations });
   }
   if (summary.playerListingExpirations > 0) {
-    return "Süresi dolan ilanındaki ürün envantere döndü.";
+    return t("notice.expiredReturned");
   }
   return undefined;
 };
@@ -542,27 +543,27 @@ export const useGameStore = create<Store>((set, get) => ({
     if (!result.ok) {
       const notice =
         result.reason === "INSUFFICIENT_CASH"
-          ? `${money(home.priceMinor - game.cashMinor)} nakit eksik. Portföyün otomatik satılmaz.`
+          ? t("notice.homeCashShortfall", { shortfall: money(home.priceMinor - game.cashMinor) })
           : result.reason === "HOME_NOT_UNLOCKED"
-            ? "Ev yolculuğu henüz açılmadı."
+            ? t("notice.homeNotUnlocked")
             : result.reason === "HOME_NOT_AVAILABLE"
-              ? "Bu ev için emlak araştırması henüz tamamlanmadı."
-              : "Bu ev zaten senin.";
+              ? t("notice.homeNotAvailable")
+              : t("notice.homeAlreadyOwned");
       set({ notice });
       buzz(game);
       sound(game, "WARNING");
       return false;
     }
     if (result.idempotent) {
-      set({ notice: "Bu ev zaten senin." });
+      set({ notice: t("notice.homeAlreadyOwned") });
       return true;
     }
     const wasFirstHome = !game.home.purchasedHomeId;
     const notice = wasFirstHome
-      ? `${home.name} artık senin. Yolculuğun burada bitmiyor.`
+      ? t("notice.firstHomeOwned", { home: home.name })
       : isTopTierHome(homeId)
-        ? `${home.name} ile emlak merdiveninin zirvesindesin. Kariyerin burada bitmiyor.`
-        : `${home.name} ile yükseldin. Sıradaki hedef için pazar açık.`;
+        ? t("notice.topTierHomeOwned", { home: home.name })
+        : t("notice.homeUpgraded", { home: home.name });
     set({
       game: stampAndPersist(result.state),
       notice,
@@ -578,7 +579,7 @@ export const useGameStore = create<Store>((set, get) => ({
       mode,
     });
     if (isFtueActive(game) && game.ftue.stage !== "NEGOTIATION") {
-      set({ notice: "Önce karşılaştır ve bir kanıtı kontrol et." });
+      set({ notice: t("notice.ftueCheckCompare") });
       return;
     }
     const currentListing = game.listings.find(
@@ -590,13 +591,12 @@ export const useGameStore = create<Store>((set, get) => ({
         currentListing.state !== "WATCHED" &&
         currentListing.state !== "NEGOTIATING")
     ) {
-      set({ notice: "Bu ilan artık pazarda değil." });
+      set({ notice: t("notice.listingNotInMarket") });
       return;
     }
     if (currentListing.priceMinor !== item.priceMinor) {
       set({
-        notice:
-          "İlan fiyatı değişti. Güncel fiyatı kontrol edip teklifini yeniden gönder.",
+        notice: t("notice.listingPriceChanged"),
       });
       return;
     }
@@ -611,7 +611,7 @@ export const useGameStore = create<Store>((set, get) => ({
             closed: false,
           });
     if (current.closed || current.offersRemaining === 0) {
-      set({ notice: "Görüşme kapandı." });
+      set({ notice: t("notice.negotiationClosed") });
       return;
     }
     const index = current.offersRemaining === 2 ? 1 : 2;
@@ -672,10 +672,10 @@ export const useGameStore = create<Store>((set, get) => ({
     const progressed = progressBy(negotiatingState);
     const fallback =
       result.result === "counter"
-        ? `Satıcı ${money(result.counterMinor ?? 0)} karşı teklif verdi.`
+        ? t("notice.sellerCountered", { price: money(result.counterMinor ?? 0) })
         : remaining
-          ? "Teklif reddedildi. Son hakkın kaldı."
-          : "Son teklif reddedildi.";
+          ? t("notice.offerRejectedLastChance")
+          : t("notice.finalOfferRejected");
     set({
       game: stampAndPersist(progressed.state),
       notice: worldNotice(progressed, fallback),
@@ -690,12 +690,12 @@ export const useGameStore = create<Store>((set, get) => ({
       quick,
     });
     if (isFtueActive(game) && game.ftue.firstAssetId === item.id) {
-      set({ notice: "İlk döngüde bu ürünü dengeli fiyatla listele." });
+      set({ notice: t("notice.ftueListBalanced") });
       return;
     }
     const transactionId = `sale:direct:${item.id}`;
     if (game.transactionJournal.some((entry) => entry.id === transactionId)) {
-      set({ notice: "Bu satış zaten tamamlandı." });
+      set({ notice: t("notice.saleAlreadyCompleted") });
       return;
     }
     const currentAsset = game.ownedAssets.find((asset) => asset.id === item.id);
@@ -704,8 +704,7 @@ export const useGameStore = create<Store>((set, get) => ({
       !["IN_INVENTORY", "READY"].includes(currentAsset.state)
     ) {
       set({
-        notice:
-          "Bu ürün şu anda hızlı satışa uygun değil. Portföydeki durumunu kontrol et.",
+        notice: t("notice.notEligibleQuickSale"),
       });
       return;
     }
@@ -721,8 +720,7 @@ export const useGameStore = create<Store>((set, get) => ({
       currentAsset.state !== item.state
     ) {
       set({
-        notice:
-          "Ürünün satış bilgileri değişti. Güncel tutarı kontrol edip satışı yeniden onayla.",
+        notice: t("notice.saleDetailsChanged"),
       });
       return;
     }
@@ -735,13 +733,13 @@ export const useGameStore = create<Store>((set, get) => ({
       currentAsset.currentListingId,
     );
     if (!result.ok) {
-      set({ notice: "Bu ürün artık satılamıyor." });
+      set({ notice: t("notice.cannotSellItem") });
       buzz(game);
       sound(game, "WARNING");
       return;
     }
     if (result.idempotent) {
-      set({ notice: "Bu satış zaten tamamlandı." });
+      set({ notice: t("notice.saleAlreadyCompleted") });
       return;
     }
     const withMeta = recordCompletedSaleMeta(
@@ -752,11 +750,12 @@ export const useGameStore = create<Store>((set, get) => ({
     );
     const progressed = progressBy(withMeta);
     const cause = saleDecisionCause(currentAsset, saleMinor);
+    const prodName = localizeProduct(currentAsset.instance.family.name);
     set({
       game: stampAndPersist(progressed.state),
       notice: worldNotice(
         progressed,
-        `${currentAsset.instance.family.name} ${money(saleMinor)} fiyatına satıldı. ${cause}`,
+        t("notice.itemSold", { product: prodName, price: money(saleMinor), cause }),
       ),
     });
     showTradeInterstitialAfterSale(game, progressed.state);
@@ -771,7 +770,7 @@ export const useGameStore = create<Store>((set, get) => ({
       askingPriceMinor,
     });
     if (isFtueActive(game) && game.ftue.stage !== "LISTING") {
-      set({ notice: "İlk ürün için önce bir hazırlık tamamla." });
+      set({ notice: t("notice.ftueFinishPrepFirst") });
       return;
     }
     const result = createPlayerListing(
@@ -781,13 +780,13 @@ export const useGameStore = create<Store>((set, get) => ({
       game.gameTimeMin,
     );
     if (!result.ok) {
-      set({ notice: "Bu ürün ilana çıkarılamıyor." });
+      set({ notice: t("notice.cannotList") });
       buzz(game);
       sound(game, "WARNING");
       return;
     }
     if (result.idempotent) {
-      set({ notice: "Bu ilan zaten oluşturuldu." });
+      set({ notice: t("notice.listingAlreadyCreated") });
       return;
     }
     let next = recordFtueListing(result.state, item.id);
@@ -802,11 +801,12 @@ export const useGameStore = create<Store>((set, get) => ({
       )?.id,
     );
     const progressed = progressBy(next);
+    const prodName = localizeProduct(item.instance.family.name);
     set({
       game: stampAndPersist(progressed.state),
       notice: worldNotice(
         progressed,
-        `${item.instance.family.name} ilana çıktı. Alıcılar aranıyor.`,
+        t("notice.listedForSale", { product: prodName }),
       ),
     });
     sound(game, "LISTING");
@@ -831,23 +831,24 @@ export const useGameStore = create<Store>((set, get) => ({
       set({
         notice:
           result.reason === "ACTIVE_BUYER_OFFER"
-            ? "Önce mevcut alıcı teklifini yanıtla."
-            : "İlan fiyatı değiştirilemedi.",
+            ? t("notice.answerBuyerOfferFirst")
+            : t("notice.cannotChangePrice"),
       });
       buzz(game);
       sound(game, "WARNING");
       return;
     }
     if (result.idempotent) {
-      set({ notice: "İlan fiyatı zaten bu tutarda." });
+      set({ notice: t("notice.priceAlreadySame") });
       return;
     }
     const progressed = progressBy(result.state);
+    const prodName = asset ? localizeProduct(asset.instance.family.name) : t("nav.portfolio");
     set({
       game: stampAndPersist(progressed.state),
       notice: worldNotice(
         progressed,
-        `${asset?.instance.family.name ?? "Ürün"} için yeni fiyat ${money(askingPriceMinor)}.`,
+        t("notice.priceUpdated", { product: prodName, price: money(askingPriceMinor) }),
       ),
     });
     sound(game, "LISTING");
@@ -861,23 +862,24 @@ export const useGameStore = create<Store>((set, get) => ({
       : undefined;
     const result = withdrawPlayerListing(game, listingId, game.gameTimeMin);
     if (!result.ok) {
-      set({ notice: "İlan geri çekilemedi." });
+      set({ notice: t("notice.cannotWithdraw") });
       buzz(game);
       sound(game, "WARNING");
       return;
     }
     if (result.idempotent) {
-      set({ notice: "Bu ilan zaten geri çekildi." });
+      set({ notice: t("notice.alreadyWithdrawn") });
       return;
     }
     const progressed = progressBy(
       recordFtueWithdrawal(result.state, listingId),
     );
+    const prodName = asset ? localizeProduct(asset.instance.family.name) : t("nav.portfolio");
     set({
       game: stampAndPersist(progressed.state),
       notice: worldNotice(
         progressed,
-        `${asset?.instance.family.name ?? "Ürün"} envantere döndü.`,
+        t("notice.returnedToInventory", { product: prodName }),
       ),
     });
   },
@@ -895,8 +897,7 @@ export const useGameStore = create<Store>((set, get) => ({
       listing.state !== "ACTIVE"
     ) {
       set({
-        notice:
-          "Bu teklif artık kabul edilemiyor. Güncel teklifleri kontrol et.",
+        notice: t("notice.offerNoLongerValid"),
       });
       buzz(game);
       sound(game, "WARNING");
@@ -912,13 +913,13 @@ export const useGameStore = create<Store>((set, get) => ({
       listing.id,
     );
     if (!result.ok) {
-      set({ notice: "Bu teklif artık kabul edilemiyor." });
+      set({ notice: t("notice.offerNoLongerValid") });
       buzz(game);
       sound(game, "WARNING");
       return;
     }
     if (result.idempotent) {
-      set({ notice: "Bu satış zaten tamamlandı." });
+      set({ notice: t("notice.saleAlreadyCompleted") });
       return;
     }
     const ftueProgressed =
@@ -936,7 +937,7 @@ export const useGameStore = create<Store>((set, get) => ({
       game: stampAndPersist(progressed.state),
       notice: worldNotice(
         progressed,
-        `Alıcı teklifi kabul edildi: ${money(buyerOffer.amountMinor)}.`,
+        t("notice.buyerOfferAccepted", { price: money(buyerOffer.amountMinor) }),
       ),
     });
     showTradeInterstitialAfterSale(game, progressed.state);
@@ -960,7 +961,7 @@ export const useGameStore = create<Store>((set, get) => ({
         ? buyerCounterMinor(buyerOffer, listing)
         : undefined;
     if (!buyerOffer || !listing || counterMinor === undefined) {
-      set({ notice: "Bu teklif için karşı teklif yapılamıyor." });
+      set({ notice: t("notice.cannotCounterOffer") });
       return;
     }
     const result = counterBuyerOffer(
@@ -970,7 +971,7 @@ export const useGameStore = create<Store>((set, get) => ({
       game.gameTimeMin,
     );
     if (!result.ok) {
-      set({ notice: "Bu teklif için pazarlık hakkın kalmadı." });
+      set({ notice: t("notice.noNegotiationRightsLeft") });
       buzz(game);
       sound(game, "WARNING");
       return;
@@ -989,7 +990,7 @@ export const useGameStore = create<Store>((set, get) => ({
         game: stampAndPersist(progressed.state),
         notice: worldNotice(
           progressed,
-          `${buyerOffer.buyer} karşı teklifini kabul etti: ${money(result.amountMinor)}.`,
+          t("notice.buyerAcceptedCounter", { buyer: buyerOffer.buyer, price: money(result.amountMinor) }),
         ),
       });
       const asset = game.ownedAssets.find(
@@ -1004,8 +1005,8 @@ export const useGameStore = create<Store>((set, get) => ({
       game: stampAndPersist(result.state),
       notice:
         result.outcome === "FINAL"
-          ? `${buyerOffer.buyer} son fiyatını verdi: ${money(result.amountMinor)}.`
-          : `${buyerOffer.buyer} pazarlıktan çekildi. İlanın yayında kalıyor.`,
+          ? t("notice.buyerFinalPrice", { buyer: buyerOffer.buyer, price: money(result.amountMinor) })
+          : t("notice.buyerWithdrew", { buyer: buyerOffer.buyer }),
     });
     sound(game, result.outcome === "FINAL" ? "OFFER" : "WARNING");
   },
@@ -1015,28 +1016,28 @@ export const useGameStore = create<Store>((set, get) => ({
     const buyerOffer = game.buyerOffers.find((item) => item.id === offerId);
     const result = rejectBuyerOffer(game, offerId);
     if (!result.ok) {
-      set({ notice: "Bu teklif artık aktif değil." });
+      set({ notice: t("notice.offerNoLongerValid") });
       return;
     }
     set({
       game: stampAndPersist(result.state),
-      notice: `${buyerOffer?.buyer ?? "Alıcının"} teklifi reddedildi. İlanın yayında kalıyor.`,
+      notice: t("notice.buyerOfferRejected", { buyer: buyerOffer?.buyer ?? t("notice.buyerGeneric") }),
     });
   },
   inspect: (listingId, kind) => {
     const game = get().game;
     recordReplayCommand(game, "INSPECT_LISTING", { listingId, kind });
     if (isFtueActive(game) && game.ftue.stage !== "EVIDENCE") {
-      set({ notice: "Önce benzer ilanları karşılaştır." });
+      set({ notice: t("notice.ftueCheckCompareFirst") });
       return;
     }
     const result = inspectListing(game, listingId, kind);
     if (!result.ok) {
-      set({ notice: "Bu ilan artık incelenemiyor." });
+      set({ notice: t("notice.cannotInspect") });
       return;
     }
     if (result.idempotent) {
-      set({ notice: "Bu kontrol zaten yapıldı." });
+      set({ notice: t("notice.inspectionAlreadyDone") });
       return;
     }
     const listing = result.state.listings.find((item) => item.id === listingId);
@@ -1058,7 +1059,7 @@ export const useGameStore = create<Store>((set, get) => ({
       game: stampAndPersist(progressed.state),
       notice: worldNotice(
         progressed,
-        "Yeni kanıtlar tahmin aralığını daralttı.",
+        t("notice.evidenceNarrowedBand"),
       ),
     });
   },
@@ -1066,7 +1067,7 @@ export const useGameStore = create<Store>((set, get) => ({
     const game = get().game;
     recordReplayCommand(game, "PREPARE_ASSET", { assetId, kind });
     if (isFtueActive(game) && game.ftue.stage !== "PREPARATION") {
-      set({ notice: "Bu hazırlık ilk satın almadan sonra açılır." });
+      set({ notice: t("notice.prepUnlockedAfterPurchase") });
       return;
     }
     const result = startPreparation(game, assetId, kind);
@@ -1074,13 +1075,13 @@ export const useGameStore = create<Store>((set, get) => ({
       set({
         notice:
           result.reason === "INSUFFICIENT_CASH"
-            ? "Bu hazırlık için yeterli nakit yok."
-            : "Bu hazırlık şu anda yapılamıyor.",
+            ? t("notice.insufficientCashForPrep")
+            : t("notice.prepNotAvailable"),
       });
       return;
     }
     if (result.idempotent) {
-      set({ notice: "Bu hazırlık zaten yapıldı." });
+      set({ notice: t("notice.prepAlreadyDone") });
       return;
     }
     const tracked = trackAnalytics(
@@ -1100,7 +1101,7 @@ export const useGameStore = create<Store>((set, get) => ({
       game: stampAndPersist(recordFtuePreparation(progressed.state, assetId)),
       notice: worldNotice(
         progressed,
-        "Hazırlık tamamlandı. Ücreti ürünün toplam harcamasına eklendi.",
+        t("notice.prepCompletedAddedCost"),
       ),
     });
   },
@@ -1136,7 +1137,7 @@ export const useGameStore = create<Store>((set, get) => ({
     if (next === game) return;
     set({
       game: stampAndPersist(next),
-      notice: "Farkları gördün. Şimdi seçtiğin ilandaki kanıtı kontrol et.",
+      notice: t("notice.differencesSeenCheckEvidence"),
     });
   },
   toggleWatch: (listingId) => {
@@ -1147,8 +1148,8 @@ export const useGameStore = create<Store>((set, get) => ({
     set({
       game: stampAndPersist(next),
       notice: watched
-        ? "İlan Takip listene eklendi."
-        : "İlan Takip listesinden çıkarıldı.",
+        ? t("notice.addedToFollow")
+        : t("notice.removedFromFollow"),
     });
   },
   saveSearch: (
@@ -1159,7 +1160,7 @@ export const useGameStore = create<Store>((set, get) => ({
   ) => {
     const game = get().game;
     if (marketExpertiseLevel(game) < 3) {
-      set({ notice: "Ürün alarmı Pazar Seviye 3'te açılır." });
+      set({ notice: t("notice.alarmUnlockedLevel3") });
       return;
     }
     if (
@@ -1171,8 +1172,7 @@ export const useGameStore = create<Store>((set, get) => ({
       )
     ) {
       set({
-        notice:
-          "Alarm kaydedilemedi; ürün, fiyat ve kondisyon bilgilerini kontrol et.",
+        notice: t("notice.alarmInvalidCheck"),
       });
       return;
     }
@@ -1186,12 +1186,12 @@ export const useGameStore = create<Store>((set, get) => ({
     set({
       game: stampAndPersist(next),
       notice:
-        next === game ? "Bu arama zaten kayıtlı." : "Ürün alarmı kaydedildi.",
+        next === game ? t("notice.alarmAlreadySaved") : t("notice.alarmSaved"),
     });
   },
   removeSearch: (searchId) => {
     const next = removeSavedSearch(get().game, searchId);
-    set({ game: stampAndPersist(next), notice: "Kayıtlı arama kaldırıldı." });
+    set({ game: stampAndPersist(next), notice: t("notice.alarmRemoved") });
   },
   recordImpressions: (listingIds) => {
     let next = get().game;
@@ -1509,7 +1509,7 @@ export const useGameStore = create<Store>((set, get) => ({
     clearReplayDiagnostics();
     persistenceSuspended = false;
     const game = initialState(systemTimeProvider.nowWallMs());
-    set({ game, notice: "Yeni kariyer başladı." });
+    set({ game, notice: t("notice.newCareerStarted") });
     await saveGame(game);
   },
 }));

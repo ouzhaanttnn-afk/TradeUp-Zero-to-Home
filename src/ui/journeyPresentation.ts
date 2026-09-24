@@ -1,28 +1,18 @@
 import type { CareerEventGroup } from "../domain/models";
+import { t, type Language } from "../i18n";
 
 export type TimelineFilter = "ALL" | CareerEventGroup;
 export type CareerEventTone = "first" | "record" | "progress" | "home";
 
-const filterLabels: Record<TimelineFilter, string> = {
-  ALL: "Tümü",
-  FIRSTS: "İlkler",
-  RECORDS: "Rekorlar",
-  MILESTONES: "Gelişim",
-  HOME: "Ev yolculuğu",
-};
-
-const groupPresentation: Record<
-  CareerEventGroup,
-  { label: string; tone: CareerEventTone }
-> = {
-  FIRSTS: { label: "İlk adım", tone: "first" },
-  RECORDS: { label: "Rekor", tone: "record" },
-  MILESTONES: { label: "Gelişim", tone: "progress" },
-  HOME: { label: "Ev hedefi", tone: "home" },
-};
-
-export function timelineFilterLabel(filter: TimelineFilter) {
-  return filterLabels[filter];
+export function timelineFilterLabel(filter: TimelineFilter, lang?: Language) {
+  const map: Record<TimelineFilter, string> = {
+    ALL: "journey.filterAll",
+    FIRSTS: "journey.filterFirsts",
+    RECORDS: "journey.filterRecords",
+    MILESTONES: "journey.filterMilestones",
+    HOME: "journey.filterHome",
+  };
+  return t(map[filter], undefined, lang);
 }
 
 export function timelinePageState(
@@ -44,20 +34,29 @@ export function careerEventPresentation(
   group: CareerEventGroup,
   currentGameMin: number,
   occurredAtGameMin: number,
+  lang?: Language,
 ) {
   const ageMin = Math.max(0, currentGameMin - occurredAtGameMin);
+  const toneMap: Record<CareerEventGroup, { key: string; tone: CareerEventTone }> = {
+    FIRSTS: { key: "journey.groupFirsts", tone: "first" },
+    RECORDS: { key: "journey.groupRecords", tone: "record" },
+    MILESTONES: { key: "journey.groupMilestones", tone: "progress" },
+    HOME: { key: "journey.groupHome", tone: "home" },
+  };
+  const item = toneMap[group];
   return {
-    ...groupPresentation[group],
-    ageLabel: ageMin === 0 ? "Az önce" : `${ageMin} dk önce`,
+    label: t(item.key, undefined, lang),
+    tone: item.tone,
+    ageLabel: ageMin === 0 ? t("follow.justNow", undefined, lang) : t("follow.minutesAgo", { min: ageMin }, lang),
   };
 }
 
-export function completedSalesPresentation(realizedProfitMinor: number) {
+export function completedSalesPresentation(realizedProfitMinor: number, lang?: Language) {
   if (realizedProfitMinor < 0) {
-    return { label: "Tamamlanan satışlardan zarar", tone: "loss" as const };
+    return { label: t("journey.salesLoss", undefined, lang), tone: "loss" as const };
   }
   if (realizedProfitMinor > 0) {
-    return { label: "Tamamlanan satışlardan kâr", tone: "profit" as const };
+    return { label: t("journey.salesProfit", undefined, lang), tone: "profit" as const };
   }
-  return { label: "Tamamlanan satış sonucu", tone: "neutral" as const };
+  return { label: t("journey.salesNeutral", undefined, lang), tone: "neutral" as const };
 }

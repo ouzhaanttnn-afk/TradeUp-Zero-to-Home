@@ -3,7 +3,7 @@ import { avatars, freeAvatars } from "../content/avatars";
 import { ownsAnimatedAvatars } from "../domain/profile";
 import type { AvatarId, GameState } from "../domain/models";
 import { AvatarPortrait } from "./AvatarPortrait";
-import { useTranslation, localizeAvatar } from "../i18n";
+import { useTranslation, localizeAvatar, localizeNotice } from "../i18n";
 
 type ProfileOnboardingProps = {
   game: GameState;
@@ -97,7 +97,7 @@ export default function ProfileOnboarding({
         {!animatedAvatarsOwned ? (
           <div
             className="premium-avatar-preview"
-            aria-label="Canlı avatar ön izlemesi"
+            aria-label={t("onboarding.liveAvatarPreview")}
           >
             <div>
               <span>{t("onboarding.liveAvatars")}</span>
@@ -131,7 +131,7 @@ export default function ProfileOnboarding({
         </button>
         {restoreRequested ? (
           <p className="onboarding-restore-status" role="status">
-            {monetizationBusy ? t("onboarding.checking") : notice}
+            {monetizationBusy ? t("onboarding.checking") : localizeNotice(notice, lang)}
           </p>
         ) : null}
       </section>

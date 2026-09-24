@@ -3,6 +3,7 @@ import { activeBookCostMinor, activeOwnedAssets } from "../domain/economy";
 import { categoryExpertiseLevel } from "../domain/meta";
 import type { GameState } from "../domain/models";
 import { money, signedMoney } from "../game";
+import { type Language } from "../i18n";
 
 export function wealthPresentation(state: GameState) {
   const assets = activeOwnedAssets(state);
@@ -41,8 +42,11 @@ export function wealthPresentation(state: GameState) {
 export function formatEstimate(
   band: { lowMinor: number; highMinor: number },
   signed = false,
+  lang?: Language,
 ) {
-  const format = signed ? signedMoney : money;
+  const format = signed
+    ? (val: number) => signedMoney(val, lang)
+    : (val: number) => money(val, lang);
   return band.lowMinor === band.highMinor
     ? format(band.lowMinor)
     : `${format(band.lowMinor)}–${format(band.highMinor)}`;

@@ -6,7 +6,7 @@ import { money } from "../game";
 import { missedOpportunityPresentation } from "./followPresentation";
 import { Icon } from "./Icon";
 import { ProductVisual } from "./ProductVisual";
-import { useTranslation, localizeProduct } from "../i18n";
+import { useTranslation, localizeProduct, localizeRisk } from "../i18n";
 
 export default function FollowPanel({
   game,
@@ -56,14 +56,14 @@ export default function FollowPanel({
             className="listing watch-listing"
             key={item.id}
             onClick={() => onSelectListing(item.id)}
-            aria-label={`${localizeProduct(item.instance.family.id, item.instance.family.name, lang)}, ${money(item.priceMinor, lang)}, %${item.instance.condition}`}
+            aria-label={`${localizeProduct(item.instance.family.id, item.instance.family.name, lang)}, ${money(item.priceMinor, lang)}, ${lang === "tr" ? `%${item.instance.condition}` : `${item.instance.condition}%`}`}
           >
             <ProductVisual instance={item.instance} className="product-art" />
             <div className="listing-copy">
-              <small>CANLI · %{item.instance.condition}</small>
+              <small>{t("market.liveBadge") || "CANLI"} · {lang === "tr" ? `%${item.instance.condition}` : `${item.instance.condition}%`}</small>
               <h3>{localizeProduct(item.instance.family.id, item.instance.family.name, lang)}</h3>
               <span className="subtle">
-                {npcRiskSignal(item, game.gameTimeMin).text}
+                {localizeRisk(npcRiskSignal(item, game.gameTimeMin).text, lang)}
               </span>
             </div>
             <div className="price">
@@ -87,7 +87,7 @@ export default function FollowPanel({
               <div className="follow-card-heading">
                 <div>
                   <small>{t("follow.alertsTitle").toUpperCase()}</small>
-                  <h3>{family?.name ?? t("follow.unknownFamily")}</h3>
+                  <h3>{family ? localizeProduct(family.id, family.name, lang) : t("follow.unknownFamily")}</h3>
                 </div>
                 <span
                   className={`match-count${matches.length ? " has-matches" : ""}`}
@@ -100,11 +100,11 @@ export default function FollowPanel({
               <div className="alarm-criteria">
                 <span>
                   <small>{t("follow.maxPrice")}</small>
-                  <b>{money(search.maxPriceMinor)}</b>
+                  <b>{money(search.maxPriceMinor, lang)}</b>
                 </span>
                 <span>
                   <small>{t("follow.minCondition")}</small>
-                  <b>%{search.minCondition}</b>
+                  <b>{lang === "tr" ? `%${search.minCondition}` : `${search.minCondition}%`}</b>
                 </span>
                 <span>
                   <small>{t("follow.evidence")}</small>
@@ -147,6 +147,7 @@ export default function FollowPanel({
             missed.reason,
             game.gameTimeMin,
             missed.atGameMin,
+            lang,
           );
           return (
             <article className="follow-card missed" key={missed.id}>

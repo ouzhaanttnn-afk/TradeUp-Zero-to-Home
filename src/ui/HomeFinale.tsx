@@ -5,7 +5,7 @@ import { simplifyLegacyPlayerCopy } from "./playerLanguage";
 import { useModalFocus } from "./useModalFocus";
 import { homeOptionById } from "../content/homes";
 import { homeAssets } from "./homeAssets";
-import { useTranslation } from "../i18n";
+import { useTranslation, localizeHome } from "../i18n";
 
 type FinaleHighlight = {
   id: string;
@@ -24,7 +24,7 @@ export default function HomeFinale({
   buttonRef: RefObject<HTMLButtonElement | null>;
   onClose: () => void;
 }) {
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const panelRef = useRef<HTMLElement>(null);
   const home = homeOptionById(homeId);
   useModalFocus(true, panelRef, buttonRef, onClose);
@@ -48,7 +48,7 @@ export default function HomeFinale({
       <h2 id="home-finale-title">{t("finale.headline")}</h2>
       <p>
         {t("finale.desc", {
-          home: home?.name ?? t("finale.homeDefault"),
+          home: home ? localizeHome(home.id, home.name, "", "", lang).name : t("finale.homeDefault"),
         })}
       </p>
       {highlights.length ? (
@@ -58,9 +58,9 @@ export default function HomeFinale({
         >
           {highlights.map((event) => (
             <span key={event.id}>
-              <b>{simplifyLegacyPlayerCopy(event.label)}</b>
+              <b>{simplifyLegacyPlayerCopy(event.label, lang)}</b>
               {event.amountMinor !== undefined
-                ? money(event.amountMinor)
+                ? money(event.amountMinor, lang)
                 : null}
             </span>
           ))}

@@ -130,7 +130,7 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
           >
             {t("settings.save")}
           </button>
-          <div className="profile-stats" role="group" aria-label="Profil özeti">
+          <div className="profile-stats" role="group" aria-label={t("settings.profileSummary")}>
             <span>
               <small>{t("settings.level")}</small>
               <b>{marketLevel}</b>
@@ -141,7 +141,7 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
             </span>
             <span>
               <small>{t("settings.homeGoal")}</small>
-              <b>%{homeProgress}</b>
+              <b>{lang === "tr" ? `%${homeProgress}` : `${homeProgress}%`}</b>
             </span>
           </div>
         </form>
@@ -162,13 +162,13 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
                   type="button"
                   disabled={locked}
                   aria-pressed={game.profile.avatarId === avatar.id}
-                  aria-label={`${localized.name}${locked ? ", " + (t("onboarding.comingSoon") || "canlı avatar paketi gerekli") : ""}`}
+                  aria-label={`${localized.name}${locked ? ", " + t("onboarding.comingSoon") : ""}`}
                   onClick={() => setProfileAvatar(avatar.id)}
                 >
                   <AvatarPortrait avatarId={avatar.id} />
                   <span>
                     <b>{localized.name}</b>
-                    <small>{locked ? (t("onboarding.comingSoon") || "Canlı · Yakında") : localized.role}</small>
+                    <small>{locked ? t("onboarding.comingSoon") : localized.role}</small>
                   </span>
                   {locked ? <i aria-hidden="true">◇</i> : null}
                 </button>

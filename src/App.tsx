@@ -27,9 +27,8 @@ import {
   listingEstimateBand,
 } from "./domain/decision";
 import { WORLD_CONFIG } from "./domain/config";
-import { buyerPersona } from "./domain/buyers";
 import { activeMarketEvent, radarSignal } from "./domain/marketEvents";
-import { ftueCopy, ftueStageLabel, isFtueActive } from "./domain/ftue";
+import { ftueCopy, isFtueActive } from "./domain/ftue";
 import { categoryExpertiseLevel, marketExpertiseLevel } from "./domain/meta";
 import {
   getRewardEligibility,
@@ -86,6 +85,15 @@ import {
   localizeProduct,
   localizePreparation,
   localizeSeller,
+  localizeConfidence,
+  localizeBuyerPersona,
+  localizeMarketEvent,
+  localizeFtueStage,
+  localizeFtueCopy,
+  localizeInspection,
+  localizeEvidence,
+  localizeSignal,
+  localizeNotice,
   currencySymbol,
 } from "./i18n";
 
@@ -104,27 +112,15 @@ const PurchasesSheet = lazy(loadPurchasesSheet);
 type Tab = "market" | "radar" | "portfolio" | "journey";
 type PortfolioSegment = "inventory" | "preparation" | "listings";
 
-const evidenceLabel = (confidence: number) =>
-  confidence >= 0.72 ? "Yüksek" : confidence >= 0.46 ? "Orta" : "Düşük";
-
-const offerModeOptions: Array<{
-  mode: PlayerOfferMode;
-  label: string;
-  detail: string;
-}> = [
-  { mode: "AGGRESSIVE", label: "Sert", detail: "Yüksek risk" },
-  { mode: "BALANCED", label: "Dengeli", detail: "Orta yol" },
-  { mode: "SAFE", label: "Güvenli", detail: "Kabul şansı daha yüksek" },
-];
-
 export function StartupSkeleton() {
+  const { t } = useTranslation();
   return (
     <div
       className="startup-shell"
       role="status"
       aria-live="polite"
       aria-busy="true"
-      aria-label="Kayıt yükleniyor"
+      aria-label={t("startup.loadingSave") || "Kayıt yükleniyor"}
     >
       <div className="startup-art" aria-hidden="true" />
       <div className="startup-brand">
@@ -136,34 +132,59 @@ export function StartupSkeleton() {
       </div>
       <div className="startup-progress">
         <span className="startup-progress__spinner" aria-hidden="true" />
-        <p>Kariyerin hazırlanıyor</p>
+        <p>{t("startup.preparingCareer") || "Kariyerin hazırlanıyor"}</p>
       </div>
     </div>
   );
 }
 
-const rewardCopy = {
-  MARKET_SCOUT: {
-    ad: "25 tarama hakkı · Video",
-    premium: "25 tarama hakkını yenile",
-  },
-  FAST_INSPECTION: {
-    ad: "İncelemeyi şimdi bitir · Video",
-    premium: "İncelemeyi şimdi bitir",
-  },
-  FAST_PREPARATION: {
-    ad: "Hazırlığı şimdi bitir · Video",
-    premium: "Hazırlığı şimdi bitir",
-  },
-  LISTING_REACH: {
-    ad: "İlanı bir kez öne çıkar · Video",
-    premium: "Premium erişim hakkını kullan",
-  },
-} as const;
-
 export default function App() {
   useTapHaptics();
   const { t, lang } = useTranslation();
+
+  const evidenceLabel = (confidence: number) =>
+    localizeConfidence(confidence, lang);
+
+  const offerModeOptions: Array<{
+    mode: PlayerOfferMode;
+    label: string;
+    detail: string;
+  }> = [
+    {
+      mode: "AGGRESSIVE",
+      label: t("offerMode.aggressiveLabel") || "Sert",
+      detail: t("offerMode.aggressiveDetail") || "Yüksek risk",
+    },
+    {
+      mode: "BALANCED",
+      label: t("offerMode.balancedLabel") || "Dengeli",
+      detail: t("offerMode.balancedDetail") || "Orta yol",
+    },
+    {
+      mode: "SAFE",
+      label: t("offerMode.safeLabel") || "Güvenli",
+      detail: t("offerMode.safeDetail") || "Kabul şansı daha yüksek",
+    },
+  ];
+
+  const rewardCopy = {
+    MARKET_SCOUT: {
+      ad: t("reward.marketScoutAd") || "25 tarama hakkı · Video",
+      premium: t("reward.marketScoutPremium") || "25 tarama hakkını yenile",
+    },
+    FAST_INSPECTION: {
+      ad: t("reward.fastInspectionAd") || "İncelemeyi şimdi bitir · Video",
+      premium: t("reward.fastInspectionPremium") || "İncelemeyi şimdi bitir",
+    },
+    FAST_PREPARATION: {
+      ad: t("reward.fastPreparationAd") || "Hazırlığı şimdi bitir · Video",
+      premium: t("reward.fastPreparationPremium") || "Hazırlığı şimdi bitir",
+    },
+    LISTING_REACH: {
+      ad: t("reward.boostListingAd") || "İlanı bir kez öne çıkar · Video",
+      premium: t("reward.boostListingPremium") || "Premium erişim hakkını kullan",
+    },
+  } as const;
   const [tab, setTab] = useState<Tab>("market");
   const [portfolioSegment, setPortfolioSegment] =
     useState<PortfolioSegment>("inventory");
@@ -354,6 +375,7 @@ export default function App() {
     selected
       ? categoryExpertiseLevel(game, selected.instance.family.category)
       : 0,
+    lang,
   );
   const inventory = inventoryAssets(game);
   const workshop = preparationAssets(game);
@@ -383,6 +405,7 @@ export default function App() {
               (listing) => listing.familyId === asset.familyId,
             ).length,
           },
+          lang,
         ),
       },
     ];
@@ -391,7 +414,7 @@ export default function App() {
     (count, entry) => count + entry.activity.offers.length,
     0,
   );
-  const latestSale = latestSaleResult(game);
+  const latestSale = latestSaleResult(game, lang);
   const negotiating = selected
     ? (game.negotiations[selected.id] ??
       (game.negotiation?.listingId === selected.id
@@ -415,8 +438,8 @@ export default function App() {
     remainingMinor: number;
   }) =>
     quote.shortfallMinor
-      ? `${money(quote.shortfallMinor)} nakit eksik`
-      : `Alırsan kalan: ${money(quote.remainingMinor)}`;
+      ? t("wallet.buyingShortfall", { shortfall: money(quote.shortfallMinor, lang) })
+      : t("wallet.buyingPower", { remaining: money(quote.remainingMinor, lang) });
   const premiumReward = hasPremiumEntitlement(game);
   const rewardProviderAvailable =
     premiumReward || game.monetization.consent.canRequestAds;
@@ -424,7 +447,7 @@ export default function App() {
     rewardProviderAvailable && getRewardEligibility(game, placementId).ok;
   const rewardLabel = (placementId: keyof typeof rewardCopy) =>
     rewardCopy[placementId][premiumReward ? "premium" : "ad"];
-  const coach = ftueCopy[game.ftue.stage];
+  const coach = localizeFtueCopy(game.ftue.stage, ftueCopy[game.ftue.stage], lang);
   const showCoach =
     ftueActive && !game.ftue.dismissedStages.includes(game.ftue.stage);
   const startingOffer =
@@ -435,7 +458,7 @@ export default function App() {
       : undefined;
   const marketLevel = marketExpertiseLevel(game);
   const estimates = wealthPresentation(game);
-  const recovery = ftueActive ? null : recoveryPlan(game);
+  const recovery = ftueActive ? null : recoveryPlan(game, lang);
   const homeLadderTarget = nextLadderHome(game.home);
   const homeProgress = !game.home.purchased
     ? Math.min(100, Math.floor((total / HOME_GOAL_MINOR) * 100))
@@ -514,11 +537,11 @@ export default function App() {
               setComparing(false);
           }}
         >
-          {option.label}
+          {localizeInspection(kind, option.label, lang)}
           <small>
             {option.durationMin
-              ? `${option.durationMin} dk · pazar ilerler`
-              : "anında"}
+              ? `${option.durationMin} ${lang === "tr" ? "dk" : lang === "de" ? "Min." : "min"} · ${t("market.marketAdvances") || "pazar ilerler"}`
+              : t("market.instant")}
           </small>
         </button>
       ))}
@@ -636,9 +659,9 @@ export default function App() {
             </div>
           </div>
           <p className="owned-facts">
-            Bilgi güveni: {evidenceLabel(item.instance.evidenceConfidence)}
+            {t("portfolio.evidenceConfidence")}: {evidenceLabel(item.instance.evidenceConfidence)}
             <span aria-hidden="true">·</span>
-            Satış hızı: %
+            {t("portfolio.liquiditySpeed")}: %
             {Math.round(
               (item.instance.family.liquidity +
                 item.instance.liquidityBonusBps / 10_000) *
@@ -647,8 +670,8 @@ export default function App() {
           </p>
           {focusedAssetId === item.id ? (
             <p className="decision-cause" role="status">
-              <b>Karar özeti</b>
-              <span>{purchaseDecisionCause(game, item)}</span>
+              <b>{t("portfolio.decisionCauseSummary")}</b>
+              <span>{purchaseDecisionCause(game, item, lang)}</span>
             </p>
           ) : null}
         </div>
@@ -657,18 +680,22 @@ export default function App() {
             <p className="preparation-status" role="status">
               {pendingPreparation ? (
                 <>
-                  {item.instance.family.preparation.find(
-                    (action) => action.kind === pendingPreparation.kind,
-                  )?.label ?? "Hazırlık"}{" "}
-                  devam ediyor ·{" "}
-                  {Math.max(
-                    0,
-                    pendingPreparation.completesAtGameMin - game.gameTimeMin,
+                  {localizePreparation(
+                    pendingPreparation.kind,
+                    item.instance.family.preparation.find(
+                      (action) => action.kind === pendingPreparation.kind,
+                    )?.label ?? t("portfolio.preparation"),
+                    lang,
                   )}{" "}
-                  dk kaldı.
+                  {t("portfolio.prepInProgress", {
+                    min: Math.max(
+                      0,
+                      pendingPreparation.completesAtGameMin - game.gameTimeMin,
+                    ),
+                  })}
                 </>
               ) : (
-                "Hazırlık işlem kaydı bulunamadı."
+                t("portfolio.prepNotFound")
               )}
             </p>
           ) : null}
@@ -676,7 +703,7 @@ export default function App() {
           item.state !== "PREPARING" &&
           !availablePreparations.length ? (
             <p className="preparation-status">
-              Hazırlık tamam. Ürününü satışa çıkarabilirsin.
+              {t("portfolio.prepComplete")}
             </p>
           ) : null}
           {!ftueActive &&
@@ -685,10 +712,10 @@ export default function App() {
             <div className="portfolio-card-actions">
               {!showPreparation && availablePreparations.length > 0 ? (
                 <button
-                  aria-label="Ürünü hazırla"
+                  aria-label={t("portfolio.prepProduct")}
                   onClick={() => showOwnedAsset(item.id, "preparation")}
                 >
-                  Hazırla
+                  {t("portfolio.prepare")}
                 </button>
               ) : null}
               <button
@@ -703,8 +730,8 @@ export default function App() {
                 }}
               >
                 {listingStrategyAssetId === item.id
-                  ? "Seçenekleri kapat"
-                  : "Satışa çıkar"}
+                  ? t("portfolio.closeOptions")
+                  : t("portfolio.putOnSale")}
               </button>
             </div>
           ) : null}
@@ -717,11 +744,11 @@ export default function App() {
               className={`portfolio-next-action${ftueActive ? "" : " listing-strategies"}`}
             >
               <small>
-                {ftueActive ? "SIRADAKİ ADIM" : "SATIŞ SEÇENEKLERİ"}
+                {ftueActive ? t("portfolio.nextStep") : t("portfolio.saleOptions")}
               </small>
               <b>
                 {ftueActive
-                  ? "Dengeli fiyatla satışa çıkar"
+                  ? t("ftue.listBalanced")
                   : t("listing.howToSell")}
               </b>
               {ftueActive ? (
@@ -786,7 +813,7 @@ export default function App() {
                       );
                     }}
                   >
-                    Kendi fiyatını belirle
+                    {t("portfolio.setOwnPrice")}
                   </button>
                   {manualListingAssetId === item.id ? (
                     <form
@@ -800,13 +827,13 @@ export default function App() {
                       }}
                     >
                       <label>
-                        <span>İlan fiyatı</span>
+                        <span>{t("listing.askingPrice")}</span>
                         <span className="manual-price-input">
-                          ₺
+                          {currencySymbol(lang)}
                           <input
                             value={manualListingPrice}
                             inputMode="decimal"
-                            aria-label="Kendi ilan fiyatın"
+                            aria-label={t("portfolio.ownPriceAria")}
                             onChange={(event) =>
                               setManualListingPrice(event.target.value)
                             }
@@ -819,15 +846,16 @@ export default function App() {
                               manualListingPriceMinor(manualListingPrice)!,
                               quote.balancedAskingMinor,
                               quote.premiumAskingMinor,
+                              lang,
                             )
-                          : "Geçerli bir fiyat yaz"}
+                          : t("portfolio.validPriceWarning")}
                       </small>
                       <button
                         className="primary"
                         disabled={!manualListingPriceMinor(manualListingPrice)}
                         type="submit"
                       >
-                        Bu fiyatla ilan ver
+                        {t("listing.submitWithPrice")}
                       </button>
                     </form>
                   ) : null}
@@ -850,8 +878,8 @@ export default function App() {
                 {item.instance.preparationHistory.some(
                   (record) => record.state === "COMPLETE",
                 )
-                  ? "Diğer hazırlıklar"
-                  : "Nasıl hazırlamak istersin?"}
+                  ? t("portfolio.otherPreps")
+                  : t("portfolio.howToPrep")}
               </summary>
               {!item.instance.preparationHistory.length ? (
                 <p className="preparation-guide">
@@ -871,7 +899,7 @@ export default function App() {
                     </span>
                     <small>
                       {action.durationMin} {lang === "tr" ? "dk" : lang === "de" ? "Min." : "min"} ·{" "}
-                      {preparationPresentation(item, action).join(" · ")}
+                      {preparationPresentation(item, action, lang).join(" · ")}
                     </small>
                   </button>
                 ))}
@@ -941,7 +969,7 @@ export default function App() {
               <span className="eyebrow">TRADEUP</span>
               <h1>Zero to Home</h1>
               <small className="game-clock">
-                {gameClockLabel(game.gameTimeMin)}
+                {gameClockLabel(game.gameTimeMin, lang)}
               </small>
             </div>
           </div>
@@ -964,19 +992,19 @@ export default function App() {
       ) : null}
 
       {!settingsOpen ? (
-        <section className="wallet" aria-label="Finans özeti">
+        <section className="wallet" aria-label={t("wallet.finSummary")}>
           <div>
             <small>{t("wallet.cash")}</small>
-            <strong>{money(game.cashMinor)}</strong>
+            <strong>{money(game.cashMinor, lang)}</strong>
           </div>
           <div>
             <small>{t("wallet.netWorth")}</small>
-            <strong>{formatEstimate(estimates.total)}</strong>
+            <strong>{formatEstimate(estimates.total, false, lang)}</strong>
           </div>
           {game.home.unlocked ? (
             <div
               className="goal"
-              aria-label={`Ev yolculuğu yüzde ${homeProgress}`}
+              aria-label={t("wallet.homeJourneyPercent", { progress: homeProgress })}
             >
               <small>{t("wallet.homeGoal")} · %{homeProgress}</small>
               <span>
@@ -989,15 +1017,15 @@ export default function App() {
 
       {!settingsOpen ? (
         <div className="notice" role="status" key={notice}>
-          {notice}
+          {localizeNotice(notice, lang)}
         </div>
       ) : null}
       {!settingsOpen && showCoachHere ? (
-        <aside className="coach" aria-label="İlk oturum rehberi">
-          <button onClick={dismissCoach} aria-label="Rehberi kapat">
+        <aside className="coach" aria-label={t("coach.aria")}>
+          <button onClick={dismissCoach} aria-label={t("common.close")}>
             <Icon name="close" />
           </button>
-          <small>İLK İŞLEM · {ftueStageLabel[game.ftue.stage]}</small>
+          <small>{t("coach.firstTrade")} · {localizeFtueStage(game.ftue.stage, lang)}</small>
           <h2>{coach.title}</h2>
           <p>{coach.body}</p>
           {firstAsset && coachSegment && !atCoachDestination ? (
@@ -1005,15 +1033,15 @@ export default function App() {
               className="coach-next"
               onClick={() => showOwnedAsset(firstAsset.id, coachSegment)}
             >
-              Ürününe dön
+              {t("coach.returnToProduct")}
             </button>
           ) : null}
         </aside>
       ) : null}
       {!settingsOpen && recovery ? (
-        <aside className="recovery-bar" aria-label="Nakit toparlama yolları">
+        <aside className="recovery-bar" aria-label={t("recovery.aria")}>
           <div>
-            <small>NAKİT PLANI</small>
+            <small>{t("recovery.kicker")}</small>
             <b>{recovery.title}</b>
           </div>
           <div className="recovery-actions">
@@ -1024,7 +1052,7 @@ export default function App() {
                 navigate("market");
               }}
             >
-              Küçük eşya bul
+              {t("recovery.findSmallGoods")}
             </button>
             {recovery.canQuickSell ? (
               <button
@@ -1042,7 +1070,7 @@ export default function App() {
                   setQuickSaleAssetId(candidate.id);
                 }}
               >
-                Hızlı satış
+                {t("recovery.quickSale")}
               </button>
             ) : null}
             {recovery.canRevise ? (
@@ -1052,7 +1080,7 @@ export default function App() {
                   navigate("portfolio");
                 }}
               >
-                İlanı düzenle
+                {t("recovery.editListing")}
               </button>
             ) : null}
           </div>
@@ -1065,12 +1093,12 @@ export default function App() {
             {!settingsOpen ? (
               <div className="section-title">
                 <div>
-                  <small>CANLI PAZAR</small>
-                  <h2>Fırsat akışı</h2>
+                  <small>{t("market.liveMarket")}</small>
+                  <h2>{t("market.dealFeed")}</h2>
                 </div>
                 <div className="market-title-actions">
                   <span className="market-listing-count">
-                    {visibleMarketListings.length} ilan
+                    {visibleMarketListings.length} {t("market.itemsCount")}
                   </span>
                   <button
                     className="market-follow-entry"
@@ -1080,7 +1108,7 @@ export default function App() {
                       void loadFollowPanel();
                       setFollowSheetOpen(true);
                     }}
-                    aria-label={`Takip${game.follow.watchedListingIds.length ? ` · ${game.follow.watchedListingIds.length} ilan` : ""}`}
+                    aria-label={`${t("market.followTab")}${game.follow.watchedListingIds.length ? ` · ${game.follow.watchedListingIds.length} ${t("market.itemsCount")}` : ""}`}
                   >
                     <Icon name="follow" />
                     {game.follow.watchedListingIds.length ? (
@@ -1093,22 +1121,22 @@ export default function App() {
                     <>
                       <label
                         className={`market-sort${marketSort === "MARKET" ? "" : " market-sort--active"}`}
-                        title="Pazarı sırala"
+                        title={t("market.sortTitle")}
                       >
                         <Icon name="sort" />
                         <select
-                          aria-label="Pazar sıralaması"
+                          aria-label={t("market.sortAria")}
                           value={marketSort}
                           onChange={(event) =>
                             setMarketSort(event.target.value as MarketSort)
                           }
                         >
-                          <option value="MARKET">Pazar sırası</option>
+                          <option value="MARKET">{t("market.sortMarket")}</option>
                           <option value="PRICE_ASC">
-                            Fiyat: düşükten yükseğe
+                            {t("market.sortPriceAsc")}
                           </option>
                           <option value="PRICE_DESC">
-                            Fiyat: yüksekten düşüğe
+                            {t("market.sortPriceDesc")}
                           </option>
                         </select>
                       </label>
@@ -1122,7 +1150,7 @@ export default function App() {
                         >
                           <Icon name="refresh" />
                           <span className="market-refresh-copy">
-                            <b>Yenile</b>
+                            <b>{t("market.refreshButton")}</b>
                             <small>
                               +25 · +1{" "}
                               {shortDuration(scanRefill.nextCreditSeconds)}
@@ -1134,11 +1162,11 @@ export default function App() {
                           className="market-refresh"
                           disabled={game.monetization.marketScanCredits === 0}
                           onClick={scan}
-                          aria-label={`Pazarı yenile · ${game.monetization.marketScanCredits} hak kaldı`}
+                          aria-label={t("market.refreshAria", { credits: game.monetization.marketScanCredits })}
                         >
                           <Icon name="refresh" />
                           <span className="market-refresh-copy">
-                            <b>Yenile</b>
+                            <b>{t("market.refreshButton")}</b>
                             <small>
                               {game.monetization.marketScanCredits}/
                               {scanRefill.cap}
@@ -1155,12 +1183,12 @@ export default function App() {
               </div>
             ) : null}
             {!ftueActive && marketEvent ? (
-              <aside className="market-event" aria-label="Güncel pazar olayı">
+              <aside className="market-event" aria-label={t("market.eventAria")}>
                 <span aria-hidden="true">↗</span>
                 <div>
-                  <small>PAZAR HAREKETİ</small>
-                  <b>{marketEvent.title}</b>
-                  <p>{marketEvent.message}</p>
+                  <small>{t("market.eventBadge")}</small>
+                  <b>{localizeMarketEvent(marketEvent, lang).title}</b>
+                  <p>{localizeMarketEvent(marketEvent, lang).message}</p>
                 </div>
               </aside>
             ) : null}
@@ -1168,7 +1196,7 @@ export default function App() {
               <div
                 className="chips market-filters"
                 role="group"
-                aria-label="Pazar kategorileri"
+                aria-label={t("market.categoriesGroup")}
               >
                 <button
                   className={
@@ -1190,7 +1218,7 @@ export default function App() {
                     key={category}
                     onClick={() => setMarketCategory(category)}
                   >
-                    {localizeCategory(category)}
+                    {localizeCategory(category, lang)}
                   </button>
                 ))}
               </div>
@@ -1200,7 +1228,7 @@ export default function App() {
                 <article className="starting-sale">
                   <img
                     src={assetFor("prd_notebook")}
-                    alt="Eski defter"
+                    alt={localizeProduct("prd_notebook", "Eski defter", lang)}
                     onError={(event) => {
                       const fallback = fallbackAssetFor("Küçük Eşya");
                       if (event.currentTarget.src !== fallback)
@@ -1208,22 +1236,21 @@ export default function App() {
                     }}
                   />
                   <div>
-                    <small>ECE'NİN TEKLİFİ</small>
-                    <h3>Eski defter</h3>
+                    <small>{t("market.startingKicker")}</small>
+                    <h3>{localizeProduct("prd_notebook", "Eski defter", lang)}</h3>
                     <p>
-                      Harcaman yok · Satıştan kazanacağın{" "}
-                      {money(startingOffer.amountMinor)}
+                      {t("ftue.noCostGain", { amount: money(startingOffer.amountMinor, lang) })}
                     </p>
                     <button
                       className="primary"
                       onClick={() => acceptBuyer(startingOffer.id)}
                     >
-                      Teklifi kabul et · {money(startingOffer.amountMinor)}
+                      {t("ftue.acceptOffer", { amount: money(startingOffer.amountMinor, lang) })}
                     </button>
                   </div>
                 </article>
               ) : null}
-              <Suspense fallback={<p role="status">İlanlar hazırlanıyor…</p>}>
+              <Suspense fallback={<p role="status">{t("common.listingsLoading")}</p>}>
                 {visibleMarketListings.map((item, index) => {
                   const categoryLevel = categoryExpertiseLevel(
                     game,
@@ -1253,7 +1280,7 @@ export default function App() {
           </>
         ) : null}
         {tab === "radar" ? (
-          <Suspense fallback={<p role="status">Radar hazırlanıyor…</p>}>
+          <Suspense fallback={<p role="status">{t("common.radarLoading")}</p>}>
             <RadarPanel
               game={game}
               signal={radarSignalNow}
@@ -1268,14 +1295,14 @@ export default function App() {
           <>
             <div className="section-title portfolio-title">
               <div>
-                <small>ÜRÜNLERİN</small>
-                <h2>Portföy</h2>
+                <small>{t("portfolio.heading")}</small>
+                <h2>{t("portfolio.title")}</h2>
               </div>
             </div>
             <div
               className="segments"
               role="tablist"
-              aria-label="Portföy bölümleri"
+              aria-label={t("portfolio.segmentsAria")}
             >
               {(
                 [
@@ -1307,20 +1334,20 @@ export default function App() {
                 </span>
                 <h3>
                   {activeOwnedAssets(game).length
-                    ? "Bu bölümde ürün yok"
-                    : "Portföyün boş"}
+                    ? t("portfolio.emptySegment")
+                    : t("portfolio.emptyPortfolio")}
                 </h3>
                 <p>
                   {activeOwnedAssets(game).length
-                    ? "Ürünlerini Hazırlık ve İlanlarım bölümlerinde takip edebilirsin."
-                    : "Pazardan bir ürün alarak portföyünü oluşturabilirsin."}
+                    ? t("portfolio.emptySegmentDesc")
+                    : t("portfolio.emptyPortfolioDesc")}
                 </p>
                 {workshop.some((asset) => asset.state === "PREPARING") ? (
                   <button onClick={() => setPortfolioSegment("preparation")}>
-                    Hazırlığı gör
+                    {t("portfolio.viewPrep")}
                   </button>
                 ) : (
-                  <button onClick={() => navigate("market")}>Pazara git</button>
+                  <button onClick={() => navigate("market")}>{t("portfolio.returnMarket")}</button>
                 )}
               </div>
             ) : null}
@@ -1330,10 +1357,10 @@ export default function App() {
               role="tabpanel"
               aria-label={
                 portfolioSegment === "inventory"
-                  ? "Envanter"
+                  ? t("portfolio.inventory")
                   : portfolioSegment === "preparation"
-                    ? "Hazırlık"
-                    : "İlanlarım"
+                    ? t("portfolio.preparation")
+                    : t("portfolio.listings")
               }
             >
               {portfolioSegment === "preparation" &&
@@ -1365,7 +1392,7 @@ export default function App() {
               {portfolioSegment === "listings"
                 ? playerListings.map(
                     ({ listing: playerListing, asset, activity }) => {
-                      const ownershipState = ownershipPresentation(asset.state);
+                      const ownershipState = ownershipPresentation(asset.state, lang);
                       return (
                         <article
                           className={`owned owned--listing${focusedAssetId === asset.id ? " owned--focused" : ""}`}
@@ -1394,10 +1421,10 @@ export default function App() {
                               </div>
                               <div>
                                 <span>{t("market.listingPrice")}</span>
-                                <b>{money(playerListing.askingPriceMinor)}</b>
+                                <b>{money(playerListing.askingPriceMinor, lang)}</b>
                               </div>
                               <div>
-                                <span>İlgi</span>
+                                <span>{t("portfolio.interest")}</span>
                                 <b>%{playerListing.interest}</b>
                               </div>
                             </div>
@@ -1406,14 +1433,18 @@ export default function App() {
                             <div
                               className="listing-wait"
                               role="group"
-                              aria-label="İlan durumu"
+                              aria-label={t("portfolio.listingStatusAria")}
                             >
                               <div className="listing-wait-copy">
-                                <b>Yayında · {activity.ageLabel}</b>
-                                <span>Alıcı teklifi bekleniyor.</span>
+                                <b>
+                                  {t("portfolio.publishedAge", {
+                                    age: activity.ageLabel,
+                                  })}
+                                </b>
+                                <span>{t("portfolio.liveWaitBuyer")}</span>
                                 <span>
-                                  {activity.remainingLabel} · Teklif gelirse
-                                  anında bildirim alırsın.
+                                  {activity.remainingLabel} ·{" "}
+                                  {t("portfolio.liveNotif")}
                                 </span>
                                 {activity.diagnosis ? (
                                   <span className="listing-diagnosis">
@@ -1422,7 +1453,7 @@ export default function App() {
                                 ) : null}
                               </div>
                               <button onClick={() => navigate("market")}>
-                                Pazara göz at
+                                {t("portfolio.browseMarket")}
                               </button>
                             </div>
                           ) : null}
@@ -1434,19 +1465,23 @@ export default function App() {
                             const counterMinor = !buyerOffer.counterUsed
                               ? buyerCounterMinor(buyerOffer, playerListing)
                               : undefined;
-                            const persona = buyerPersona(buyerOffer.buyerType);
+                            const persona = buyerOffer.buyerType
+                              ? localizeBuyerPersona(buyerOffer.buyerType, lang)
+                              : undefined;
                             return (
                               <div
                                 className="buyer-offer"
                                 key={buyerOffer.id}
                                 role="group"
-                                aria-label={`${buyerOffer.buyer} alıcı teklifi`}
+                                aria-label={t("buyer.offerAria", {
+                                  buyer: buyerOffer.buyer,
+                                })}
                               >
                                 <h4>
                                   {buyerOffer.buyer}{" "}
                                   {buyerOffer.counterUsed
-                                    ? "son fiyatını verdi"
-                                    : "teklif verdi"}
+                                    ? t("buyer.gaveFinal")
+                                    : t("buyer.madeOffer")}
                                 </h4>
                                 {persona ? (
                                   <p className="buyer-persona">
@@ -1456,12 +1491,12 @@ export default function App() {
                                 ) : null}
                                 <dl className="sale-breakdown">
                                   <div>
-                                    <dt>Alacağın tutar</dt>
-                                    <dd>{money(sale.proceedsMinor)}</dd>
+                                    <dt>{t("buyer.amountProceeds")}</dt>
+                                    <dd>{money(sale.proceedsMinor, lang)}</dd>
                                   </div>
                                   <div>
-                                    <dt>Toplam harcaman</dt>
-                                    <dd>{money(sale.bookCostMinor)}</dd>
+                                    <dt>{t("portfolio.totalSpent")}</dt>
+                                    <dd>{money(sale.bookCostMinor, lang)}</dd>
                                   </div>
                                   <div
                                     className={
@@ -1470,44 +1505,55 @@ export default function App() {
                                   >
                                     <dt>
                                       {sale.profitMinor < 0
-                                        ? "Zararın"
+                                        ? t("buyer.yourLoss")
                                         : sale.profitMinor > 0
-                                          ? "Kârın"
-                                          : "Kâr / zarar"}
+                                          ? t("buyer.yourProfit")
+                                          : t("saleResult.netResult")}
                                     </dt>
-                                    <dd>{signedMoney(sale.profitMinor)}</dd>
+                                    <dd>{signedMoney(sale.profitMinor, lang)}</dd>
                                   </div>
                                 </dl>
                                 <p>
-                                  {buyerOffer.expiresAtGameMin -
-                                    game.gameTimeMin}{" "}
-                                  oyun dakikası içinde karar ver.
+                                  {t("buyer.decisionTime", {
+                                    min:
+                                      buyerOffer.expiresAtGameMin -
+                                      game.gameTimeMin,
+                                  })}
                                 </p>
                                 <div
                                   className={`sell-actions${counterMinor === undefined ? "" : " buyer-actions"}`}
                                 >
                                   <button
                                     className="primary"
-                                    aria-label="Teklifi kabul et"
+                                    aria-label={t("common.accept")}
                                     onClick={() => acceptBuyer(buyerOffer.id)}
                                   >
-                                    Kabul et
+                                    {t("common.accept")}
                                   </button>
                                   {counterMinor !== undefined ? (
                                     <button
-                                      aria-label={`Karşı teklif yap: ${money(counterMinor)} iste`}
+                                      aria-label={t("buyer.counterAction", {
+                                        amount: money(counterMinor, lang),
+                                      })}
                                       onClick={() =>
                                         counterBuyer(buyerOffer.id)
                                       }
                                     >
-                                      {money(counterMinor)} iste
+                                      {money(counterMinor, lang)}{" "}
+                                      {lang === "tr"
+                                        ? "iste"
+                                        : lang === "de"
+                                          ? "fordern"
+                                          : lang === "es"
+                                            ? "pedir"
+                                            : "ask"}
                                     </button>
                                   ) : null}
                                   <button
-                                    aria-label="Teklifi reddet"
+                                    aria-label={t("common.reject")}
                                     onClick={() => rejectBuyer(buyerOffer.id)}
                                   >
-                                    Reddet
+                                    {t("common.reject")}
                                   </button>
                                 </div>
                               </div>
@@ -1552,7 +1598,7 @@ export default function App() {
                                   !manualListingPriceMinor(revisedListingPrice)
                                 }
                               >
-                                Fiyatı uygula
+                                {t("portfolio.applyPrice")}
                               </button>
                             </form>
                           ) : null}
@@ -1561,7 +1607,7 @@ export default function App() {
                               disabled={activity.offers.length > 0}
                               title={
                                 activity.offers.length > 0
-                                  ? "Önce mevcut teklifi yanıtla"
+                                  ? t("portfolio.answerPendingFirst")
                                   : undefined
                               }
                               onClick={() => {
@@ -1571,7 +1617,7 @@ export default function App() {
                                 );
                               }}
                             >
-                              Fiyatı değiştir
+                              {t("portfolio.changePrice")}
                             </button>
                             <button
                               onClick={() => {
@@ -1586,7 +1632,7 @@ export default function App() {
                                   showOwnedAsset(asset.id, "inventory");
                               }}
                             >
-                              İlanı geri çek
+                              {t("portfolio.withdrawListing")}
                             </button>
                           </div>
                         </article>
@@ -1599,27 +1645,39 @@ export default function App() {
             !playerListings.length &&
             !game.buyerOffers.length ? (
               latestSale ? (
-                <section className="sale-result" aria-label="Son satış sonucu">
+                <section className="sale-result" aria-label={t("saleResult.aria")}>
                   <div className="sale-result-copy" role="status">
                     <div className="sale-result-heading">
                       <ProductVisual
                         instance={latestSale.instance}
                         className="sale-result-art"
-                        alt={latestSale.assetName}
+                        alt={localizeProduct(
+                          latestSale.instance.family.id,
+                          latestSale.assetName,
+                          lang,
+                        )}
                       />
                       <div>
-                        <small>SATIŞ TAMAMLANDI</small>
-                        <h3>{latestSale.assetName} satıldı</h3>
+                        <small>{t("saleResult.heading")}</small>
+                        <h3>
+                          {t("saleResult.soldTitle", {
+                            product: localizeProduct(
+                              latestSale.instance.family.id,
+                              latestSale.assetName,
+                              lang,
+                            ),
+                          })}
+                        </h3>
                       </div>
                     </div>
                     <dl className="sale-breakdown">
                       <div>
-                        <dt>Hesabına giren</dt>
-                        <dd>{money(latestSale.proceedsMinor)}</dd>
+                        <dt>{t("saleResult.accountCredit")}</dt>
+                        <dd>{money(latestSale.proceedsMinor, lang)}</dd>
                       </div>
                       <div>
-                        <dt>Toplam harcaman</dt>
-                        <dd>{money(latestSale.bookCostMinor)}</dd>
+                        <dt>{t("portfolio.totalSpent")}</dt>
+                        <dd>{money(latestSale.bookCostMinor, lang)}</dd>
                       </div>
                       <div
                         className={
@@ -1628,25 +1686,29 @@ export default function App() {
                       >
                         <dt>
                           {latestSale.profitMinor < 0
-                            ? "Net zararın"
+                            ? t("saleResult.netLoss")
                             : latestSale.profitMinor > 0
-                              ? "Net kârın"
-                              : "Net sonuç"}
+                              ? t("saleResult.netProfit")
+                              : t("saleResult.netResult")}
                         </dt>
-                        <dd>{signedMoney(latestSale.profitMinor)}</dd>
+                        <dd>{signedMoney(latestSale.profitMinor, lang)}</dd>
                       </div>
                     </dl>
                     <p className="decision-cause">
-                      <b>Sonuç özeti</b>
+                      <b>{t("saleResult.summaryHeading")}</b>
                       <span>{latestSale.cause}</span>
                     </p>
-                    <p>Yeni fırsat için paran hazır: {money(game.cashMinor)}</p>
+                    <p>
+                      {t("saleResult.moneyReady", {
+                        amount: money(game.cashMinor, lang),
+                      })}
+                    </p>
                   </div>
                   <button
                     className="primary"
                     onClick={() => navigate("market")}
                   >
-                    Yeni fırsatlara bak
+                    {t("saleResult.seeOpportunities")}
                   </button>
                 </section>
               ) : (
@@ -1654,8 +1716,8 @@ export default function App() {
                   <span className="empty-icon">
                     <Icon name="portfolio" />
                   </span>
-                  <h3>Aktif ilanın yok</h3>
-                  <p>Bir ürününü seçip satışa çıkar.</p>
+                  <h3>{t("portfolio.noActiveListing")}</h3>
+                  <p>{t("portfolio.pickAndList")}</p>
                   <button
                     onClick={() =>
                       inventory.length
@@ -1663,7 +1725,9 @@ export default function App() {
                         : navigate("market")
                     }
                   >
-                    {inventory.length ? "Ürünlerini gör" : "Pazara dön"}
+                    {inventory.length
+                      ? t("portfolio.viewProducts")
+                      : t("portfolio.returnMarket")}
                   </button>
                 </div>
               )
@@ -1677,18 +1741,18 @@ export default function App() {
                 <section className="settings-card" role="status">
                   <div className="settings-sheet-heading">
                     <div>
-                      <small>HESABIM</small>
-                      <h2>Profil ve Ayarlar</h2>
+                      <small>{t("settings.heading")}</small>
+                      <h2>{t("settings.title")}</h2>
                     </div>
                   </div>
-                  <p className="settings-loading">Ayarlar hazırlanıyor…</p>
+                  <p className="settings-loading">{t("common.settingsLoading")}</p>
                 </section>
               }
             >
               <SettingsPanel onClose={closeSettingsPanel} />
             </Suspense>
           ) : (
-            <Suspense fallback={<p role="status">Yolculuk hazırlanıyor…</p>}>
+            <Suspense fallback={<p role="status">{t("common.journeyLoading")}</p>}>
               <JourneyPanel
                 game={game}
                 homeProgress={homeProgress}
@@ -1704,7 +1768,7 @@ export default function App() {
       </main>
 
       {!settingsOpen ? (
-        <nav aria-label="Ana bölümler">
+        <nav aria-label={t("nav.mainSections")}>
           {(
             [
               ["market", "home", t("nav.market")],
@@ -1760,7 +1824,7 @@ export default function App() {
                     {pendingBuyerOfferCount}
                   </span>
                   <span id="pending-buyer-offers" className="sr-only">
-                    {pendingBuyerOfferCount} alıcı teklifi bekliyor
+                    {t("buyer.pendingOffersNotice", { count: pendingBuyerOfferCount })}
                   </span>
                 </>
               ) : null}
@@ -1780,14 +1844,14 @@ export default function App() {
             void openPurchases();
             setPurchasesBubbleOpen(true);
           }}
-          aria-label="Satın Almalar ve Görünüm"
+          aria-label={t("settings.purchases")}
         >
           <Icon name="basket" />
         </button>
       ) : null}
 
       {purchasesBubbleOpen ? (
-        <Suspense fallback={<p role="status">Mağaza hazırlanıyor…</p>}>
+        <Suspense fallback={<p role="status">{t("common.storeLoading")}</p>}>
           <PurchasesSheet
             game={game}
             storeProducts={storeProducts}
@@ -1827,7 +1891,7 @@ export default function App() {
                 ref={sheetCloseRef}
                 className="close"
                 onClick={() => setSelectedId(null)}
-                aria-label="Kapat"
+                aria-label={t("common.close")}
               >
                 <Icon name="close" />
               </button>
@@ -1881,13 +1945,16 @@ export default function App() {
                     }
                   >
                     {
-                      signal(
-                        selected,
-                        categoryExpertiseLevel(
-                          game,
-                          selected.instance.family.category,
-                        ),
-                      ).text
+                      localizeSignal(
+                        signal(
+                          selected,
+                          categoryExpertiseLevel(
+                            game,
+                            selected.instance.family.category,
+                          ),
+                        ).text,
+                        lang,
+                      )
                     }
                   </span>
                 </div>
@@ -1903,8 +1970,8 @@ export default function App() {
                 >
                   <Icon name="follow" />
                   {game.follow.watchedListingIds.includes(selected.id)
-                    ? "Takipten çıkar"
-                    : "İlanı takip et"}
+                    ? t("sheet.unfollow")
+                    : t("sheet.follow")}
                 </button>
                 {marketLevel >= 3 ? (
                   <button
@@ -1917,15 +1984,15 @@ export default function App() {
                       )
                     }
                   >
-                    Ürün alarmı kur
+                    {t("sheet.setAlarm")}
                   </button>
                 ) : (
-                  <span>Ürün alarmı Seviye 3'te açılır</span>
+                  <span>{t("sheet.alarmLevel3")}</span>
                 )}
               </div>
               <div className="band">
                 <div>
-                  <span>Tahmini fiyat aralığı</span>
+                  <span>{t("sheet.estPriceRange")}</span>
                   <b>
                     {money(
                       listingEstimateBand(
@@ -1935,6 +2002,7 @@ export default function App() {
                           selected.instance.family.category,
                         ),
                       ).lowMinor,
+                      lang,
                     )}{" "}
                     –{" "}
                     {money(
@@ -1945,6 +2013,7 @@ export default function App() {
                           selected.instance.family.category,
                         ),
                       ).highMinor,
+                      lang,
                     )}
                   </b>
                 </div>
@@ -1972,16 +2041,16 @@ export default function App() {
               </div>
               <div className="details">
                 <div>
-                  <span>Kondisyon</span>
-                  <b>%{selected.instance.condition}</b>
+                  <span>{t("market.conditionLabel") || (lang === "tr" ? "Kondisyon" : "Condition")}</span>
+                  <b>{lang === "tr" ? `%${selected.instance.condition}` : `${selected.instance.condition}%`}</b>
                 </div>
                 <div>
-                  <span>Bilgi güveni</span>
+                  <span>{t("portfolio.evidenceConfidence")}</span>
                   <b>{evidenceLabel(selected.instance.evidenceConfidence)}</b>
                 </div>
                 <div>
-                  <span>Pazarlık hakkı</span>
-                  <b aria-label={`${offers} pazarlık hakkı kaldı`}>
+                  <span>{t("sheet.negotiationRights")}</span>
+                  <b aria-label={t("sheet.negotiationRemaining", { count: offers })}>
                     {"● ".repeat(offers)}
                     {"○ ".repeat(2 - offers)}
                   </b>
@@ -1997,9 +2066,9 @@ export default function App() {
                   }
                 >
                   <span>
-                    <small>ÜRÜN KONTROLLERİ</small>
+                    <small>{t("sheet.productChecks")}</small>
                     <b>
-                      Bilgi güveni %
+                      {t("portfolio.evidenceConfidence")} %
                       {Math.round(selected.instance.evidenceConfidence * 100)}
                     </b>
                   </span>
@@ -2013,10 +2082,10 @@ export default function App() {
                       const definition = selected.instance.family.evidence.find(
                         (item) => item.id === record.definitionId,
                       );
-                      const evidenceState = evidencePresentation(record.status);
+                      const evidenceState = evidencePresentation(record.status, lang);
                       return (
                         <p className="evidence-row" key={record.definitionId}>
-                          <b>{definition?.label}</b>
+                          <b>{localizeEvidence(definition?.label ?? "", lang)}</b>
                           <span
                             className={`evidence-state ${evidenceState.tone}`}
                           >
@@ -2038,8 +2107,8 @@ export default function App() {
                     {!ftueActive || game.ftue.stage !== "COMPARE" ? (
                       <button className="secondary" onClick={toggleComparison}>
                         {comparing
-                          ? "Karşılaştırmayı kapat"
-                          : "Benzer ilanlarla karşılaştır"}
+                          ? t("sheet.closeCompare")
+                          : t("sheet.compareWithSimilar")}
                       </button>
                     ) : null}
                   </div>
@@ -2047,27 +2116,25 @@ export default function App() {
               </section>
               {comparing ? (
                 <div className="compare-stack" ref={comparisonRef}>
-                  <h3>Aynı ürün grubu · {comparables.length} ilan</h3>
+                  <h3>{t("sheet.comparablesTitle", { count: comparables.length })}</h3>
                   {comparables.length < 2 ? (
                     <p>
-                      Şu anda aynı ürün grubunda karşılaştırılabilecek başka
-                      aktif ilan yok.
+                      {t("sheet.comparablesEmpty")}
                     </p>
                   ) : (
                     <>
                       <p>
-                        Farklı satırlar işaretli. Satıcı tipi güvenilirlik
-                        garantisi değildir; inceleme bulgularını karşılaştır.
+                        {t("sheet.comparablesNote")}
                       </p>
                       {comparables.map((item, index) => (
                         <section
                           className="compare-card"
                           key={item.id}
-                          aria-label={`İlan ${index + 1}`}
+                          aria-label={t("sheet.listingNumber", { num: index + 1 })}
                         >
                           <h4>
-                            İlan {index + 1} ·{" "}
-                            {index === 0 ? "Açık ilan" : "Alternatif"}
+                            {t("sheet.listingNumber", { num: index + 1 })} ·{" "}
+                            {index === 0 ? t("sheet.activeListingLabel") : t("sheet.alternativeLabel")}
                           </h4>
                           <dl>
                             {compareRows.map((row) => (
@@ -2081,7 +2148,7 @@ export default function App() {
                               >
                                 <dt>
                                   {row.label}
-                                  {row.different ? <small>Farklı</small> : null}
+                                  {row.different ? <small>{t("sheet.diffBadge")}</small> : null}
                                 </dt>
                                 <dd>{row.values[index]}</dd>
                               </div>
@@ -2092,7 +2159,7 @@ export default function App() {
                               className="secondary"
                               onClick={() => selectListing(item.id)}
                             >
-                              İlan {index + 1} detaylarını aç
+                              {t("sheet.openListingDetails", { num: index + 1 })}
                             </button>
                           ) : null}
                         </section>
@@ -2105,22 +2172,22 @@ export default function App() {
             <div
               className="sheet-decision"
               role="group"
-              aria-label="Satın alma adımları"
+              aria-label={t("sheet.purchaseSteps")}
             >
               <div className="sheet-decision-heading">
-                <small>KARARIN</small>
-                <span>Nakit {money(game.cashMinor)}</span>
+                <small>{t("sheet.yourDecision")}</small>
+                <span>{t("sheet.cashAvailable", { cash: money(game.cashMinor, lang) })}</span>
               </div>
               {purchaseFeedback ? (
                 <p className="sheet-feedback" role="status">
-                  {purchaseFeedback}
+                  {localizeNotice(purchaseFeedback, lang)}
                 </p>
               ) : null}
               {(!ftueActive || game.ftue.stage === "NEGOTIATION") &&
               offers === 1 &&
               !negotiating?.closed ? (
                 <p className="sheet-step">
-                  ● ○ Son teklifin. Bu teklif reddedilirse görüşme kapanır.
+                  {t("sheet.lastOfferWarning")}
                 </p>
               ) : null}
               {(!ftueActive || game.ftue.stage === "NEGOTIATION") &&
@@ -2134,7 +2201,7 @@ export default function App() {
                     );
                   }}
                 >
-                  Karşı teklifi kabul et · {money(budget.counter.amountMinor)}
+                  {t("sheet.acceptCounter", { price: money(budget.counter.amountMinor, lang) })}
                   <small>{balanceCopy(budget.counter)}</small>
                 </button>
               ) : null}
@@ -2142,7 +2209,7 @@ export default function App() {
                 <div
                   className="offer-mode-picker"
                   role="group"
-                  aria-label="Teklif tarzı"
+                  aria-label={t("sheet.offerStyleAria")}
                 >
                   {offerModeOptions.map((option) => {
                     const amount = purchaseBudget(
@@ -2162,7 +2229,7 @@ export default function App() {
                         onClick={() => setPurchaseOfferMode(option.mode)}
                       >
                         <b>{option.label}</b>
-                        <strong>{amount ? money(amount) : "—"}</strong>
+                        <strong>{amount ? money(amount, lang) : "—"}</strong>
                         <small>{option.detail}</small>
                       </button>
                     );
@@ -2192,20 +2259,22 @@ export default function App() {
                         )
                       }
                     >
-                      Pazarlık et
+                      {t("sheet.negotiateButton")}
                       {!ftueActive
                         ? ` · ${offerModeOptions.find((option) => option.mode === purchaseOfferMode)?.label}`
                         : ""}
                       {budget?.offer ? (
                         <>
                           <small>
-                            {money(budget.offer.amountMinor)} teklif · {offers}{" "}
-                            hak
+                            {t("sheet.offerTriesRemaining", {
+                              amount: money(budget.offer.amountMinor, lang),
+                              offers,
+                            })}
                           </small>
                           <small>{balanceCopy(budget.offer)}</small>
                         </>
                       ) : (
-                        <small>Görüşme kapandı</small>
+                        <small>{t("sheet.negotiationClosed")}</small>
                       )}
                     </button>
                     {budget?.direct ? (
@@ -2219,7 +2288,7 @@ export default function App() {
                         }
                       >
                         {t("sheet.buyDirect")}{" "}
-                        <small>{money(budget.direct.amountMinor)}</small>
+                        <small>{money(budget.direct.amountMinor, lang)}</small>
                         <small>{balanceCopy(budget.direct)}</small>
                       </button>
                     ) : null}
@@ -2227,7 +2296,7 @@ export default function App() {
                   {budget && budget.shortfallMinor > 0 ? (
                     <div className="cash-shortfall">
                       <p>
-                        {t("sheet.cashShortfall", { amount: money(budget.shortfallMinor) })}
+                        {t("sheet.cashShortfall", { amount: money(budget.shortfallMinor, lang) })}
                       </p>
                       <button
                         onClick={() => {
@@ -2245,15 +2314,15 @@ export default function App() {
                 <>
                   <p className="sheet-step">
                     {game.ftue.stage === "COMPARE"
-                      ? "1 / 3 · Benzer ilanların fiyatlarına bak."
-                      : "2 / 3 · Ürünü nasıl kontrol edeceğini seç."}
+                      ? t("sheet.coachStep1")
+                      : t("sheet.coachStep2")}
                   </p>
                   {game.ftue.stage === "COMPARE" ? (
                     <button
                       className="primary sheet-next"
                       onClick={toggleComparison}
                     >
-                      Benzer ilanlarla karşılaştır
+                      {t("sheet.compareWithSimilar")}
                     </button>
                   ) : game.ftue.stage === "EVIDENCE" ? (
                     renderInspectionActions()
@@ -2280,12 +2349,12 @@ export default function App() {
                 ref={followSheetCloseRef}
                 className="close"
                 onClick={() => setFollowSheetOpen(false)}
-                aria-label="Kapat"
+                aria-label={t("common.close")}
               >
                 <Icon name="close" />
               </button>
               <Suspense
-                fallback={<p role="status">Takip listesi hazırlanıyor…</p>}
+                fallback={<p role="status">{t("common.followLoading")}</p>}
               >
                 <FollowPanel
                   game={game}

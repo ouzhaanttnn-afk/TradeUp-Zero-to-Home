@@ -1,7 +1,8 @@
 import { activeOwnedAssets, activePlayerListings } from "../domain/economy";
 import type { GameState } from "../domain/models";
+import { t, type Language } from "../i18n";
 
-export function recoveryPlan(state: GameState) {
+export function recoveryPlan(state: GameState, lang?: Language) {
   const assets = activeOwnedAssets(state);
   const assetValueMinor = assets.reduce(
     (total, asset) => total + asset.instance.fairValueMinor,
@@ -23,10 +24,10 @@ export function recoveryPlan(state: GameState) {
     level,
     title:
       level === "LOCKED"
-        ? "Nakit ürünlerde bağlı"
+        ? t("recovery.tiedInGoods", undefined, lang)
         : level === "TIGHT"
-          ? "Nakit alanın daraldı"
-          : "Yeni fırsatlar için nakit aç",
+          ? t("recovery.tightCash", undefined, lang)
+          : t("recovery.openCash", undefined, lang),
     canQuickSell: assets.some((asset) =>
       ["IN_INVENTORY", "READY"].includes(asset.state),
     ),

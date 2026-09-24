@@ -1,7 +1,7 @@
 import type { GameState } from "../domain/models";
 import type { RadarSignal } from "../domain/marketEvents";
 import { Icon } from "./Icon";
-import { useTranslation, localizeCategory } from "../i18n";
+import { useTranslation, localizeCategory, localizeMarketMessage } from "../i18n";
 
 export default function RadarPanel({
   game,
@@ -43,7 +43,7 @@ export default function RadarPanel({
             </span>
             <div>
               <b>{getTierCopy(signal.tier).badge}</b>
-              <small>{signal.message}</small>
+              <small>{localizeMarketMessage(signal.message, lang)}</small>
             </div>
           </div>
           <div className="radar-categories">

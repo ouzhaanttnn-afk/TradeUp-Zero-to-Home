@@ -1,6 +1,7 @@
 import type { Language } from "./types";
+import { extendedTranslations } from "./extendedTranslations";
 
-export const translations: Record<Language, Record<string, string>> = {
+const baseTranslations: Record<Language, Record<string, string>> = {
   tr: {
     // Navigation
     "nav.market": "Pazar",
@@ -1128,4 +1129,11 @@ export const translations: Record<Language, Record<string, string>> = {
     "market.ageMinutes": "{min} min",
     "market.ageHours": "{hour} h",
   },
+};
+
+export const translations: Record<Language, Record<string, string>> = {
+  tr: { ...baseTranslations.tr, ...extendedTranslations.tr },
+  en: { ...baseTranslations.en, ...extendedTranslations.en },
+  de: { ...baseTranslations.de, ...extendedTranslations.de },
+  es: { ...baseTranslations.es, ...extendedTranslations.es },
 };

@@ -1,7 +1,8 @@
 import type { GameState } from "../domain/models";
+import { type Language } from "../i18n";
 import { saleDecisionCause } from "./decisionCause";
 
-export function latestSaleResult(state: GameState) {
+export function latestSaleResult(state: GameState, lang?: Language) {
   const entry = state.transactionJournal
     .toReversed()
     .find((item) => item.kind === "SALE" && item.assetId);
@@ -15,6 +16,6 @@ export function latestSaleResult(state: GameState) {
     proceedsMinor: entry.cashDeltaMinor,
     bookCostMinor: -entry.costBasisDeltaMinor,
     profitMinor: entry.realizedProfitDeltaMinor,
-    cause: saleDecisionCause(asset, entry.cashDeltaMinor),
+    cause: saleDecisionCause(asset, entry.cashDeltaMinor, lang),
   };
 }

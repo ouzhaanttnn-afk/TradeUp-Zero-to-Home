@@ -1,19 +1,21 @@
 import type { EvidenceStatus } from "../domain/models";
+import { t, type Language } from "../i18n";
 
 export type EvidenceTone = "neutral" | "info" | "warning" | "success";
 
-const presentation: Record<
-  EvidenceStatus,
-  { label: string; tone: EvidenceTone }
-> = {
-  UNKNOWN: { label: "Bilinmiyor", tone: "neutral" },
-  CLAIMED: { label: "Satıcı beyanı", tone: "info" },
-  VISIBLE: { label: "Fotoğrafta görülüyor", tone: "info" },
-  SUSPICIOUS: { label: "Şüpheli", tone: "warning" },
-  CHECKED: { label: "Kusur doğrulandı", tone: "warning" },
-  VERIFIED: { label: "Sorunsuz doğrulandı", tone: "success" },
+const toneMap: Record<EvidenceStatus, EvidenceTone> = {
+  UNKNOWN: "neutral",
+  CLAIMED: "info",
+  VISIBLE: "info",
+  SUSPICIOUS: "warning",
+  CHECKED: "warning",
+  VERIFIED: "success",
 };
 
-export function evidencePresentation(status: EvidenceStatus) {
-  return presentation[status];
+export function evidencePresentation(status: EvidenceStatus, lang?: Language) {
+  const key = `evidence.${status.toLowerCase()}`;
+  return {
+    label: t(key, undefined, lang),
+    tone: toneMap[status] ?? "neutral",
+  };
 }

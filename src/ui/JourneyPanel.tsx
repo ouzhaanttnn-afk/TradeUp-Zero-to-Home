@@ -63,7 +63,7 @@ export default function JourneyPanel({
     timelinePages.start,
     timelinePages.end,
   );
-  const completedSales = completedSalesPresentation(game.realizedProfitMinor);
+  const completedSales = completedSalesPresentation(game.realizedProfitMinor, lang);
   const estimates = wealthPresentation(game);
   const marketLevel = marketExpertiseLevel(game);
   const marketXpTarget = nextExpertiseThreshold(game.expertise.marketXp);
@@ -93,8 +93,8 @@ export default function JourneyPanel({
     <>
       <div className="section-title">
         <div>
-          <small>KİŞİSEL KAYIT</small>
-          <h2>Yolculuk</h2>
+          <small>{t("journey.personalRecord")}</small>
+          <h2>{t("journey.title")}</h2>
         </div>
       </div>
       {game.home.unlocked ? (
@@ -105,42 +105,53 @@ export default function JourneyPanel({
             </span>
           </div>
           <div>
-            <small>EV YOLCULUĞU · %{homeProgress}</small>
+            <small>{t("journey.homeJourney")} · {lang === "tr" ? `%${homeProgress}` : `${homeProgress}%`}</small>
             <h3>
               {!game.home.purchased
-                ? "Kendi alanına giden yol"
+                ? t("journey.pathToOwnSpace")
                 : ladderTarget
-                  ? `${purchasedHome?.name ?? "Evin"} sonrası: ${ladderTarget.name}`
-                  : "Emlak merdiveninin zirvesi"}
+                  ? `${purchasedHome ? localizeHome(purchasedHome.id, purchasedHome.name, "", "", lang).name : t("journey.yourHome")} → ${localizeHome(ladderTarget.id, ladderTarget.name, "", "", lang).name}`
+                  : t("journey.realEstatePeak")}
             </h3>
             <p>
               {!game.home.purchased
                 ? homeProgress < 50
-                  ? "İlk kârlı satışından sonra ev hedefin görünür olur."
-                  : `Kalan tahmini mesafe ${formatEstimate({
-                      lowMinor: Math.max(
-                        0,
-                        HOME_GOAL_MINOR - estimates.total.highMinor,
+                  ? t("journey.homeGoalLockedDesc")
+                  : t("journey.remainingDistanceCashNeeded", {
+                      distance: formatEstimate(
+                        {
+                          lowMinor: Math.max(
+                            0,
+                            HOME_GOAL_MINOR - estimates.total.highMinor,
+                          ),
+                          highMinor: Math.max(
+                            0,
+                            HOME_GOAL_MINOR - estimates.total.lowMinor,
+                          ),
+                        },
+                        false,
+                        lang,
                       ),
-                      highMinor: Math.max(
-                        0,
-                        HOME_GOAL_MINOR - estimates.total.lowMinor,
-                      ),
-                    })}. Ev alımı için hedefte nakit gerekecek.`
+                    })
                 : ladderTarget
-                  ? `Sıradaki hedef ${ladderTarget.name}. Kalan tahmini mesafe ${formatEstimate(
-                      {
-                        lowMinor: Math.max(
-                          0,
-                          ladderTarget.priceMinor - estimates.total.highMinor,
-                        ),
-                        highMinor: Math.max(
-                          0,
-                          ladderTarget.priceMinor - estimates.total.lowMinor,
-                        ),
-                      },
-                    )}.`
-                  : "Emlak merdiveninin zirvesindesin; pazar ve kariyerin açık kalmaya devam ediyor."}
+                  ? t("journey.nextTargetRemainingDistance", {
+                      target: localizeHome(ladderTarget.id, ladderTarget.name, "", "", lang).name,
+                      distance: formatEstimate(
+                        {
+                          lowMinor: Math.max(
+                            0,
+                            ladderTarget.priceMinor - estimates.total.highMinor,
+                          ),
+                          highMinor: Math.max(
+                            0,
+                            ladderTarget.priceMinor - estimates.total.lowMinor,
+                          ),
+                        },
+                        false,
+                        lang,
+                      ),
+                    })
+                  : t("journey.topTierLadder")}
             </p>
             <div className="xp-bar">
               <i style={{ width: `${homeProgress}%` }} />
@@ -150,13 +161,13 @@ export default function JourneyPanel({
                 <div className="home-market-status" role="status">
                   <span>
                     {upgradeOptions.length
-                      ? `${upgradeOptions.length} ev bulundu`
-                      : "Emlak araştırması sürüyor"}
+                      ? t("journey.homesFound", { count: upgradeOptions.length })
+                      : t("journey.homeSearchActive")}
                   </span>
                   {nextHome ? (
-                    <b>Yeni sonuç yaklaşık {nextHomeWaitMin} oyun dk.</b>
+                    <b>{t("journey.nextHomeWait", { min: nextHomeWaitMin })}</b>
                   ) : (
-                    <b>Tüm seçenekler bulundu</b>
+                    <b>{t("journey.allHomeOptionsFound")}</b>
                   )}
                 </div>
                 {upgradeOptions.length ? (
@@ -212,10 +223,10 @@ export default function JourneyPanel({
             <Icon name="home" />
           </span>
           <div>
-            <small>UZUN DÖNEM HEDEFİ</small>
-            <h3>Ev yolculuğu henüz görünmedi</h3>
+            <small>{t("journey.longTermGoal")}</small>
+            <h3>{t("journey.homeJourneyNotVisible")}</h3>
             <p>
-              Temel döngüyü öğrenip ilk kârlı satışını tamamladığında açılır.
+              {t("journey.unlocksAfterProfitableSale")}
             </p>
           </div>
         </section>
@@ -223,36 +234,34 @@ export default function JourneyPanel({
       {game.home.purchased && !ladderTarget ? (
         <section className="next-goal-card">
           <div>
-            <small>KARİYER ZİRVESİ</small>
-            <h3>{purchasedHome?.name ?? "Kendi evin"} ile tamamlandı</h3>
+            <small>{t("journey.careerPeak")}</small>
+            <h3>{t("journey.completedWithHome", { home: purchasedHome ? localizeHome(purchasedHome.id, purchasedHome.name, "", "", lang).name : t("journey.yourHome") })}</h3>
             <p>
-              Emlak merdiveninin en üst basamağındasın. Pazar ve kariyerin
-              açık kalmaya devam ediyor.
+              {t("journey.topOfLadderDesc")}
             </p>
           </div>
-          <span>TAMAMLANDI</span>
+          <span>{t("journey.completedBadge")}</span>
         </section>
       ) : null}
       <section className={`score-card journey-score ${completedSales.tone}`}>
         <div className="journey-score-heading">
           <small>{completedSales.label}</small>
-          <span>Gerçekleşen sonuç</span>
+          <span>{t("journey.realizedOutcome")}</span>
         </div>
         <strong className={game.realizedProfitMinor < 0 ? "loss" : ""}>
-          {money(game.realizedProfitMinor)}
+          {money(game.realizedProfitMinor, lang)}
         </strong>
         <p>
-          Bu tutar yalnız tamamlanan satışlardan gelir; elindeki ürünlerin
-          tahmini değeri aşağıda ayrı gösterilir.
+          {t("journey.realizedProfitDesc")}
         </p>
       </section>
       <div className="journey-block-heading">
         <div>
-          <small>PARAN VE ÜRÜNLERİN</small>
-          <h3>Bugünkü durum</h3>
+          <small>{t("journey.moneyAndProducts")}</small>
+          <h3>{t("journey.statusToday")}</h3>
         </div>
         <div className="journey-metrics-toggle-row">
-          <span>{activeOwnedAssets(game).length} ürün</span>
+          <span>{t("journey.ownedProductsCount", { count: activeOwnedAssets(game).length })}</span>
           <button
             className="timeline-toggle"
             type="button"
@@ -260,19 +269,19 @@ export default function JourneyPanel({
             aria-controls="journey-metrics-detail"
             onClick={() => setMetricsExpanded((expanded) => !expanded)}
           >
-            {metricsExpanded ? "Kapat" : "Detay"}
+            {metricsExpanded ? t("common.close") : t("common.detail")}
             <span aria-hidden="true">{metricsExpanded ? "−" : "+"}</span>
           </button>
         </div>
       </div>
       <div className="metric-grid journey-metrics journey-metrics-primary">
         <div>
-          <span>Nakit</span>
-          <b>{money(game.cashMinor)}</b>
+          <span>{t("wallet.cash")}</span>
+          <b>{money(game.cashMinor, lang)}</b>
         </div>
         <div>
-          <span>Toplam tahmini değer</span>
-          <b>{formatEstimate(estimates.total)}</b>
+          <span>{t("journey.totalEstValue")}</span>
+          <b>{formatEstimate(estimates.total, false, lang)}</b>
         </div>
       </div>
       {metricsExpanded ? (
@@ -281,23 +290,25 @@ export default function JourneyPanel({
           id="journey-metrics-detail"
         >
           <div>
-            <span>Ürünlerin tahmini değeri</span>
-            <b>{formatEstimate(estimates.portfolio)}</b>
+            <span>{t("journey.itemsEstValue")}</span>
+            <b>{formatEstimate(estimates.portfolio, false, lang)}</b>
           </div>
           <div>
-            <span>Ürünlere harcanan toplam</span>
-            <b>{money(activeBookCostMinor(game))}</b>
+            <span>{t("journey.itemsTotalSpent")}</span>
+            <b>{money(activeBookCostMinor(game), lang)}</b>
           </div>
           <div>
-            <span>Ürünlerdeki tahmini fark</span>
+            <span>{t("journey.itemsEstDifference")}</span>
             <b className={estimates.difference.highMinor < 0 ? "loss" : ""}>
-              {formatEstimate(estimates.difference, true)}
+              {formatEstimate(estimates.difference, true, lang)}
             </b>
           </div>
           <div>
-            <span>Toplam değerin nakit kısmı</span>
+            <span>{t("journey.cashShareOfTotal")}</span>
             <b>
-              %{estimates.cashShare.low}–%{estimates.cashShare.high}
+              {lang === "tr"
+                ? `%${estimates.cashShare.low}–%${estimates.cashShare.high}`
+                : `${estimates.cashShare.low}%–${estimates.cashShare.high}%`}
             </b>
           </div>
         </div>
@@ -305,11 +316,11 @@ export default function JourneyPanel({
       <section className="expertise-card">
         <div className="expertise-heading">
           <div>
-            <small>PAZAR DENEYİMİ</small>
-            <h3>Seviye {marketLevel}</h3>
+            <small>{t("journey.marketExpBadge")}</small>
+            <h3>{t("journey.levelNumber", { level: marketLevel })}</h3>
           </div>
           <span>
-            {game.expertise.marketXp} / {marketXpTarget} deneyim
+            {t("journey.xpProgress", { current: game.expertise.marketXp, target: marketXpTarget })}
           </span>
         </div>
         <div className="xp-bar">
@@ -324,10 +335,10 @@ export default function JourneyPanel({
         </div>
         <p>
           {marketLevel < 3
-            ? "Seviye 3: ürün alarmları ve fiyat eğilimi"
+            ? t("journey.expPerkLevel3")
             : marketLevel < 6
-              ? "Seviye 6: bilgi güveni ve kusur ihtimali"
-              : "Bilgi araçların kararını netleştirir; fiyat bonusu vermez."}
+              ? t("journey.expPerkLevel6")
+              : t("journey.expPerkMax")}
         </p>
         <div className="category-levels">
           {Object.entries(game.expertise.categoryXp)
@@ -342,11 +353,11 @@ export default function JourneyPanel({
       </section>
       <div className="timeline-header timeline-header-collapsible">
         <div>
-          <small>KİŞİSEL KAYITLARIN</small>
-          <h3>Kariyer hikâyen</h3>
+          <small>{t("journey.personalRecords")}</small>
+          <h3>{t("journey.careerStory")}</h3>
         </div>
         <div className="timeline-summary">
-          <span>{game.career.length} önemli an</span>
+          <span>{t("journey.careerMomentsCount", { count: game.career.length })}</span>
           <button
             className="timeline-toggle"
             type="button"
@@ -354,7 +365,7 @@ export default function JourneyPanel({
             aria-controls="career-timeline-content"
             onClick={() => setTimelineExpanded((expanded) => !expanded)}
           >
-            {timelineExpanded ? "Kapat" : "Aç"}
+            {timelineExpanded ? t("common.close") : t("common.open")}
             <span aria-hidden="true">{timelineExpanded ? "−" : "+"}</span>
           </button>
         </div>
@@ -372,16 +383,16 @@ export default function JourneyPanel({
                     setTimelinePage(0);
                   }}
                 >
-                  {timelineFilterLabel(filter)}
+                  {timelineFilterLabel(filter, lang)}
                 </button>
               ),
             )}
           </div>
           {!timeline.length ? (
             <div className="empty compact-empty">
-              <h3>Bu grupta olay yok</h3>
+              <h3>{t("journey.noEventsInGroup")}</h3>
               <p>
-                Anlamlı ilkler, rekorlar ve eşikler gerçek işlemlerinden doğar.
+                {t("journey.noEventsDesc")}
               </p>
             </div>
           ) : null}
@@ -391,8 +402,9 @@ export default function JourneyPanel({
                 event.group,
                 game.gameTimeMin,
                 event.atGameMin,
+                lang,
               );
-              const saleCopy = saleHistoryCopy(event);
+              const saleCopy = saleHistoryCopy(event, lang);
               return (
                 <article
                   className={`timeline-event ${eventState.tone}`}
@@ -408,24 +420,24 @@ export default function JourneyPanel({
                       </small>
                       <span>{eventState.ageLabel}</span>
                     </div>
-                    <b>{simplifyLegacyPlayerCopy(event.label)}</b>
+                    <b>{simplifyLegacyPlayerCopy(event.label, lang)}</b>
                     {saleCopy ? <p>{saleCopy}</p> : null}
                   </div>
                   {event.amountMinor !== undefined ? (
-                    <em>{money(event.amountMinor)}</em>
+                    <em>{money(event.amountMinor, lang)}</em>
                   ) : null}
                 </article>
               );
             })}
           </div>
           {timelinePages.pageCount > 1 ? (
-            <div className="timeline-pagination" aria-label="Kariyer sayfaları">
+            <div className="timeline-pagination" aria-label={t("journey.careerPagesAria")}>
               <button
                 type="button"
                 disabled={timelinePages.page === 0}
                 onClick={() => setTimelinePage(timelinePages.page - 1)}
               >
-                Önceki
+                {t("common.previous")}
               </button>
               <span>
                 {timelinePages.page + 1} / {timelinePages.pageCount}
@@ -435,7 +447,7 @@ export default function JourneyPanel({
                 disabled={timelinePages.page === timelinePages.pageCount - 1}
                 onClick={() => setTimelinePage(timelinePages.page + 1)}
               >
-                Sonraki
+                {t("common.next")}
               </button>
             </div>
           ) : null}

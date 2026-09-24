@@ -1,21 +1,23 @@
 import type { OwnershipState } from "../domain/models";
+import { t, type Language } from "../i18n";
 
 export type OwnershipTone =
   "available" | "working" | "listed" | "reserved" | "pending" | "complete";
 
-const presentation: Record<
-  OwnershipState,
-  { label: string; tone: OwnershipTone }
-> = {
-  IN_INVENTORY: { label: "Envanterde", tone: "available" },
-  PREPARING: { label: "Hazırlanıyor", tone: "working" },
-  READY: { label: "İlana hazır", tone: "available" },
-  LISTED: { label: "İlanda", tone: "listed" },
-  RESERVED: { label: "Rezerve", tone: "reserved" },
-  SOLD_PENDING: { label: "Ödeme bekleniyor", tone: "pending" },
-  SOLD_COMPLETE: { label: "Satış tamamlandı", tone: "complete" },
+const stateKeyMap: Record<OwnershipState, { key: string; tone: OwnershipTone }> = {
+  IN_INVENTORY: { key: "ownership.inInventory", tone: "available" },
+  PREPARING: { key: "ownership.preparing", tone: "working" },
+  READY: { key: "ownership.ready", tone: "available" },
+  LISTED: { key: "ownership.listed", tone: "listed" },
+  RESERVED: { key: "ownership.reserved", tone: "reserved" },
+  SOLD_PENDING: { key: "ownership.soldPending", tone: "pending" },
+  SOLD_COMPLETE: { key: "ownership.soldComplete", tone: "complete" },
 };
 
-export function ownershipPresentation(state: OwnershipState) {
-  return presentation[state];
+export function ownershipPresentation(state: OwnershipState, lang?: Language) {
+  const item = stateKeyMap[state];
+  return {
+    label: t(item.key, undefined, lang),
+    tone: item.tone,
+  };
 }

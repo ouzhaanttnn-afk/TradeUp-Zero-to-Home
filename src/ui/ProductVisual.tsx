@@ -1,5 +1,6 @@
 import { assetFor, fallbackAssetFor, visualTreatmentFor } from "../assets";
 import type { ItemInstance } from "../domain/models";
+import { useTranslation, localizeVisualCondition } from "../i18n";
 
 export function ProductVisual({
   instance,
@@ -12,6 +13,7 @@ export function ProductVisual({
   alt?: string;
   priority?: boolean;
 }) {
+  const { t, lang } = useTranslation();
   const visual = visualTreatmentFor(instance);
   return (
     <div
@@ -34,35 +36,35 @@ export function ProductVisual({
       <span className="condition-overlay" aria-hidden="true" />
       <span
         className="visual-condition-bar"
-        title={`Kondisyon: ${visual.conditionLabel}`}
+        title={t("market.conditionTitle", { condition: localizeVisualCondition(instance.condition, lang) })}
         aria-hidden="true"
       />
       <span className="visual-statuses">
         {visual.revealedDefect ? (
           <span
             className="visual-badge visual-badge--defect"
-            aria-label={`${visual.revealedDefectCount} doğrulanmış kusur`}
+            aria-label={t("visual.defectCount", { count: visual.revealedDefectCount })}
           >
             <b aria-hidden="true">!</b>
-            <em>Kusur</em>
+            <em>{t("visual.defect")}</em>
           </span>
         ) : null}
         {visual.missingAccessory ? (
           <span
             className="visual-badge visual-badge--accessory"
-            aria-label="Eksik aksesuar"
+            aria-label={t("visual.missingAccessory")}
           >
             <b aria-hidden="true">−</b>
-            <em>Eksik</em>
+            <em>{t("visual.missing")}</em>
           </span>
         ) : null}
         {visual.verifiedEvidence ? (
           <span
             className="visual-badge visual-badge--verified"
-            aria-label={`${visual.verifiedEvidenceCount} kanıt doğrulandı`}
+            aria-label={t("visual.verifiedCount", { count: visual.verifiedEvidenceCount })}
           >
             <b aria-hidden="true">✓</b>
-            <em>Kontrollü</em>
+            <em>{t("visual.verified")}</em>
           </span>
         ) : null}
       </span>

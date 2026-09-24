@@ -9,6 +9,7 @@ import {
   localizeCategory,
   localizeConfidence,
   localizeSignal,
+  localizeRisk,
 } from "../i18n";
 
 type MarketRisk = {
@@ -55,7 +56,7 @@ export function MarketListingCard({
       data-price-minor={item.priceMinor}
       data-market-tier={item.instance.family.tier}
       onClick={onSelect}
-      aria-label={`${productName}, ${money(item.priceMinor, lang)}, %${item.instance.condition}, ${confidence}, ${ageLabel}, ${signalText}. ${t("market.openDetail")}`}
+      aria-label={`${productName}, ${money(item.priceMinor, lang)}, ${lang === "tr" ? `%${item.instance.condition}` : `${item.instance.condition}%`}, ${confidence}, ${ageLabel}, ${signalText}. ${t("market.openDetail")}`}
     >
       <div className="market-visual-frame">
         <ProductVisual
@@ -64,12 +65,12 @@ export function MarketListingCard({
           priority={priority}
         />
         <span className="market-condition-signal">
-          %{item.instance.condition}
+          {lang === "tr" ? `%${item.instance.condition}` : `${item.instance.condition}%`}
         </span>
       </div>
       {risk.level !== "low" ? (
         <span className={`market-heat market-heat--${risk.level}`}>
-          {risk.text}
+          {localizeRisk(risk.text, lang)}
         </span>
       ) : null}
       <div className="listing-copy">
@@ -87,7 +88,7 @@ export function MarketListingCard({
         </div>
         <div className="tags">
           <b className={itemSignal.cls}>{signalText}</b>
-          <span>%{item.instance.condition} {t("market.conditionBadge") || "kondisyon"}</span>
+          <span>{lang === "tr" ? `%${item.instance.condition}` : `${item.instance.condition}%`} {t("market.conditionLabel") || (lang === "tr" ? "kondisyon" : "condition")}</span>
         </div>
         <div className="market-card-facts">
           <span>{confidence}</span>

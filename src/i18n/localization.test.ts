@@ -7,6 +7,9 @@ import {
   localizePreparation,
   localizeSeller,
   localizeSignal,
+  localizeEvidence,
+  localizeAttribute,
+  localizeNotice,
   formatMoney,
   currencySymbol,
   t,
@@ -178,6 +181,40 @@ describe("i18n localization suite", () => {
       expect(listingAgeLabel(0, 0, "tr")).toBe("Yeni");
       expect(listingAgeLabel(0, 15, "tr")).toBe("15 dk");
       expect(listingAgeLabel(0, 120, "tr")).toBe("2 sa");
+    });
+  });
+
+  describe("evidence, attributes, and notices localization", () => {
+    it("localizes evidence labels across languages", () => {
+      expect(localizeEvidence("Kapak izi", "en")).toBe("Cover mark");
+      expect(localizeEvidence("Eksik sayfa", "de")).toBe("Fehlende Seite");
+      expect(localizeEvidence("Batarya sağlık testi", "es")).toBe("Prueba de salud de batería");
+      expect(localizeEvidence("Kapak izi", "tr")).toBe("Kapak izi");
+    });
+
+    it("localizes attribute labels across languages", () => {
+      expect(localizeAttribute("Kapak", "en")).toBe("Cover");
+      expect(localizeAttribute("Sayfa", "de")).toBe("Seiten");
+      expect(localizeAttribute("Orijinallik", "es")).toBe("Autenticidad");
+      expect(localizeAttribute("Kapak", "tr")).toBe("Kapak");
+    });
+
+    it("localizes notices across languages including dynamic patterns", () => {
+      expect(localizeNotice("Piyasa canlı. İyi fırsatlar beklemez.", "en")).toBe(
+        "Market is live. Good deals don't wait.",
+      );
+      expect(localizeNotice("25 yenileme hakkın geri doldu.", "en")).toBe(
+        "25 scan credits restored.",
+      );
+      expect(localizeNotice("25 yenileme hakkın geri doldu.", "de")).toBe(
+        "25 Scan-Credits wieder aufgeladen.",
+      );
+      expect(localizeNotice("Ses seviyesi kapalı olarak ayarlandı.", "en")).toBe(
+        "Sound level set to Off.",
+      );
+      expect(localizeNotice("Bu ürün zaten satın alındı.", "es")).toBe(
+        "Este producto ya fue comprado.",
+      );
     });
   });
 });

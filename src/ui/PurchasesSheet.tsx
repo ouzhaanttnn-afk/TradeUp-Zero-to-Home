@@ -50,7 +50,7 @@ export default function PurchasesSheet({
   showPrivacyOptions: () => Promise<void>;
   onClose: () => void;
 }) {
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const closeRef = useRef<HTMLButtonElement>(null);
   const sheetRef = useRef<HTMLElement>(null);
 
@@ -108,12 +108,13 @@ export default function PurchasesSheet({
                     productId,
                     storeCopy[productId].title,
                     storeCopy[productId].detail,
+                    lang,
                   );
                   return (
                     <article key={productId}>
                       <div>
                         <strong>
-                          {metadata?.title || localizedCopy.title}
+                          {localizedCopy.title || metadata?.title}
                         </strong>
                         <p>{localizedCopy.detail}</p>
                       </div>

@@ -1,5 +1,6 @@
 import type { GameState, OwnedAsset } from "../domain/models";
 import { money } from "../game";
+import { t, getLanguage, type Language } from "../i18n";
 
 const metadataAmount = (value: unknown) =>
   typeof value === "number" && Number.isInteger(value) ? value : undefined;
@@ -7,6 +8,7 @@ const metadataAmount = (value: unknown) =>
 export function purchaseDecisionCause(
   state: Pick<GameState, "transactionJournal">,
   asset: OwnedAsset,
+  lang: Language = getLanguage(),
 ) {
   const purchase = state.transactionJournal.find(
     (entry) => entry.kind === "PURCHASE" && entry.assetId === asset.id,
@@ -19,27 +21,31 @@ export function purchaseDecisionCause(
       : 0;
 
   if (negotiatedSavingMinor > 0) {
-    return `Pazarlık, liste fiyatına göre ${money(negotiatedSavingMinor)} tasarruf sağladı.`;
+    return t("decision.negotiationSaving", { saving: money(negotiatedSavingMinor, lang) }, lang);
   }
   if (asset.instance.evidenceConfidence < 0.46) {
-    return "Bu alımdaki en büyük belirsizlik, ürün bilgilerinin hâlâ zayıf olması.";
+    return t("decision.uncertaintyWeak", undefined, lang);
   }
-  return "Bu kararın dayanağı, görünür fiyat aralığı ve kontrol edilen ürün bilgileri.";
+  return t("decision.groundedPrice", undefined, lang);
 }
 
-export function saleDecisionCause(asset: OwnedAsset, proceedsMinor: number) {
+export function saleDecisionCause(
+  asset: OwnedAsset,
+  proceedsMinor: number,
+  lang: Language = getLanguage(),
+) {
   const profitMinor = proceedsMinor - asset.bookCostMinor;
   if (profitMinor < 0) {
-    return `Zararın ana nedeni: satış fiyatı toplam harcamanın ${money(-profitMinor)} altında kaldı.`;
+    return t("decision.lossCause", { amount: money(-profitMinor, lang) }, lang);
   }
   if (profitMinor === 0) {
-    return "Satış fiyatı toplam harcamayı tam karşıladı; kâr veya zarar oluşmadı.";
+    return t("decision.breakeven", undefined, lang);
   }
   const completedPreparation = asset.instance.preparationHistory.some(
     (record) => record.state === "COMPLETE" && record.kind !== "TEST",
   );
   if (completedPreparation && asset.preparationCostMinor > 0) {
-    return `Hazırlık maliyeti dahil, satış fiyatı toplam harcamanı ${money(profitMinor)} aştı.`;
+    return t("decision.prepProfit", { amount: money(profitMinor, lang) }, lang);
   }
-  return `Kârın ana nedeni: satış fiyatı toplam harcamanı ${money(profitMinor)} aştı.`;
+  return t("decision.profitCause", { amount: money(profitMinor, lang) }, lang);
 }

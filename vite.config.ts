@@ -49,6 +49,21 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (
+            id.includes("productTranslations") ||
+            id.includes("labelTranslations") ||
+            id.includes("extendedTranslations")
+          ) {
+            return "i18n-data";
+          }
+        },
+      },
+    },
+  },
   plugins: [
     react(),
     {
