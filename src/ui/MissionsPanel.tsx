@@ -31,8 +31,8 @@ export default function MissionsPanel({ game }: { game: GameState }) {
                   <small className="mission-badge">{mission.badge[lang]}</small>
                   <h4>{mission.title[lang]}</h4>
                 </div>
-                <span className="mission-reward-pill">
-                  +{mission.rewardXp} XP
+                <span className={`mission-reward-pill ${mission.completed ? "claimed" : ""}`}>
+                  {mission.completed ? "✓ " : "+"}{mission.rewardXp} XP
                 </span>
               </div>
               <p>{mission.description[lang]}</p>
