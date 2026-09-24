@@ -47,6 +47,9 @@ import {
 import { useGameStore } from "./stores/gameStore";
 import { useTapHaptics } from "./hooks/useTapHaptics";
 import { Icon, type IconName } from "./ui/Icon";
+import { getSellerQuote, getBuyerQuote } from "./domain/dialogues";
+import { isShowcaseItem } from "./domain/showcase";
+import ShowcaseRoom from "./ui/ShowcaseRoom";
 import { evidencePresentation } from "./ui/evidencePresentation";
 import { ownershipPresentation } from "./ui/ownershipPresentation";
 import { latestSaleResult } from "./ui/saleResult";
@@ -275,6 +278,10 @@ export default function App() {
     purchaseProduct,
     openPurchases,
     showPrivacyOptions,
+    showcaseAssetIds,
+    specialization,
+    toggleShowcase,
+    setSpecialization,
   } = useGameStore();
 
   const openSettingsPanel = useCallback(() => {
@@ -630,6 +637,7 @@ export default function App() {
           (record) => record.kind === action.kind,
         ).length < action.maxUses,
     );
+    const inShowcase = isShowcaseItem(showcaseAssetIds, item.id);
     return (
       <article
         className={`owned${focusedAssetId === item.id ? " owned--focused" : ""}`}
@@ -642,9 +650,16 @@ export default function App() {
         <div className="owned-copy">
           <div className="owned-title-row">
             <h3>{localizeProduct(item.instance.family.id, item.instance.family.name, lang)}</h3>
-            <span className={`asset-state ${ownershipState.tone}`}>
-              {ownershipState.label}
-            </span>
+            <div className="owned-title-badges">
+              {inShowcase ? (
+                <span className="showcase-mini-badge" title={t("showcase.featured") || "Vitrinde"}>
+                  <Icon name="star" />
+                </span>
+              ) : null}
+              <span className={`asset-state ${ownershipState.tone}`}>
+                {ownershipState.label}
+              </span>
+            </div>
           </div>
           <div className="owned-metrics">
             <div>
@@ -732,6 +747,14 @@ export default function App() {
                 {listingStrategyAssetId === item.id
                   ? t("portfolio.closeOptions")
                   : t("portfolio.putOnSale")}
+              </button>
+              <button
+                type="button"
+                className={`showcase-toggle-btn ${inShowcase ? "active" : ""}`}
+                aria-label={inShowcase ? (t("showcase.remove") || "Vitrinden Kaldır") : (t("showcase.add") || "Vitrine Ekle")}
+                onClick={() => toggleShowcase(item.id)}
+              >
+                <Icon name="star" /> {inShowcase ? (t("showcase.removeFromShowcase") || "Vitrinden Çıkar") : (t("showcase.addToShowcase") || "Vitrine Ekle")}
               </button>
             </div>
           ) : null}
@@ -1299,6 +1322,14 @@ export default function App() {
                 <h2>{t("portfolio.title")}</h2>
               </div>
             </div>
+            <ShowcaseRoom
+              game={game}
+              showcaseAssetIds={showcaseAssetIds}
+              onSelectAsset={(assetId) => {
+                showOwnedAsset(assetId, "inventory");
+              }}
+              onToggleShowcase={toggleShowcase}
+            />
             <div
               className="segments"
               role="tablist"
@@ -1489,6 +1520,9 @@ export default function App() {
                                     <span>{persona.tendency}</span>
                                   </p>
                                 ) : null}
+                                <div className="buyer-dialogue-quote">
+                                  "{getBuyerQuote(buyerOffer.buyerType, buyerOffer.counterUsed ? "counter" : "initial", lang)}"
+                                </div>
                                 <dl className="sale-breakdown">
                                   <div>
                                     <dt>{t("buyer.amountProceeds")}</dt>
@@ -1761,6 +1795,8 @@ export default function App() {
                   if (buyHome(homeId) && wasFirstHome) setHomeFinaleOpen(true);
                 }}
                 onOpenPortfolio={() => navigate("portfolio")}
+                specialization={specialization}
+                onSelectSpecialization={setSpecialization}
               />
             </Suspense>
           )
@@ -1927,6 +1963,12 @@ export default function App() {
                       lang,
                     )}
                   </h2>
+                </div>
+                <div className="seller-dialogue-bubble">
+                  <span className="seller-dialogue-tag">
+                    💬 {localizeSeller(selected.seller, sellerLabel[selected.seller], lang)}
+                  </span>
+                  <p>"{getSellerQuote(selected.seller, "greeting", lang)}"</p>
                 </div>
                 <div className="detail-price">
                   <div>

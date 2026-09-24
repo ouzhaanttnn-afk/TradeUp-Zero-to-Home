@@ -524,6 +524,24 @@ const marketEventMap: Record<string, Record<Language, { title: string; message: 
     de: { title: "Ruhiger Markt", message: "Käufer sind wählerischer; fundierte und ausgewogene Inserate punkten." },
     es: { title: "Mercado Tranquilo", message: "Los compradores son más selectivos; destacan anuncios bien verificados y equilibrados." },
   },
+  "vintage-nostalgia": {
+    tr: { title: "Nostalji rüzgarı", message: "Retro müzik ve fotoğraf ürünlerine yoğun koleksiyoncu ilgisi var." },
+    en: { title: "Vintage Nostalgia", message: "Surging collector interest in retro music and photo gear." },
+    de: { title: "Nostalgiewelle", message: "Starkes Sammlerinteresse an Retro-Musik- und Fotogeräten." },
+    es: { title: "Viento Nostálgico", message: "Gran interés de coleccionistas en música y fotografía retro." },
+  },
+  "diy-workshop": {
+    tr: { title: "Atölye ve tamir haftası", message: "El aletleri ve atölye ekipmanlarında alıcı hareketliliği yüksek." },
+    en: { title: "DIY Workshop Week", message: "Elevated buyer activity for tools and workshop machinery." },
+    de: { title: "Werkstattwoche", message: "Hohe Käuferaktivität bei Werkzeugen und Werkstattausrüstung." },
+    es: { title: "Semana del Taller", message: "Alta demanda de compradores para herramientas y taller." },
+  },
+  "tech-expo": {
+    tr: { title: "Bilişim ve donanım fuarı", message: "Bilgisayar ve telefon kategorisinde hızlı satışlar gerçekleşiyor." },
+    en: { title: "Tech & Hardware Expo", message: "Fast turnover and high bids for computers and phones." },
+    de: { title: "Technologie-Messe", message: "Schneller Absatz und hohe Gebote für Computer und Telefone." },
+    es: { title: "Feria Tecnológica", message: "Ventas rápidas y ofertas altas en ordenadores y teléfonos." },
+  },
 };
 
 export function localizeMarketEvent(
@@ -567,6 +585,24 @@ const marketEventByMessageMap: Record<string, Record<Language, string>> = {
     en: "Buyers are choosier; strong evidence and balanced listings stand out.",
     de: "Käufer sind wählerischer; fundierte und ausgewogene Inserate punkten.",
     es: "Los compradores son más selectivos; destacan anuncios bien verificados y equilibrados.",
+  },
+  "Retro müzik ve fotoğraf ürünlerine yoğun koleksiyoncu ilgisi var.": {
+    tr: "Retro müzik ve fotoğraf ürünlerine yoğun koleksiyoncu ilgisi var.",
+    en: "Surging collector interest in retro music and photo gear.",
+    de: "Starkes Sammlerinteresse an Retro-Musik- und Fotogeräten.",
+    es: "Gran interés de coleccionistas en música y fotografía retro.",
+  },
+  "El aletleri ve atölye ekipmanlarında alıcı hareketliliği yüksek.": {
+    tr: "El aletleri ve atölye ekipmanlarında alıcı hareketliliği yüksek.",
+    en: "Elevated buyer activity for tools and workshop machinery.",
+    de: "Hohe Käuferaktivität bei Werkzeugen und Werkstattausrüstung.",
+    es: "Alta demanda de compradores para herramientas y taller.",
+  },
+  "Bilgisayar ve telefon kategorisinde hızlı satışlar gerçekleşiyor.": {
+    tr: "Bilgisayar ve telefon kategorisinde hızlı satışlar gerçekleşiyor.",
+    en: "Fast turnover and high bids for computers and phones.",
+    de: "Schneller Absatz und hohe Gebote für Computer und Telefone.",
+    es: "Ventas rápidas y ofertas altas en ordenadores y teléfonos.",
   },
 };
 

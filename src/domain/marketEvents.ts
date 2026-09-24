@@ -54,6 +54,30 @@ export const MARKET_EVENTS: readonly MarketEventDefinition[] = [
     demandMultiplier: 0.92,
     radarTier: "CALM",
   },
+  {
+    id: "vintage-nostalgia",
+    title: "Nostalji rüzgarı",
+    message: "Retro müzik ve fotoğraf ürünlerine yoğun koleksiyoncu ilgisi var.",
+    affectedCategories: ["Müzik", "Fotoğraf"],
+    demandMultiplier: 1.25,
+    radarTier: "HIGH",
+  },
+  {
+    id: "diy-workshop",
+    title: "Atölye ve tamir haftası",
+    message: "El aletleri ve atölye ekipmanlarında alıcı hareketliliği yüksek.",
+    affectedCategories: ["Atölye", "Küçük Eşya"],
+    demandMultiplier: 1.18,
+    radarTier: "RISING",
+  },
+  {
+    id: "tech-expo",
+    title: "Bilişim ve donanım fuarı",
+    message: "Bilgisayar ve telefon kategorisinde hızlı satışlar gerçekleşiyor.",
+    affectedCategories: ["Bilgisayar", "Telefon"],
+    demandMultiplier: 1.22,
+    radarTier: "HIGH",
+  },
 ] as const;
 
 const EVENT_DELAY_MIN = 180;

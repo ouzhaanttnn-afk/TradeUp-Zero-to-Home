@@ -12,6 +12,7 @@ const iconNames: IconName[] = [
   "portfolio",
   "radar",
   "refresh",
+  "star",
 ];
 
 describe("Icon", () => {

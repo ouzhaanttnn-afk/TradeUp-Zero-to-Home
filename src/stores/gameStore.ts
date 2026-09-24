@@ -83,7 +83,44 @@ import {
   type PlayerOfferMode,
 } from "../game";
 import { t, localizeProduct } from "../i18n";
+import { getActiveHomePerk } from "../domain/homePerks";
+import { maxShowcaseCapacity, toggleShowcaseItem } from "../domain/showcase";
+import type { SpecializationId } from "../domain/specialization";
 import { systemTimeProvider } from "../infrastructure/time";
+
+const loadShowcaseIds = (): string[] => {
+  if (typeof window === "undefined" || !window.localStorage) return [];
+  try {
+    const raw = window.localStorage.getItem("tradeup_showcase_asset_ids");
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveShowcaseIds = (ids: string[]) => {
+  if (typeof window === "undefined" || !window.localStorage) return;
+  try {
+    window.localStorage.setItem("tradeup_showcase_asset_ids", JSON.stringify(ids));
+  } catch {}
+};
+
+const loadSpecialization = (): SpecializationId | null => {
+  if (typeof window === "undefined" || !window.localStorage) return null;
+  try {
+    return (window.localStorage.getItem("tradeup_specialization_id") as SpecializationId) || null;
+  } catch {
+    return null;
+  }
+};
+
+const saveSpecialization = (spec: SpecializationId | null) => {
+  if (typeof window === "undefined" || !window.localStorage) return;
+  try {
+    if (spec) window.localStorage.setItem("tradeup_specialization_id", spec);
+    else window.localStorage.removeItem("tradeup_specialization_id");
+  } catch {}
+};
 import type { StoreProductMetadata } from "../infrastructure/monetization";
 import {
   getMonetizationAdapters,
@@ -153,6 +190,10 @@ type Store = {
   claimReward: (placementId: RewardPlacementId) => Promise<void>;
   dismissCoach: () => void;
   reset: () => Promise<void>;
+  showcaseAssetIds: string[];
+  specialization: SpecializationId | null;
+  toggleShowcase: (assetId: string) => void;
+  setSpecialization: (spec: SpecializationId) => void;
 };
 
 const buzz = (state: GameState, success = false) => {
@@ -281,6 +322,8 @@ export const useGameStore = create<Store>((set, get) => ({
   notice: "Piyasa canlı. İyi fırsatlar beklemez.",
   storeProducts: [],
   monetizationBusy: false,
+  showcaseAssetIds: loadShowcaseIds(),
+  specialization: loadSpecialization(),
   hydrate: () => {
     if (hydration) return hydration;
     hydration = (async () => {
@@ -1096,7 +1139,15 @@ export const useGameStore = create<Store>((set, get) => ({
       },
       `${assetId}:${kind}:${result.state.gameTimeMin}`,
     );
-    const progressed = progressBy(tracked, Math.max(1, result.durationMin));
+    const homePerk = getActiveHomePerk(game.home);
+    const spec = get().specialization;
+    const durationDiscount =
+      (homePerk?.prepDurationDiscount ?? 0) + (spec === "RESTORER" ? 0.25 : 0);
+    const effectiveDuration = Math.max(
+      1,
+      Math.round(result.durationMin * (1 - Math.min(0.5, durationDiscount))),
+    );
+    const progressed = progressBy(tracked, effectiveDuration);
     set({
       game: stampAndPersist(recordFtuePreparation(progressed.state, assetId)),
       notice: worldNotice(
@@ -1511,5 +1562,29 @@ export const useGameStore = create<Store>((set, get) => ({
     const game = initialState(systemTimeProvider.nowWallMs());
     set({ game, notice: t("notice.newCareerStarted") });
     await saveGame(game);
+  },
+  toggleShowcase: (assetId: string) => {
+    const current = get().showcaseAssetIds;
+    const capacity = maxShowcaseCapacity(get().game.home);
+    const result = toggleShowcaseItem(current, assetId, capacity);
+    saveShowcaseIds(result.showcaseAssetIds);
+    set({
+      showcaseAssetIds: result.showcaseAssetIds,
+      notice:
+        result.reason === "CAPACITY_REACHED"
+          ? t("showcase.capacityFull") || "Vitrin kapasitesi dolu!"
+          : result.added
+            ? t("showcase.addedNotice") || "Eşya vitrine eklendi."
+            : t("showcase.removedNotice") || "Eşya vitrinden çıkarıldı.",
+    });
+    buzz(get().game, result.added);
+  },
+  setSpecialization: (spec: SpecializationId) => {
+    saveSpecialization(spec);
+    set({
+      specialization: spec,
+      notice: t("specialization.selectedNotice") || "Kariyer uzmanlığı güncellendi.",
+    });
+    buzz(get().game, true);
   },
 }));
