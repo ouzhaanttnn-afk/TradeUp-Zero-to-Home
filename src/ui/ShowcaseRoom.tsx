@@ -14,11 +14,13 @@ export default function ShowcaseRoom({
   showcaseAssetIds,
   onSelectAsset,
   onToggleShowcase,
+  onOpenInventory,
 }: {
   game: GameState;
   showcaseAssetIds: readonly string[];
   onSelectAsset: (assetId: string) => void;
   onToggleShowcase: (assetId: string) => void;
+  onOpenInventory?: () => void;
 }) {
   const { t, lang } = useTranslation();
   const capacity = maxShowcaseCapacity(game.home);
@@ -98,7 +100,23 @@ export default function ShowcaseRoom({
         ))}
 
         {Array.from({ length: emptySlotsCount }).map((_, index) => (
-          <div className="showcase-slot empty" key={`empty-${index}`}>
+          <div
+            className={`showcase-slot empty ${onOpenInventory ? "clickable" : ""}`}
+            key={`empty-${index}`}
+            role={onOpenInventory ? "button" : undefined}
+            tabIndex={onOpenInventory ? 0 : undefined}
+            onClick={onOpenInventory}
+            onKeyDown={
+              onOpenInventory
+                ? (e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      onOpenInventory();
+                    }
+                  }
+                : undefined
+            }
+          >
             <span className="empty-slot-icon">✦</span>
             <b>{t("showcase.emptySlot") || "Boş Vitrin Yuvası"}</b>
             <small>{t("showcase.emptyDesc") || "Portföyünden değerli eşyaları vitrine ekle."}</small>

@@ -1334,6 +1334,7 @@ export default function App() {
                 showOwnedAsset(assetId, "inventory");
               }}
               onToggleShowcase={toggleShowcase}
+              onOpenInventory={() => setPortfolioSegment("inventory")}
             />
             <div
               className="segments"

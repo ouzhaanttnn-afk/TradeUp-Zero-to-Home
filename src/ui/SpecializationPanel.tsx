@@ -4,6 +4,12 @@ import {
 } from "../domain/specialization";
 import { useTranslation } from "../i18n";
 
+const SPEC_ICONS: Record<SpecializationId, string> = {
+  RESTORER: "🔧",
+  NEGOTIATOR: "💼",
+  SCOUT: "🧭",
+};
+
 export default function SpecializationPanel({
   activeSpecialization,
   onSelectSpecialization,
@@ -36,7 +42,10 @@ export default function SpecializationPanel({
             >
               <div className="specialization-card-header">
                 <div>
-                  <h4>{spec.title[lang]}</h4>
+                  <h4>
+                    <span className="spec-icon-emoji">{SPEC_ICONS[spec.id]}</span>
+                    {spec.title[lang]}
+                  </h4>
                   <small>{spec.subtitle[lang]}</small>
                 </div>
                 {isSelected ? (

@@ -1148,6 +1148,8 @@ export const useGameStore = create<Store>((set, get) => ({
       Math.round(result.durationMin * (1 - Math.min(0.5, durationDiscount))),
     );
     const progressed = progressBy(tracked, effectiveDuration);
+    buzz(progressed.state, true);
+    sound(progressed.state, "OFFER");
     set({
       game: stampAndPersist(recordFtuePreparation(progressed.state, assetId)),
       notice: worldNotice(
