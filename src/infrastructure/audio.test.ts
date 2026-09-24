@@ -31,4 +31,15 @@ describe("semantic audio feedback", () => {
       playFeedbackSound("WARNING", "NORMAL", player),
     ).resolves.toBeUndefined();
   });
+
+  it("plays an uplifting multi-tone chime for achievements and showcase actions", async () => {
+    const player = vi.fn<TonePlayer>(() => Promise.resolve());
+
+    await playFeedbackSound("ACHIEVEMENT", "NORMAL", player);
+
+    expect(player).toHaveBeenCalledTimes(4);
+    expect(player.mock.calls.map(([tone]) => tone.frequencyHz)).toEqual([
+      523, 659, 784, 1046,
+    ]);
+  });
 });

@@ -47,7 +47,12 @@ import {
 import { useGameStore } from "./stores/gameStore";
 import { useTapHaptics } from "./hooks/useTapHaptics";
 import { Icon, type IconName } from "./ui/Icon";
-import { getSellerQuote, getBuyerQuote } from "./domain/dialogues";
+import {
+  getSellerQuote,
+  getBuyerQuote,
+  getSellerBadge,
+  getBuyerBadge,
+} from "./domain/dialogues";
 import { isShowcaseItem } from "./domain/showcase";
 import ShowcaseRoom from "./ui/ShowcaseRoom";
 import { evidencePresentation } from "./ui/evidencePresentation";
@@ -1521,7 +1526,10 @@ export default function App() {
                                   </p>
                                 ) : null}
                                 <div className="buyer-dialogue-quote">
-                                  "{getBuyerQuote(buyerOffer.buyerType, buyerOffer.counterUsed ? "counter" : "initial", lang)}"
+                                  <span className="buyer-dialogue-avatar" aria-hidden="true">
+                                    {getBuyerBadge(buyerOffer.buyerType).icon}
+                                  </span>
+                                  <p>"{getBuyerQuote(buyerOffer.buyerType, buyerOffer.counterUsed ? "counter" : "initial", lang)}"</p>
                                 </div>
                                 <dl className="sale-breakdown">
                                   <div>
@@ -1965,9 +1973,14 @@ export default function App() {
                   </h2>
                 </div>
                 <div className="seller-dialogue-bubble">
-                  <span className="seller-dialogue-tag">
-                    💬 {localizeSeller(selected.seller, sellerLabel[selected.seller], lang)}
-                  </span>
+                  <div className="seller-dialogue-header">
+                    <span className="seller-dialogue-avatar" aria-hidden="true">
+                      {getSellerBadge(selected.seller).icon}
+                    </span>
+                    <span className="seller-dialogue-tag">
+                      {localizeSeller(selected.seller, sellerLabel[selected.seller], lang)}
+                    </span>
+                  </div>
                   <p>"{getSellerQuote(selected.seller, "greeting", lang)}"</p>
                 </div>
                 <div className="detail-price">

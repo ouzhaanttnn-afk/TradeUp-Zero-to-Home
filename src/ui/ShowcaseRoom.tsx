@@ -25,6 +25,10 @@ export default function ShowcaseRoom({
   const activeAssets = getShowcaseAssets(game.ownedAssets, showcaseAssetIds);
   const emptySlotsCount = Math.max(0, capacity - activeAssets.length);
   const homePerk = getActiveHomePerk(game.home);
+  const totalShowcaseValueMinor = activeAssets.reduce(
+    (sum, a) => sum + a.instance.fairValueMinor,
+    0,
+  );
 
   return (
     <section className="showcase-room" aria-label={t("showcase.title") || "Koleksiyon Vitrini"}>
@@ -35,9 +39,16 @@ export default function ShowcaseRoom({
           </small>
           <h3>{t("showcase.title") || "Kişisel Vitrin & Müze"}</h3>
         </div>
-        <span className="showcase-capacity-pill">
-          {activeAssets.length} / {capacity}
-        </span>
+        <div className="showcase-header-badges">
+          {totalShowcaseValueMinor > 0 ? (
+            <span className="showcase-value-pill" title={t("showcase.totalValue") || "Toplam Değer"}>
+              ⭐ {money(totalShowcaseValueMinor, lang)}
+            </span>
+          ) : null}
+          <span className="showcase-capacity-pill">
+            {activeAssets.length} / {capacity}
+          </span>
+        </div>
       </div>
 
       {homePerk ? (

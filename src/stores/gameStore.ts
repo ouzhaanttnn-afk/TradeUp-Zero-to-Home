@@ -1577,6 +1577,9 @@ export const useGameStore = create<Store>((set, get) => ({
             ? t("showcase.addedNotice") || "Eşya vitrine eklendi."
             : t("showcase.removedNotice") || "Eşya vitrinden çıkarıldı.",
     });
+    if (result.added) {
+      sound(get().game, "ACHIEVEMENT");
+    }
     buzz(get().game, result.added);
   },
   setSpecialization: (spec: SpecializationId) => {
@@ -1585,6 +1588,7 @@ export const useGameStore = create<Store>((set, get) => ({
       specialization: spec,
       notice: t("specialization.selectedNotice") || "Kariyer uzmanlığı güncellendi.",
     });
+    sound(get().game, "ACHIEVEMENT");
     buzz(get().game, true);
   },
 }));

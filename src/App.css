@@ -5702,20 +5702,19 @@ nav .active::before {
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
-.seller-dialogue-bubble p, .buyer-dialogue-quote {
+.seller-dialogue-bubble p, .buyer-dialogue-quote p {
   font-size: 12px;
   font-style: italic;
   color: #c9ded5;
   margin: 0;
   line-height: 1.35;
 }
-.buyer-dialogue-quote {
-  padding: 4px 8px;
-  background: rgba(0, 0, 0, 0.25);
-  border-left: 2px solid #58b684;
-  border-radius: 4px;
-  margin: 6px 0;
-}
+.seller-dialogue-header{display:flex;align-items:center;gap:6px}
+.seller-dialogue-avatar,.buyer-dialogue-avatar{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;font-size:11px;border-radius:50%;background:rgba(255,255,255,0.08);flex-shrink:0}
+.buyer-dialogue-quote{display:flex;align-items:center;gap:6px;padding:4px 8px;background:rgba(0,0,0,0.25);border-left:2px solid #58b684;border-radius:4px;margin:6px 0}
+.buyer-dialogue-quote p{flex:1}
+.showcase-header-badges{display:flex;align-items:center;gap:6px}
+.showcase-value-pill{display:inline-flex;align-items:center;gap:3px;background:rgba(241,207,109,0.15);border:1px solid rgba(241,207,109,0.35);color:#f1cf6d;font-size:11px;font-weight:700;padding:2px 7px;border-radius:12px}
 .showcase-room {
   background: linear-gradient(170deg, rgba(22, 38, 30, 0.8), rgba(12, 22, 17, 0.9));
   border: 1px solid rgba(220, 180, 80, 0.35);

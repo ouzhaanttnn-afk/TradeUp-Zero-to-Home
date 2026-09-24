@@ -315,3 +315,83 @@ export function getBuyerQuote(
     buyerQuotes.QUICK.initial.tr
   );
 }
+
+export type CharacterBadge = {
+  icon: string;
+  role: Record<Language, string>;
+};
+
+export const SELLER_BADGES: Record<SellerKind, CharacterBadge> = {
+  urgent: {
+    icon: "⚡",
+    role: { tr: "Acilci Satıcı", en: "Urgent Seller", de: "Eiliger Verkäufer", es: "Vendedor Urgente" },
+  },
+  merchant: {
+    icon: "🏪",
+    role: { tr: "Esnaf Satıcı", en: "Merchant", de: "Händler", es: "Comerciante" },
+  },
+  emotional: {
+    icon: "💖",
+    role: { tr: "Duygusal Satıcı", en: "Sentimental Seller", de: "Emotionaler Verkäufer", es: "Vendedor Sentimental" },
+  },
+  uninformed: {
+    icon: "📦",
+    role: { tr: "Piyasasız Satıcı", en: "Uninformed Seller", de: "Ahnungsloser Verkäufer", es: "Vendedor Desinformado" },
+  },
+  risky: {
+    icon: "🎲",
+    role: { tr: "Riskli Satıcı", en: "Risky Seller", de: "Riskanter Verkäufer", es: "Vendedor Arriesgado" },
+  },
+  expert: {
+    icon: "🔍",
+    role: { tr: "Uzman Piyasacı", en: "Market Expert", de: "Markt-Experte", es: "Experto de Mercado" },
+  },
+};
+
+export const BUYER_BADGES: Record<BuyerType, CharacterBadge> = {
+  QUICK: {
+    icon: "⚡",
+    role: { tr: "Seri Alıcı", en: "Quick Buyer", de: "Schnellkäufer", es: "Comprador Rápido" },
+  },
+  QUALITY: {
+    icon: "💎",
+    role: { tr: "Kondisyoncu", en: "Condition Hunter", de: "Qualitätskäufer", es: "Cazador de Calidad" },
+  },
+  COLLECTOR: {
+    icon: "🏆",
+    role: { tr: "Koleksiyoncu", en: "Collector", de: "Sammler", es: "Coleccionista" },
+  },
+  NEGOTIATOR: {
+    icon: "🤝",
+    role: { tr: "Pazarlıkçı", en: "Hard Negotiator", de: "Verhandler", es: "Negociador" },
+  },
+  RISK_AVERSE: {
+    icon: "🛡️",
+    role: { tr: "Temkinli Alıcı", en: "Cautious Buyer", de: "Vorsichtiger Käufer", es: "Comprador Cauto" },
+  },
+  BULK: {
+    icon: "📦",
+    role: { tr: "Toptancı", en: "Bulk Trader", de: "Großhändler", es: "Mayorista" },
+  },
+};
+
+export function getSellerBadge(seller: SellerKind): CharacterBadge {
+  return SELLER_BADGES[seller] ?? {
+    icon: "💬",
+    role: { tr: "Satıcı", en: "Seller", de: "Verkäufer", es: "Vendedor" },
+  };
+}
+
+export function getBuyerBadge(buyerType?: BuyerType): CharacterBadge {
+  if (!buyerType) {
+    return {
+      icon: "💬",
+      role: { tr: "Alıcı", en: "Buyer", de: "Käufer", es: "Comprador" },
+    };
+  }
+  return BUYER_BADGES[buyerType] ?? {
+    icon: "💬",
+    role: { tr: "Alıcı", en: "Buyer", de: "Käufer", es: "Comprador" },
+  };
+}
+

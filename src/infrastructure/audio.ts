@@ -1,7 +1,13 @@
 import type { AccessibilityPreferences } from "../domain/models";
 
 export type FeedbackSound =
-  "OFFER" | "PURCHASE" | "LISTING" | "SALE_PROFIT" | "SALE_LOSS" | "WARNING";
+  | "OFFER"
+  | "PURCHASE"
+  | "LISTING"
+  | "SALE_PROFIT"
+  | "SALE_LOSS"
+  | "WARNING"
+  | "ACHIEVEMENT";
 
 type SoundLevel = AccessibilityPreferences["soundLevel"];
 type Tone = {
@@ -35,6 +41,12 @@ const patterns: Record<FeedbackSound, Tone[]> = {
     { frequencyHz: 220, durationMs: 105, waveform: "triangle" },
   ],
   WARNING: [{ frequencyHz: 300, durationMs: 68, waveform: "triangle" }],
+  ACHIEVEMENT: [
+    { frequencyHz: 523, durationMs: 40, waveform: "triangle" },
+    { frequencyHz: 659, durationMs: 50, waveform: "triangle" },
+    { frequencyHz: 784, durationMs: 60, waveform: "triangle" },
+    { frequencyHz: 1046, durationMs: 110, attackMs: 8 },
+  ],
 };
 
 let sharedContext: AudioContext | undefined;
