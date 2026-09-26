@@ -83,10 +83,37 @@ import {
   type PlayerOfferMode,
 } from "../game";
 import { t, localizeProduct } from "../i18n";
-import { getActiveHomePerk } from "../domain/homePerks";
 import { maxShowcaseCapacity, toggleShowcaseItem } from "../domain/showcase";
 import type { SpecializationId } from "../domain/specialization";
 import { systemTimeProvider } from "../infrastructure/time";
+import {
+  DEFAULT_APPEARANCE,
+  canUseHomeInteriorStyle,
+  canUseShellTheme,
+  sanitizeAppearance,
+  type AppearancePreferences,
+  type HomeInteriorStyle,
+  type ShellTheme,
+} from "../domain/appearance";
+
+const APPEARANCE_STORAGE_KEY = "tradeup_appearance_v1";
+
+const loadAppearance = (): AppearancePreferences => {
+  if (typeof window === "undefined" || !window.localStorage) return DEFAULT_APPEARANCE;
+  try {
+    const raw = window.localStorage.getItem(APPEARANCE_STORAGE_KEY);
+    return raw ? { ...DEFAULT_APPEARANCE, ...JSON.parse(raw) } : DEFAULT_APPEARANCE;
+  } catch {
+    return DEFAULT_APPEARANCE;
+  }
+};
+
+const saveAppearance = (appearance: AppearancePreferences) => {
+  if (typeof window === "undefined" || !window.localStorage) return;
+  try {
+    window.localStorage.setItem(APPEARANCE_STORAGE_KEY, JSON.stringify(appearance));
+  } catch {}
+};
 
 const loadShowcaseIds = (): string[] => {
   if (typeof window === "undefined" || !window.localStorage) return [];
@@ -192,6 +219,9 @@ type Store = {
   reset: () => Promise<void>;
   showcaseAssetIds: string[];
   specialization: SpecializationId | null;
+  appearance: AppearancePreferences;
+  setShellTheme: (theme: ShellTheme) => void;
+  setHomeInteriorStyle: (style: HomeInteriorStyle) => void;
   toggleShowcase: (assetId: string) => void;
   setSpecialization: (spec: SpecializationId) => void;
   lastProfitGained: { deltaMinor: number; timestamp: number } | null;
@@ -326,6 +356,21 @@ export const useGameStore = create<Store>((set, get) => ({
   monetizationBusy: false,
   showcaseAssetIds: loadShowcaseIds(),
   specialization: loadSpecialization(),
+  appearance: loadAppearance(),
+  setShellTheme: (theme) => {
+    const current = get();
+    if (!canUseShellTheme(theme, current.game.monetization.entitlements)) return;
+    const appearance = { ...current.appearance, shellTheme: theme };
+    saveAppearance(appearance);
+    set({ appearance });
+  },
+  setHomeInteriorStyle: (style) => {
+    const current = get();
+    if (!canUseHomeInteriorStyle(style, current.game.monetization.entitlements)) return;
+    const appearance = { ...current.appearance, homeInteriorStyle: style };
+    saveAppearance(appearance);
+    set({ appearance });
+  },
   lastProfitGained: null,
   clearProfitGained: () => set({ lastProfitGained: null }),
   hydrate: () => {
@@ -369,6 +414,7 @@ export const useGameStore = create<Store>((set, get) => ({
       set({
         game: stampAndPersist(refreshed.state),
         storeProducts: refreshed.products,
+        appearance: sanitizeAppearance(get().appearance, refreshed.state.monetization.entitlements),
       });
     })().finally(() => {
       hydration = undefined;
@@ -1146,15 +1192,7 @@ export const useGameStore = create<Store>((set, get) => ({
       },
       `${assetId}:${kind}:${result.state.gameTimeMin}`,
     );
-    const homePerk = getActiveHomePerk(game.home);
-    const spec = get().specialization;
-    const durationDiscount =
-      (homePerk?.prepDurationDiscount ?? 0) + (spec === "RESTORER" ? 0.25 : 0);
-    const effectiveDuration = Math.max(
-      1,
-      Math.round(result.durationMin * (1 - Math.min(0.5, durationDiscount))),
-    );
-    const progressed = progressBy(tracked, effectiveDuration);
+    const progressed = progressBy(tracked, result.durationMin);
     buzz(progressed.state, true);
     sound(progressed.state, "OFFER");
     set({
@@ -1411,6 +1449,7 @@ export const useGameStore = create<Store>((set, get) => ({
     set({
       game: stampAndPersist(refreshed.state),
       storeProducts: refreshed.products,
+      appearance: sanitizeAppearance(get().appearance, refreshed.state.monetization.entitlements),
       monetizationBusy: false,
       notice: refreshed.storeAvailable
         ? "Mağaza fiyatları güncellendi."
@@ -1457,6 +1496,7 @@ export const useGameStore = create<Store>((set, get) => ({
     }[result.status];
     set({
       game: stampAndPersist(next),
+      appearance: sanitizeAppearance(get().appearance, next.monetization.entitlements),
       monetizationBusy: false,
       notice: message,
     });
@@ -1485,6 +1525,7 @@ export const useGameStore = create<Store>((set, get) => ({
         );
     set({
       game: stampAndPersist(next),
+      appearance: sanitizeAppearance(get().appearance, next.monetization.entitlements),
       monetizationBusy: false,
       notice: result.failed
         ? "Satın almalar geri yüklenemedi. Bağlantını kontrol edip tekrar dene."
@@ -1503,6 +1544,7 @@ export const useGameStore = create<Store>((set, get) => ({
     set({
       game: stampAndPersist(refreshed.state),
       storeProducts: refreshed.products,
+      appearance: sanitizeAppearance(get().appearance, refreshed.state.monetization.entitlements),
     });
   },
   showPrivacyOptions: async () => {

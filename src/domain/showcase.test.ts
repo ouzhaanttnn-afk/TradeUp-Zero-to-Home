@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_SHOWCASE_CAPACITY,
-  EXPANDED_SHOWCASE_CAPACITY,
   getShowcaseAssets,
   isShowcaseItem,
   maxShowcaseCapacity,
@@ -10,7 +9,7 @@ import {
 import type { OwnedAsset } from "./models";
 
 describe("showcase domain module", () => {
-  it("determines showcase capacity based on purchased home tier", () => {
+  it("keeps cosmetic showcase capacity independent from home tier", () => {
     expect(maxShowcaseCapacity(undefined)).toBe(DEFAULT_SHOWCASE_CAPACITY);
     expect(
       maxShowcaseCapacity({
@@ -27,7 +26,7 @@ describe("showcase domain module", () => {
         purchasedHomeId: "stone_courtyard",
         progressMilestones: [],
       }),
-    ).toBe(EXPANDED_SHOWCASE_CAPACITY);
+    ).toBe(DEFAULT_SHOWCASE_CAPACITY);
   });
 
   it("toggles items in and out of showcase within capacity limits", () => {

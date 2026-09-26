@@ -280,6 +280,7 @@ button:disabled {
   overflow-x: clip;
   box-shadow: 0 0 54px rgba(0, 0, 0, 0.45);
 }
+
 .startup-shell {
   position: relative;
   isolation: isolate;
@@ -6068,4 +6069,3 @@ nav .active::before {
   15%, 75% { opacity: 1; transform: translate(-50%, 0); }
   to { opacity: 0; transform: translate(-50%, -16px); }
 }
-

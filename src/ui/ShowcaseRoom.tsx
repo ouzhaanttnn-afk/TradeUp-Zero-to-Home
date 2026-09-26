@@ -1,5 +1,4 @@
 import type { GameState } from "../domain/models";
-import { getActiveHomePerk } from "../domain/homePerks";
 import {
   getShowcaseAssets,
   maxShowcaseCapacity,
@@ -26,7 +25,6 @@ export default function ShowcaseRoom({
   const capacity = maxShowcaseCapacity(game.home);
   const activeAssets = getShowcaseAssets(game.ownedAssets, showcaseAssetIds);
   const emptySlotsCount = Math.max(0, capacity - activeAssets.length);
-  const homePerk = getActiveHomePerk(game.home);
   const totalShowcaseValueMinor = activeAssets.reduce(
     (sum, a) => sum + a.instance.fairValueMinor,
     0,
@@ -52,16 +50,6 @@ export default function ShowcaseRoom({
           </span>
         </div>
       </div>
-
-      {homePerk ? (
-        <div className="home-hq-banner">
-          <Icon name="home" />
-          <div>
-            <strong>{homePerk.badge[lang]}</strong>
-            <p>{homePerk.description[lang]}</p>
-          </div>
-        </div>
-      ) : null}
 
       <div className="showcase-grid">
         {activeAssets.map((asset) => (

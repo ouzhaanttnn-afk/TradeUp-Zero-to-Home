@@ -5,6 +5,22 @@ import type { StoreProductMetadata } from "../infrastructure/monetization";
 import { Icon } from "./Icon";
 import { useModalFocus } from "./useModalFocus";
 import { useTranslation, localizeStoreProduct } from "../i18n";
+import { useGameStore } from "../stores/gameStore";
+import type { HomeInteriorStyle, ShellTheme } from "../domain/appearance";
+
+const themeChoices: { id: ShellTheme; label: string; productId?: MonetizationProductId }[] = [
+  { id: "classic", label: "Klasik" },
+  { id: "obsidian", label: "Obsidyen", productId: "tradeup_premium_lifetime" },
+  { id: "night-market", label: "Gece Pazarı", productId: "tradeup_theme_night_market" },
+  { id: "workshop", label: "Atölye", productId: "tradeup_theme_workshop" },
+];
+
+const homeStyleChoices: { id: HomeInteriorStyle; label: string }[] = [
+  { id: "classic", label: "Klasik" },
+  { id: "modern", label: "Modern" },
+  { id: "heritage", label: "Miras" },
+  { id: "coastal", label: "Sahil" },
+];
 
 const storeCopy: Record<
   MonetizationProductId,
@@ -53,6 +69,7 @@ export default function PurchasesSheet({
   const { t, lang } = useTranslation();
   const closeRef = useRef<HTMLButtonElement>(null);
   const sheetRef = useRef<HTMLElement>(null);
+  const { appearance, setShellTheme, setHomeInteriorStyle } = useGameStore();
 
   useModalFocus(true, sheetRef, closeRef, onClose);
 
@@ -136,6 +153,51 @@ export default function PurchasesSheet({
                   );
                 },
               )}
+            </div>
+            <div className="cosmetic-picker" aria-label="Arayüz teması" style={{ display: "grid", gap: 8, marginTop: 8 }}>
+              <strong>Arayüz teması</strong>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+                {themeChoices.map((choice) => {
+                  const unlocked = !choice.productId || game.monetization.entitlements.some(
+                    (entry) => entry.productId === choice.productId && entry.status === "OWNED",
+                  );
+                  return (
+                    <button
+                      key={choice.id}
+                      className={appearance.shellTheme === choice.id ? "selected" : "secondary"}
+                      style={{ minHeight: 40, color: appearance.shellTheme === choice.id ? "var(--accent)" : undefined }}
+                      disabled={!unlocked}
+                      aria-pressed={appearance.shellTheme === choice.id}
+                      onClick={() => setShellTheme(choice.id)}
+                    >
+                      {choice.label}{unlocked ? "" : " · Kilitli"}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="cosmetic-picker" aria-label="Ev iç mekân stili" style={{ display: "grid", gap: 8, marginTop: 8 }}>
+              <strong>Ev iç mekân stili</strong>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+                {homeStyleChoices.map((choice) => {
+                  const unlocked = choice.id === "classic" || game.monetization.entitlements.some(
+                    (entry) => entry.entitlementId === "home_styles_01" && entry.status === "OWNED",
+                  );
+                  return (
+                    <button
+                      key={choice.id}
+                      className={appearance.homeInteriorStyle === choice.id ? "selected" : "secondary"}
+                      style={{ minHeight: 40, color: appearance.homeInteriorStyle === choice.id ? "var(--accent)" : undefined }}
+                      disabled={!unlocked || (choice.id !== "classic" && !game.home.purchased)}
+                      aria-pressed={appearance.homeInteriorStyle === choice.id}
+                      onClick={() => setHomeInteriorStyle(choice.id)}
+                    >
+                      {choice.label}{unlocked ? "" : " · Kilitli"}
+                    </button>
+                  );
+                })}
+              </div>
+              {!game.home.purchased ? <small>Ek stiller, ilk ev satın alındığında seçilebilir.</small> : null}
             </div>
             <p className="purchase-note">
               {t("store.note")}

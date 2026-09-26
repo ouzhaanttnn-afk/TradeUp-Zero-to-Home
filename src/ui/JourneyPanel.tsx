@@ -27,28 +27,19 @@ import { simplifyLegacyPlayerCopy } from "./playerLanguage";
 import { saleHistoryCopy } from "./saleHistory";
 import { formatEstimate, wealthPresentation } from "./wealthPresentation";
 import { useTranslation, localizeHome, localizeCategory } from "../i18n";
-import MissionsPanel from "./MissionsPanel";
-import SpecializationPanel from "./SpecializationPanel";
-import type { SpecializationId } from "../domain/specialization";
-import { getActiveHomePerk } from "../domain/homePerks";
 
 export default function JourneyPanel({
   game,
   homeProgress,
   onBuyHome,
   onOpenPortfolio,
-  specialization,
-  onSelectSpecialization,
 }: {
   game: GameState;
   homeProgress: number;
   onBuyHome: (homeId: string) => void;
   onOpenPortfolio: () => void;
-  specialization?: SpecializationId | null;
-  onSelectSpecialization?: (spec: SpecializationId) => void;
 }) {
   const { lang, t } = useTranslation();
-  const activePerk = getActiveHomePerk(game.home);
   const timelinePageSize = 4;
   const [timelineFilter, setTimelineFilter] = useState<TimelineFilter>("ALL");
   const [timelineExpanded, setTimelineExpanded] = useState(false);
@@ -165,12 +156,6 @@ export default function JourneyPanel({
             <div className="xp-bar">
               <i style={{ width: `${homeProgress}%` }} />
             </div>
-            {activePerk ? (
-              <div className="home-hq-perk-chip">
-                <span className="hq-badge">⭐ {activePerk.badge[lang]}</span>
-                <p><strong>{activePerk.title[lang]}:</strong> {activePerk.description[lang]}</p>
-              </div>
-            ) : null}
             {showHomeMarket ? (
               <div className="home-market">
                 <div className="home-market-status" role="status">
@@ -366,11 +351,6 @@ export default function JourneyPanel({
             ))}
         </div>
       </section>
-      <MissionsPanel game={game} />
-      <SpecializationPanel
-        activeSpecialization={specialization ?? null}
-        onSelectSpecialization={onSelectSpecialization ?? (() => {})}
-      />
       <div className="timeline-header timeline-header-collapsible">
         <div>
           <small>{t("journey.personalRecords")}</small>

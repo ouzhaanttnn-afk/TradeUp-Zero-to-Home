@@ -10,6 +10,28 @@ import {
 } from "react";
 import { App as CapacitorApp } from "@capacitor/app";
 import "./App.css";
+
+const shellThemeStyles: Record<string, CSSProperties> = {
+  classic: {},
+  obsidian: {
+    "--surface-0": "#090b10", "--surface-1": "#11141c", "--surface-2": "#181c26",
+    "--line-soft": "rgba(204,213,232,.11)", "--line-strong": "rgba(221,228,242,.24)",
+    "--accent": "#d7deec", "--muted": "#a5adbd",
+    background: "radial-gradient(circle at 82% 4%,rgba(133,148,181,.16),transparent 30%),linear-gradient(180deg,#11141c,#07090d 72%)",
+  } as CSSProperties,
+  "night-market": {
+    "--surface-0": "#08081a", "--surface-1": "#11112a", "--surface-2": "#17163a",
+    "--line-soft": "rgba(167,155,255,.14)", "--line-strong": "rgba(139,113,255,.32)",
+    "--accent": "#9e8cff", "--muted": "#aaa5c8",
+    background: "radial-gradient(circle at 18% 5%,rgba(116,73,255,.22),transparent 32%),linear-gradient(180deg,#11102e,#070714 76%)",
+  } as CSSProperties,
+  workshop: {
+    "--surface-0": "#15100b", "--surface-1": "#211910", "--surface-2": "#2c2116",
+    "--line-soft": "rgba(224,174,104,.13)", "--line-strong": "rgba(228,164,75,.3)",
+    "--accent": "#e2a84f", "--muted": "#b6a38c",
+    background: "radial-gradient(circle at 82% 5%,rgba(215,139,45,.18),transparent 30%),linear-gradient(180deg,#24190e,#0f0c09 76%)",
+  } as CSSProperties,
+};
 import { assetFor, fallbackAssetFor } from "./assets";
 import {
   activeOwnedAssets,
@@ -54,7 +76,6 @@ import {
   getBuyerBadge,
 } from "./domain/dialogues";
 import { isShowcaseItem } from "./domain/showcase";
-import { SPECIALIZATIONS, SPEC_ICONS } from "./domain/specialization";
 import ShowcaseRoom from "./ui/ShowcaseRoom";
 import { evidencePresentation } from "./ui/evidencePresentation";
 import { ownershipPresentation } from "./ui/ownershipPresentation";
@@ -285,11 +306,10 @@ export default function App() {
     openPurchases,
     showPrivacyOptions,
     showcaseAssetIds,
-    specialization,
     toggleShowcase,
-    setSpecialization,
     lastProfitGained,
     clearProfitGained,
+    appearance,
   } = useGameStore();
 
   useEffect(() => {
@@ -1004,9 +1024,10 @@ export default function App() {
 
   return (
     <div
-      className={`app-shell tab-${tab}${game.accessibility.reducedMotion ? " reduced-motion" : ""}${game.accessibility.largeText ? " large-text" : ""}${game.home.purchased ? " home-complete" : ""}${homePulseStage !== null ? " home-atmosphere-pulse" : ""}`}
+      className={`app-shell theme-${appearance.shellTheme} home-style-${appearance.homeInteriorStyle} tab-${tab}${game.accessibility.reducedMotion ? " reduced-motion" : ""}${game.accessibility.largeText ? " large-text" : ""}${game.home.purchased ? " home-complete" : ""}${homePulseStage !== null ? " home-atmosphere-pulse" : ""}`}
       style={
         {
+          ...shellThemeStyles[appearance.shellTheme],
           "--home-gold-progress": `${goldPercent / 100}`,
         } as CSSProperties
       }
@@ -1025,16 +1046,10 @@ export default function App() {
               </small>
             </div>
           </div>
-          {specialization ? (
-            <button
-              type="button"
-              className="header-spec-chip"
-              onClick={() => openJourney()}
-              title={SPECIALIZATIONS[specialization].title[lang]}
-            >
-              <span>{SPEC_ICONS[specialization]}</span>
-              <small>{SPECIALIZATIONS[specialization].title[lang]}</small>
-            </button>
+          {premiumReward ? (
+            <span className="entitlement-state" title="TradeUp Premium kurucusu">
+              ◆ KURUCU
+            </span>
           ) : null}
           <button
             ref={settingsButtonRef}
@@ -1839,8 +1854,6 @@ export default function App() {
                   if (buyHome(homeId) && wasFirstHome) setHomeFinaleOpen(true);
                 }}
                 onOpenPortfolio={() => navigate("portfolio")}
-                specialization={specialization}
-                onSelectSpecialization={setSpecialization}
               />
             </Suspense>
           )
@@ -1949,6 +1962,7 @@ export default function App() {
           <HomeFinale
             highlights={finaleHighlights}
             homeId={game.home.purchasedHomeId}
+            interiorStyle={appearance.homeInteriorStyle}
             buttonRef={homeFinaleButtonRef}
             onClose={() => setHomeFinaleOpen(false)}
           />

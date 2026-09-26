@@ -1,18 +1,8 @@
 import type { HomeState, OwnedAsset } from "./models";
 
 export const DEFAULT_SHOWCASE_CAPACITY = 3;
-export const EXPANDED_SHOWCASE_CAPACITY = 5;
-
 export function maxShowcaseCapacity(home?: HomeState): number {
-  if (!home?.purchased || !home.purchasedHomeId) {
-    return DEFAULT_SHOWCASE_CAPACITY;
-  }
-  if (
-    home.purchasedHomeId === "stone_courtyard" ||
-    home.purchasedHomeId === "coastal_villa"
-  ) {
-    return EXPANDED_SHOWCASE_CAPACITY;
-  }
+  void home;
   return DEFAULT_SHOWCASE_CAPACITY;
 }
 
