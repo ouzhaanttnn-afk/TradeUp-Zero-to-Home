@@ -10,12 +10,13 @@
 
 - The native StoreKit adapter requests all five locked non-consumable product identifiers and verifies current entitlements before granting them.
 - `tradeup_premium_lifetime` exists in App Store Connect and is Ready for Review.
-- The other four product records do not yet exist in App Store Connect.
+- All five locked product records now exist in App Store Connect. Night Market and Workshop use the USD 1.99 tier; Home Styles and Animated Avatars use USD 2.99; Premium remains USD 4.99.
 - Animated avatars have a working entitlement gate and reduced-motion behavior.
 - Night Market, Workshop and Premium Obsidian themes now expose selectable, persisted, entitlement-gated appearances.
 - Home Styles now exposes three selectable interior/finale variants after the first home purchase. Animated avatars remain entitlement-gated and respect reduced motion.
 - Premium now displays its founder badge. The two promised alternate application icons still need native icon assets and an iOS selector before Premium can be considered fully delivered.
-- All five products require Apple metadata, localized display copy, price schedules and review screenshots before submission.
+- The four new products have worldwide availability, Turkish display copy and price schedules. Apple review screenshots remain intentionally pending until TestFlight verification.
+- iOS 1.0.1 build 22 was uploaded successfully and is available to the three-member internal `Betatest` group. No app or IAP review submission was started.
 
 ## GDD v2.2 conflicts introduced after the 1.0.1 submission
 
