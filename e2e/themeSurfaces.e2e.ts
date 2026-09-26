@@ -47,6 +47,8 @@ test("paid themes tint market surfaces without changing item visuals or decision
   });
 
   const classic = await appearance();
+  await page.locator("#boot-splash").waitFor({ state: "hidden" });
+  await page.screenshot({ path: testInfo.outputPath("classic.png"), animations: "disabled" });
   const shell = page.locator(".app-shell");
   const themes = [];
   for (const theme of ["night-market", "workshop", "obsidian"]) {
@@ -64,10 +66,8 @@ test("paid themes tint market surfaces without changing item visuals or decision
     expect(themed.signal).toBe(classic.signal);
     expect(themed.image).toBe(classic.image);
     themes.push(themed.card);
-    if (theme === "night-market") {
-      await page.locator("#boot-splash").waitFor({ state: "hidden" });
-      await page.screenshot({ path: testInfo.outputPath("night-market.png"), animations: "disabled" });
-    }
+    await page.locator("#boot-splash").waitFor({ state: "hidden" });
+    await page.screenshot({ path: testInfo.outputPath(`${theme}.png`), animations: "disabled" });
   }
   expect(new Set(themes).size).toBe(3);
   for (const width of [320, 430]) {

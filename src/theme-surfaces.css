@@ -1,10 +1,27 @@
 /* Cosmetic surfaces only. Product imagery, condition, risk and price signals stay unchanged. */
+.app-shell.theme-classic .market-grid .market-card {
+  background: radial-gradient(circle at 50% 0, rgba(111, 151, 117, 0.07), transparent 46%),
+    linear-gradient(155deg, rgba(15, 35, 26, 0.85), rgba(7, 18, 13, 0.9));
+}
+
+.app-shell.theme-classic .market-grid .market-card--upper-market {
+  background: radial-gradient(circle at 76% -8%, rgba(218, 183, 96, 0.08), transparent 42%),
+    radial-gradient(circle at 20% 0, rgba(84, 177, 130, 0.09), transparent 48%),
+    linear-gradient(155deg, rgba(14, 38, 27, 0.87), rgba(5, 17, 11, 0.92));
+}
+
+.app-shell.theme-classic .product-art {
+  background: radial-gradient(circle at 50% 20%, rgba(59, 114, 87, 0.53), rgba(12, 27, 20, 0.83) 72%);
+}
+
 .app-shell.theme-night-market {
   --theme-top: #211d43;
   --theme-bottom: #0b0a1b;
   --theme-card-top: #1c1939;
-  --theme-art-core: #353060;
-  --theme-art-edge: #111027;
+  --theme-card-wash: rgba(28, 25, 57, 0.84);
+  --theme-card-base: rgba(11, 10, 27, 0.91);
+  --theme-art-core: rgba(53, 48, 96, 0.64);
+  --theme-art-edge: rgba(17, 16, 39, 0.79);
   --theme-tint: #b9a8ff;
   --theme-ink: #100e26;
   --theme-line: rgba(181, 163, 255, 0.27);
@@ -16,8 +33,10 @@
   --theme-top: #33251b;
   --theme-bottom: #120e0b;
   --theme-card-top: #2c2119;
-  --theme-art-core: #57402a;
-  --theme-art-edge: #21170f;
+  --theme-card-wash: rgba(44, 33, 25, 0.84);
+  --theme-card-base: rgba(18, 14, 11, 0.91);
+  --theme-art-core: rgba(87, 64, 42, 0.64);
+  --theme-art-edge: rgba(33, 23, 15, 0.79);
   --theme-tint: #f1c17d;
   --theme-ink: #251508;
   --theme-line: rgba(232, 179, 108, 0.26);
@@ -29,8 +48,10 @@
   --theme-top: #252c3b;
   --theme-bottom: #0a0d13;
   --theme-card-top: #1c2431;
-  --theme-art-core: #344257;
-  --theme-art-edge: #111722;
+  --theme-card-wash: rgba(28, 36, 49, 0.84);
+  --theme-card-base: rgba(10, 13, 19, 0.91);
+  --theme-art-core: rgba(52, 66, 87, 0.64);
+  --theme-art-edge: rgba(17, 23, 34, 0.79);
   --theme-tint: #d0dced;
   --theme-ink: #101723;
   --theme-line: rgba(180, 200, 225, 0.24);
@@ -41,7 +62,7 @@
 .app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) {
   --theme-panel: linear-gradient(145deg, var(--theme-top), var(--theme-bottom));
   --theme-card: radial-gradient(circle at 50% 0, var(--theme-glow), transparent 49%),
-    linear-gradient(155deg, var(--theme-card-top), var(--theme-bottom));
+    linear-gradient(155deg, var(--theme-card-wash), var(--theme-card-base));
   --theme-art: radial-gradient(circle at 48% 22%, var(--theme-art-core), var(--theme-art-edge) 74%);
 }
 
