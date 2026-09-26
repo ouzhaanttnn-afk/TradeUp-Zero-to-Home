@@ -36,3 +36,9 @@ The release path now hides missions and specializations, removes their preparati
 - `pnpm test`: 379 tests passed, including iPhone-only and cosmetic-entitlement regression coverage.
 - `pnpm lint`: passed.
 - `pnpm build`: passed.
+
+## Mobile playtest feedback — 2026-09-26
+
+- One player reached approximately ₺150,000 on mobile without a reported bug and described the overall flow as fairly smooth.
+- The first non-scripted buyer offer felt slightly slow. This is a subjective observation; no listing age or elapsed wall-time measurement was supplied.
+- The tutorial's first buyer offer is scripted. Normal listings already have an early-trade tempo boost, while the current general arrival multiplier is 2.75 versus 2 in the binding GDD. Do not increase it further on this single report. Before release calibration, compare actual `listing_created → buyer_offer` times excluding scripted offers and resolve the config/GDD mismatch through the product process.
