@@ -186,6 +186,32 @@ test("expanded product families use dedicated mobile artwork", async ({
   });
   await page
     .locator(".market-card")
+    .filter({ has: page.locator('img[src*="prd_leather_bag"]') })
+    .first()
+    .click();
+  const heroBounds = await page.locator(".hero-art").evaluate((hero) => {
+    const frame = hero.getBoundingClientRect();
+    const image = hero.querySelector("img")!.getBoundingClientRect();
+    return {
+      frameWidth: frame.width,
+      frameHeight: frame.height,
+      imageWidth: image.width,
+      imageHeight: image.height,
+      imageTop: image.top - frame.top,
+      imageBottom: frame.bottom - image.bottom,
+    };
+  });
+  expect(heroBounds.imageWidth).toBeLessThanOrEqual(heroBounds.frameWidth);
+  expect(heroBounds.imageHeight).toBeLessThanOrEqual(heroBounds.frameHeight);
+  expect(heroBounds.imageTop).toBeGreaterThanOrEqual(0);
+  expect(heroBounds.imageBottom).toBeGreaterThanOrEqual(0);
+  await page.screenshot({
+    path: testInfo.outputPath("leather-bag-detail-390.png"),
+    animations: "disabled",
+  });
+  await page.getByRole("button", { name: "Kapat", exact: true }).click();
+  await page
+    .locator(".market-card")
     .filter({
       has: page.locator('img[src*="prd_game_cartridge"]'),
     })

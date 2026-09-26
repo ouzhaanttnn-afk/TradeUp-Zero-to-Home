@@ -216,12 +216,13 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "store.ready": "Mağaza hazır",
     "store.comingSoon": "Yakında",
     "store.owned": "Sahipsin",
+    "store.includedWithPremium": "Premium ile açık",
     "store.pending": "Ödeme beklemede",
     "store.buy": "Satın al · {price}",
     "store.restore": "Satın alımları geri yükle",
     "store.privacy": "Gizlilik",
     "store.note":
-      "Satın almalar yalnız cihaz mağazası fiyatları yüklenince açılır. Premium, reklamları atlar; oyun içi hak sınırları değişmez.",
+      "Fiyatlar cihaz mağazasından gelir. Premium tüm kozmetikleri ve reklamsız hakları içerir; Reklamsız paketi yalnız reklamları kaldırır. Oyun içi hak sınırları değişmez.",
 
     // Categories
     "cat.smallGoods": "Küçük Eşya",
@@ -498,12 +499,13 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "store.ready": "Store ready",
     "store.comingSoon": "Coming soon",
     "store.owned": "Owned",
+    "store.includedWithPremium": "Included with Premium",
     "store.pending": "Payment pending",
     "store.buy": "Buy · {price}",
     "store.restore": "Restore Purchases",
     "store.privacy": "Privacy",
     "store.note":
-      "Purchases unlock once device store prices load. Premium skips ads; in-game limits remain unchanged.",
+      "Prices come from the device store. Premium includes all cosmetics and ad-free use; No Ads removes ads only. Gameplay limits stay the same.",
 
     // Categories
     "cat.smallGoods": "Small Goods",
@@ -780,12 +782,13 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "store.ready": "Shop bereit",
     "store.comingSoon": "Bald verfügbar",
     "store.owned": "Im Besitz",
+    "store.includedWithPremium": "In Premium enthalten",
     "store.pending": "Zahlung ausstehend",
     "store.buy": "Kaufen · {price}",
     "store.restore": "Käufe wiederherstellen",
     "store.privacy": "Datenschutz",
     "store.note":
-      "Käufe sind verfügbar, sobald Store-Preise geladen sind. Premium überspringt Werbung.",
+      "Preise kommen aus dem Geräteshop. Premium enthält alle Kosmetikoptionen und Werbefreiheit; Werbefrei entfernt nur Werbung. Spiellimits bleiben gleich.",
 
     // Categories
     "cat.smallGoods": "Kleinartikel",
@@ -1062,12 +1065,13 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "store.ready": "Tienda lista",
     "store.comingSoon": "Próximamente",
     "store.owned": "En posesión",
+    "store.includedWithPremium": "Incluido con Premium",
     "store.pending": "Pago pendiente",
     "store.buy": "Comprar · {price}",
     "store.restore": "Restaurar Compras",
     "store.privacy": "Privacidad",
     "store.note":
-      "Las compras se habilitan cuando cargan los precios del dispositivo. Premium omite anuncios.",
+      "Los precios vienen de la tienda del dispositivo. Premium incluye todos los cosméticos y elimina anuncios; Sin anuncios solo elimina anuncios. Los límites del juego no cambian.",
 
     // Categories
     "cat.smallGoods": "Artículos pequeños",

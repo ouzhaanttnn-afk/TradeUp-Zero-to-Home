@@ -132,6 +132,10 @@ export const MONETIZATION_CONFIG = {
       entitlementId: "premium_lifetime" as const,
     },
     {
+      productId: "tradeup_no_ads_lifetime" as const,
+      entitlementId: "no_ads_lifetime" as const,
+    },
+    {
       productId: "tradeup_theme_night_market" as const,
       entitlementId: "theme_night_market" as const,
     },
@@ -178,6 +182,11 @@ export const MONETIZATION_CONFIG = {
       entitlementId: "premium_lifetime" as const,
       platform: "web" as const,
     },
+    noAds: {
+      productId: "tradeup_no_ads_lifetime" as const,
+      entitlementId: "no_ads_lifetime" as const,
+      platform: "web" as const,
+    },
     themeNightMarket: {
       productId: "tradeup_theme_night_market" as const,
       entitlementId: "theme_night_market" as const,
@@ -220,4 +229,4 @@ export const MONETIZATION_CONFIG = {
     },
   },
 } as const;
-export const GAME_CONFIG_VERSION = "gdd-2.2-r2";
+export const GAME_CONFIG_VERSION = "gdd-2.2-r3";

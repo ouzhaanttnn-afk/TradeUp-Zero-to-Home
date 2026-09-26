@@ -21,12 +21,21 @@ describe("trade interstitial gate", () => {
     expect(shouldShowTradeInterstitial(at(59), at(60))).toBe(true);
   });
 
-  it("skips without consent and for verified Premium", () => {
+  it("skips without consent and for verified Premium or No Ads", () => {
     const before = at(29);
     const after = at(30);
     after.monetization.consent.canRequestAds = false;
     expect(shouldShowTradeInterstitial(before, after)).toBe(false);
     after.monetization.consent.canRequestAds = true;
+    after.monetization.entitlements = [
+      {
+        productId: "tradeup_no_ads_lifetime",
+        entitlementId: "no_ads_lifetime",
+        platform: "ios",
+        status: "OWNED",
+      },
+    ];
+    expect(shouldShowTradeInterstitial(before, after)).toBe(false);
     after.monetization.entitlements = [
       {
         productId: "tradeup_premium_lifetime",

@@ -150,6 +150,14 @@ export const hasPremiumEntitlement = (state: Pick<GameState, "monetization">) =>
       entry.entitlementId === "premium_lifetime" && entry.status === "OWNED",
   );
 
+export const hasAdFreeEntitlement = (state: Pick<GameState, "monetization">) =>
+  state.monetization.entitlements.some(
+    (entry) =>
+      (entry.entitlementId === "premium_lifetime" ||
+        entry.entitlementId === "no_ads_lifetime") &&
+      entry.status === "OWNED",
+  );
+
 export const syncConsentState = (
   state: GameState,
   canRequestAds: boolean,
@@ -472,7 +480,7 @@ export const requestMonetizedAction = (
   if (source === "ad" && !normalized.monetization.consent.canRequestAds) {
     return { ok: false, reason: "AD_CONSENT_REQUIRED", state: normalized };
   }
-  if (source === "premium" && !hasPremiumEntitlement(normalized)) {
+  if (source === "premium" && !hasAdFreeEntitlement(normalized)) {
     return { ok: false, reason: "PREMIUM_REQUIRED", state: normalized };
   }
 
@@ -569,19 +577,10 @@ export const setRewardEntitlement = (
   owned: boolean,
   platform: "ios" | "android" | "web" = "web",
 ): GameState => {
-  const entitlementId: EntitlementId | null =
-    productId === MONETIZATION_CONFIG.products.premium.productId
-      ? "premium_lifetime"
-      : productId === MONETIZATION_CONFIG.products.themeNightMarket.productId
-        ? "theme_night_market"
-        : productId === MONETIZATION_CONFIG.products.themeWorkshop.productId
-          ? "theme_workshop"
-          : productId === MONETIZATION_CONFIG.products.homeStyles.productId
-            ? "home_styles_01"
-            : productId ===
-                MONETIZATION_CONFIG.products.animatedAvatars.productId
-              ? "animated_avatars_01"
-              : null;
+  const entitlementId: EntitlementId | undefined =
+    MONETIZATION_CONFIG.productCatalog.find(
+      (product) => product.productId === productId,
+    )?.entitlementId;
 
   if (!entitlementId) return state;
 
@@ -630,27 +629,34 @@ export const syncVerifiedEntitlement = (
   )?.entitlementId;
   if (!entitlementId) return state;
   const premiumAvatarSelected = isAnimatedAvatar(state.profile.avatarId);
+  const remainingEntitlements = [
+    ...state.monetization.entitlements.filter(
+      (entry) => entry.entitlementId !== entitlementId,
+    ),
+    {
+      productId,
+      entitlementId,
+      status,
+      platform,
+      ...(status === "REVOKED"
+        ? { verifiedAtGameMin: state.gameTimeMin }
+        : {}),
+    },
+  ];
+  const animatedAvatarsStillOwned = remainingEntitlements.some(
+    (entry) =>
+      (entry.entitlementId === "premium_lifetime" ||
+        entry.entitlementId === "animated_avatars_01") &&
+      entry.status === "OWNED",
+  );
   return {
     ...state,
-    ...(entitlementId === "animated_avatars_01" && premiumAvatarSelected
+    ...(premiumAvatarSelected && !animatedAvatarsStillOwned
       ? { profile: { ...state.profile, avatarId: "pazar-kasifi" as const } }
       : {}),
     monetization: {
       ...state.monetization,
-      entitlements: [
-        ...state.monetization.entitlements.filter(
-          (entry) => entry.entitlementId !== entitlementId,
-        ),
-        {
-          productId,
-          entitlementId,
-          status,
-          platform,
-          ...(status === "REVOKED"
-            ? { verifiedAtGameMin: state.gameTimeMin }
-            : {}),
-        },
-      ],
+      entitlements: remainingEntitlements,
     },
   };
 };

@@ -1027,13 +1027,16 @@ Görevler varsa “3 reklam izle” veya “10 rastgele ürün al” şeklinde o
 ## v1.0 IAP ürün kataloğu
 | Product ID | Mağaza tipi | Hedef taban fiyat* | Kalıcı entitlement | İçerik |
 | --- | --- | ---: | --- | --- |
-| `tradeup_premium_lifetime` | Non-consumable | USD 4.99 eşdeğeri | `premium_lifetime` | Uygun rewarded haklarını video izlemeden kullanma; aynı cap/cooldown/sonuç. Özel Obsidian Ledger arayüz teması, kurucu rozeti ve iki alternatif uygulama ikonu. |
+| `tradeup_premium_lifetime` | Non-consumable | USD 4.99 eşdeğeri | `premium_lifetime` | Reklamsız haklar; Obsidian, Gece Pazarı, Atölye temaları, üç ev iç mekân stili ve üç hareketli avatar. Mevcut kurucu rozeti ve alternatif uygulama ikonları korunur. Reward cap/cooldown/sonuç değişmez. |
+| `tradeup_no_ads_lifetime` | Non-consumable | USD 1.99 eşdeğeri | `no_ads_lifetime` | Yalnız reklamları kaldırır: uygun dört rewarded hakkı video izlemeden aynı cap/cooldown/sonuçla kullanılır; 30 ticaretteki iOS geçiş reklamı atlanır. Kozmetik açmaz. |
 | `tradeup_theme_night_market` | Non-consumable | USD 1.99 eşdeğeri | `theme_night_market` | Gece Pazarı uygulama kabuğu, portföy zemini, satış damgaları ve uyumlu ses/haptik sunumu. |
 | `tradeup_theme_workshop` | Non-consumable | USD 1.99 eşdeğeri | `theme_workshop` | Endüstriyel Atölye kabuğu, portföy zemini, işlem kartı çerçeveleri ve satış damgaları. |
 | `tradeup_home_styles_01` | Non-consumable | USD 2.99 eşdeğeri | `home_styles_01` | Ev satın alındığında seçilebilen üç iç mekân stili, timeline zemini ve final sunum varyasyonları. Ev ilerlemesine para eklemez. |
 | `tradeup_animated_avatars_01` | Non-consumable | USD 2.99 eşdeğeri | `animated_avatars_01` | Profil ve ana kabukta kullanılabilen üç canlı avatar. Hareket, parıltı ve karakter sunumu dışında gameplay, ekonomi, şans veya ilerleme avantajı vermez. |
 
 \* Mağaza, bölgesel fiyatı ve vergiyi kendi sisteminden gösterir. Bu rakamlar v1.0 ürün konumlandırmasını kilitler; kod fiyat yazmaz.
+
+> **[ONAYLI REVİZYON · 2026-09-27] Premium paket ve Reklamsız:** Altı kalıcı SKU vardır. Premium, listedeki dört ayrı kozmetik ürünün haklarını da kapsar; onları doğrudan satın almış oyuncuların mevcut hakları korunur. Reklamsız yalnız reklam atlama haklarını verir ve Premium kozmetiklerini açmaz. Her iki paket de rewarded placement ödülünü, günlük/oturum sınırını, cooldown'ı, pazar kalitesini veya ekonomiyi değiştirmez. Tekil kozmetik entitlement'ı Premium iadesinden sonra da kendi doğrulanmış satın alımı varsa kalır. Premium veya Reklamsız iadesi yalnız kendisinin verdiği hakkı kaldırır. Önceki beş SKU ve yalnız Premium'a özgü reklam atlama ifadelerinin yerini bu revizyon alır.
 
 ## Kozmetik bütünlük
 - Ücretli temalar yalnız uygulama kabuğu, portföy alanı, milestone sunumu, profil ve ev görünümünü değiştirir.
@@ -1052,9 +1055,9 @@ Görevler varsa “3 reklam izle” veya “10 rastgele ürün al” şeklinde o
 # 34A. Rewarded Reklam Yerleşimleri ve Kesin Limitler
 > Rewarded reklam oyuncunun doğal olarak beklediği bir işlemi hızlandırır veya standart pazar örneklemini genişletir; sonucu iyileştirmez.
 
-> **[ONAYLI REVİZYON · 2026-09-19] Erken oyun tarama hakkı:** Oyuncu 50 ücretsiz aktif tarama hakkıyla başlar. İlk 30 tamamlanmış pazar alım-satımında üst sınır 50, 30. tamamlanmış ticaretten itibaren 25'tir; hediye başlangıç defteri bu sayıya dahil değildir. Eşik geçişinde 25'i aşan kullanılmamış haklar 25'e indirilir. Her `Pazarı yenile` kullanımı bir hak tüketir ve dünya saatini 2 oyun dakikası ilerletir; doğal pazar akışı ve temel ticaret hak olmasa da sürer. Haklar çevrimiçi veya çevrimdışı geçen gerçek zamanda 72 saniyede bir yenilenir; boş sayaç erken oyunda 60 dakikada 50/50, sonrasında 30 dakikada 25/25 olur. Hak sıfıra indiğinde `MARKET_SCOUT`, açık kullanıcı seçimiyle sayacı tam 25'e yeniler; erken oyunda 50'ye doldurmaz. Premium aynı yenilemeyi video olmadan aynı cap ve cooldown ile uygular. Hak satın alınamaz, aşama sınırının üstünde biriktirilemez, cihaz saatini geri almak hak üretmez. Önceki 2026-09-08 revizyonunun sabit 25 başlangıç ve üst sınır bölümlerinin yerini bu revizyon alır; yeni reklam yerleşimi veya ekonomi ödülü oluşturmaz. Eski kayıtlar mevcut hakkını korur, erken oyunda zamanla 50'ye yenilenebilir.
+> **[ONAYLI REVİZYON · 2026-09-19] Erken oyun tarama hakkı:** Oyuncu 50 ücretsiz aktif tarama hakkıyla başlar. İlk 30 tamamlanmış pazar alım-satımında üst sınır 50, 30. tamamlanmış ticaretten itibaren 25'tir; hediye başlangıç defteri bu sayıya dahil değildir. Eşik geçişinde 25'i aşan kullanılmamış haklar 25'e indirilir. Her `Pazarı yenile` kullanımı bir hak tüketir ve dünya saatini 2 oyun dakikası ilerletir; doğal pazar akışı ve temel ticaret hak olmasa da sürer. Haklar çevrimiçi veya çevrimdışı geçen gerçek zamanda 72 saniyede bir yenilenir; boş sayaç erken oyunda 60 dakikada 50/50, sonrasında 30 dakikada 25/25 olur. Hak sıfıra indiğinde `MARKET_SCOUT`, açık kullanıcı seçimiyle sayacı tam 25'e yeniler; erken oyunda 50'ye doldurmaz. Premium ve Reklamsız aynı yenilemeyi video olmadan aynı cap ve cooldown ile uygular. Hak satın alınamaz, aşama sınırının üstünde biriktirilemez, cihaz saatini geri almak hak üretmez. Önceki 2026-09-08 revizyonunun sabit 25 başlangıç ve üst sınır bölümlerinin yerini bu revizyon alır; yeni reklam yerleşimi veya ekonomi ödülü oluşturmaz. Eski kayıtlar mevcut hakkını korur, erken oyunda zamanla 50'ye yenilenebilir.
 
-> **[ONAYLI REVİZYON · 2026-09-19] Ticaret geçiş reklamı:** İlk 29 tamamlanmış pazar ticareti reklamsızdır. 30., 60., 90. ve sonraki 30'un katı tamamlanmış ticaretten sonra yalnız iOS'ta tek standart interstitial denenir; hediye başlangıç defteri sayılmaz. Satış önce atomik biçimde tamamlanır ve kaydedilir; reklamın yüklenmemesi, izin verilmemesi, iptali veya kapanması satışa ve pazar akışına etki etmez. Doğrulanmış Premium hak sahibi bu reklamı görmez. Reklam yalnız izin varsa ve yayın kapısı açıksa istenir; test sürümünde resmi test birimi kullanılır. Para/servet eşiği reklam başlatmaz. Önceki zorunlu reklam yasağının yalnız bu tanımlı ticaret sonu istisnası değişmiştir.
+> **[ONAYLI REVİZYON · 2026-09-19] Ticaret geçiş reklamı:** İlk 29 tamamlanmış pazar ticareti reklamsızdır. 30., 60., 90. ve sonraki 30'un katı tamamlanmış ticaretten sonra yalnız iOS'ta tek standart interstitial denenir; hediye başlangıç defteri sayılmaz. Satış önce atomik biçimde tamamlanır ve kaydedilir; reklamın yüklenmemesi, izin verilmemesi, iptali veya kapanması satışa ve pazar akışına etki etmez. Doğrulanmış Premium veya Reklamsız hak sahibi bu reklamı görmez. Reklam yalnız izin varsa ve yayın kapısı açıksa istenir; test sürümünde resmi test birimi kullanılır. Para/servet eşiği reklam başlatmaz. Önceki zorunlu reklam yasağının yalnız bu tanımlı ticaret sonu istisnası değişmiştir.
 
 ## Global uygunluk ve frekans
 | Kural | Kilitli değer |
@@ -1065,7 +1068,7 @@ Görevler varsa “3 reklam izle” veya “10 rastgele ürün al” şeklinde o
 | Global cooldown | 90 saniye; yalnız başarıyla uygulanan reward sonrası başlar |
 | Aynı ekrandaki CTA | En fazla 1 rewarded CTA |
 | Otomatik gösterim | Asla yok; CTA açık video simgesi ve ödül açıklaması taşır |
-| Premium davranışı | Aynı placement, aynı sonuç, aynı cap/cooldown; video yerine `Premium hakkını kullan` |
+| Premium / Reklamsız davranışı | Aynı placement, aynı sonuç, aynı cap/cooldown; video yerine açık reklamsız kullanım seçeneği |
 | Cap hesabı | Takvim gece yarısı değil rolling 24 saat transaction ledger’ı; saat geri alma cap’i sıfırlamaz |
 
 ## v1.0 placement matrisi
@@ -1085,12 +1088,12 @@ Global cap placement cap’lerinin toplamından önce uygulanır. Oyuncu aynı g
 - Offer sonrası “kaybı telafi et”, kaçan ilanı geri getir veya final anını hızlandır placement’ı yoktur.
 
 ## CTA dili
-| Ücretsiz kullanıcı | Premium kullanıcı |
+| Ücretsiz kullanıcı | Premium / Reklamsız kullanıcı |
 | --- | --- |
 | “25 tarama hakkı • Video” | “25 tarama hakkını yenile” |
 | “İncelemeyi şimdi bitir • Video” | “İncelemeyi şimdi bitir” |
 | “Hazırlığı şimdi bitir • Video” | “Hazırlığı şimdi bitir” |
-| “İlanı bir kez öne çıkar • Video” | “Premium erişim hakkını kullan” |
+| “İlanı bir kez öne çıkar • Video” | “İlanı bir kez öne çıkar” |
 
 
 ---
@@ -1140,8 +1143,8 @@ REQUESTED/AD_LOADED/AD_STARTED -> CANCELLED | FAILED
 ## Entitlement sınırları
 - Tüm v1.0 ürünleri non-consumable’dır; consume edilmez ve yeniden satın alınamaz.
 - iOS ve Android satın alımları v1.0’da mağaza hesabına bağlıdır; kullanıcı hesabı olmadığı için çapraz platform entitlement vaadi verilmez.
-- Premium kullanıcının video atlaması ayrı ödül üretmez; yalnız `RewardActionService` kaynağını `ad` yerine `premium` yapar.
-- Premium günlük hak sayısını, market spawn kalitesini veya hazırlık sonucunu artırmaz.
+- Premium veya Reklamsız kullanıcının video atlaması ayrı ödül üretmez; yalnız `RewardActionService` kaynağını `ad` yerine dahili `premium` yapar.
+- İki paket de günlük hak sayısını, market spawn kalitesini veya hazırlık sonucunu artırmaz.
 
 
 ---
@@ -1170,6 +1173,7 @@ REQUESTED/AD_LOADED/AD_STARTED -> CANCELLED | FAILED
 | Global cooldown | 90 sn | 90–180 sn |
 | MARKET_SCOUT listing sayısı | 4 | 3–5; standard spawn bias’ı değişmez |
 | Premium fiyatı | USD 4.99 eşdeğeri | Store console’da en fazla ±1 fiyat katmanı; entitlement değişmez |
+| Reklamsız fiyatı | USD 1.99 eşdeğeri | Store console’da en fazla ±1 fiyat katmanı; entitlement değişmez |
 | Kozmetik paket fiyatı | USD 1.99 / 2.99 eşdeğeri | Store console’da en fazla ±1 fiyat katmanı |
 
 Default değerler Codex’in uygulayacağı kesin başlangıç değerleridir. Kalibrasyon zarfı yalnız soft-launch verisiyle config/store console üzerinden kullanılabilir; yeni ekran, reward türü, entitlement veya ekonomi kuralı eklemek için kullanılamaz.
@@ -1610,7 +1614,7 @@ Bu eşikler sektör garantisi değil, Studio Nostos’un karar kapılarıdır. �
 3. P1 — Karar vertical slice: compare, evidence/inspection, 24 deep family, preparation actions.
 4. P1 — İlk oturum: scripted başlangıç defteri, gerçek seçim, pazarlık, listeleme ve ilk kâr.
 5. P2 — Meta: expertise, Takip, career timeline, home reveal ve analytics event contract.
-6. P3 — Monetizasyon foundation: Billing/entitlement/consent/rewarded adapter, dört placement ve beş non-consumable SKU; sandbox/test kimlikleriyle tamamlanır, production serving kalite kapısından sonra feature flag ile açılır.
+6. P3 — Monetizasyon foundation: Billing/entitlement/consent/rewarded adapter, dört placement ve altı non-consumable SKU; sandbox/test kimlikleriyle tamamlanır, production serving kalite kapısından sonra feature flag ile açılır.
 7. P4 — İçerik ölçeği: yalnız vertical slice ve monetizasyon güvenliği testleri geçtikten sonra data/asset family genişlemesi.
 
 ## Mihenk’ten aktarılacaklar
@@ -1641,13 +1645,13 @@ Bu eşikler sektör garantisi değil, Studio Nostos’un karar kapılarıdır. �
 - Yalnız `MARKET_SCOUT`, `FAST_INSPECTION`, `FAST_PREPARATION` ve `LISTING_REACH` rewarded placement’ları vardır; iki teklif kuralını veya fair value bilgisini değiştiren reklam yoktur.
 - Rewarded CTA ilk 20 aktif dakika ve ilk satış öncesi görünmez; rolling 24s cap=8, session cap=4 ve 90 sn cooldown testlerle doğrulanır.
 - Premium entitlement aynı reward payload/cap yolunu videosuz kullanır; daha fazla hak, daha iyi sonuç veya market bias üretmez.
-- Beş non-consumable SKU store metadata’sından fiyatlanır; purchase, pending, cancel, restore, refund/revoke ve offline entitlement senaryoları geçer.
+- Altı non-consumable SKU store metadata’sından fiyatlanır; purchase, pending, cancel, restore, refund/revoke ve offline entitlement senaryoları geçer.
 - ATT/consent reddi gameplay’i kilitlemez; izin/consent olmadan ad request yapılmaz ve normal bekleme yolu çalışır.
 - Ücretli tema ürün kondisyonunu, defect/evidence overlay’ini, risk sinyalini veya ekonomik sonucu değiştirmez.
 - Production build’de test ad unit, sandbox product ID, sahte indirim, hard-coded mağaza fiyatı ve harici dijital checkout bulunmaz.
 - Soft launch; sayfa 48’deki kalite kapıları geçmeden takvim gerekçesiyle başlatılmaz.
 
-> MASTER DIRECTIVE: Bu v2.2 belgeyi tek source of truth kabul et. Önce ekonomik gerçeği ve deterministik pazarı düzelt; ardından Compare + Evidence + tam iki haklı pazarlık + Preparation + Sale zincirini 24 derin family ile tamamla. Sonra yalnız sayfa 34–37’de tanımlı dört rewarded placement’ı, beş non-consumable SKU’yu ve 2026-09-19 tarihli tek ticaret geçiş reklamı istisnasını, entitlement/consent/restore akışını aynen uygula. Yeni mekanik, ekstra teklif, premium para, cash pack, başka zorunlu reklam, ikinci görüş, garantili fırsat veya görünmez büyük kusur icat etme. Asset eksikliğini blocker yapma. Her fazda testleri çalıştır; Definition of Done geçmeden build’i tamamlandı sayma. Kullanıcının “devam” komutu sıradaki faza geçiştir, tasarımı yeniden açma.
+> MASTER DIRECTIVE: Bu v2.2 belgeyi 2026-09-27 onaylı paket revizyonuyla tek source of truth kabul et. Önce ekonomik gerçeği ve deterministik pazarı düzelt; ardından Compare + Evidence + tam iki haklı pazarlık + Preparation + Sale zincirini 24 derin family ile tamamla. Sonra yalnız sayfa 34–37’de tanımlı dört rewarded placement’ı, altı non-consumable SKU’yu ve 2026-09-19 tarihli tek ticaret geçiş reklamı istisnasını, entitlement/consent/restore akışını aynen uygula. Yeni mekanik, ekstra teklif, premium para, cash pack, başka zorunlu reklam, ikinci görüş, garantili fırsat veya görünmez büyük kusur icat etme. Asset eksikliğini blocker yapma. Her fazda testleri çalıştır; Definition of Done geçmeden build’i tamamlandı sayma. Kullanıcının “devam” komutu sıradaki faza geçiştir, tasarımı yeniden açma.
 
 | R&D referansları | Kullanım amacı |
 | --- | --- |

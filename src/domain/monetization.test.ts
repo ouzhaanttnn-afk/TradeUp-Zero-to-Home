@@ -8,11 +8,13 @@ import {
   getRewardEligibility,
   markFirstSaleComplete,
   rechargeMarketScanCredits,
+  hasAdFreeEntitlement,
   requestMonetizedAction,
   setRewardEntitlement,
   syncConsentState,
   syncVerifiedEntitlement,
 } from "./monetization";
+import { ownsAnimatedAvatars } from "./profile";
 
 const makeReadyForRewards = () => {
   const unlocked = advanceRewardState(
@@ -202,6 +204,34 @@ describe("monetization reward eligibility", () => {
     expect(claimed.ok).toBe(true);
     if (!claimed.ok) throw new Error("Expected premium claim");
     expect(claimed.state.monetization.usage.sessionRewardCount).toBe(1);
+  });
+
+  it("No Ads bypasses video without cosmetics or extra reward capacity", () => {
+    const ready = syncConsentState(makeReadyForRewards(), false, false);
+    const noAds = setRewardEntitlement(ready, "tradeup_no_ads_lifetime", true);
+    expect(hasAdFreeEntitlement(noAds)).toBe(true);
+    expect(ownsAnimatedAvatars(noAds)).toBe(false);
+    const claimed = requestMonetizedAction(noAds, "MARKET_SCOUT", "premium");
+    expect(claimed.ok).toBe(true);
+    if (!claimed.ok) throw new Error("Expected ad-free claim");
+    expect(claimed.state.monetization.usage.sessionRewardCount).toBe(1);
+    expect(claimed.state.monetization.rewardTransactions[0]?.source).toBe("premium");
+    const revoked = syncVerifiedEntitlement(noAds, "tradeup_no_ads_lifetime", "REVOKED", "ios");
+    expect(hasAdFreeEntitlement(revoked)).toBe(false);
+    expect(requestMonetizedAction(revoked, "MARKET_SCOUT", "premium").ok).toBe(false);
+  });
+
+  it("Premium avatar access survives a standalone refund and standalone access survives Premium refund", () => {
+    const premium = setRewardEntitlement(initialState(0, "SANDBOX"), "tradeup_premium_lifetime", true, "ios");
+    premium.profile.avatarId = "gece-analisti";
+    expect(ownsAnimatedAvatars(premium)).toBe(true);
+    const withStandalone = setRewardEntitlement(premium, "tradeup_animated_avatars_01", true, "ios");
+    const standaloneRevoked = syncVerifiedEntitlement(withStandalone, "tradeup_animated_avatars_01", "REVOKED", "ios");
+    expect(standaloneRevoked.profile.avatarId).toBe("gece-analisti");
+    const restoredStandalone = syncVerifiedEntitlement(withStandalone, "tradeup_premium_lifetime", "REVOKED", "ios");
+    expect(restoredStandalone.profile.avatarId).toBe("gece-analisti");
+    const premiumRevoked = syncVerifiedEntitlement(standaloneRevoked, "tradeup_premium_lifetime", "REVOKED", "ios");
+    expect(premiumRevoked.profile.avatarId).toBe("pazar-kasifi");
   });
 
   it("applies pending, owned and revoke only from verified sync input", () => {

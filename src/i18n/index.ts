@@ -329,19 +329,37 @@ const storeCopies: Record<string, Record<Language, { title: string; detail: stri
   tradeup_premium_lifetime: {
     tr: {
       title: "TradeUp Premium",
-      detail: "Hızlandırmaları video izlemeden kullan; 30 ticaret reklamını atla. Hak sınırları değişmez.",
+      detail: "Reklamsız oyna; tüm temalar, ev stilleri ve canlı avatarlar da açık. Hak sınırları değişmez.",
     },
     en: {
       title: "TradeUp Premium",
-      detail: "Use boosts without watching ads; skip 30 trade ads. Gameplay limits unchanged.",
+      detail: "Ad-free use plus all themes, home styles and animated avatars. Gameplay limits unchanged.",
     },
     de: {
       title: "TradeUp Premium",
-      detail: "Boosts ohne Werbung nutzen; 30 Handels-Werbungen überspringen. Grenzen unverändert.",
+      detail: "Werbefrei spielen mit allen Designs, Hausstilen und animierten Avataren. Spiellimits unverändert.",
     },
     es: {
       title: "TradeUp Premium",
-      detail: "Usa mejoras sin ver anuncios; salta 30 anuncios de comercio. Límites intactos.",
+      detail: "Sin anuncios y con todos los temas, estilos de casa y avatares animados. Límites intactos.",
+    },
+  },
+  tradeup_no_ads_lifetime: {
+    tr: {
+      title: "Reklamsız",
+      detail: "Videoları ve 30 ticaret reklamını atla; kozmetik içermez. Hak sınırları değişmez.",
+    },
+    en: {
+      title: "No Ads",
+      detail: "Skip rewarded videos and trade ads; no cosmetics. Gameplay limits unchanged.",
+    },
+    de: {
+      title: "Werbefrei",
+      detail: "Reward-Videos und Handelswerbung überspringen; keine Kosmetik. Spiellimits unverändert.",
+    },
+    es: {
+      title: "Sin anuncios",
+      detail: "Omite vídeos de recompensa y anuncios de comercio; sin cosméticos. Límites intactos.",
     },
   },
   tradeup_theme_night_market: {
@@ -748,4 +766,3 @@ export function localizeVisualCondition(condition: number, lang = currentLanguag
 
 export * from "./types";
 export * from "./labelTranslations";
-

@@ -172,3 +172,100 @@
   border-color: var(--theme-line);
   background: var(--theme-panel);
 }
+
+/* Full-screen settings and the nested store must inherit the selected shell theme. */
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .settings-card {
+  border-color: var(--theme-line);
+  background: radial-gradient(circle at 86% 4%, var(--theme-glow), transparent 33%),
+    linear-gradient(180deg, var(--theme-top), var(--theme-bottom));
+}
+
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .settings-sheet-heading {
+  border-color: var(--theme-line);
+  background: var(--theme-card-base);
+}
+
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) :is(.profile-card, .settings-link-card, .purchase-panel) {
+  border-color: var(--theme-line);
+  background: var(--theme-card);
+}
+
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) :is(.avatar-picker--settings, .settings-section, .purchase-list article, .profile-stats > span, .profile-card input, .settings-card .settings-row .settings-value, .settings-card .close, .settings-card .icon-button, .purchases-sheet .close, .cosmetic-picker button) {
+  border-color: var(--theme-line);
+  background: var(--theme-card-base);
+}
+
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .settings-section-heading {
+  border-color: var(--theme-line);
+  background: linear-gradient(110deg, var(--theme-glow), transparent);
+}
+
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) :is(.settings-row + .settings-row, .settings-document-links a) {
+  border-color: var(--theme-line);
+}
+
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) :is(.settings-heading-icon, .settings-row-icon, .settings-link-icon, .settings-link-card > i) {
+  color: var(--theme-tint);
+  background: var(--theme-glow);
+}
+
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) :is(.settings-group-label, .profile-kicker, .entitlement-state, .settings-document-links a) {
+  color: var(--theme-tint);
+}
+
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) :is(.avatar-options button, .profile-card input),
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .settings-switch::before {
+  border-color: var(--theme-line);
+  background: var(--theme-bottom);
+}
+
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .avatar-options button[aria-pressed="true"] {
+  border-color: var(--theme-tint);
+  background: var(--theme-card-top);
+  box-shadow: 0 0 0 2px var(--theme-glow);
+}
+
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .avatar-options button > i,
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .settings-switch[aria-pressed="true"] > span {
+  color: var(--theme-ink);
+  background: var(--theme-tint);
+}
+
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .settings-switch[aria-pressed="true"]::before {
+  border-color: var(--theme-line);
+  background: var(--theme-glow);
+}
+
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .cosmetic-picker button[aria-pressed="true"] {
+  border-color: var(--theme-tint);
+  background: var(--theme-card-top);
+  box-shadow: inset 0 0 0 1px var(--theme-glow);
+}
+
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .purchases-sheet .sheet-scroll {
+  background: linear-gradient(180deg, var(--theme-top), var(--theme-bottom));
+}
+
+/* Account and store controls stay finger-sized at the narrowest supported width. */
+.settings-card .lang-pill {
+  min-width: 44px;
+}
+
+.purchases-sheet .purchase-list button {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+@media (max-width: 430px) {
+  .settings-row:has(.language-selector) {
+    flex-wrap: wrap;
+  }
+
+  .settings-row .language-selector {
+    flex: 0 0 100%;
+  }
+
+  .settings-row .lang-pill {
+    flex: 1;
+  }
+}

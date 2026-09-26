@@ -25,12 +25,18 @@ const owns = (entitlements: readonly EntitlementState[], id: EntitlementId) =>
 export const canUseShellTheme = (
   theme: ShellTheme,
   entitlements: readonly EntitlementState[],
-) => theme === "classic" || owns(entitlements, themeEntitlement[theme]!);
+) =>
+  theme === "classic" ||
+  owns(entitlements, themeEntitlement[theme]!) ||
+  owns(entitlements, "premium_lifetime");
 
 export const canUseHomeInteriorStyle = (
   style: HomeInteriorStyle,
   entitlements: readonly EntitlementState[],
-) => style === "classic" || owns(entitlements, "home_styles_01");
+) =>
+  style === "classic" ||
+  owns(entitlements, "home_styles_01") ||
+  owns(entitlements, "premium_lifetime");
 
 export const sanitizeAppearance = (
   value: Partial<AppearancePreferences> | undefined,

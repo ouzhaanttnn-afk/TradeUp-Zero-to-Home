@@ -20,7 +20,7 @@ describe("monetization provider contracts", () => {
   it("loads only the locked products from provider metadata", async () => {
     const adapter = createSandboxBillingAdapter({ products });
     const loaded = await adapter.loadProducts();
-    expect(loaded).toHaveLength(5);
+    expect(loaded).toHaveLength(6);
     expect(loaded.map((product) => product.productId)).toEqual(
       MONETIZATION_CONFIG.productCatalog.map((product) => product.productId),
     );

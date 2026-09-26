@@ -7,8 +7,6 @@ test("paid themes tint market surfaces without changing item visuals or decision
   await completeFirstLaunch(page);
   const saved = validateState(initialState(Date.now(), "SANDBOX"));
   saved.monetization.entitlements.push(
-    { productId: "tradeup_theme_night_market", entitlementId: "theme_night_market", status: "OWNED", platform: "ios" },
-    { productId: "tradeup_theme_workshop", entitlementId: "theme_workshop", status: "OWNED", platform: "ios" },
     { productId: "tradeup_premium_lifetime", entitlementId: "premium_lifetime", status: "OWNED", platform: "ios" },
   );
   await page.evaluate(async (state) => {
@@ -46,9 +44,48 @@ test("paid themes tint market surfaces without changing item visuals or decision
     };
   });
 
+  const accountAppearance = async (capture = false) => {
+    await page.getByRole("button", { name: "Ayarlar", exact: true }).click();
+    await expect(page.locator(".profile-card")).toBeVisible();
+    const settings = await page.evaluate(() => {
+      const surface = (selector: string) => {
+        const style = getComputedStyle(document.querySelector<HTMLElement>(selector)!);
+        return `${style.backgroundImage}|${style.backgroundColor}`;
+      };
+      return {
+        screen: surface(".settings-card"),
+        profile: surface(".profile-card"),
+        avatar: surface(".avatar-picker--settings .avatar-options button"),
+        controls: surface(".settings-section"),
+      };
+    });
+    if (capture) await page.screenshot({ path: testInfo.outputPath("workshop-settings.png"), animations: "disabled" });
+    await page.getByRole("button", { name: /Satın almalar & görünüm/i }).click();
+    await expect(page.locator(".purchases-sheet")).toBeVisible();
+    await expect(page.locator(".purchase-list article")).toHaveCount(6);
+    await expect(page.locator(".purchase-list article").filter({ has: page.getByText("Reklamsız", { exact: true }) })).toContainText("Premium ile açık");
+    await expect(page.locator(".purchase-list article").filter({ hasText: "Gece Pazarı" })).toContainText("Premium ile açık");
+    const purchases = await page.evaluate(() => {
+      const surface = (selector: string) => {
+        const style = getComputedStyle(document.querySelector<HTMLElement>(selector)!);
+        return `${style.backgroundImage}|${style.backgroundColor}`;
+      };
+      return {
+        panel: surface(".purchase-panel"),
+        product: surface(".purchase-list article"),
+        choice: surface(".cosmetic-picker button[aria-pressed='true']"),
+      };
+    });
+    if (capture) await page.screenshot({ path: testInfo.outputPath("workshop-store.png"), animations: "disabled" });
+    await page.locator(".purchases-sheet .close").click();
+    await page.locator(".settings-card > .settings-sheet-heading .icon-button").click();
+    return { ...settings, ...purchases };
+  };
+
   const classic = await appearance();
   await page.locator("#boot-splash").waitFor({ state: "hidden" });
   await page.screenshot({ path: testInfo.outputPath("classic.png"), animations: "disabled" });
+  const classicAccount = await accountAppearance();
   const shell = page.locator(".app-shell");
   const themes = [];
   for (const theme of ["night-market", "workshop", "obsidian"]) {
@@ -68,6 +105,10 @@ test("paid themes tint market surfaces without changing item visuals or decision
     themes.push(themed.card);
     await page.locator("#boot-splash").waitFor({ state: "hidden" });
     await page.screenshot({ path: testInfo.outputPath(`${theme}.png`), animations: "disabled" });
+    const themedAccount = await accountAppearance(theme === "workshop");
+    for (const key of Object.keys(classicAccount) as (keyof typeof classicAccount)[]) {
+      expect(themedAccount[key], `${theme} ${key}`).not.toBe(classicAccount[key]);
+    }
   }
   expect(new Set(themes).size).toBe(3);
   for (const width of [320, 430]) {

@@ -12,5 +12,7 @@ export const isAnimatedAvatar = (avatarId: AvatarId) =>
 export const ownsAnimatedAvatars = (state: Pick<GameState, "monetization">) =>
   state.monetization.entitlements.some(
     (entry) =>
-      entry.entitlementId === "animated_avatars_01" && entry.status === "OWNED",
+      (entry.entitlementId === "animated_avatars_01" ||
+        entry.entitlementId === "premium_lifetime") &&
+      entry.status === "OWNED",
   );

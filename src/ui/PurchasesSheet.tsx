@@ -6,7 +6,13 @@ import { Icon } from "./Icon";
 import { useModalFocus } from "./useModalFocus";
 import { useTranslation, localizeStoreProduct } from "../i18n";
 import { useGameStore } from "../stores/gameStore";
-import type { HomeInteriorStyle, ShellTheme } from "../domain/appearance";
+import {
+  canUseHomeInteriorStyle,
+  canUseShellTheme,
+  type HomeInteriorStyle,
+  type ShellTheme,
+} from "../domain/appearance";
+import { hasPremiumEntitlement } from "../domain/monetization";
 
 const themeChoices: { id: ShellTheme; label: string; productId?: MonetizationProductId }[] = [
   { id: "classic", label: "Klasik" },
@@ -29,7 +35,11 @@ const storeCopy: Record<
   tradeup_premium_lifetime: {
     title: "TradeUp Premium",
     detail:
-      "Hızlandırmaları video izlemeden kullan; 30 ticaret reklamını atla. Hak sınırları değişmez.",
+      "Reklamsız oyna; tüm temalar, ev stilleri ve canlı avatarlar da açık. Hak sınırları değişmez.",
+  },
+  tradeup_no_ads_lifetime: {
+    title: "Reklamsız",
+    detail: "Videoları ve 30 ticaret reklamını atla; kozmetik içermez. Hak sınırları değişmez.",
   },
   tradeup_theme_night_market: {
     title: "Gece Pazarı teması",
@@ -70,6 +80,7 @@ export default function PurchasesSheet({
   const closeRef = useRef<HTMLButtonElement>(null);
   const sheetRef = useRef<HTMLElement>(null);
   const { appearance, setShellTheme, setHomeInteriorStyle } = useGameStore();
+  const premiumOwned = hasPremiumEntitlement(game);
 
   useModalFocus(true, sheetRef, closeRef, onClose);
 
@@ -121,6 +132,8 @@ export default function PurchasesSheet({
                   );
                   const owned = entitlement?.status === "OWNED";
                   const pending = entitlement?.status === "PENDING";
+                  const includedWithPremium =
+                    premiumOwned && productId !== "tradeup_premium_lifetime";
                   const localizedCopy = localizeStoreProduct(
                     productId,
                     storeCopy[productId].title,
@@ -139,6 +152,8 @@ export default function PurchasesSheet({
                         <span className="entitlement-state">
                           {owned ? t("store.owned") : t("store.pending")}
                         </span>
+                      ) : includedWithPremium ? (
+                        <span className="entitlement-state">{t("store.includedWithPremium")}</span>
                       ) : metadata ? (
                         <button
                           disabled={monetizationBusy}
@@ -158,14 +173,12 @@ export default function PurchasesSheet({
               <strong>Arayüz teması</strong>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
                 {themeChoices.map((choice) => {
-                  const unlocked = !choice.productId || game.monetization.entitlements.some(
-                    (entry) => entry.productId === choice.productId && entry.status === "OWNED",
-                  );
+                  const unlocked = canUseShellTheme(choice.id, game.monetization.entitlements);
                   return (
                     <button
                       key={choice.id}
                       className={appearance.shellTheme === choice.id ? "selected" : "secondary"}
-                      style={{ minHeight: 40, color: appearance.shellTheme === choice.id ? "var(--accent)" : undefined }}
+                      style={{ minHeight: 44, color: appearance.shellTheme === choice.id ? "var(--accent)" : undefined }}
                       disabled={!unlocked}
                       aria-pressed={appearance.shellTheme === choice.id}
                       onClick={() => setShellTheme(choice.id)}
@@ -180,14 +193,12 @@ export default function PurchasesSheet({
               <strong>Ev iç mekân stili</strong>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
                 {homeStyleChoices.map((choice) => {
-                  const unlocked = choice.id === "classic" || game.monetization.entitlements.some(
-                    (entry) => entry.entitlementId === "home_styles_01" && entry.status === "OWNED",
-                  );
+                  const unlocked = canUseHomeInteriorStyle(choice.id, game.monetization.entitlements);
                   return (
                     <button
                       key={choice.id}
                       className={appearance.homeInteriorStyle === choice.id ? "selected" : "secondary"}
-                      style={{ minHeight: 40, color: appearance.homeInteriorStyle === choice.id ? "var(--accent)" : undefined }}
+                      style={{ minHeight: 44, color: appearance.homeInteriorStyle === choice.id ? "var(--accent)" : undefined }}
                       disabled={!unlocked || (choice.id !== "classic" && !game.home.purchased)}
                       aria-pressed={appearance.homeInteriorStyle === choice.id}
                       onClick={() => setHomeInteriorStyle(choice.id)}

@@ -270,6 +270,31 @@ describe("monetization application service", () => {
     });
   });
 
+  it("verifies the standalone No Ads SKU through the same non-consumable path", async () => {
+    const billing = createSandboxBillingAdapter({
+      products: [],
+      purchases: {
+        tradeup_no_ads_lifetime: {
+          status: "VERIFIED",
+          event: {
+            transactionId: "purchase:no-ads:1",
+            productId: "tradeup_no_ads_lifetime",
+            entitlementId: "no_ads_lifetime",
+            platform: "ios",
+            status: "OWNED",
+          },
+        },
+      },
+    });
+    const result = await purchaseStoreProduct(initialState(), "tradeup_no_ads_lifetime", billing);
+    expect(result.status).toBe("OWNED");
+    expect(result.state.monetization.entitlements[0]).toMatchObject({
+      productId: "tradeup_no_ads_lifetime",
+      entitlementId: "no_ads_lifetime",
+      status: "OWNED",
+    });
+  });
+
   it("preserves pending and applies verified revoke during restore", async () => {
     const pending = await purchaseStoreProduct(
       initialState(),

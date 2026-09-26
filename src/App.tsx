@@ -54,7 +54,7 @@ import { ftueCopy, isFtueActive } from "./domain/ftue";
 import { categoryExpertiseLevel, marketExpertiseLevel } from "./domain/meta";
 import {
   getRewardEligibility,
-  hasPremiumEntitlement,
+  hasAdFreeEntitlement,
 } from "./domain/monetization";
 import { activeMarketListings, npcRiskSignal } from "./domain/world";
 import { nextLadderHome } from "./content/homes";
@@ -212,7 +212,7 @@ export default function App() {
     },
     LISTING_REACH: {
       ad: t("reward.boostListingAd") || "İlanı bir kez öne çıkar · Video",
-      premium: t("reward.boostListingPremium") || "Premium erişim hakkını kullan",
+      premium: t("reward.boostListingPremium") || "İlanı bir kez öne çıkar",
     },
   } as const;
   const [tab, setTab] = useState<Tab>("market");
@@ -483,7 +483,7 @@ export default function App() {
     quote.shortfallMinor
       ? t("wallet.buyingShortfall", { shortfall: money(quote.shortfallMinor, lang) })
       : t("wallet.buyingPower", { remaining: money(quote.remainingMinor, lang) });
-  const premiumReward = hasPremiumEntitlement(game);
+  const premiumReward = hasAdFreeEntitlement(game);
   const rewardProviderAvailable =
     premiumReward || game.monetization.consent.canRequestAds;
   const canClaimReward = (placementId: keyof typeof rewardCopy) =>

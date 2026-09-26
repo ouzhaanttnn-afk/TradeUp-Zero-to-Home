@@ -614,8 +614,9 @@ main {
   position: relative;
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
   padding: 0;
   border: 1px solid #294338;
   border-radius: 12px;
@@ -2441,8 +2442,6 @@ nav .active .nav-icon {
   height: 112px;
   border-radius: 17px;
   background: radial-gradient(circle, #315b48, #12251d);
-  display: grid;
-  place-items: center;
   font-size: calc(75px + var(--text-size-boost));
   margin-bottom: 0;
   border: 1px solid rgba(155, 220, 187, 0.12);
@@ -2822,12 +2821,6 @@ nav .active .nav-icon {
   height: 100%;
   object-fit: contain;
 }
-.hero-art img {
-  width: 148px;
-  height: 112px;
-  max-width: calc(100% - 20px);
-  object-fit: contain;
-}
 .product-visual {
   position: relative;
   isolation: isolate;
@@ -2842,6 +2835,13 @@ nav .active .nav-icon {
   max-height: 100%;
   object-fit: contain;
   display: block;
+}
+.hero-art.product-visual img {
+  position: absolute;
+  inset: 8px 12px;
+  width: calc(100% - 24px);
+  height: calc(100% - 16px);
+  object-fit: contain;
 }
 .condition-overlay {
   position: absolute;

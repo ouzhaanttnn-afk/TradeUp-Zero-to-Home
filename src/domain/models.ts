@@ -300,6 +300,7 @@ export type RewardPlacementId =
 
 export type MonetizationProductId =
   | "tradeup_premium_lifetime"
+  | "tradeup_no_ads_lifetime"
   | "tradeup_theme_night_market"
   | "tradeup_theme_workshop"
   | "tradeup_home_styles_01"
@@ -307,6 +308,7 @@ export type MonetizationProductId =
 
 export type EntitlementId =
   | "premium_lifetime"
+  | "no_ads_lifetime"
   | "theme_night_market"
   | "theme_workshop"
   | "home_styles_01"

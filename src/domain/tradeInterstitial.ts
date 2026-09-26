@@ -1,6 +1,6 @@
 import type { GameState } from "./models";
 import { completedTradeCount } from "./economy";
-import { hasPremiumEntitlement } from "./monetization";
+import { hasAdFreeEntitlement } from "./monetization";
 
 export const TRADE_INTERSTITIAL_INTERVAL = 30;
 
@@ -16,7 +16,7 @@ export const shouldShowTradeInterstitial = (
     current > previous &&
     current > 0 &&
     current % TRADE_INTERSTITIAL_INTERVAL === 0 &&
-    !hasPremiumEntitlement(after) &&
+    !hasAdFreeEntitlement(after) &&
     after.monetization.consent.canRequestAds
   );
 };

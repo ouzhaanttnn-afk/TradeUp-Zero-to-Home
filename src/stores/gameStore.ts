@@ -52,6 +52,7 @@ import {
 } from "../domain/ftue";
 import {
   advanceRewardState,
+  hasAdFreeEntitlement,
   rechargeMarketScanCredits,
 } from "../domain/monetization";
 import { shouldShowTradeInterstitial } from "../domain/tradeInterstitial";
@@ -1559,10 +1560,7 @@ export const useGameStore = create<Store>((set, get) => ({
     if (get().monetizationBusy) return;
     const state = get().game;
     recordReplayCommand(state, "CLAIM_REWARD", { placementId });
-    const premium = state.monetization.entitlements.some(
-      (entry) =>
-        entry.entitlementId === "premium_lifetime" && entry.status === "OWNED",
-    );
+    const premium = hasAdFreeEntitlement(state);
     set({ monetizationBusy: true });
     const result = await runRewardedAction(
       state,
