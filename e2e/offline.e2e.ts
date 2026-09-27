@@ -75,14 +75,9 @@ test("first install caches game resources and preserves a sale across offline re
   expect((await readSave()).transactionJournal).toEqual(
     before.transactionJournal,
   );
-  await page
-    .getByRole("button", {
-      name: /Deri Kapaklı Kutu Defteri, fiyat ₺120, kondisyon yüzde 55,.+İlan detaylarını aç/,
-    })
-    .click();
-  await expect(
-    page.getByRole("button", { name: "Benzer ilanlarla karşılaştır" }),
-  ).toBeVisible();
+  await page.locator(".market-grid .market-card").first().click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await expect(page.getByRole("group", { name: "Satın alma adımları" })).toBeVisible();
   expect(
     await page
       .locator("img")

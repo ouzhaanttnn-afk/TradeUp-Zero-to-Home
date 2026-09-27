@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { completeFirstLaunch } from "./helpers";
+import { advanceFrozenStartup, completeFirstLaunch } from "./helpers";
 import { initialState, money, validateState } from "../src/game";
 import type { GameState } from "../src/domain/models";
 import { reconcileJournal } from "../src/domain/economy";
@@ -38,7 +38,7 @@ for (const scenario of ["offer", "counter", "shortfall"] as const) {
     }
     const saved = validateState(initial);
     await page.goto("/");
-    await completeFirstLaunch(page);
+    await completeFirstLaunch(page, true);
     await expect(
       page.getByRole("heading", { name: "Fırsat akışı" }),
     ).toBeVisible();
@@ -80,10 +80,11 @@ for (const scenario of ["offer", "counter", "shortfall"] as const) {
         }
       });
     await page.reload();
+    await advanceFrozenStartup(page);
     await page.locator(`[data-listing-id="${listing.id}"]`).click();
     const steps = page.getByRole("group", { name: "Satın alma adımları" });
     const offer = steps.getByRole("button", { name: /^Pazarlık et/ });
-    const direct = steps.getByRole("button", { name: /^Hemen al/ });
+    const direct = steps.getByRole("button", { name: /^Hemen Satın Al/ });
     await expect(direct).toBeDisabled();
     await expect(direct).toContainText("₺80 nakit eksik");
     const action =
@@ -141,6 +142,7 @@ for (const scenario of ["offer", "counter", "shortfall"] as const) {
         ),
       ).toHaveLength(scenario === "offer" ? 1 : 0);
       await page.reload();
+      await advanceFrozenStartup(page);
       await expect(
         page.getByRole("heading", { name: "Fırsat akışı" }),
       ).toBeVisible();

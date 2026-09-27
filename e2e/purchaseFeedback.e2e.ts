@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { completeFirstLaunch } from "./helpers";
+import { advanceFrozenStartup, completeFirstLaunch } from "./helpers";
 import { initialState, resolveOffer, validateState } from "../src/game";
 import { reconcileJournal } from "../src/domain/economy";
 import type { GameState } from "../src/domain/models";
@@ -37,7 +37,7 @@ test("seller feedback stays in the sheet and two rejected offers remain closed a
     ).toBe("rejected");
   const saved = validateState(initial);
   await page.goto("/");
-  await completeFirstLaunch(page);
+  await completeFirstLaunch(page, true);
   await expect(
     page.getByRole("heading", { name: "Fırsat akışı" }),
   ).toBeVisible();
@@ -81,6 +81,7 @@ test("seller feedback stays in the sheet and two rejected offers remain closed a
   const openListing = async () =>
     page.locator(`[data-listing-id="${listing.id}"]`).click();
   await page.reload();
+  await advanceFrozenStartup(page);
   await openListing();
   const steps = page.getByRole("group", { name: "Satın alma adımları" });
   const negotiate = steps.getByRole("button", { name: /^Pazarlık et/ });
@@ -115,11 +116,12 @@ test("seller feedback stays in the sheet and two rejected offers remain closed a
     realizedProfit: true,
   });
   await page.reload();
+  await advanceFrozenStartup(page);
   await openListing();
   await expect(negotiate).toBeDisabled();
   await expect(steps.getByRole("status")).toHaveCount(0);
   // Closing negotiation does not hide the existing non-tutorial list-price purchase.
-  await expect(steps.getByRole("button", { name: /^Hemen al/ })).toBeEnabled();
+  await expect(steps.getByRole("button", { name: /^Hemen Satın Al/ })).toBeEnabled();
   expect((await readSave()).negotiations[listing.id]).toEqual(
     closed.negotiations[listing.id],
   );

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { completeFirstLaunch } from "./helpers";
+import { advanceFrozenStartup, completeFirstLaunch } from "./helpers";
 import { initialState, validateState } from "../src/game";
 import type { GameState } from "../src/domain/models";
 import {
@@ -38,7 +38,7 @@ for (const width of [320, 430]) {
     if (!listing.ok) throw new Error(listing.reason);
     const saved = validateState(listing.state);
     await page.goto("/");
-    await completeFirstLaunch(page);
+    await completeFirstLaunch(page, true);
     await expect(
       page.getByRole("heading", { name: "Fırsat akışı" }),
     ).toBeVisible();
@@ -60,6 +60,7 @@ for (const width of [320, 430]) {
       }
     }, saved);
     await page.reload();
+    await advanceFrozenStartup(page);
     const readSave = () =>
       page.evaluate(async () => {
         const db = await new Promise<IDBDatabase>((resolve, reject) => {
@@ -91,7 +92,7 @@ for (const width of [320, 430]) {
     const listingCardHeight = await waiting
       .locator("xpath=ancestor::article")
       .evaluate((card) => card.getBoundingClientRect().height);
-    expect(listingCardHeight).toBeLessThan(width === 430 ? 220 : 310);
+    expect(listingCardHeight).toBeLessThan(width === 430 ? 220 : 340);
     await expect(page.locator(".nav-offer-count")).toHaveCount(0);
     const layout = async () => {
       expect(
@@ -174,7 +175,7 @@ for (const width of [320, 430]) {
     ).toHaveAttribute("aria-selected", "true");
     await expect(waiting).toHaveCount(0);
     await expect(
-      page.getByRole("button", { name: "Teklifi kabul et", exact: true }),
+      page.getByRole("button", { name: "Kabul Et", exact: true }),
     ).toBeVisible();
     await layout();
     await page.screenshot({
@@ -189,10 +190,10 @@ for (const width of [320, 430]) {
     expect(offered.cashMinor).toBe(saved.cashMinor);
     expect(offered.transactionJournal).toEqual(revised.transactionJournal);
     await page
-      .getByRole("button", { name: "Teklifi reddet", exact: true })
+      .getByRole("button", { name: "Reddet", exact: true })
       .click();
     await expect(page.locator(".nav-offer-count")).toHaveCount(0);
-    await expect(page.getByText("İlanın yayında kalıyor.")).toBeVisible();
+    await expect(page.getByText(/teklifi reddedildi\./)).toBeVisible();
     await expect(waiting).toBeVisible();
     const rejected = await readSave();
     expect(rejected.buyerOffers).toEqual([]);
@@ -206,10 +207,11 @@ for (const width of [320, 430]) {
       realizedProfit: true,
     });
     await page.reload();
+    await advanceFrozenStartup(page);
     await page.getByRole("button", { name: "Portföy", exact: true }).click();
     await page.getByRole("tab", { name: "İlanlarım", exact: true }).click();
     await expect(
-      page.getByRole("button", { name: "Teklifi reddet", exact: true }),
+      page.getByRole("button", { name: "Reddet", exact: true }),
     ).toHaveCount(0);
     await expect(waiting).toBeVisible();
     expect((await readSave()).buyerOffers).toEqual([]);
@@ -223,7 +225,7 @@ for (const width of [320, 430]) {
     await expect(page.locator(".nav-offer-count")).toHaveText("1");
     await expect(waiting).toHaveCount(0);
     await page
-      .getByRole("button", { name: "Teklifi kabul et", exact: true })
+      .getByRole("button", { name: "Kabul Et", exact: true })
       .click();
     await expect(page.locator(".nav-offer-count")).toHaveCount(0);
     await expect

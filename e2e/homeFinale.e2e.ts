@@ -109,7 +109,7 @@ test("wealth atmosphere culminates in an accessible home purchase finale", async
   // dead "coming soon" placeholder.
   await expect(
     page.getByRole("heading", {
-      name: "Bahçeli Başlangıç Evi sonrası: Şehir Rezidans Dairesi",
+      name: "Bahçeli Başlangıç Evi → Şehir Rezidans Dairesi",
     }),
   ).toBeVisible();
   await expect(page.getByText("1 ev bulundu")).toBeVisible();

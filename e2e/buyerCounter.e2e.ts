@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { completeFirstLaunch } from "./helpers";
+import { advanceFrozenStartup, completeFirstLaunch } from "./helpers";
 import type { GameState } from "../src/domain/models";
 import {
   buyerCounterMinor,
@@ -69,7 +69,7 @@ test("a buyer counter becomes one persisted final offer with no message chain", 
   });
 
   await page.goto("/");
-  await completeFirstLaunch(page);
+  await completeFirstLaunch(page, true);
   await page.evaluate(async (state) => {
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
       const request = indexedDB.open("tradeup", 1);
@@ -109,6 +109,7 @@ test("a buyer counter becomes one persisted final offer with no message chain", 
     });
 
   await page.reload();
+  await advanceFrozenStartup(page);
   await page.getByRole("button", { name: "Portföy", exact: true }).click();
   await page.getByRole("tab", { name: "İlanlarım", exact: true }).click();
   const counter = page.getByRole("button", { name: /Karşı teklif yap:/ });
@@ -127,10 +128,10 @@ test("a buyer counter becomes one persisted final offer with no message chain", 
   ).toBeVisible();
   await expect(counter).toHaveCount(0);
   await expect(
-    page.getByRole("button", { name: "Teklifi kabul et" }),
+    page.getByRole("button", { name: "Kabul Et", exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Teklifi reddet" }),
+    page.getByRole("button", { name: "Reddet", exact: true }),
   ).toBeVisible();
   const final = await readSave();
   expect(final.buyerOffers[0]).toMatchObject({
@@ -153,10 +154,11 @@ test("a buyer counter becomes one persisted final offer with no message chain", 
   });
 
   await page.reload();
+  await advanceFrozenStartup(page);
   await page.getByRole("button", { name: "Portföy", exact: true }).click();
   await page.getByRole("tab", { name: "İlanlarım", exact: true }).click();
   await expect(counter).toHaveCount(0);
-  await page.getByRole("button", { name: "Teklifi kabul et" }).click();
+  await page.getByRole("button", { name: "Kabul Et", exact: true }).click();
   await expect
     .poll(async () => (await readSave()).ownedAssets[0].state)
     .toBe("SOLD_COMPLETE");

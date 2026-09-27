@@ -1,5 +1,15 @@
 # TradeUp iOS Release Readiness
 
+## 27 Eylül 2026 güncel durum
+
+- Yerel kalite kapısı: 384 birim testi, lint, production build ve tam Playwright taraması (37 başarılı, 1 isteğe bağlı görsel üretimi atlandı) geçti. Rehberli ilk satın alma akışını bekleyen eski testler, güncel serbest pazar ve 50 erken oyun tarama kuralına göre yenilendi.
+- App Store Connect'te iOS 1.0.1 (34) TestFlight build'i işlenmiş ve **Ready to Submit**; ancak mevcut reddedilmiş 1.0.1 dağıtım başvurusu hâlâ eski build **14**'e bağlı. 34 henüz App Review'a gönderilmedi. Önceki red, iPad Air 11 inçte cihaz uyumluluğuydu; build 34 iPhone hedefli.
+- Altı GDD v2.2 kalıcı IAP kaydı mevcut. Premium **Ready for Review**, diğer beşi **Prepare for Submission**. Reklamsız ürününün 175 bölge kapsamı, 1,99 USD taban fiyatı ve Türkçe mağaza metni ayarlandı; inceleme ekran görüntüsü ve kalan ürünlerin fiyat/yerelleştirme/görselleri tamamlanmadı.
+- Mevcut App Privacy etiketi **Data Not Collected**. iOS uygulaması açılırken AdMob izin akışı başlatılabildiği ve Google Mobile Ads SDK veri toplayabildiği için bu etiketin doğruluğu yayın öncesi yeniden değerlendirilmeli. Üretim reklam kapısının kapalı olması SDK veri akışının yokluğunu tek başına kanıtlamaz.
+- Mevcut App Review başvurusu unresolved/rejected durumunda; Apple bu başvuruya yeni IAP eklenmesine izin vermiyor. Mevcut başvuruyu build 34 ve Premium ile yeniden sunmak ya da mevcut başvuruyu sonlandırıp altı IAP hazırlandıktan sonra yeni başvuru açmak ayrı yayın kararı gerektirir. İki seçenekten hiçbiri henüz uygulanmadı; manuel yayın ayarı korunuyor.
+
+## Önceki tarihsel kayıtlar
+
 ## Repository tarafında tamamlananlar
 
 - Capacitor iOS 8.5.1 projesi `ios/App` altında oluşturuldu.
