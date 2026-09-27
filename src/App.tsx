@@ -141,8 +141,9 @@ const PurchasesSheet = lazy(loadPurchasesSheet);
 
 type Tab = "market" | "radar" | "portfolio" | "journey";
 type PortfolioSegment = "inventory" | "preparation" | "listings";
+export const MIN_STARTUP_SCREEN_MS = 2_400;
 
-export function StartupSkeleton() {
+export function StartupSkeleton({ ready = false }: { ready?: boolean }) {
   const { t } = useTranslation();
   return (
     <div
@@ -150,7 +151,11 @@ export function StartupSkeleton() {
       role="status"
       aria-live="polite"
       aria-busy="true"
-      aria-label={t("startup.loadingSave") || "Kayıt yükleniyor"}
+      aria-label={
+        ready
+          ? t("startup.preparingCareer") || "Kariyerin hazırlanıyor"
+          : t("startup.loadingSave") || "Kayıt yükleniyor"
+      }
     >
       <div className="startup-art" aria-hidden="true" />
       <div className="startup-brand">
@@ -244,6 +249,7 @@ export default function App() {
   const [homeFinaleOpen, setHomeFinaleOpen] = useState(false);
   const [homePulseStage, setHomePulseStage] = useState<number | null>(null);
   const [scanSpinKey, setScanSpinKey] = useState(0);
+  const [startupElapsed, setStartupElapsed] = useState(false);
   const [wallClockNow, setWallClockNow] = useState(() => Date.now());
   const [followSheetOpen, setFollowSheetOpen] = useState(false);
   const [purchasesBubbleOpen, setPurchasesBubbleOpen] = useState(false);
@@ -341,6 +347,10 @@ export default function App() {
   useEffect(() => {
     void hydrate();
   }, [hydrate]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setStartupElapsed(true), MIN_STARTUP_SCREEN_MS);
+    return () => window.clearTimeout(timer);
+  }, []);
   useEffect(() => {
     if (!ready || !sessionActive) return undefined;
     const timer = window.setInterval(tick, WORLD_CONFIG.activeTickMin * 60_000);
@@ -538,7 +548,7 @@ export default function App() {
     [game.career],
   );
 
-  if (!ready) return <StartupSkeleton />;
+  if (!ready || !startupElapsed) return <StartupSkeleton ready={ready} />;
 
   if (!game.profile.onboardingComplete) {
     return (

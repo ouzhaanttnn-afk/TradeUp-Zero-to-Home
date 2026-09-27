@@ -127,6 +127,7 @@ test("market refresh turns the brand arrow once and reduced motion keeps it stil
   await refresh.click();
   await expect(arrow).toHaveAttribute("data-scan-cycle", "1");
   await expect(arrow).toHaveCSS("animation-name", "brand-scan-turn");
+  await expect(arrow).toHaveCSS("animation-duration", "0.9s");
   await refresh.click();
   await expect(arrow).toHaveAttribute("data-scan-cycle", "2");
   await expect.poll(() => arrow.evaluate((element) => getComputedStyle(element).transform)).toBe("none");

@@ -14,4 +14,10 @@ describe("startup skeleton", () => {
     expect(markup.match(/<button/g)).toBeNull();
     expect(markup).not.toContain("₺");
   });
+
+  it("announces the transition after the save is ready", () => {
+    const markup = renderToStaticMarkup(<StartupSkeleton ready />);
+    expect(markup).toContain('aria-label="Kariyerin hazırlanıyor"');
+    expect(markup).toContain('aria-busy="true"');
+  });
 });
