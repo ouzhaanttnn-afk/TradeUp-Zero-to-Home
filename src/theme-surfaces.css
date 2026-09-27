@@ -284,7 +284,7 @@
   background: var(--theme-card-base);
 }
 
-.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) :is(.profile-card, .settings-link-card, .purchase-panel) {
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) :is(.profile-card, .settings-link-card, .purchase-panel, .appearance-panel) {
   border-color: var(--theme-line);
   background: var(--theme-card);
 }
@@ -345,6 +345,19 @@
   background: linear-gradient(180deg, var(--theme-top), var(--theme-bottom));
 }
 
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .purchases-sheet :is(.owned-purchases, .extra-purchases) {
+  border-color: var(--theme-line);
+  background: var(--theme-card-base);
+}
+
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .owned-purchases__item {
+  background: var(--theme-glow);
+}
+
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .purchases-sheet :is(.owned-purchases summary b, .extra-purchases summary b, .owned-purchases__item small) {
+  color: var(--theme-tint);
+}
+
 /* Account and store controls stay finger-sized at the narrowest supported width. */
 .settings-card .lang-pill {
   min-width: 44px;
@@ -355,36 +368,11 @@
   min-height: 44px;
 }
 
-/* Purchased rights read as a quiet inventory, while purchasable packs keep full details. */
-.purchases-sheet .purchase-list .purchase-item:first-child {
+/* The premium offer stays distinct while owned rights live in their own disclosure. */
+.purchases-sheet .purchase-list .purchase-item--premium {
   border-color: rgba(199, 170, 103, 0.25);
   background: radial-gradient(circle at 0 0, rgba(199, 170, 103, 0.09), transparent 52%),
     rgba(16, 29, 24, 0.84);
-}
-
-.purchases-sheet .purchase-list .purchase-item--compact {
-  position: relative;
-  min-height: 44px;
-  padding: 6px 8px 6px 16px;
-  border-radius: 10px;
-}
-
-.purchases-sheet .purchase-list .purchase-item--compact::before {
-  position: absolute;
-  left: 7px;
-  top: 50%;
-  width: 3px;
-  height: 18px;
-  border-radius: 3px;
-  background: var(--theme-tint, var(--accent));
-  transform: translateY(-50%);
-  content: "";
-}
-
-.purchases-sheet .purchase-list .purchase-item--compact strong {
-  display: block;
-  line-height: 1.2;
-  overflow-wrap: anywhere;
 }
 
 .purchases-sheet .purchase-list .purchase-item-status {
@@ -399,14 +387,116 @@
   white-space: nowrap;
 }
 
-.purchases-sheet .purchase-list .purchase-item-status--included {
-  border-color: var(--theme-line, rgba(137, 193, 164, 0.15));
-  color: var(--theme-muted, #9fbaac);
-  background: var(--theme-glow, rgba(137, 193, 164, 0.06));
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .purchases-sheet .purchase-list .purchase-item--premium {
+  background: radial-gradient(circle at 0 0, var(--theme-glow), transparent 52%), var(--theme-card-base);
 }
 
-.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .purchases-sheet .purchase-list .purchase-item:first-child {
-  background: radial-gradient(circle at 0 0, var(--theme-glow), transparent 52%), var(--theme-card-base);
+.appearance-panel {
+  margin-top: 8px;
+  padding: 11px;
+  border: 1px solid rgba(137, 193, 164, 0.15);
+  border-radius: 17px;
+  background: rgba(10, 27, 20, 0.74);
+}
+.appearance-panel h3 {
+  margin: 0 0 6px;
+  color: #dce9e1;
+  font-size: calc(13px + var(--text-size-boost));
+}
+.appearance-panel .cosmetic-picker {
+  display: grid;
+  gap: 7px;
+  margin-top: 10px;
+}
+.cosmetic-picker__choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+.owned-purchases,
+.extra-purchases {
+  margin: 7px 0;
+  border: 1px solid rgba(137, 193, 164, 0.16);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.025);
+}
+.owned-purchases summary,
+.extra-purchases summary {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 11px;
+  color: #dce9e1;
+  font-size: calc(10px + var(--text-size-boost));
+  font-weight: 750;
+  cursor: pointer;
+  list-style: none;
+}
+.owned-purchases summary::-webkit-details-marker,
+.extra-purchases summary::-webkit-details-marker {
+  display: none;
+}
+.owned-purchases summary span,
+.extra-purchases summary span {
+  margin-right: auto;
+}
+.owned-purchases summary::after,
+.extra-purchases summary::after {
+  color: #8cbda1;
+  content: "⌄";
+  font-size: 16px;
+  line-height: 1;
+  transition: transform 160ms ease;
+}
+.owned-purchases[open] summary::after,
+.extra-purchases[open] summary::after {
+  transform: rotate(180deg);
+}
+.owned-purchases summary:focus-visible,
+.extra-purchases summary:focus-visible {
+  outline: 2px solid #69d99c;
+  outline-offset: 2px;
+}
+.owned-purchases summary b,
+.extra-purchases summary b {
+  display: grid;
+  min-width: 23px;
+  height: 23px;
+  place-items: center;
+  border-radius: 999px;
+  color: #a7e6bf;
+  background: rgba(105, 226, 162, 0.1);
+  font-size: calc(9px + var(--text-size-boost));
+}
+.owned-purchases__list,
+.extra-purchases .purchase-list {
+  display: grid;
+  gap: 5px;
+  padding: 0 7px 7px;
+}
+.owned-purchases__item {
+  display: flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 5px 7px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.035);
+}
+.owned-purchases__item strong {
+  min-width: 0;
+  font-size: calc(9px + var(--text-size-boost));
+  line-height: 1.25;
+}
+.owned-purchases__item small {
+  flex: 0 0 auto;
+  max-width: 45%;
+  color: #86d3a7;
+  font-size: calc(8px + var(--text-size-boost));
+  line-height: 1.2;
+  text-align: right;
 }
 
 @media (max-width: 430px) {

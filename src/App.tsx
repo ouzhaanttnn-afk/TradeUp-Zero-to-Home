@@ -55,6 +55,7 @@ import { categoryExpertiseLevel, marketExpertiseLevel } from "./domain/meta";
 import {
   getRewardEligibility,
   hasAdFreeEntitlement,
+  hasPremiumEntitlement,
 } from "./domain/monetization";
 import { activeMarketListings, npcRiskSignal } from "./domain/world";
 import { nextLadderHome } from "./content/homes";
@@ -1074,7 +1075,7 @@ export default function App() {
               </small>
             </div>
           </div>
-          {premiumReward ? (
+          {hasPremiumEntitlement(game) ? (
             <span className="entitlement-state" title="TradeUp Premium kurucusu">
               ◆ KURUCU
             </span>

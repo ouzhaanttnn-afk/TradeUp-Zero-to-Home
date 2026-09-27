@@ -62,14 +62,12 @@ test("paid themes tint market surfaces without changing item visuals or decision
     if (capture) await page.screenshot({ path: testInfo.outputPath("workshop-settings.png"), animations: "disabled" });
     await page.getByRole("button", { name: /Satın almalar & görünüm/i }).click();
     await expect(page.locator(".purchases-sheet")).toBeVisible();
-    await expect(page.locator(".purchase-list article")).toHaveCount(6);
-    await expect(page.locator(".purchase-item--compact")).toHaveCount(5);
-    expect(await page.locator(".purchase-item--compact").evaluateAll((items) =>
-      items.every((item) => item.getBoundingClientRect().height <= 54),
-    )).toBe(true);
-    await expect(page.locator(".purchase-item:first-child")).toContainText("Hak sınırları değişmez");
-    await expect(page.locator(".purchase-list article").filter({ has: page.getByText("Reklamsız", { exact: true }) })).toContainText("Premium ile açık");
-    await expect(page.locator(".purchase-list article").filter({ hasText: "Gece Pazarı" })).toContainText("Premium ile açık");
+    await expect(page.locator(".purchase-list article")).toHaveCount(0);
+    await expect(page.locator(".owned-purchases summary")).toContainText("6");
+    await page.locator(".owned-purchases summary").click();
+    await expect(page.locator(".owned-purchases__item")).toHaveCount(6);
+    await expect(page.locator(".owned-purchases__item").filter({ hasText: "Reklamsız" })).toContainText("Premium ile açık");
+    await expect(page.locator(".owned-purchases__item").filter({ hasText: "Gece Pazarı" })).toContainText("Premium ile açık");
     const purchases = await page.evaluate(() => {
       const surface = (selector: string) => {
         const style = getComputedStyle(document.querySelector<HTMLElement>(selector)!);
@@ -77,7 +75,7 @@ test("paid themes tint market surfaces without changing item visuals or decision
       };
       return {
         panel: surface(".purchase-panel"),
-        product: surface(".purchase-list article"),
+        product: surface(".owned-purchases__item"),
         choice: surface(".cosmetic-picker button[aria-pressed='true']"),
       };
     });
@@ -163,7 +161,7 @@ test("paid themes tint market surfaces without changing item visuals or decision
     await page.getByRole("button", { name: /Satın almalar & görünüm/i }).click();
     const store = page.locator(".purchases-sheet");
     expect(await store.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
-    await expect(store.locator(".purchase-item--compact")).toHaveCount(5);
+    await expect(store.locator(".owned-purchases summary")).toContainText("6");
     await store.locator(".close").click();
     await page.locator(".settings-card > .settings-sheet-heading .icon-button").click();
   }
