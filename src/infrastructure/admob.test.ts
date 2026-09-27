@@ -64,6 +64,8 @@ describe("AdMob native adapters", () => {
       }),
       showConsentForm: vi.fn(),
       showPrivacyOptionsForm: vi.fn(),
+      trackingAuthorizationStatus: vi.fn().mockResolvedValue({ status: "denied" }),
+      requestTrackingAuthorization: vi.fn(),
       prepareRewardVideoAd: vi.fn(),
       showRewardVideoAd: vi.fn(),
     };
@@ -90,6 +92,8 @@ describe("AdMob native adapters", () => {
       }),
       showConsentForm: vi.fn(),
       showPrivacyOptionsForm: vi.fn(),
+      trackingAuthorizationStatus: vi.fn().mockResolvedValue({ status: "notDetermined" }),
+      requestTrackingAuthorization: vi.fn().mockResolvedValue(undefined),
       prepareRewardVideoAd: vi.fn(),
       showRewardVideoAd: vi.fn(),
       prepareInterstitial: vi.fn().mockResolvedValue({ adUnitId: "test" }),
@@ -106,6 +110,10 @@ describe("AdMob native adapters", () => {
       isTesting: true,
       npa: true,
     });
+    expect(port.requestTrackingAuthorization).toHaveBeenCalledOnce();
+    expect(port.requestTrackingAuthorization.mock.invocationCallOrder[0]).toBeLessThan(
+      port.prepareInterstitial.mock.invocationCallOrder[0],
+    );
     expect(port.showInterstitial).toHaveBeenCalledOnce();
   });
 
@@ -119,6 +127,8 @@ describe("AdMob native adapters", () => {
       }),
       showConsentForm: vi.fn(),
       showPrivacyOptionsForm: vi.fn(),
+      trackingAuthorizationStatus: vi.fn().mockResolvedValue({ status: "denied" }),
+      requestTrackingAuthorization: vi.fn(),
       prepareRewardVideoAd: vi.fn().mockResolvedValue({ adUnitId: "test" }),
       showRewardVideoAd: vi.fn().mockResolvedValue({ amount: 1, type: "test" }),
     };
@@ -132,6 +142,31 @@ describe("AdMob native adapters", () => {
     expect(port.prepareRewardVideoAd).toHaveBeenCalledWith(
       expect.objectContaining({ isTesting: true, npa: true }),
     );
+    expect(port.requestTrackingAuthorization).not.toHaveBeenCalled();
+  });
+
+  it("skips the ad without granting a reward if the tracking permission flow fails", async () => {
+    const port = {
+      initialize: vi.fn().mockResolvedValue(undefined),
+      requestConsentInfo: vi.fn().mockResolvedValue({
+        status: "NOT_REQUIRED",
+        canRequestAds: true,
+        privacyOptionsRequirementStatus: "NOT_REQUIRED",
+      }),
+      showConsentForm: vi.fn(),
+      showPrivacyOptionsForm: vi.fn(),
+      trackingAuthorizationStatus: vi.fn().mockResolvedValue({ status: "notDetermined" }),
+      requestTrackingAuthorization: vi.fn().mockRejectedValue(new Error("unavailable")),
+      prepareRewardVideoAd: vi.fn(),
+      showRewardVideoAd: vi.fn(),
+    };
+    const adapters = createAdMobAdapters(port as never, { platform: "ios" });
+    await adapters.consent.refresh();
+    expect(await adapters.rewarded.show("MARKET_SCOUT")).toEqual({
+      status: "FAILED",
+      reason: "PROVIDER",
+    });
+    expect(port.prepareRewardVideoAd).not.toHaveBeenCalled();
   });
 
   it("classifies provider failures without exposing native error details", () => {

@@ -67,6 +67,8 @@ type AdMobPort = Pick<
   | "requestConsentInfo"
   | "showConsentForm"
   | "showPrivacyOptionsForm"
+  | "trackingAuthorizationStatus"
+  | "requestTrackingAuthorization"
   | "prepareRewardVideoAd"
   | "showRewardVideoAd"
   | "prepareInterstitial"
@@ -131,6 +133,14 @@ export const createAdMobAdapters = (
     return consentSnapshot(info);
   };
 
+  const requestTrackingIfNeeded = async () => {
+    if (platform !== "ios") return;
+    const authorization = await port.trackingAuthorizationStatus();
+    if (authorization.status === "notDetermined") {
+      await port.requestTrackingAuthorization();
+    }
+  };
+
   return {
     consent: {
       refresh: refreshConsent,
@@ -152,6 +162,7 @@ export const createAdMobAdapters = (
         );
         if (!adId) return { status: "FAILED", reason: "PROVIDER" };
         try {
+          await requestTrackingIfNeeded();
           await port.prepareRewardVideoAd({
             adId,
             isTesting: !productionEnabled,
@@ -177,6 +188,7 @@ export const createAdMobAdapters = (
       if (!adId) return false;
       showingInterstitial = true;
       try {
+        await requestTrackingIfNeeded();
         await port.prepareInterstitial({
           adId,
           isTesting: !productionEnabled,
