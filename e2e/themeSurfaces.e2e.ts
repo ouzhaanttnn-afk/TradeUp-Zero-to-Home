@@ -151,3 +151,55 @@ test("paid themes tint market surfaces without changing item visuals or decision
     await detail.locator(".close").click();
   }
 });
+
+test("market movement copy stays separated and inherits the selected theme on narrow screens", async ({ page }, testInfo) => {
+  await page.goto("/");
+  await completeFirstLaunch(page);
+  const saved = validateState(initialState(Date.now(), "SANDBOX"));
+  saved.seed = 5; // The first event window is Nostalji rüzgarı.
+  saved.gameTimeMin = 180;
+  saved.monetization.entitlements.push(
+    { productId: "tradeup_premium_lifetime", entitlementId: "premium_lifetime", status: "OWNED", platform: "ios" },
+  );
+  await page.evaluate(async (state) => {
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open("tradeup", 1);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    await new Promise<void>((resolve, reject) => {
+      const transaction = db.transaction("game", "readwrite");
+      transaction.objectStore("game").put(state, "main");
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+    });
+    db.close();
+    localStorage.setItem("tradeup_appearance_v1", JSON.stringify({ shellTheme: "obsidian", homeInteriorStyle: "classic" }));
+  }, saved);
+  await page.reload();
+  const event = page.locator(".market-event");
+  await expect(event).toContainText("Nostalji rüzgarı");
+  await expect(page.locator(".app-shell")).toHaveClass(/theme-obsidian/);
+  for (const width of [320, 390, 430]) {
+    await page.setViewportSize({ width, height: 844 });
+    const boxes = await event.evaluate((element) => {
+      const box = (selector: string) => element.querySelector(selector)!.getBoundingClientRect();
+      const badge = box("small");
+      const title = box("b");
+      const message = box("p");
+      const container = element.getBoundingClientRect();
+      return {
+        badgeBottom: badge.bottom,
+        titleTop: title.top,
+        titleBottom: title.bottom,
+        messageTop: message.top,
+        messageBottom: message.bottom,
+        containerBottom: container.bottom,
+      };
+    });
+    expect(boxes.titleTop).toBeGreaterThan(boxes.badgeBottom);
+    expect(boxes.messageTop).toBeGreaterThan(boxes.titleBottom);
+    expect(boxes.containerBottom).toBeGreaterThan(boxes.messageBottom);
+    if (width === 390) await event.screenshot({ path: testInfo.outputPath("nostalgia-event-390.png") });
+  }
+});

@@ -1,4 +1,30 @@
 /* Cosmetic surfaces only. Product imagery, condition, risk and price signals stay unchanged. */
+.market-event > div {
+  min-width: 0;
+  grid-auto-rows: max-content;
+  gap: 3px;
+}
+
+.market-event small,
+.market-event b,
+.market-event p {
+  display: block;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.market-event small {
+  font-size: calc(8px + var(--text-size-boost));
+}
+
+.market-event b {
+  font-size: calc(12px + var(--text-size-boost));
+}
+
+.market-event p {
+  font-size: calc(9px + var(--text-size-boost));
+}
+
 .app-shell.theme-classic .market-grid .market-card {
   background: radial-gradient(circle at 50% 0, rgba(111, 151, 117, 0.07), transparent 46%),
     linear-gradient(155deg, rgba(15, 35, 26, 0.85), rgba(7, 18, 13, 0.9));
@@ -67,9 +93,18 @@
   background: var(--theme-panel);
 }
 
-.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) :is(.wallet, .notice, .profile-settings-button, .market-filters, .market-follow-entry, .segments, nav) {
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) :is(.wallet, .notice, .profile-settings-button, .market-filters, .market-follow-entry, .segments, nav, .market-event) {
   border-color: var(--theme-line);
   background: var(--theme-panel);
+}
+
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .market-event > span {
+  color: var(--theme-tint);
+  background: var(--theme-glow);
+}
+
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .market-event small {
+  color: var(--theme-tint);
 }
 
 .app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) :is(.market-grid .market-card, .market-grid .market-card--upper-market, .listing:not(.market-card), .owned, .saved-search-card, .missed-card, .score-card, .expertise-card, .home-card, .metric-grid div, .timeline article, .journey-score, .empty) {
