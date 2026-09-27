@@ -3,7 +3,7 @@ import { chromium } from "@playwright/test";
 import { resolve } from "node:path";
 
 const source = resolve("store-assets/ios/iphone-6.5");
-const output = resolve("store-assets/ios/iphone-6.5-story-v101");
+const output = resolve("store-assets/ios/iphone-6.5-story-v102");
 
 const slides = [
   {

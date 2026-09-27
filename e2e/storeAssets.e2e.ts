@@ -69,7 +69,7 @@ test("generate App Store screenshots for TradeUp", async ({
   await page.clock.install({ time: now });
 
   await page.goto("/");
-  await page.getByLabel("Oyuncu adı").fill("Alper");
+  await page.getByLabel("Oyuncu adı").fill("Oyuncu");
   await page.getByRole("button", { name: /Pazar Kaşifi/ }).click();
   await capture(
     page,
@@ -82,7 +82,7 @@ test("generate App Store screenshots for TradeUp", async ({
   market.profile = {
     ...market.profile,
     onboardingComplete: true,
-    name: "Alper",
+    name: "Oyuncu",
     avatarId: "pazar-kasifi",
   };
   market.accessibility.reducedMotion = true;
@@ -111,6 +111,19 @@ test("generate App Store screenshots for TradeUp", async ({
   await expect(
     page.getByRole("heading", { name: "Fırsat akışı" }),
   ).toBeVisible();
+  const marketArtwork = await page.locator(".market-grid img").evaluateAll(
+    async (images) =>
+      Promise.all(
+        images.map(async (image) => {
+          const artwork = image as HTMLImageElement;
+          artwork.loading = "eager";
+          await artwork.decode();
+          return artwork.naturalWidth > 0;
+        }),
+      ),
+  );
+  expect(marketArtwork.length).toBeGreaterThanOrEqual(9);
+  expect(marketArtwork.every(Boolean)).toBe(true);
   await capture(page, "02-canli-pazar", testInfo.outputPath("market.png"));
 
   await page.setViewportSize({ width: 1032, height: 1376 });
