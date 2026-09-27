@@ -243,6 +243,7 @@ export default function App() {
   const [focusedAssetId, setFocusedAssetId] = useState<string | null>(null);
   const [homeFinaleOpen, setHomeFinaleOpen] = useState(false);
   const [homePulseStage, setHomePulseStage] = useState<number | null>(null);
+  const [scanSpinKey, setScanSpinKey] = useState(0);
   const [wallClockNow, setWallClockNow] = useState(() => Date.now());
   const [followSheetOpen, setFollowSheetOpen] = useState(false);
   const [purchasesBubbleOpen, setPurchasesBubbleOpen] = useState(false);
@@ -558,6 +559,17 @@ export default function App() {
     setPurchaseOfferMode("BALANCED");
     setEvidenceExpanded(isFtueActive(game));
     openListing(listingId);
+  };
+  const refreshMarket = () => {
+    const previousTime = useGameStore.getState().game.gameTimeMin;
+    scan();
+    if (
+      useGameStore.getState().game.gameTimeMin > previousTime &&
+      !game.accessibility.reducedMotion &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      setScanSpinKey((current) => current + 1);
+    }
   };
   const toggleComparison = () => {
     if (!selected) return;
@@ -1036,7 +1048,13 @@ export default function App() {
         <header>
           <div className="brand-lockup">
             <span className="brand-mark" aria-hidden="true">
-              ↑
+              <span
+                key={scanSpinKey}
+                className={scanSpinKey ? "brand-arrow brand-arrow--refreshing" : "brand-arrow"}
+                data-scan-cycle={scanSpinKey}
+              >
+                ↑
+              </span>
             </span>
             <div>
               <span className="eyebrow">TRADEUP</span>
@@ -1239,7 +1257,7 @@ export default function App() {
                         <button
                           className="market-refresh"
                           disabled={game.monetization.marketScanCredits === 0}
-                          onClick={scan}
+                          onClick={refreshMarket}
                           aria-label={t("market.refreshAria", { credits: game.monetization.marketScanCredits })}
                         >
                           <Icon name="refresh" />
