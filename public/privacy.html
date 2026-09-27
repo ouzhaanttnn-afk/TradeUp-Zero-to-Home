@@ -19,7 +19,8 @@
       <p class="lead">
         TradeUp: Zero to Home hesap açmanızı istemez. Oyun ilerlemeniz cihazda
         tutulur. İsteğe bağlı reklamlar ve mağaza işlemleri için aşağıdaki
-        üçüncü taraf hizmetler devreye girebilir.
+        üçüncü taraf hizmetler devreye girebilir. Kullanım analitiği ise yalnız
+        ayrıca açmayı seçerseniz Firebase üzerinden çalışır.
       </p>
       <section class="card">
         <h2>Yerel oyun kaydı</h2>
@@ -31,9 +32,13 @@
         </p>
         <h2>Oyun analitiği</h2>
         <p>
-          Oyun olayları, analitik tercihi açıkken cihazdaki sınırlı bir kuyrukta
-          saklanır; mevcut uygulama bu olayları bir analitik sağlayıcısına
-          göndermez. Ayarlardan analitiği kapatmak yerel olay kuyruğunu temizler.
+          İsteğe bağlı analitik başlangıçta kapalıdır. iOS uygulamasında ayarlardan
+          açıkça açarsanız oyun olaylarının yalnız türü (örneğin satın alma veya
+          satışın tamamlanması) Google Firebase Analytics'e gönderilir. Oyun içi adınız,
+          fiyatlarınız, bakiyeniz ve olayların yerel kimlikleri gönderilmez.
+          Firebase SDK'sı uygulama örneği ve cihazla ilgili teknik bilgileri de
+          işleyebilir. Analitiği kapatmak cihazdaki olay kuyruğunu temizler ve
+          Firebase veri toplamayı durdurur. Oyun analitik olmadan da çalışır.
         </p>
         <h2>Reklam ve izin altyapısı</h2>
         <p>

@@ -32,6 +32,11 @@ import {
   setAnalyticsEnabled,
   trackAnalytics,
 } from "../infrastructure/analytics";
+import {
+  applyFirebaseAnalyticsConsent,
+  saveFirebaseAnalyticsConsent,
+  withExplicitAnalyticsConsent,
+} from "../infrastructure/firebaseAnalytics";
 import { playFeedbackSound, type FeedbackSound } from "../infrastructure/audio";
 import {
   clearReplayDiagnostics,
@@ -380,7 +385,7 @@ export const useGameStore = create<Store>((set, get) => ({
       await saveQueue.catch(() => undefined);
       const { state: loadedGame, recovery } = await loadGameWithStatus();
       const game = rechargeMarketScanCredits(
-        loadedGame,
+        withExplicitAnalyticsConsent(loadedGame),
         systemTimeProvider.nowWallMs(),
       );
       const restoredScanCredits = Math.max(
@@ -1323,7 +1328,13 @@ export const useGameStore = create<Store>((set, get) => ({
     if (next !== game) set({ game: stampAndPersist(next) });
   },
   setAnalytics: (enabled) => {
+    if (enabled && !saveFirebaseAnalyticsConsent(true)) {
+      set({ notice: "Analitik tercihi kaydedilemedi; cihaz depolamasını kontrol et." });
+      return;
+    }
+    if (!enabled) saveFirebaseAnalyticsConsent(false);
     const next = setAnalyticsEnabled(get().game, enabled);
+    void applyFirebaseAnalyticsConsent(enabled);
     set({
       game: stampAndPersist(next),
       notice: enabled

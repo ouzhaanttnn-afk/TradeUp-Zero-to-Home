@@ -470,6 +470,11 @@ export const noticeDict: Record<string, { en: string; de: string; es: string }> 
     de: "Optionale Analytik aktiviert.",
     es: "Analíticas opcionales activadas."
   },
+  "Analitik tercihi kaydedilemedi; cihaz depolamasını kontrol et.": {
+    en: "Could not save analytics preference; check device storage.",
+    de: "Analytik-Einstellung konnte nicht gespeichert werden; prüfe den Gerätespeicher.",
+    es: "No se pudo guardar la preferencia de analítica; revisa el almacenamiento.",
+  },
   "Analitik kapatıldı ve yerel olay kuyruğu temizlendi.": {
     en: "Analytics disabled and local event queue cleared.",
     de: "Analytik deaktiviert und Ereignis-Queue geleert.",

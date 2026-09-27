@@ -9,6 +9,7 @@ import { unavailableBillingAdapter } from "./infrastructure/monetization";
 import { createIosBillingAdapter } from "./infrastructure/nativeBilling";
 import { NativePurchases } from "@capgo/native-purchases";
 import { useGameStore } from "./stores/gameStore";
+import { startFirebaseAnalytics } from "./infrastructure/firebaseAnalytics";
 import { configureMonetizationAdapters } from "./services/monetization";
 
 // Keep cosmetic themes separate from the core stylesheet's delivery budget.
@@ -19,6 +20,7 @@ themeSurfaces.href = themeSurfacesUrl;
 document.head.append(themeSurfaces);
 
 if (Capacitor.isNativePlatform()) {
+  startFirebaseAnalytics(useGameStore);
   const admob = createAdMobAdapters();
   configureMonetizationAdapters({
     billing:

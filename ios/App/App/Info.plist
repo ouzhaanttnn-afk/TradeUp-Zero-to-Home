@@ -30,6 +30,8 @@
 	<true/>
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-4229088811556918~1245306004</string>
+	<key>FIREBASE_ANALYTICS_COLLECTION_ENABLED</key>
+	<false/>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>Reklam gösterimi ve ölçümü için cihaz tanımlayıcısına erişim izni istiyoruz. İzin vermeseniz de oyuna devam edebilirsiniz.</string>
 	<key>SKAdNetworkItems</key>

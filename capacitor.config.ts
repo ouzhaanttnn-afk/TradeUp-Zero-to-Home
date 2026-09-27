@@ -12,5 +12,18 @@ const config: CapacitorConfig = {
     preferredContentMode: "mobile",
     allowsLinkPreview: false,
   },
+  experimental: {
+    ios: {
+      spm: {
+        swiftToolsVersion: "6.1",
+        packageOptions: {
+          "@capacitor-firebase/analytics": { symlink: process.platform !== "win32" },
+        },
+        packageTraits: {
+          "@capacitor-firebase/analytics": ["AnalyticsWithoutAdIdSupport"],
+        },
+      },
+    },
+  },
 };
 export default config;
