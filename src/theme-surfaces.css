@@ -64,6 +64,7 @@
   --theme-card: radial-gradient(circle at 50% 0, var(--theme-glow), transparent 49%),
     linear-gradient(155deg, var(--theme-card-wash), var(--theme-card-base));
   --theme-art: radial-gradient(circle at 48% 22%, var(--theme-art-core), var(--theme-art-edge) 74%);
+  background: var(--theme-panel);
 }
 
 .app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) :is(.wallet, .notice, .profile-settings-button, .market-filters, .market-follow-entry, .segments, nav) {
@@ -171,6 +172,43 @@
 .app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) :is(.sheet-decision, .band, .details, .evidence-panel, .compare-stack) {
   border-color: var(--theme-line);
   background: var(--theme-panel);
+}
+
+/* Secondary tabs and profile showcases are part of the paid app shell too. */
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) :is(.radar-card, .showcase-room, .showcase-card, .showcase-slot.empty, .journey-metrics-primary div, .timeline-header-collapsible, .seller-dialogue-bubble) {
+  border-color: var(--theme-line);
+  background: var(--theme-card);
+}
+
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) :is(.showcase-card-visual, .showcase-visual) {
+  background: var(--theme-art);
+}
+
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) :is(.radar-categories button, .home-silhouette, .timeline-toggle, .category-levels > span) {
+  border-color: var(--theme-line);
+  background: var(--theme-card-top);
+}
+
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) :is(.home-card-primary, .journey-score:not(.loss)) {
+  border-color: var(--theme-line);
+  background: radial-gradient(circle at 12% 10%, var(--theme-glow), transparent 46%), var(--theme-panel);
+}
+
+/* The generic neutral signal uses !important; it must not freeze a cosmetic journey card green. */
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .journey-score.neutral {
+  background: radial-gradient(circle at 12% 10%, var(--theme-glow), transparent 46%), var(--theme-panel) !important;
+}
+
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) :is(.showcase-slot.empty, .empty-slot-icon, .home-silhouette, .timeline-toggle span, .xp-bar i) {
+  color: var(--theme-tint);
+}
+
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) :is(.home-card small, .expertise-card small, .journey-block-heading small, .timeline-header small, .seller-dialogue-tag) {
+  color: var(--theme-tint);
+}
+
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .xp-bar i {
+  background: linear-gradient(90deg, var(--theme-tint), #f3d58d);
 }
 
 /* Full-screen settings and the nested store must inherit the selected shell theme. */

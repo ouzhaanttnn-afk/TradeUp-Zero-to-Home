@@ -2465,10 +2465,12 @@ nav .active .nav-icon {
 }
 .sheet-summary {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 10px;
-  align-items: end;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 7px;
   padding: 0 2px;
+}
+.sheet-summary > * {
+  min-width: 0;
 }
 .sheet-title > small {
   color: #7fa093;
@@ -2488,13 +2490,10 @@ nav .active .nav-icon {
 }
 .detail-price {
   display: flex;
-  min-width: 92px;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: flex-end;
-  gap: 2px;
-  padding-bottom: 0;
-  text-align: right;
+  min-width: 0;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: baseline;
 }
 .detail-price > div {
   display: grid;
@@ -5702,7 +5701,7 @@ nav .active::before {
   border: 1px solid rgba(126, 205, 165, 0.2);
   border-radius: 12px;
   padding: 8px 12px;
-  margin: 8px 0;
+  margin: 0;
   display: flex;
   flex-direction: column;
   gap: 3px;
@@ -5720,6 +5719,7 @@ nav .active::before {
   color: #c9ded5;
   margin: 0;
   line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 .seller-dialogue-header{display:flex;align-items:center;gap:6px}
 .seller-dialogue-avatar,.buyer-dialogue-avatar{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;font-size:11px;border-radius:50%;background:rgba(255,255,255,0.08);flex-shrink:0}

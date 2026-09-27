@@ -82,10 +82,27 @@ test("paid themes tint market surfaces without changing item visuals or decision
     return { ...settings, ...purchases };
   };
 
+  const secondaryAppearance = async () => {
+    const read = async (selector: string) => page.locator(selector).first().evaluate((element) => getComputedStyle(element).backgroundImage);
+    await page.getByRole("navigation").getByRole("button", { name: "Radar" }).click();
+    await expect(page.locator(".radar-card")).toBeVisible();
+    const radar = await read(".radar-card");
+    await page.getByRole("navigation").getByRole("button", { name: "Portföy" }).click();
+    await expect(page.locator(".showcase-room")).toBeVisible();
+    const showcase = await read(".showcase-room");
+    const showcaseSlot = await read(".showcase-slot.empty");
+    await page.getByRole("navigation").getByRole("button", { name: "Yolculuk" }).click();
+    await expect(page.locator(".journey-score")).toBeVisible();
+    const journey = await read(".journey-score");
+    await page.getByRole("navigation").getByRole("button", { name: "Pazar" }).click();
+    return { radar, showcase, showcaseSlot, journey };
+  };
+
   const classic = await appearance();
   await page.locator("#boot-splash").waitFor({ state: "hidden" });
   await page.screenshot({ path: testInfo.outputPath("classic.png"), animations: "disabled" });
   const classicAccount = await accountAppearance();
+  const classicSecondary = await secondaryAppearance();
   const shell = page.locator(".app-shell");
   const themes = [];
   for (const theme of ["night-market", "workshop", "obsidian"]) {
@@ -109,10 +126,28 @@ test("paid themes tint market surfaces without changing item visuals or decision
     for (const key of Object.keys(classicAccount) as (keyof typeof classicAccount)[]) {
       expect(themedAccount[key], `${theme} ${key}`).not.toBe(classicAccount[key]);
     }
+    const themedSecondary = await secondaryAppearance();
+    for (const key of Object.keys(classicSecondary) as (keyof typeof classicSecondary)[]) {
+      expect(themedSecondary[key], `${theme} ${key}`).not.toBe(classicSecondary[key]);
+    }
   }
   expect(new Set(themes).size).toBe(3);
-  for (const width of [320, 430]) {
+  for (const width of [320, 390, 430]) {
     await page.setViewportSize({ width, height: 844 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    await page.locator(".market-grid .market-card").first().click();
+    const detail = page.getByRole("dialog", { name: /.+/ });
+    await expect(detail.locator(".seller-dialogue-bubble")).toBeVisible();
+    const bounds = await detail.evaluate((element) => {
+      const box = (selector: string) => element.querySelector(selector)!.getBoundingClientRect();
+      const title = box(".sheet-title");
+      const message = box(".seller-dialogue-bubble");
+      const price = box(".detail-price");
+      return { titleBottom: title.bottom, messageTop: message.top, messageBottom: message.bottom, priceTop: price.top };
+    });
+    expect(bounds.messageTop).toBeGreaterThanOrEqual(bounds.titleBottom);
+    expect(bounds.priceTop).toBeGreaterThanOrEqual(bounds.messageBottom);
+    if (width === 390) await page.screenshot({ path: testInfo.outputPath("themed-listing-detail-390.png"), animations: "disabled" });
+    await detail.locator(".close").click();
   }
 });
