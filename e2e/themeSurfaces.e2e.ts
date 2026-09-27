@@ -138,6 +138,11 @@ test("paid themes tint market surfaces without changing item visuals or decision
     await page.locator(".market-grid .market-card").first().click();
     const detail = page.getByRole("dialog", { name: /.+/ });
     await expect(detail.locator(".seller-dialogue-bubble")).toBeVisible();
+    await expect(detail.locator(".hero-art")).toHaveCSS("height", "100px");
+    const decisionButtons = detail.locator(".sheet-decision button");
+    for (const button of await decisionButtons.all()) {
+      expect(await button.evaluate((element) => element.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
+    }
     const bounds = await detail.evaluate((element) => {
       const box = (selector: string) => element.querySelector(selector)!.getBoundingClientRect();
       const title = box(".sheet-title");

@@ -330,6 +330,73 @@
 }
 
 @media (max-width: 430px) {
+  /* Compact only the standard-size listing sheet; large-text keeps its breathing room. */
+  .app-shell:not(.large-text) .sheet-scroll {
+    padding-top: 6px;
+    padding-bottom: 8px;
+  }
+
+  .app-shell:not(.large-text) .grab {
+    margin-bottom: 5px;
+  }
+
+  .app-shell:not(.large-text) .sheet-hero-shell {
+    margin-bottom: 4px;
+  }
+
+  .app-shell:not(.large-text) .sheet .hero-art {
+    height: 100px;
+  }
+
+  .app-shell:not(.large-text) .sheet-summary {
+    gap: 5px;
+  }
+
+  .app-shell:not(.large-text) .seller-dialogue-bubble {
+    gap: 2px;
+    padding: 6px 10px;
+  }
+
+  .app-shell:not(.large-text) .sheet-follow-actions {
+    margin-top: 5px;
+  }
+
+  .app-shell:not(.large-text) :is(.band, .details) {
+    margin-top: 5px;
+    padding: 6px 7px;
+  }
+
+  .app-shell:not(.large-text) .details div {
+    padding-block: 4px;
+  }
+
+  .app-shell:not(.large-text) .sheet-decision {
+    padding-top: 8px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+  }
+
+  .app-shell:not(.large-text) .sheet-decision-heading,
+  .app-shell:not(.large-text) .offer-mode-picker {
+    margin-bottom: 5px;
+  }
+
+  .app-shell:not(.large-text) .offer-mode-picker button {
+    min-height: 52px;
+    padding: 4px 3px;
+  }
+
+  .app-shell:not(.large-text) .sheet-actions button {
+    padding: 6px 5px;
+  }
+
+  .app-shell:not(.large-text) .cash-shortfall {
+    padding: 9px;
+  }
+
+  .app-shell:not(.large-text) .cash-shortfall p {
+    margin-bottom: 5px;
+  }
+
   .settings-row:has(.language-selector) {
     flex-wrap: wrap;
   }
