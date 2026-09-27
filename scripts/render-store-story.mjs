@@ -25,8 +25,14 @@ const slides = [
     detail: "Sermayeni büyüt, ev fırsatlarını keşfet.",
   },
   {
+    file: "03-urunu-incele.png",
+    eyebrow: "04 · AKILLI KARAR",
+    title: "Her ürünün hikâyesini oku.",
+    detail: "Durumu ve fiyat aralığını gör, sonra karar ver.",
+  },
+  {
     file: "01-kariyerini-baslat.png",
-    eyebrow: "04 · SENİN HİKÂYEN",
+    eyebrow: "05 · SENİN HİKÂYEN",
     title: "Kariyerine kendi tarzınla başla.",
     detail: "İsmini ve karakterini seç.",
   },
@@ -48,15 +54,15 @@ try {
         *{box-sizing:border-box}html,body{margin:0;width:428px;height:926px;overflow:hidden}
         body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#f7f7e8;
           background:radial-gradient(circle at 50% 35%,#206646 0,#0c2d20 46%,#061810 100%)}
-        .frame{height:100%;display:flex;flex-direction:column;align-items:center;padding:39px 23px 20px}
+        .frame{height:100%;display:flex;flex-direction:column;align-items:center;padding:27px 19px 14px}
         .eyebrow{font-size:11px;letter-spacing:2.3px;color:#96e7b9;font-weight:800}
-        h1{font-size:30px;line-height:1.04;letter-spacing:-.7px;text-align:center;margin:10px 0 7px;
+        h1{font-size:28px;line-height:1.04;letter-spacing:-.7px;text-align:center;margin:8px 0 6px;
           max-width:390px;text-wrap:balance}
-        .detail{font-size:14px;line-height:1.25;color:#d4e7da;text-align:center;margin:0 0 16px}
-        .screen{height:721px;width:333px;overflow:hidden;border:2px solid #d3af62;border-radius:24px;
+        .detail{font-size:13px;line-height:1.25;color:#d4e7da;text-align:center;margin:0 0 10px}
+        .screen{height:758px;width:350px;overflow:hidden;border:2px solid #d3af62;border-radius:24px;
           box-shadow:0 18px 36px #0008,0 0 0 6px #071d15}
-        .screen img{display:block;width:100%;height:100%;object-fit:fill}
-        .footer{display:flex;align-items:center;gap:7px;margin-top:auto;padding-top:10px;
+        .screen img{display:block;width:100%;height:100%;object-fit:contain}
+        .footer{display:flex;align-items:center;gap:7px;margin-top:auto;padding-top:8px;
           color:#f0cb77;font-size:12px;letter-spacing:2px;font-weight:900}
         .mark{font-size:17px;line-height:1}
       </style>

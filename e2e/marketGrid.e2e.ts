@@ -91,6 +91,7 @@ for (const width of [320, 430]) {
       .first()
       .locator(".product-art")
       .boundingBox();
+    expect(firstVisual?.height).toBeGreaterThanOrEqual(68);
     const firstSignals = await cards
       .first()
       .locator(".market-condition-signal")

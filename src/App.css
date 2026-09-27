@@ -1004,7 +1004,7 @@ main {
 }
 .market-grid .product-art {
   width: 100%;
-  height: clamp(58px, 17vw, 70px);
+  height: clamp(68px, 20vw, 82px);
   aspect-ratio: auto;
   flex: 0 0 auto;
   border-radius: 9px;

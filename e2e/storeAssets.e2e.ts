@@ -1,9 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
-import { mkdir } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import sharp from "sharp";
 import { HOME_OPTIONS } from "../src/content/homes";
-import { initialState, validateState } from "../src/game";
+import { initialState, market as createMarket, validateState } from "../src/game";
 import type { GameState } from "../src/domain/models";
 import { completeFirstLaunch } from "./helpers";
 
@@ -13,6 +13,19 @@ test.skip(
 );
 
 const outputDirectory = path.resolve("store-assets/ios/iphone-6.5");
+
+async function writeGeneratedAsset(targetPath: string, image: Buffer) {
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    try {
+      await writeFile(targetPath, image);
+      return;
+    } catch (error) {
+      if (attempt === 4) throw error;
+      // Windows scanners occasionally hold an existing screenshot briefly.
+      await new Promise((resolve) => setTimeout(resolve, 150 * (attempt + 1)));
+    }
+  }
+}
 
 async function persistGame(page: Page, state: GameState) {
   await page.evaluate(async (game) => {
@@ -32,14 +45,19 @@ async function persistGame(page: Page, state: GameState) {
 }
 
 async function capture(page: Page, name: string, temporaryPath: string) {
+  await page.evaluate(() => {
+    window.scrollTo(0, 0);
+    document.querySelector("main")?.scrollTo(0, 0);
+  });
   await page.screenshot({ path: temporaryPath, animations: "disabled" });
   const targetPath = path.join(outputDirectory, `${name}.png`);
-  await sharp(temporaryPath)
+  const image = await sharp(temporaryPath)
     .resize(1284, 2778, { fit: "fill" })
     .png({ compressionLevel: 9 })
-    .toFile(targetPath);
-  const metadata = await sharp(targetPath).metadata();
+    .toBuffer();
+  const metadata = await sharp(image).metadata();
   expect([metadata.width, metadata.height]).toEqual([1284, 2778]);
+  await writeGeneratedAsset(targetPath, image);
 }
 
 test("generate App Store screenshots for TradeUp", async ({
@@ -75,6 +93,19 @@ test("generate App Store screenshots for TradeUp", async ({
   };
   market.monetization.marketScanCredits = 21;
   market.monetization.marketScanRefillAnchorWallMs = now.getTime();
+  // Capture a reachable later-session market with varied arrivals, not the
+  // same initial cohort repeated across most of the product page.
+  const seenFamilies = new Set<string>();
+  market.listings = Array.from({ length: 48 }, (_, index) =>
+    createMarket(market.seed + index * 37, market.cashMinor, index, 0, 4),
+  )
+    .flat()
+    .filter((listing) => {
+      if (seenFamilies.has(listing.familyId)) return false;
+      seenFamilies.add(listing.familyId);
+      return true;
+    })
+    .slice(0, 16);
   await persistGame(page, market);
   await page.reload();
   await expect(
@@ -86,13 +117,14 @@ test("generate App Store screenshots for TradeUp", async ({
   await mkdir(path.resolve("store-assets/ios/ipad-13"), { recursive: true });
   const iPadSource = testInfo.outputPath("ipad-market.png");
   await page.screenshot({ path: iPadSource, animations: "disabled" });
-  await sharp(iPadSource)
+  const iPadImage = await sharp(iPadSource)
     .resize(2064, 2752, { fit: "fill" })
     .png({ compressionLevel: 9 })
-    .toFile(path.resolve("store-assets/ios/ipad-13/01-canli-pazar.png"));
+    .toBuffer();
+  await writeGeneratedAsset(path.resolve("store-assets/ios/ipad-13/01-canli-pazar.png"), iPadImage);
   await page.setViewportSize({ width: 428, height: 926 });
 
-  await page.getByRole("button", { name: "Satın Almalar ve Görünüm" }).click();
+  await page.getByRole("button", { name: "Satın almalar & görünüm" }).click();
   await expect(page.getByText("TradeUp Premium", { exact: false })).toBeVisible();
   await capture(page, "06-premium-inceleme", testInfo.outputPath("premium.png"));
   await page.getByRole("button", { name: "Kapat", exact: true }).click();
@@ -104,11 +136,13 @@ test("generate App Store screenshots for TradeUp", async ({
   await capture(page, "03-urunu-incele", testInfo.outputPath("detail.png"));
   await page
     .getByRole("group", { name: "Satın alma adımları" })
-    .getByRole("button", { name: /^Hemen al/ })
+    .getByRole("button", { name: /^Hemen Satın Al/ })
     .click();
   await expect(
     page.getByRole("tab", { name: "Envanter", exact: true }),
   ).toHaveAttribute("aria-selected", "true");
+  await page.getByRole("button", { name: "Vitrine Ekle", exact: true }).click();
+  await expect(page.getByText("1 / 3")).toBeVisible();
   await capture(
     page,
     "04-portfoyunu-buyut",
