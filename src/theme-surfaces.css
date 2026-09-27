@@ -329,6 +329,60 @@
   min-height: 44px;
 }
 
+/* Purchased rights read as a quiet inventory, while purchasable packs keep full details. */
+.purchases-sheet .purchase-list .purchase-item:first-child {
+  border-color: rgba(199, 170, 103, 0.25);
+  background: radial-gradient(circle at 0 0, rgba(199, 170, 103, 0.09), transparent 52%),
+    rgba(16, 29, 24, 0.84);
+}
+
+.purchases-sheet .purchase-list .purchase-item--compact {
+  position: relative;
+  min-height: 44px;
+  padding: 6px 8px 6px 16px;
+  border-radius: 10px;
+}
+
+.purchases-sheet .purchase-list .purchase-item--compact::before {
+  position: absolute;
+  left: 7px;
+  top: 50%;
+  width: 3px;
+  height: 18px;
+  border-radius: 3px;
+  background: var(--theme-tint, var(--accent));
+  transform: translateY(-50%);
+  content: "";
+}
+
+.purchases-sheet .purchase-list .purchase-item--compact strong {
+  display: block;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.purchases-sheet .purchase-list .purchase-item-status {
+  flex: 0 0 auto;
+  padding: 4px 6px;
+  border: 1px solid rgba(105, 226, 162, 0.18);
+  border-radius: 999px;
+  color: var(--theme-tint, #69d99c);
+  background: rgba(105, 226, 162, 0.07);
+  font-size: calc(8px + var(--text-size-boost));
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.purchases-sheet .purchase-list .purchase-item-status--included {
+  border-color: var(--theme-line, rgba(137, 193, 164, 0.15));
+  color: var(--theme-muted, #9fbaac);
+  background: var(--theme-glow, rgba(137, 193, 164, 0.06));
+}
+
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .purchases-sheet .purchase-list .purchase-item:first-child {
+  background: radial-gradient(circle at 0 0, var(--theme-glow), transparent 52%), var(--theme-card-base);
+}
+
 @media (max-width: 430px) {
   /* Compact only the standard-size listing sheet; large-text keeps its breathing room. */
   .app-shell:not(.large-text) .sheet-scroll {

@@ -134,6 +134,9 @@ export default function PurchasesSheet({
                   const pending = entitlement?.status === "PENDING";
                   const includedWithPremium =
                     premiumOwned && productId !== "tradeup_premium_lifetime";
+                  const compactEntitlement =
+                    (owned || includedWithPremium) &&
+                    productId !== "tradeup_premium_lifetime";
                   const localizedCopy = localizeStoreProduct(
                     productId,
                     storeCopy[productId].title,
@@ -141,19 +144,22 @@ export default function PurchasesSheet({
                     lang,
                   );
                   return (
-                    <article key={productId}>
+                    <article
+                      key={productId}
+                      className={compactEntitlement ? "purchase-item purchase-item--compact" : "purchase-item"}
+                    >
                       <div>
                         <strong>
                           {localizedCopy.title || metadata?.title}
                         </strong>
-                        <p>{localizedCopy.detail}</p>
+                        {!compactEntitlement ? <p>{localizedCopy.detail}</p> : null}
                       </div>
                       {owned || pending ? (
-                        <span className="entitlement-state">
+                        <span className={compactEntitlement ? "entitlement-state purchase-item-status" : "entitlement-state"}>
                           {owned ? t("store.owned") : t("store.pending")}
                         </span>
                       ) : includedWithPremium ? (
-                        <span className="entitlement-state">{t("store.includedWithPremium")}</span>
+                        <span className="entitlement-state purchase-item-status purchase-item-status--included">{t("store.includedWithPremium")}</span>
                       ) : metadata ? (
                         <button
                           disabled={monetizationBusy}
