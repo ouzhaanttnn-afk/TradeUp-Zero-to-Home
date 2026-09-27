@@ -54,9 +54,8 @@ test("profile and settings stay accessible from the mobile game header", async (
     .getByRole("button", { name: /Satın almalar & görünüm/i })
     .click();
   await expect(dialog.locator(".purchase-list article")).toHaveCount(6);
-  await expect(dialog.locator(".purchase-list article:visible")).toHaveCount(2);
-  await dialog.locator(".extra-purchases summary").click();
   await expect(dialog.locator(".purchase-list article:visible")).toHaveCount(6);
+  await expect(dialog.locator(".extra-purchases")).toHaveCount(0);
   await expect(dialog).toContainText("Reklamsız");
   await expect(dialog).toContainText("Yakında");
   await expect(dialog).not.toContainText("Fiyat yüklenemedi");
@@ -64,7 +63,7 @@ test("profile and settings stay accessible from the mobile game header", async (
     await dialog
       .locator(".purchase-list article")
       .evaluateAll((cards) =>
-        cards.every((card) => card.getBoundingClientRect().height <= 76),
+        cards.every((card) => card.getBoundingClientRect().height <= 96),
       ),
   ).toBe(true);
   await page.screenshot({

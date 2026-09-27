@@ -56,4 +56,8 @@ test("primary mobile surfaces have no serious WCAG violations", async ({
   await page.getByRole("button", { name: "Ayarlar", exact: true }).click();
   await expect(page.getByRole("dialog", { name: "Profil ve Ayarlar" })).toBeVisible();
   expect(await seriousViolations(page)).toEqual([]);
+
+  await page.getByRole("button", { name: /Satın almalar & görünüm/i }).click();
+  await expect(page.getByRole("dialog", { name: "Satın Almalar & Görünüm" })).toBeVisible();
+  expect(await seriousViolations(page)).toEqual([]);
 });

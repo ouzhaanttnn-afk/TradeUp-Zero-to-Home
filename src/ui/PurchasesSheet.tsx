@@ -124,16 +124,14 @@ export default function PurchasesSheet({
   const availablePacks = entries.filter(
     (entry) => !entry.owned && !entry.includedWithPremium,
   );
-  const mainPacks = availablePacks.filter(
-    (entry) =>
-      entry.productId === "tradeup_premium_lifetime" ||
-      entry.productId === "tradeup_no_ads_lifetime",
+  const noAdsOwned = entries.some(
+    (entry) => entry.productId === "tradeup_no_ads_lifetime" && entry.owned,
   );
-  const cosmeticPacks = availablePacks.filter(
-    (entry) =>
-      entry.productId !== "tradeup_premium_lifetime" &&
-      entry.productId !== "tradeup_no_ads_lifetime",
-  );
+  const activePackLabel = premiumOwned
+    ? t("store.premiumActive")
+    : noAdsOwned
+      ? t("store.noAdsActive")
+      : t("store.packsActive");
   const renderAvailablePack = (entry: (typeof entries)[number]) => (
     <article
       key={entry.productId}
@@ -192,23 +190,19 @@ export default function PurchasesSheet({
               <h2 id="purchases-sheet-title">{t("store.title")}</h2>
             </div>
           </div>
-          <section className="purchase-panel" aria-label={t("store.title")}>
-            <div className="purchase-panel-heading">
-              <div>
-                <strong>{t("store.permanentPacks")}</strong>
-                <p>{t("store.permanentSub")}</p>
+          {openPacks.length > 0 ? (
+            <section className="purchase-status" aria-label={t("store.openPacks")}>
+              <div className="purchase-status__headline">
+                <span className="purchase-status__mark" aria-hidden="true">✓</span>
+                <div>
+                  <small>{t("store.permanentPacks")}</small>
+                  <strong>{activePackLabel}</strong>
+                </div>
+                <span className="purchase-status__count">{openPacks.length}/{entries.length}</span>
               </div>
-              <span>
-                {storeProducts.length
-                  ? t("store.ready")
-                  : t("store.comingSoon")}
-              </span>
-            </div>
-            {openPacks.length > 0 ? (
               <details className="owned-purchases">
                 <summary>
                   <span>{t("store.openPacks")}</span>
-                  <b>{openPacks.length}</b>
                 </summary>
                 <div className="owned-purchases__list">
                   {openPacks.map((entry) => (
@@ -226,40 +220,20 @@ export default function PurchasesSheet({
                   ))}
                 </div>
               </details>
-            ) : null}
-            {mainPacks.length > 0 ? (
-              <div className="purchase-list">
-                {mainPacks.map(renderAvailablePack)}
-              </div>
-            ) : null}
-            {cosmeticPacks.length > 0 ? (
-              <details className="extra-purchases">
-                <summary>
-                  <span>{t("store.cosmeticPacks")}</span>
-                  <b>{cosmeticPacks.length}</b>
-                </summary>
-                <div className="purchase-list">
-                  {cosmeticPacks.map(renderAvailablePack)}
+            </section>
+          ) : null}
+          {availablePacks.length > 0 ? (
+            <section className="purchase-panel" aria-label={t("store.permanentPacks")}>
+              <div className="purchase-panel-heading">
+                <div>
+                  <strong>{t("store.permanentPacks")}</strong>
+                  <p>{t("store.permanentSub")}</p>
                 </div>
-              </details>
-            ) : null}
-            <p className="purchase-note">{t("store.note")}</p>
-            <div className="purchase-footer-actions">
-              <button
-                className="secondary"
-                disabled={monetizationBusy || Capacitor.getPlatform() !== "ios"}
-                onClick={() => void restorePurchases()}
-              >
-                {t("store.restore")}
-              </button>
-              <button
-                className="text-button"
-                onClick={() => void showPrivacyOptions()}
-              >
-                {t("store.privacy")}
-              </button>
-            </div>
-          </section>
+                <span>{storeProducts.length ? t("store.ready") : t("store.comingSoon")}</span>
+              </div>
+              <div className="purchase-list">{availablePacks.map(renderAvailablePack)}</div>
+            </section>
+          ) : null}
           <section
             className="appearance-panel"
             aria-label={t("store.appearance")}
@@ -340,6 +314,21 @@ export default function PurchasesSheet({
               ) : null}
             </div>
           </section>
+          <div className="purchase-utilities">
+            <p>{t("store.shortNote")}</p>
+            <div>
+              <button
+                className="text-button"
+                disabled={monetizationBusy || Capacitor.getPlatform() !== "ios"}
+                onClick={() => void restorePurchases()}
+              >
+                {t("store.restore")}
+              </button>
+              <button className="text-button" onClick={() => void showPrivacyOptions()}>
+                {t("store.privacy")}
+              </button>
+            </div>
+          </div>
         </div>
       </section>
     </div>

@@ -63,7 +63,8 @@ test("paid themes tint market surfaces without changing item visuals or decision
     await page.getByRole("button", { name: /Satın almalar & görünüm/i }).click();
     await expect(page.locator(".purchases-sheet")).toBeVisible();
     await expect(page.locator(".purchase-list article")).toHaveCount(0);
-    await expect(page.locator(".owned-purchases summary")).toContainText("6");
+    await expect(page.locator(".purchase-status__count")).toHaveText("6/6");
+    if (capture) await page.screenshot({ path: testInfo.outputPath("workshop-store.png"), animations: "disabled" });
     await page.locator(".owned-purchases summary").click();
     await expect(page.locator(".owned-purchases__item")).toHaveCount(6);
     await expect(page.locator(".owned-purchases__item").filter({ hasText: "Reklamsız" })).toContainText("Premium ile açık");
@@ -74,12 +75,11 @@ test("paid themes tint market surfaces without changing item visuals or decision
         return `${style.backgroundImage}|${style.backgroundColor}`;
       };
       return {
-        panel: surface(".purchase-panel"),
-        product: surface(".owned-purchases__item"),
+        panel: surface(".purchase-status"),
+        product: surface(".purchase-status__mark"),
         choice: surface(".cosmetic-picker button[aria-pressed='true']"),
       };
     });
-    if (capture) await page.screenshot({ path: testInfo.outputPath("workshop-store.png"), animations: "disabled" });
     await page.locator(".purchases-sheet .close").click();
     await page.locator(".settings-card > .settings-sheet-heading .icon-button").click();
     return { ...settings, ...purchases };
@@ -161,7 +161,7 @@ test("paid themes tint market surfaces without changing item visuals or decision
     await page.getByRole("button", { name: /Satın almalar & görünüm/i }).click();
     const store = page.locator(".purchases-sheet");
     expect(await store.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
-    await expect(store.locator(".owned-purchases summary")).toContainText("6");
+    await expect(store.locator(".purchase-status__count")).toHaveText("6/6");
     await store.locator(".close").click();
     await page.locator(".settings-card > .settings-sheet-heading .icon-button").click();
   }

@@ -345,17 +345,25 @@
   background: linear-gradient(180deg, var(--theme-top), var(--theme-bottom));
 }
 
-.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .purchases-sheet :is(.owned-purchases, .extra-purchases) {
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .purchases-sheet :is(.purchase-status, .purchase-list) {
   border-color: var(--theme-line);
   background: var(--theme-card-base);
 }
 
 .app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .owned-purchases__item {
+  border-color: var(--theme-line);
+}
+
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .purchases-sheet :is(.purchase-status__mark, .purchase-status__count, .owned-purchases__item small) {
+  color: var(--theme-tint);
+}
+
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .purchase-status__mark {
   background: var(--theme-glow);
 }
 
-.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .purchases-sheet :is(.owned-purchases summary b, .extra-purchases summary b, .owned-purchases__item small) {
-  color: var(--theme-tint);
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .purchases-sheet .purchase-list article {
+  background: transparent;
 }
 
 /* Account and store controls stay finger-sized at the narrowest supported width. */
@@ -413,77 +421,91 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
 }
-.owned-purchases,
-.extra-purchases {
-  margin: 7px 0;
-  border: 1px solid rgba(137, 193, 164, 0.16);
-  border-radius: 11px;
-  background: rgba(255, 255, 255, 0.025);
+.purchase-status {
+  margin-top: 9px;
+  padding: 9px 11px 3px;
+  border: 1px solid rgba(137, 193, 164, 0.19);
+  border-radius: 15px;
+  background: rgba(10, 27, 20, 0.74);
 }
-.owned-purchases summary,
-.extra-purchases summary {
+.purchase-status__headline {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.purchase-status__mark {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 10px;
+  color: #92e5b5;
+  background: rgba(105, 226, 162, 0.12);
+  font-size: 18px;
+}
+.purchase-status__headline > div {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+.purchase-status__headline small {
+  color: #8ba99a;
+  font-size: calc(8px + var(--text-size-boost));
+}
+.purchase-status__headline strong {
+  font-size: calc(13px + var(--text-size-boost));
+}
+.purchase-status__count {
+  margin-left: auto;
+  color: #a7e6bf;
+  font-size: calc(10px + var(--text-size-boost));
+  font-weight: 800;
+}
+.owned-purchases {
+  margin-top: 6px;
+  border-top: 1px solid rgba(137, 193, 164, 0.13);
+}
+.owned-purchases summary {
   display: flex;
   min-height: 44px;
   align-items: center;
   gap: 8px;
-  padding: 7px 11px;
-  color: #dce9e1;
+  color: #a7c5b4;
   font-size: calc(10px + var(--text-size-boost));
-  font-weight: 750;
   cursor: pointer;
   list-style: none;
 }
-.owned-purchases summary::-webkit-details-marker,
-.extra-purchases summary::-webkit-details-marker {
+.owned-purchases summary::-webkit-details-marker {
   display: none;
 }
-.owned-purchases summary span,
-.extra-purchases summary span {
-  margin-right: auto;
-}
-.owned-purchases summary::after,
-.extra-purchases summary::after {
-  color: #8cbda1;
+.owned-purchases summary::after {
+  margin-left: auto;
   content: "⌄";
   font-size: 16px;
   line-height: 1;
   transition: transform 160ms ease;
 }
-.owned-purchases[open] summary::after,
-.extra-purchases[open] summary::after {
+.owned-purchases[open] summary::after {
   transform: rotate(180deg);
 }
-.owned-purchases summary:focus-visible,
-.extra-purchases summary:focus-visible {
+.owned-purchases summary:focus-visible {
   outline: 2px solid #69d99c;
   outline-offset: 2px;
 }
-.owned-purchases summary b,
-.extra-purchases summary b {
+.owned-purchases__list {
   display: grid;
-  min-width: 23px;
-  height: 23px;
-  place-items: center;
-  border-radius: 999px;
-  color: #a7e6bf;
-  background: rgba(105, 226, 162, 0.1);
-  font-size: calc(9px + var(--text-size-boost));
-}
-.owned-purchases__list,
-.extra-purchases .purchase-list {
-  display: grid;
-  gap: 5px;
-  padding: 0 7px 7px;
+  gap: 0;
+  padding-bottom: 5px;
 }
 .owned-purchases__item {
   display: flex;
-  min-height: 36px;
+  min-height: 35px;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 5px 7px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.035);
+  padding: 5px 0;
+  border-top: 1px solid rgba(137, 193, 164, 0.1);
 }
 .owned-purchases__item strong {
   min-width: 0;
@@ -497,6 +519,60 @@
   font-size: calc(8px + var(--text-size-boost));
   line-height: 1.2;
   text-align: right;
+}
+.purchases-sheet .purchase-list {
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid rgba(137, 193, 164, 0.16);
+  border-radius: 12px;
+  background: rgba(16, 29, 24, 0.84);
+}
+.purchases-sheet .purchase-list article {
+  min-height: 58px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.purchases-sheet .purchase-list article + article {
+  border-top: 1px solid rgba(137, 193, 164, 0.13);
+}
+.purchases-sheet .purchase-list strong {
+  font-size: calc(12px + var(--text-size-boost));
+  line-height: 1.25;
+}
+.purchases-sheet .purchase-list p {
+  font-size: calc(10px + var(--text-size-boost));
+  line-height: 1.35;
+}
+.purchases-sheet .purchase-list :is(button, .store-unavailable) {
+  font-size: calc(10px + var(--text-size-boost));
+}
+.purchase-utilities {
+  margin: 10px 3px calc(8px + env(safe-area-inset-bottom));
+}
+.purchase-utilities p {
+  margin: 0;
+  color: #8fa69b;
+  font-size: calc(9px + var(--text-size-boost));
+  line-height: 1.4;
+}
+.purchase-utilities > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 12px;
+  margin-top: 3px;
+}
+.purchase-utilities button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 6px 0;
+  border: 0;
+  background: transparent;
+  color: var(--theme-tint, #a7c5b4);
+  font-size: calc(10px + var(--text-size-boost));
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 @media (max-width: 430px) {
