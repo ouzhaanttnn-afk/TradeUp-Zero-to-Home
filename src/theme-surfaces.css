@@ -402,9 +402,11 @@
 .appearance-panel {
   margin-top: 8px;
   padding: 11px;
-  border: 1px solid rgba(137, 193, 164, 0.15);
+  border: 1px solid rgba(137, 193, 164, 0.28);
   border-radius: 17px;
-  background: rgba(10, 27, 20, 0.74);
+  background: radial-gradient(circle at 12% 0, rgba(105, 226, 162, 0.11), transparent 48%),
+    rgba(10, 27, 20, 0.74);
+  box-shadow: inset 0 1px rgba(185, 244, 208, 0.08), 0 0 18px rgba(105, 226, 162, 0.06);
 }
 .appearance-panel h3 {
   margin: 0 0 6px;
@@ -424,9 +426,11 @@
 .purchase-status {
   margin-top: 9px;
   padding: 9px 11px 3px;
-  border: 1px solid rgba(137, 193, 164, 0.19);
+  border: 1px solid rgba(137, 193, 164, 0.34);
   border-radius: 15px;
-  background: rgba(10, 27, 20, 0.74);
+  background: radial-gradient(circle at 8% 0, rgba(105, 226, 162, 0.18), transparent 55%),
+    rgba(10, 27, 20, 0.74);
+  box-shadow: inset 0 1px rgba(185, 244, 208, 0.11), 0 0 22px rgba(105, 226, 162, 0.09);
 }
 .purchase-status__headline {
   display: flex;
@@ -440,9 +444,32 @@
   flex: 0 0 auto;
   place-items: center;
   border-radius: 10px;
+  border: 1px solid rgba(105, 226, 162, 0.32);
   color: #92e5b5;
   background: rgba(105, 226, 162, 0.12);
+  box-shadow: 0 0 14px rgba(105, 226, 162, 0.17);
   font-size: 18px;
+}
+.purchases-sheet .cosmetic-picker button[aria-pressed="true"] {
+  border-color: rgba(105, 226, 162, 0.68);
+  background: linear-gradient(140deg, rgba(105, 226, 162, 0.16), rgba(21, 38, 31, 0.9));
+  box-shadow: inset 0 0 0 1px rgba(105, 226, 162, 0.12), 0 0 15px rgba(105, 226, 162, 0.13);
+}
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .purchases-sheet :is(.purchase-status, .appearance-panel) {
+  border-color: var(--theme-line);
+  background: radial-gradient(circle at 10% 0, var(--theme-glow), transparent 55%),
+    var(--theme-card-base);
+  box-shadow: inset 0 1px var(--theme-line), 0 0 22px var(--theme-glow);
+}
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .purchases-sheet .purchase-status__mark {
+  border-color: var(--theme-line);
+  box-shadow: 0 0 15px var(--theme-glow);
+}
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .purchases-sheet .cosmetic-picker button[aria-pressed="true"] {
+  border-color: var(--theme-tint);
+  background: radial-gradient(circle at 50% 0, var(--theme-glow), transparent 75%),
+    var(--theme-card-top);
+  box-shadow: inset 0 0 0 1px var(--theme-glow), 0 0 16px var(--theme-glow);
 }
 .purchase-status__headline > div {
   display: grid;

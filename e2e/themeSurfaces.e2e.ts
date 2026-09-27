@@ -64,6 +64,10 @@ test("paid themes tint market surfaces without changing item visuals or decision
     await expect(page.locator(".purchases-sheet")).toBeVisible();
     await expect(page.locator(".purchase-list article")).toHaveCount(0);
     await expect(page.locator(".purchase-status__count")).toHaveText("6/6");
+    for (const selector of [".purchase-status", ".appearance-panel", ".cosmetic-picker button[aria-pressed='true']"]) {
+      const glow = await page.locator(`.purchases-sheet ${selector}`).first().evaluate((element) => getComputedStyle(element).boxShadow);
+      expect(glow, `${selector} should retain its subtle highlight`).not.toBe("none");
+    }
     if (capture) await page.screenshot({ path: testInfo.outputPath("workshop-store.png"), animations: "disabled" });
     await page.locator(".owned-purchases summary").click();
     await expect(page.locator(".owned-purchases__item")).toHaveCount(6);
