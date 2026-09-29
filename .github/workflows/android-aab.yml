@@ -40,6 +40,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+          cache: gradle
 
       - uses: android-actions/setup-android@v3
         with:
@@ -94,8 +95,9 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           script: |
-            cd android && bash ./gradlew :app:connectedDebugAndroidTest --no-daemon
-            adb pull /sdcard/Android/data/com.tradeup.zerotohome/files/native-smoke "${{ github.workspace }}/android/app/build/reports/native-smoke"
+            adb shell wm size 720x1280
+            adb shell wm density 320
+            cd android && (bash ./gradlew :app:connectedDebugAndroidTest --no-daemon; test_result=$?; adb pull /sdcard/Android/data/com.tradeup.zerotohome/files/native-smoke "${{ github.workspace }}/android/app/build/reports/native-smoke" || true; exit "$test_result")
 
       - name: Keep native test and lint evidence
         if: always()

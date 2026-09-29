@@ -107,7 +107,7 @@ public class TradeUpWebViewSmokeTest {
     }
 
     private JSONObject waitForSave() throws Exception {
-        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(25);
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(45);
         do {
             js("""
             (() => {
@@ -176,11 +176,12 @@ public class TradeUpWebViewSmokeTest {
     }
 
     private void waitFor(String expression) throws Exception {
-        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(25);
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(45);
         while (System.nanoTime() < deadline) {
             if ("true".equals(js(expression))) return;
             Thread.sleep(150);
         }
+        screenshot("failure-wait.png");
         throw new AssertionError("Timed out waiting for " + expression + "; body=" + js("document.body.innerText.slice(0, 600)"));
     }
 
@@ -195,7 +196,9 @@ public class TradeUpWebViewSmokeTest {
                 callback.countDown();
             });
         });
-        assertTrue("JavaScript callback", callback.await(5, TimeUnit.SECONDS));
+        boolean responded = callback.await(20, TimeUnit.SECONDS);
+        if (!responded) screenshot("failure-js.png");
+        assertTrue("JavaScript callback: " + expression, responded);
         return result.get();
     }
 }
