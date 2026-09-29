@@ -14,7 +14,6 @@
         <item name="windowNoTitle">true</item>
         <item name="android:windowBackground">@color/tradeup_background</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar">false</item>
         <item name="android:navigationBarColor">@color/tradeup_background</item>
     </style>
 
