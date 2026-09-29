@@ -1,0 +1,83 @@
+name: Android closed-test AAB
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tradeup-android-aab
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      VITE_ADMOB_PRODUCTION_ENABLED: 'false'
+      TRADEUP_ANDROID_UPLOAD_STORE_PASSWORD: ${{ secrets.TRADEUP_ANDROID_UPLOAD_STORE_PASSWORD }}
+      TRADEUP_ANDROID_UPLOAD_KEY_ALIAS: ${{ secrets.TRADEUP_ANDROID_UPLOAD_KEY_ALIAS }}
+      TRADEUP_ANDROID_UPLOAD_KEY_PASSWORD: ${{ secrets.TRADEUP_ANDROID_UPLOAD_KEY_PASSWORD }}
+      # Official Google sample app ID; this workflow is for closed testing,
+      # not a production release with live advertising.
+      TRADEUP_ANDROID_ADMOB_APP_ID: ca-app-pub-3940256099942544~3347511713
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.19.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK 36
+        run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+
+      - name: Verify source and synchronize Android
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm test
+          pnpm lint
+          pnpm build
+          pnpm cap:sync
+
+      - name: Install upload key
+        env:
+          UPLOAD_KEYSTORE_BASE64: ${{ secrets.TRADEUP_ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+          test -n "$UPLOAD_KEYSTORE_BASE64"
+          test -n "$TRADEUP_ANDROID_UPLOAD_STORE_PASSWORD"
+          test -n "$TRADEUP_ANDROID_UPLOAD_KEY_ALIAS"
+          test -n "$TRADEUP_ANDROID_UPLOAD_KEY_PASSWORD"
+          KEY_PATH="$RUNNER_TEMP/tradeup-upload.p12"
+          printf '%s' "$UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$KEY_PATH"
+          chmod 600 "$KEY_PATH"
+          echo "TRADEUP_ANDROID_UPLOAD_STORE_FILE=$KEY_PATH" >> "$GITHUB_ENV"
+
+      - name: Build and verify signed bundle
+        run: |
+          set -euo pipefail
+          cd android
+          ./gradlew :app:bundleRelease --no-daemon
+          test -s app/build/outputs/bundle/release/app-release.aab
+          jarsigner -verify app/build/outputs/bundle/release/app-release.aab
+
+      - name: Keep Play upload file
+        uses: actions/upload-artifact@v4
+        with:
+          name: tradeup-android-closed-test-${{ github.run_number }}
+          path: android/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 7

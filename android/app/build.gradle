@@ -1,5 +1,11 @@
 apply plugin: 'com.android.application'
 
+def uploadStoreFile = System.getenv('TRADEUP_ANDROID_UPLOAD_STORE_FILE')
+def uploadStorePassword = System.getenv('TRADEUP_ANDROID_UPLOAD_STORE_PASSWORD')
+def uploadKeyAlias = System.getenv('TRADEUP_ANDROID_UPLOAD_KEY_ALIAS')
+def uploadKeyPassword = System.getenv('TRADEUP_ANDROID_UPLOAD_KEY_PASSWORD')
+def hasUploadSigning = [uploadStoreFile, uploadStorePassword, uploadKeyAlias, uploadKeyPassword].every { it?.trim() }
+
 android {
     namespace = "com.tradeup.zerotohome"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -10,14 +16,29 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        // Google-provided demo ID is for closed testing only. Supply the real
+        // Android AdMob app ID before any production release.
+        manifestPlaceholders = [admobAppId: System.getenv('TRADEUP_ANDROID_ADMOB_APP_ID') ?: 'ca-app-pub-3940256099942544~3347511713']
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
              // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        if (hasUploadSigning) {
+            release {
+                storeFile file(uploadStoreFile)
+                storePassword uploadStorePassword
+                keyAlias uploadKeyAlias
+                keyPassword uploadKeyPassword
+                storeType 'pkcs12'
+            }
+        }
+    }
     buildTypes {
         release {
+            if (hasUploadSigning) signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

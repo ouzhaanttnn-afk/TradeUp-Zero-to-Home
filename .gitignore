@@ -16,6 +16,12 @@ coverage
 .asset-benchmark
 *.local
 .tmp-review-video/
+android/.gradle/
+android/local.properties
+android/**/build/
+*.jks
+*.keystore
+*.p12
 
 # Editor directories and files
 .vscode/*
