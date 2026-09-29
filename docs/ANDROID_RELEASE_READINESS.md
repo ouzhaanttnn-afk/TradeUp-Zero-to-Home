@@ -33,7 +33,7 @@ CI kanıtı yalnız ilgili çalışma başarılıysa geçerlidir. Emülatör tes
 6. AdMob'da ayrı Android uygulaması ve dört rewarded yerleşimi oluştur. iOS reklam kimliklerini kopyalama. UMP, izin reddi, offline, no-fill ve ödülün bir kez uygulanmasını doğrula; kalite kapısı geçmeden canlı reklam açma.
 7. Gerçek Android telefonundan Play iç test kurulumu yap: alım, satış, pazarlık, kapat/aç, ses/haptik, büyük yazı, azaltılmış hareket, klavye, çentik, üç tuş/gesture navigation. Altı ürün için satın alma, iptal, pending, yeniden yükleme/restore ve iade testlerini tamamla.
 8. Destek/gizlilik URL'lerini kontrol et; Data Safety, reklam içerir, içerik derecelendirmesi ve 13+ hedef kitle beyanlarını gerçek SDK davranışına göre doldur. “Veri toplanmıyor” beyanını otomatik seçme: test reklamı bile SDK iletişimi içerebilir.
-9. Son Android sürümünün gerçek ekran görüntülerini çek; iPhone çerçeveli/iPad eski görsellerini kullanma. 512×512 ikon ve 1024×500 feature graphic gerekir. Emülatör testinin görüntüleri QA kanıtıdır; satın alma bağlantısı eksik ekranı yayın görseli sayma.
+9. Son Android sürümünün gerçek ekran görüntülerini çek; iPhone çerçeveli/iPad eski görsellerini kullanma. 512×512 ikon `public/icon-512.png` içinde hazır; 1024×500 feature graphic ayrıca hazırlanmalı. Emülatör testinin görüntüleri QA kanıtıdır; satın alma bağlantısı eksik ekranı yayın görseli sayma. Türkçe konsol taslağı: [Google Play metinleri](GOOGLE_PLAY_LISTING_TR.md).
 
 ## Kalıcı Google Play ürünleri
 
