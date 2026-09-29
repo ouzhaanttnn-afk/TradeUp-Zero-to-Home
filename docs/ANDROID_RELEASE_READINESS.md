@@ -23,6 +23,24 @@
 
 CI kanıtı yalnız ilgili çalışma başarılıysa geçerlidir. Emülatör testi fiziksel Android cihaz veya Play Billing testi yerine geçmez. Native test `debug` WebView üzerinden koşar; dağıtılan `release` AAB'nin Play kurulumu ayrıca test edilmelidir.
 
+Gerçek cihaz ve Play lisans testleri için kısa senaryolar: [Android test planı](ANDROID_TEST_PLAN_TR.md).
+
+## Doğrulanmış test paketi — 1.0.2 (8)
+
+- Kaynak commit: `37216e25e23972fbfa5da1fb25a0c3ee4bfc7eb7`.
+- [Başarılı Actions çalışması #8](https://github.com/ouzhaanttnn-afk/TradeUp-Zero-to-Home/actions/runs/36618064974): imzalı AAB, kaynak testleri, Android lint ve native smoke başarılı.
+- `pnpm test`: 64 dosyada 401 test başarılı; `pnpm lint` ve `pnpm build` başarılı.
+- Android release lint: 0 hata / 17 uyarı. Büyük ekranlarda portre kilidinin uygulanmaması ve eski şablon kaynakları gibi uyarılar production QA yerine geçmez.
+- Android 16 / 720×1280 / 360 dp emülatör: 2 native test, 0 hata; temiz profil, ilk satış, muhasebe mutabakatı, dört sekme, Geri, arka plan ve Activity yeniden oluşturma doğrulandı.
+- Pazar, ürün ve ayarlar PNG'leri test çıktısına alındı ve görsel olarak incelendi. Bu üç görüntü **QA kanıtıdır**, tamamlanmış Play mağaza seti değildir.
+- Artifact: `tradeup-android-closed-test-8`; dosya `app-release.aab`, 21.020.472 bayt. GitHub saklama süresi 7 gün; raporlar 14 gün.
+- Yerel kopya: `android/app/build/release-evidence/build-8/app-release.aab` (Git'e eklenmez; build temizliği bu kopyayı silebilir).
+- SHA-256: `0E7A62C5458A37DA574F563118E76CBD6A84EDB9CB5468E12765EE36ADDAAD36`.
+- `jarsigner -verify` başarılı; AAB içinde imza girdileri var. Bu dosyada `.so` kütüphanesi yok; ELF hizalaması gerektiren paketlenmiş native kütüphane bulunmadı. Play'in final artifact denetimi yine zorunlu.
+
+Bu sonuçlar Android ödemelerini, canlı reklamları, fiziksel cihaz performansını
+veya Play'den release kurulumunu doğrulamaz. Native smoke debug varyantındadır.
+
 ## Yarın Play hesabı açılınca
 
 1. Hesap kimlik/cihaz doğrulamasını bitir. Uygulamayı ücretsiz **Oyun / Simülasyon**, bu paket kimliğiyle oluştur; ilk dağıtım iç test olsun.
@@ -67,7 +85,8 @@ Kaynaklar (29 Eylül 2026 kontrolü):
 - [ ] Android Billing kod bağlantısı + doğrulama + altı SKU Play lisans testleri
 - [ ] Android AdMob kimlikleri + UMP + rewarded cihaz testi; production kalite kapısı
 - [ ] Android Firebase kaydı + açık rıza yolu (veya kapalı analitikle bilinçli yayın kararı)
-- [ ] Son AAB manifest/SDK/16 KB denetimi; native `.so` varsa ELF ve ZIP hizalama
+- [x] İmzalı test AAB'si, release lint ve native `.so` envanteri denetlendi (build 8)
+- [ ] Play'in yüklenen AAB üzerindeki SDK/izin/16 KB kontrolleri ve release kurulumu
 - [ ] Fiziksel cihaz, eski WebView, büyük yazı, tablet ve katlanır ekran doğrulaması
 - [ ] Android'e ait güncel mağaza görselleri / feature graphic / beyanlar
 - [ ] Gerekiyorsa 12 kişi / 14 gün kapalı test ve production erişimi
