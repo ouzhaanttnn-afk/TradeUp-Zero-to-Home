@@ -146,7 +146,7 @@ public class TradeUpWebViewSmokeTest {
     private void checkWidth() throws Exception {
         assertEquals("No horizontal document overflow", "true", js("document.documentElement.scrollWidth <= innerWidth + 1"));
         assertEquals("Visible main controls must fit", "true", js("""
-            [...document.querySelectorAll('.app-shell > nav > button, .onboarding-start, .sheet-close')]
+            [...document.querySelectorAll('.app-shell > nav > button, .onboarding-start, .sheet .close')]
               .filter(el => el.getClientRects().length)
               .every(el => { const r = el.getBoundingClientRect(); return r.left >= -1 && r.right <= innerWidth + 1; })
             """));
