@@ -6,8 +6,38 @@ Reddedilen yapı: **1.0.2 (39)**. Yeni yapı, iOS TestFlight workflow'unun yeni
 
 Hazır yeni binary: **1.0.2 (40)**, kaynak `a7506da`.
 [İmzalama ve Apple yüklemesi başarılı](https://github.com/ouzhaanttnn-afk/TradeUp-Zero-to-Home/actions/runs/36600452788).
-Apple işlemesi tamamlanıp TestFlight'ta doğrulandıktan sonra bu build seçilmeli.
-App Review'a yeniden gönderilmedi.
+Apple işlemesi tamamlandı; TestFlight'ta build 40 ve Betatest grubu doğrulandı.
+
+## Tamamlanan gönderim — 29 Eylül 2026, 20:09 (Türkiye)
+
+- Kullanıcının açık işlem onayıyla eski reddedilmiş başvuru
+  `eef19a40-c8f2-477e-ae49-b61650b23d11` kapatıldı; Apple durumu `Removed`.
+  Uygulama ve satın alma ürün kayıtları silinmedi.
+- **1.0.2 (40) ve altı IAP aynı başvuruda gönderildi.**
+  [Başvuru 527443fc-6288-4b9f-b5f9-e342b348985c](https://appstoreconnect.apple.com/apps/6811362281/distribution/reviewsubmissions/details/527443fc-6288-4b9f-b5f9-e342b348985c)
+  sonuç ekranında `Items Submitted (7)` gösteriyor; yedi öğenin her biri
+  **Waiting for Review**. Ayrı bekleyen IAP taslağı kalmadı.
+- Sürümün build 39 bağlantısı kaldırılıp build 40 seçildi. Yayınlama
+  **manuel**; bu işlem App Store yayını veya Apple onayı değildir.
+- Tek yerelleştirme Türkçe. Eski 13 inç iPad görseli kaldırıldı; diğer dört
+  iPad boyutundaki miras kullanımları da boşaldı. Eski dosya yerel tarihsel
+  klasörde korunur. Build 40 seçilip sürüm kaydedildikten sonra Apple yalnız
+  iPhone medya alanlarını gösterdi ve iPad görseli istemeden gönderimi kabul
+  etti. Bu, iPad uyumluluğunun cihazda test edildiği anlamına gelmez.
+- Beş mevcut açıklamalı iPhone görseli korundu. Diğer altı iPhone boyutunun
+  aynı 6.5 inç Türkçe görsellerini kullandığı doğrulandı. Yeni native iPad
+  çekimi üretilmedi veya yüklenmedi.
+- Altı üründe inceleme görseli ve yerelleştirme mevcut; bölge erişimi ve fiyat
+  çizelgeleri korundu. Önceden yüklenmiş IAP görselleri tarayıcı arayüzü
+  referanslarıdır, yeni native StoreKit testi değildir. Yeni native satın
+  alma testi yapıldığı iddia edilmedi.
+- Premium inceleme açıklamasındaki eski kapsam düzeltildi. Sürüm notlarında
+  iki ana paket, dört tekil kozmetiğin `Görsel paketler` erişimi, geri yükleme
+  ve iPad medyasına gerçekten yapılan işlem açıklandı; “iPhone-only olduğu
+  için iPad sorunu geçersiz” iddiası kaldırıldı.
+- Bu adım yalnız Apple başvurusu ve durum belgelerini değiştirdi. Oyun kodu,
+  ekonomi, fiyatlar ve build 40 binary'si değiştirilmedi; önceki 394 birim /
+  38 Playwright, lint ve build sonuçları yeni test çalışması olarak sunulmaz.
 
 ## İki ana seçenek, altı mağaza ürünü
 
@@ -25,7 +55,7 @@ korunur. Satın alma, yalnız gerçek StoreKit fiyatı ve kullanılabilir ürün
 metadata'sı varsa etkindir. Mağaza fiyatının gelmesi **Apple incelemesine
 gönderildiğini veya onaylandığını kanıtlamaz**.
 
-## Apple oturumu açılınca yapılacaklar
+## Uygulanan gönderim kontrol listesi (tarihsel plan)
 
 1. Ret mesajı, mevcut başvuru ve beş ürünlü taslağın güncel durumunu yeniden oku.
 2. Gerekirse reddedilen başvuruyu sonlandırıp uygulama, Premium ve diğer beş

@@ -1,5 +1,33 @@
 # TradeUp iOS Release Readiness
 
+## 29 Eylül 2026, 20:09 — yeniden App Review'a gönderildi
+
+- **TradeUp 1.0.2 (40) ve altı kalıcı IAP**, aynı
+  [527443fc-6288-4b9f-b5f9-e342b348985c başvurusunda](https://appstoreconnect.apple.com/apps/6811362281/distribution/reviewsubmissions/details/527443fc-6288-4b9f-b5f9-e342b348985c)
+  gönderildi. Apple `Items Submitted (7)` gösteriyor ve her öğe
+  **Waiting for Review**. Manuel yayın seçimi korunuyor; henüz onaylanmadı
+  veya mağazada yayımlanmadı.
+- Kullanıcının açık onayıyla reddedilmiş eski başvuru kapatıldı (`Removed`);
+  ayrı beş ürünlü taslağa Premium ve uygulama eklendi. Build 39 yerine 40
+  seçildi. Uygulama ve IAP ürün kayıtları silinmedi.
+- Eski 13 inç iPad mağaza görseli ve diğer iPad boyutlarına miras kullanımı
+  kaldırıldı. Yerel eski görsel tarihsel referans olarak korunuyor. Apple,
+  build 40 kaydedilince yalnız iPhone medya alanlarını gösterdi ve yeni iPad
+  görseli gerektirmeden başvuruyu kabul etti. Native iPad testi yapılmış veya
+  yeni native iPad görseli yüklenmiş sayılmaz.
+- Türkçe tek etkin yerelleştirme. Beş açıklamalı iPhone görseli korunuyor;
+  diğer altı iPhone boyutu bunları miras alıyor. Altı IAP'ın mevcut inceleme
+  görselleri, bölge erişimleri, fiyat çizelgeleri ve yerelleştirmeleri
+  kontrol edildi. Mevcut IAP görselleri tarayıcı referansıdır; yeni StoreKit
+  cihaz testi kanıtı olarak sunulmadı.
+- Premium kapsamı ve sürüm inceleme notları güncellendi: Reklamsız ve Premium
+  ana teklifler, dört ayrı kozmetik `Görsel paketler` içinde. Eski yanlış
+  iPad muafiyeti ifadesi kaldırıldı. Fiyat ve ürün davranışı değiştirilmedi.
+- Bu aşama Apple metadata/gönderim işlemi ve belge güncellemesidir; yeni oyun
+  kodu veya binary değişikliği yok. Aşağıdaki “henüz gönderilmedi” kayıtları
+  artık tarihsel hazırlık durumudur. Ayrıntı:
+  [yeniden gönderim kaydı](APP_REVIEW_RESUBMISSION_2026-09-29.md).
+
 ## 29 Eylül 2026 — ret ve yeniden gönderim hazırlığı
 
 - Apple, **1.0.2 (39)** sürümünü 29 Eylül'de reddetti: **2.1(b)** (oyundaki IAP ürünlerinin tamamı incelemeye sunulmamış) ve **2.3.3** (13 inç iPad mağaza görselleri güncel arayüzü göstermiyor). İnceleme cihazı iPad Air 11 inç (M3).
@@ -63,9 +91,9 @@
 ## İnceleme sonrası ve yayından önce kalanlar
 
 1. Apple'ın inceleme sonucunu izle; onay gelmeden sürümü yayımlanmış sayma. Manuel yayın seçimi korunur.
-2. Altı kalıcı ürünü fiyat, yerelleştirme ve güncel inceleme görselleriyle uygulamanın aynı yeniden gönderimine dahil et; ayrı taslakları gönderilmiş sayma.
+2. Altı kalıcı ürün aynı başvuruya dahil edildi; uygulama ile birlikte Apple inceleme sonuçlarını takip et. Yeni bir görsel talebi gelirse gerçek native cihaz/Simulator çekimi hazırla; tarayıcı referanslarını native test kanıtı sayma.
 3. Gerçek iPhone'da sandbox satın alma, geri yükleme, iptal/iade, reklam izinleri, çevrimdışı kayıt, safe-area ve düşük bellek smoke testlerini tamamla.
 4. Üretim reklamları etkinleşirse App Privacy beyanını AdMob SDK'nın gerçek veri akışıyla uyumlu hâle getir.
-5. Eski ilk oturum adımlarını bekleyen tarayıcı e2e senaryolarını güncelle ve tam tarayıcı kalite kapısını yeniden çalıştır.
+5. İlk oturum e2e senaryoları build 40 öncesinde güncellendi ve tam tarayıcı kalite kapısı geçti. Yeni kod değişikliği yapılırsa bu kalite kapısını tekrar çalıştır.
 
 Üretim reklam ve IAP anahtarları yayın kalitesinden önce repository'ye yazılmaz; Xcode/CI secret alanlarında tutulur.
