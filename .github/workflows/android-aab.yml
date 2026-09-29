@@ -72,7 +72,7 @@ jobs:
         run: |
           set -euo pipefail
           cd android
-          ./gradlew :app:bundleRelease --no-daemon
+          bash ./gradlew :app:bundleRelease --no-daemon
           test -s app/build/outputs/bundle/release/app-release.aab
           jarsigner -verify app/build/outputs/bundle/release/app-release.aab
 
