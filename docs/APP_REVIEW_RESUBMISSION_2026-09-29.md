@@ -4,6 +4,11 @@ Apple uygulama: `6811362281` · Bundle: `com.tradeup.zerotohome`.
 Reddedilen yapı: **1.0.2 (39)**. Yeni yapı, iOS TestFlight workflow'unun yeni
 çalışma numarasını alır. Aynı 39 numarasını tekrar seçme.
 
+Hazır yeni binary: **1.0.2 (40)**, kaynak `a7506da`.
+[İmzalama ve Apple yüklemesi başarılı](https://github.com/ouzhaanttnn-afk/TradeUp-Zero-to-Home/actions/runs/36600452788).
+Apple işlemesi tamamlanıp TestFlight'ta doğrulandıktan sonra bu build seçilmeli.
+App Review'a yeniden gönderilmedi.
+
 ## İki ana seçenek, altı mağaza ürünü
 
 | Ürün | StoreKit kimliği | Apple kaydı | Yeni arayüzde erişim |
