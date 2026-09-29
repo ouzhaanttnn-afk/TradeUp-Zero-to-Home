@@ -124,6 +124,16 @@ export default function PurchasesSheet({
   const availablePacks = entries.filter(
     (entry) => !entry.owned && !entry.includedWithPremium,
   );
+  const mainPackIds: MonetizationProductId[] = [
+    "tradeup_no_ads_lifetime",
+    "tradeup_premium_lifetime",
+  ];
+  const mainPacks = mainPackIds.flatMap((id) =>
+    availablePacks.filter((entry) => entry.productId === id),
+  );
+  const cosmeticPacks = availablePacks.filter(
+    (entry) => !mainPackIds.includes(entry.productId),
+  );
   const noAdsOwned = entries.some(
     (entry) => entry.productId === "tradeup_no_ads_lifetime" && entry.owned,
   );
@@ -132,32 +142,43 @@ export default function PurchasesSheet({
     : noAdsOwned
       ? t("store.noAdsActive")
       : t("store.packsActive");
-  const renderAvailablePack = (entry: (typeof entries)[number]) => (
+  const renderAvailablePack = (entry: (typeof entries)[number], main = false) => (
     <article
       key={entry.productId}
+      data-product-id={entry.productId}
       className={
         entry.productId === "tradeup_premium_lifetime"
           ? "purchase-item purchase-item--premium"
           : "purchase-item"
       }
     >
-      <div>
+      <div className="purchase-item__copy">
+        {main ? (
+          <small className="purchase-item__eyebrow">
+            {entry.productId === "tradeup_premium_lifetime"
+              ? t("store.allIncluded")
+              : t("store.adsOnly")}
+          </small>
+        ) : null}
         <strong>{entry.copy.title || entry.metadata?.title}</strong>
-        <p>{entry.copy.detail}</p>
+        <p>{main
+          ? t(entry.productId === "tradeup_premium_lifetime" ? "store.premiumSummary" : "store.noAdsSummary")
+          : entry.copy.detail}</p>
       </div>
       {entry.pending ? (
         <span className="entitlement-state purchase-item-status">
           {t("store.pending")}
         </span>
-      ) : entry.metadata ? (
+      ) : entry.metadata?.available && entry.metadata.localizedPrice ? (
         <button
           disabled={monetizationBusy}
+          aria-label={`${entry.copy.title} · ${t("store.buy", { price: entry.metadata.localizedPrice })}`}
           onClick={() => void purchaseProduct(entry.productId)}
         >
           {t("store.buy", { price: entry.metadata.localizedPrice })}
         </button>
       ) : (
-        <span className="store-unavailable">{t("store.comingSoon")}</span>
+        <span className="store-unavailable">{t("store.unavailable")}</span>
       )}
     </article>
   );
@@ -227,11 +248,27 @@ export default function PurchasesSheet({
               <div className="purchase-panel-heading">
                 <div>
                   <strong>{t("store.permanentPacks")}</strong>
-                  <p>{t("store.permanentSub")}</p>
+                  <p>{t("store.oneTime")}</p>
                 </div>
-                <span>{storeProducts.length ? t("store.ready") : t("store.comingSoon")}</span>
               </div>
-              <div className="purchase-list">{availablePacks.map(renderAvailablePack)}</div>
+              {mainPacks.length > 0 ? (
+                <div className="purchase-list purchase-list--main">
+                  {mainPacks.map((entry) => renderAvailablePack(entry, true))}
+                </div>
+              ) : null}
+              {cosmeticPacks.length > 0 ? (
+                <details className="extra-purchases">
+                  <summary>
+                    <span>
+                      <strong>{t("store.cosmeticPacks")}</strong>
+                      <small>{t("store.cosmeticSub")}</small>
+                    </span>
+                  </summary>
+                  <div className="purchase-list">
+                    {cosmeticPacks.map((entry) => renderAvailablePack(entry))}
+                  </div>
+                </details>
+              ) : null}
             </section>
           ) : null}
           <section

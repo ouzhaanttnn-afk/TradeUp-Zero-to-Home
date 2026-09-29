@@ -126,20 +126,16 @@ test("generate App Store screenshots for TradeUp", async ({
   expect(marketArtwork.every(Boolean)).toBe(true);
   await capture(page, "02-canli-pazar", testInfo.outputPath("market.png"));
 
-  await page.setViewportSize({ width: 1032, height: 1376 });
-  await mkdir(path.resolve("store-assets/ios/ipad-13"), { recursive: true });
-  const iPadSource = testInfo.outputPath("ipad-market.png");
-  await page.screenshot({ path: iPadSource, animations: "disabled" });
-  const iPadImage = await sharp(iPadSource)
-    .resize(2064, 2752, { fit: "fill" })
-    .png({ compressionLevel: 9 })
-    .toBuffer();
-  await writeGeneratedAsset(path.resolve("store-assets/ios/ipad-13/01-canli-pazar.png"), iPadImage);
-  await page.setViewportSize({ width: 428, height: 926 });
-
+  // Browser renders are useful previews, but an iPad-sized browser viewport
+  // does not represent the iPhone binary running in iPad compatibility mode.
+  // Capture actual native iPad rendering before supplying iPad store media.
   await page.getByRole("button", { name: "Satın almalar & görünüm" }).click();
   await expect(page.getByText("TradeUp Premium", { exact: false })).toBeVisible();
+  await expect(page.locator(".purchase-list article:visible")).toHaveCount(2);
   await capture(page, "06-premium-inceleme", testInfo.outputPath("premium.png"));
+  await page.locator(".extra-purchases summary").click();
+  await expect(page.locator(".purchase-list article:visible")).toHaveCount(6);
+  await capture(page, "07-kozmetik-inceleme", testInfo.outputPath("cosmetics.png"));
   await page.getByRole("button", { name: "Kapat", exact: true }).click();
 
   await page.locator(".market-card").first().click();

@@ -50,22 +50,37 @@ test("profile and settings stay accessible from the mobile game header", async (
       path,
     );
   }
+  await dialog.getByRole("button", { name: "Standart", exact: true }).click();
+  await expect(page.locator(".app-shell")).toHaveClass(/large-text/);
   await dialog
     .getByRole("button", { name: /Satın almalar & görünüm/i })
     .click();
   await expect(dialog.locator(".purchase-list article")).toHaveCount(6);
-  await expect(dialog.locator(".purchase-list article:visible")).toHaveCount(6);
-  await expect(dialog.locator(".extra-purchases")).toHaveCount(0);
+  await expect(dialog.locator(".purchase-list article:visible")).toHaveCount(2);
+  await expect(dialog.locator(".purchase-list--main article").first()).toContainText("Reklamsız");
+  await expect(dialog.locator(".purchase-list--main article").last()).toContainText("TradeUp Premium");
+  await expect(dialog.locator(".extra-purchases")).not.toHaveAttribute("open");
   await expect(dialog).toContainText("Reklamsız");
-  await expect(dialog).toContainText("Yakında");
+  await expect(dialog).toContainText("Şu an kullanılamıyor");
   await expect(dialog).not.toContainText("Fiyat yüklenemedi");
-  expect(
-    await dialog
-      .locator(".purchase-list article")
-      .evaluateAll((cards) =>
-        cards.every((card) => card.getBoundingClientRect().height <= 96),
-      ),
-  ).toBe(true);
+  const shop = page.getByRole("dialog", { name: "Satın Almalar & Görünüm" });
+  const closeBounds = await shop.getByRole("button", { name: "Kapat", exact: true }).boundingBox();
+  const titleBounds = await shop.getByRole("heading", { name: "Satın Almalar & Görünüm" }).boundingBox();
+  expect(closeBounds).not.toBeNull();
+  expect(titleBounds).not.toBeNull();
+  expect(closeBounds!.width).toBeLessThanOrEqual(60);
+  expect(titleBounds!.x + titleBounds!.width).toBeLessThanOrEqual(closeBounds!.x);
+  await shop.getByRole("button", { name: "Kapat", exact: true }).focus();
+  await page.keyboard.press("Shift+Tab");
+  await expect(shop.getByRole("button", { name: "Gizlilik", exact: true })).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(shop.getByRole("button", { name: "Kapat", exact: true })).toBeFocused();
+  await dialog.locator(".extra-purchases summary").focus();
+  await page.keyboard.press("Enter");
+  await expect(dialog.locator(".purchase-list article:visible")).toHaveCount(6);
+  await page.keyboard.press("Enter");
+  await expect(dialog.locator(".purchase-list article:visible")).toHaveCount(2);
+  await shop.locator(".sheet-scroll").evaluate((element) => element.scrollTo(0, 0));
   await page.screenshot({
     path: testInfo.outputPath("profile-settings-320.png"),
     animations: "disabled",
@@ -88,8 +103,12 @@ test("profile and settings stay accessible from the mobile game header", async (
   // Satın Almalar & Görünüm is its own sheet stacked on top of Settings now
   // (not an inline accordion), so it closes first before Settings' own
   // close button becomes reachable again.
-  await page.getByRole("button", { name: "Kapat", exact: true }).click();
-  await dialog.getByRole("button", { name: "Ayarları kapat" }).click();
+  await page.keyboard.press("Escape");
+  await expect(shop).not.toBeVisible();
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole("button", { name: /Satın almalar & görünüm/i })).toBeFocused();
+  expect(await page.evaluate(() => document.body.style.overflow)).toBe("hidden");
+  await page.keyboard.press("Escape");
   await expect(settingsButton).toBeFocused();
   expect(await page.evaluate(() => document.body.style.overflow)).toBe("");
   await expect(

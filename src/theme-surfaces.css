@@ -345,7 +345,7 @@
   background: linear-gradient(180deg, var(--theme-top), var(--theme-bottom));
 }
 
-.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .purchases-sheet :is(.purchase-status, .purchase-list) {
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .purchases-sheet :is(.purchase-status, .purchase-list:not(.purchase-list--main)) {
   border-color: var(--theme-line);
   background: var(--theme-card-base);
 }
@@ -362,11 +362,15 @@
   background: var(--theme-glow);
 }
 
-.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .purchases-sheet .purchase-list article {
+.app-shell:is(.theme-night-market, .theme-workshop, .theme-obsidian) .purchases-sheet .purchase-list:not(.purchase-list--main) article {
   background: transparent;
 }
 
 /* Account and store controls stay finger-sized at the narrowest supported width. */
+.purchases-sheet .settings-sheet-heading {
+  padding-inline-end: 60px;
+}
+
 .settings-card .lang-pill {
   min-width: 44px;
 }
@@ -574,6 +578,103 @@
 }
 .purchases-sheet .purchase-list :is(button, .store-unavailable) {
   font-size: calc(10px + var(--text-size-boost));
+}
+.purchases-sheet .purchase-list--main {
+  gap: 8px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.purchases-sheet .purchase-list--main article {
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--theme-line, rgba(137, 193, 164, 0.24));
+  border-radius: 14px;
+  background: var(--theme-card-base, rgba(16, 29, 24, 0.84));
+}
+.purchases-sheet .purchase-list--main .purchase-item--premium {
+  border-color: var(--theme-tint, #cead65);
+  background: radial-gradient(circle at 0 0, var(--theme-glow, rgba(206, 173, 101, 0.16)), transparent 80%),
+    var(--theme-card-base, rgba(16, 29, 24, 0.92));
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.08);
+}
+.purchase-item__eyebrow {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--theme-tint, #a7c5b4);
+  font-size: calc(8px + var(--text-size-boost));
+  font-weight: 800;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+}
+.purchase-item--premium .purchase-item__eyebrow {
+  color: var(--theme-tint, #e5c479);
+}
+.purchases-sheet .purchase-list--main strong {
+  font-size: calc(15px + var(--text-size-boost));
+}
+.purchases-sheet .purchase-list p {
+  display: block;
+  overflow: visible;
+  margin-bottom: 0;
+  -webkit-line-clamp: unset;
+}
+.purchases-sheet .purchase-list :is(button, .store-unavailable, .purchase-item-status) {
+  max-width: 42%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+.extra-purchases {
+  margin-top: 8px;
+}
+.extra-purchases summary {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 4px;
+  color: var(--theme-tint, #a7c5b4);
+  cursor: pointer;
+  list-style: none;
+}
+.extra-purchases summary::-webkit-details-marker {
+  display: none;
+}
+.extra-purchases summary span {
+  display: grid;
+  gap: 3px;
+}
+.extra-purchases summary strong {
+  font-size: calc(12px + var(--text-size-boost));
+}
+.extra-purchases summary small {
+  color: var(--theme-muted, #8fa69b);
+  font-size: calc(10px + var(--text-size-boost));
+}
+.extra-purchases summary::after {
+  content: "+";
+  font-size: 20px;
+}
+.extra-purchases[open] summary::after {
+  content: "−";
+}
+.extra-purchases summary:focus-visible {
+  outline: 2px solid var(--theme-tint, #69d99c);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+@media (max-width: 350px) {
+  .app-shell.large-text .purchases-sheet .purchase-list article {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .app-shell.large-text .purchases-sheet .purchase-list :is(button, .store-unavailable, .purchase-item-status) {
+    max-width: 100%;
+    text-align: left;
+  }
 }
 .purchase-utilities {
   margin: 10px 3px calc(8px + env(safe-area-inset-bottom));

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { advanceFrozenStartup, completeFirstLaunch } from "./helpers";
+import { advanceFrozenStartup, completeFirstLaunch, enableOptionalAnalytics } from "./helpers";
 import { initialState, resolveOffer, validateState } from "../src/game";
 import { reconcileJournal } from "../src/domain/economy";
 import type { GameState } from "../src/domain/models";
@@ -82,6 +82,7 @@ test("seller feedback stays in the sheet and two rejected offers remain closed a
     page.locator(`[data-listing-id="${listing.id}"]`).click();
   await page.reload();
   await advanceFrozenStartup(page);
+  await enableOptionalAnalytics(page, true);
   await openListing();
   const steps = page.getByRole("group", { name: "Satın alma adımları" });
   const negotiate = steps.getByRole("button", { name: /^Pazarlık et/ });

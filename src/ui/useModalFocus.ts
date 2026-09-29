@@ -6,6 +6,7 @@ const focusableSelector = [
   "input:not([disabled])",
   "select:not([disabled])",
   "textarea:not([disabled])",
+  "summary",
   '[tabindex]:not([tabindex="-1"])',
 ].join(",");
 
@@ -37,6 +38,9 @@ export function useModalFocus(
       initialFocusRef.current?.focus(),
     );
     const handleKeyDown = (event: KeyboardEvent) => {
+      // A nested sheet owns Escape and Tab until it closes. Keep the parent
+      // mounted so its scroll lock and original focus restoration survive.
+      if (containerRef.current?.querySelector('[role="dialog"][aria-modal="true"]')) return;
       if (event.key === "Escape") {
         event.preventDefault();
         closeRef.current();

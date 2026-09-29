@@ -2701,14 +2701,6 @@ nav .active .nav-icon {
     justify-content: space-between;
     gap: 12px;
   }
-  .app-shell.large-text .settings-card > div {
-    align-items: stretch;
-    flex-direction: column;
-  }
-  .app-shell.large-text .settings-card > div button {
-    width: 100%;
-    min-height: 44px;
-  }
 }
 
 /* Project-owned atmosphere artwork */

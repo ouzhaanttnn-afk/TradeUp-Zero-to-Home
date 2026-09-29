@@ -1,6 +1,17 @@
 # TradeUp iOS Release Readiness
 
-## 27 Eylül 2026 güncel durum
+## 29 Eylül 2026 — ret ve yeniden gönderim hazırlığı
+
+- Apple, **1.0.2 (39)** sürümünü 29 Eylül'de reddetti: **2.1(b)** (oyundaki IAP ürünlerinin tamamı incelemeye sunulmamış) ve **2.3.3** (13 inç iPad mağaza görselleri güncel arayüzü göstermiyor). İnceleme cihazı iPad Air 11 inç (M3).
+- 27 Eylül'de uygulama ve Premium aynı başvuruyla gönderilmişti; diğer beş ürün ayrı taslakta kaldı. Aşağıdaki eski kayıtların “39 gönderilmedi” / “kalan ürünler sonra ayrı gönderilir” ifadeleri artık geçersizdir. Premium ile tek başına yeniden başvuru yapılmamalı.
+- Mağaza arayüzü iki ana seçenek olarak sadeleştirildi: Reklamsız ve tüm kozmetikleri de içeren Premium. Dört tekil kozmetik açılır `Görsel paketler` bölümünde. Altı SKU'nun satın alma, geri yükleme ve mevcut hakları korunur; katlamak inceleme zorunluluğunu kaldırmaz.
+- Yerel doğrulama: **394 birim testi ve 38 Playwright akışı** geçti; lint, üretim derlemesi ve iOS senkronizasyonu başarılı. 320 px büyük yazıda başlık/kapatma çakışması giderildi; iç içe mağaza–ayarlar ekranlarında Escape, odak dönüşü ve kaydırma kilidi doğrulandı. Eski analitik testleri gerçek kullanıcı izin akışına uyarlandı; üretimde veri toplama varsayılanı değiştirilmedi. iPhone mağaza önizlemeleri ve açıklamalı kareler güncellendi; bunlar native iPad veya StoreKit testinin yerini tutmaz.
+- iPhone hedefi korunur; iPhone-only ayarı iPad uyumluluk incelemesini veya mağazada daha önce yüklenen iPad görsellerini ortadan kaldırmaz. Tarayıcıdaki geniş viewport'u native iPad ekranı gibi sunan eski üretim adımı kaldırıldı. `store-assets/ios/ipad-13/` görseli yalnız tarihsel referanstır, yeniden yüklenmemeli.
+- Yeni workflow çalışması 39'dan büyük benzersiz build numarası üretir. İmzalı binary ve Apple işlenmesi doğrulanmadan yeni sürüm yüklendi sayılmaz.
+- Kullanıcı App Store Connect'e giriş yaptıktan sonra: eski başvurunun öğelerini yeni taslakta birleştir; **uygulama + altı IAP** son listede doğrulansın. Her boyuttaki eski iPad medyası kontrol edilsin; gerekiyorsa yeni native build ile gerçek iPad/Simulator çekimi alınsın. Yayın manuel kalır.
+- [Somut yeniden gönderim paketi ve ürün listesi](APP_REVIEW_RESUBMISSION_2026-09-29.md). Henüz 29 Eylül düzeltmeleriyle yeniden App Review başlatılmadı.
+
+## 27 Eylül 2026 tarihsel durum (üstteki güncel kayıt önceliklidir)
 
 - Firebase projesi `tradeap-e16e4` içindeki iOS uygulama kaydı, TradeUp'ın `com.tradeup.zerotohome` kimliğiyle eşleşti. İndirilen `GoogleService-Info.plist` iOS uygulama hedefine eklendi; Firebase Analytics SDK'sı bağlandı. SDK veri toplama varsayılan olarak kapalıdır. Önceki yerel analitik tercihi aktarım izni sayılmaz; oyuncu ayarlardan açıkça etkinleştirirse olay adları (fiyat, oyuncu adı ve yerel kimlikler hariç) gönderilir. İzin geri alınırsa yerel kuyruk ve SDK verisi temizlenir. Mac/iPhone TestFlight doğrulaması ve Firebase DebugView kontrolü tamamlanmadan canlı analitik doğrulandı sayılmaz; App Store gizlilik beyanı yeni SDK ile tekrar karşılaştırılmalıdır. App Review başlatılmadı.
 - İlk Firebase TestFlight arşivi [build 38](https://github.com/ouzhaanttnn-afk/TradeUp-Zero-to-Home/actions/runs/36342706040) SwiftPM hedeflerine profil ayarı genel olarak uygulandığı için durdu; SDK kaynağına ait bir derleme hatası gösterilmedi. Profil ayarı yalnız uygulama hedefinin Release yapılandırmasına taşınarak düzeltildi.
@@ -51,7 +62,7 @@
 ## İnceleme sonrası ve yayından önce kalanlar
 
 1. Apple'ın inceleme sonucunu izle; onay gelmeden sürümü yayımlanmış sayma. Manuel yayın seçimi korunur.
-2. Kalan dört kalıcı ürünü App Store Connect'te oluşturup fiyat, yerelleştirme ve inceleme görselleriyle ayrı incelemeye gönder.
+2. Altı kalıcı ürünü fiyat, yerelleştirme ve güncel inceleme görselleriyle uygulamanın aynı yeniden gönderimine dahil et; ayrı taslakları gönderilmiş sayma.
 3. Gerçek iPhone'da sandbox satın alma, geri yükleme, iptal/iade, reklam izinleri, çevrimdışı kayıt, safe-area ve düşük bellek smoke testlerini tamamla.
 4. Üretim reklamları etkinleşirse App Privacy beyanını AdMob SDK'nın gerçek veri akışıyla uyumlu hâle getir.
 5. Eski ilk oturum adımlarını bekleyen tarayıcı e2e senaryolarını güncelle ve tam tarayıcı kalite kapısını yeniden çalıştır.

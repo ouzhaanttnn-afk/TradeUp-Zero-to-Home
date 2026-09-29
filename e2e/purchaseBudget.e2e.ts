@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { advanceFrozenStartup, completeFirstLaunch } from "./helpers";
+import { advanceFrozenStartup, completeFirstLaunch, enableOptionalAnalytics } from "./helpers";
 import { initialState, money, validateState } from "../src/game";
 import type { GameState } from "../src/domain/models";
 import { reconcileJournal } from "../src/domain/economy";
@@ -81,6 +81,7 @@ for (const scenario of ["offer", "counter", "shortfall"] as const) {
       });
     await page.reload();
     await advanceFrozenStartup(page);
+    await enableOptionalAnalytics(page, true);
     await page.locator(`[data-listing-id="${listing.id}"]`).click();
     const steps = page.getByRole("group", { name: "Satın alma adımları" });
     const offer = steps.getByRole("button", { name: /^Pazarlık et/ });

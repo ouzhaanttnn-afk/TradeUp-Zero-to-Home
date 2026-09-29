@@ -1,4 +1,22 @@
-import type { Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
+
+export async function enableOptionalAnalytics(page: Page, frozenClock = false) {
+  // Exercise explicit consent through the real UI; an old save preference
+  // alone must not enable telemetry after the Firebase migration.
+  await page.getByRole("button", { name: "Ayarlar", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Profil ve Ayarlar" });
+  if (frozenClock) {
+    await expect.poll(async () => {
+      await page.clock.runFor(200);
+      return dialog.count();
+    }).toBe(1);
+  }
+  const toggle = dialog.getByRole("button", { name: /analitik: Kapalı/i });
+  await expect(toggle).toHaveAttribute("aria-pressed", "false");
+  await toggle.click();
+  await expect(dialog.getByRole("button", { name: /analitik: Açık/i })).toHaveAttribute("aria-pressed", "true");
+  await dialog.getByRole("button", { name: "Ayarları kapat" }).click();
+}
 
 export async function advanceFrozenStartup(page: Page) {
   await page.locator(".startup-shell").waitFor({ state: "visible" });

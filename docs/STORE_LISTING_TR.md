@@ -12,10 +12,12 @@ Her kariyer farklıdır: sabit bir ürün merdiveni yoktur. Küçük eşyalarda 
 
 - Veri odaklı ve tekrar oynanabilir pazar
 - İki teklif haklı kısa pazarlık sistemi
-- Nakit ve toplam servet arasında gerçek likidite gerilimi
+- Elindeki nakdi ve ürünlerinin toplam değerini yönet
 - Kendi işlemlerinden oluşan kariyer zaman çizelgesi
 - Çevrimdışı çalışabilen yerel kayıt
-- Zorunlu reklam veya gerçek para ticareti yok
+- Her 30 tamamlanmış pazar ticaretinden sonra uygun koşullarda bir geçiş reklamı
+- Reklamsız paket ile reklamları atla; Premium ile buna ek olarak tüm kozmetikleri aç
+- Gerçek para ile ürün ticareti veya nakde çevirme yok
 
 ## Anahtar kelimeler
 
