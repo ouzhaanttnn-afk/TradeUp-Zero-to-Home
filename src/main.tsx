@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { Capacitor } from "@capacitor/core";
+import { Capacitor, SystemBars, SystemBarsStyle } from "@capacitor/core";
 import "./index.css";
 import App from "./App.tsx";
 import themeSurfacesUrl from "./theme-surfaces.css?url";
@@ -20,6 +20,10 @@ themeSurfaces.href = themeSurfacesUrl;
 document.head.append(themeSurfaces);
 
 if (Capacitor.isNativePlatform()) {
+  if (Capacitor.getPlatform() === "android") {
+    // TradeUp always has dark surfaces, even when the device uses a light theme.
+    void SystemBars.setStyle({ style: SystemBarsStyle.Dark }).catch(() => undefined);
+  }
   startFirebaseAnalytics(useGameStore);
   const admob = createAdMobAdapters();
   configureMonetizationAdapters({

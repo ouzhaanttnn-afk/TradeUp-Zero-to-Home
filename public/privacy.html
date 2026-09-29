@@ -14,7 +14,7 @@
         ><a href="/terms.html">Kullanım şartları</a
         ><a href="/support.html">Destek</a>
       </nav>
-      <span class="eyebrow">Gizlilik politikası · 27 Eylül 2026</span>
+      <span class="eyebrow">Gizlilik politikası · 29 Eylül 2026</span>
       <h1>Verileriniz hakkında açık bilgi.</h1>
       <p class="lead">
         TradeUp: Zero to Home hesap açmanızı istemez. Oyun ilerlemeniz cihazda
@@ -39,10 +39,11 @@
           Firebase SDK'sı uygulama örneği ve cihazla ilgili teknik bilgileri de
           işleyebilir. Analitiği kapatmak cihazdaki olay kuyruğunu temizler ve
           Firebase veri toplamayı durdurur. Oyun analitik olmadan da çalışır.
+          Android test sürümünde Firebase analitiği devre dışıdır.
         </p>
         <h2>Reklam ve izin altyapısı</h2>
         <p>
-          iOS uygulaması açıldığında reklam izni durumunu kontrol etmek için
+          iOS ve Android uygulamaları açıldığında reklam izni durumunu kontrol etmek için
           Google AdMob ve izin altyapısı başlatılabilir; bu yalnızca ödüllü
           reklam düğmesine bastığınızda gerçekleşmez. İzin ve reklam sunumu
           sırasında Google Mobile Ads SDK; IP adresi, cihaz veya reklam
@@ -52,7 +53,9 @@
           kullanılabileceğini belirtir; iOS'ta buna ilişkin izin ve tercihlerinizi
           cihaz ayarlarından yönetebilirsiniz. Uygulama, kişiselleştirilmemiş
           reklam ister; ödüllü reklamlar isteğe bağlıdır. Belirlenen ticaret
-          eşiklerinde geçiş reklamı da gösterilebilir. Bölgenizde gerektiğinde
+          eşiklerinde iOS sürümünde geçiş reklamı da gösterilebilir. Android test
+          sürümünde yalnız Google'ın test ödüllü reklam birimleri kullanılır;
+          otomatik geçiş reklamı yoktur. Bölgenizde gerektiğinde
           izin sorulur; izin verilmemesi temel oyunu engellemez ve reklam
           gösterilemeyebilir. Kullanılabilir olduğunda reklam gizliliği
           tercihlerini uygulamanın Profil ve Ayarlar bölümünden açabilirsiniz.
@@ -64,6 +67,9 @@
           Uygulama içi satın alma özelliği açıldığında ödemeleri Apple App
           Store işler. Kart bilgilerinizi almıyoruz. Satın alma ve geri yükleme
           bilgileri, haklarınızı doğrulamak için Apple üzerinden işlenir.
+          Android test sürümünde Google Play satın alma ve geri yükleme bağlantısı
+          henüz açık değildir; gerçek ödeme alınmaz. Mağazalar arası satın alma
+          veya ilerleme aktarımı sunulmaz.
         </p>
         <h2>İzinler ve kontrolünüz</h2>
         <p>

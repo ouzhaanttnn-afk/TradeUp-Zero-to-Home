@@ -5,6 +5,10 @@ def uploadStorePassword = System.getenv('TRADEUP_ANDROID_UPLOAD_STORE_PASSWORD')
 def uploadKeyAlias = System.getenv('TRADEUP_ANDROID_UPLOAD_KEY_ALIAS')
 def uploadKeyPassword = System.getenv('TRADEUP_ANDROID_UPLOAD_KEY_PASSWORD')
 def hasUploadSigning = [uploadStoreFile, uploadStorePassword, uploadKeyAlias, uploadKeyPassword].every { it?.trim() }
+def androidVersionCode = System.getenv('TRADEUP_ANDROID_VERSION_CODE') ?: '2'
+if (!(androidVersionCode ==~ /[1-9][0-9]{0,8}/)) {
+    throw new GradleException('TRADEUP_ANDROID_VERSION_CODE must be a positive integer of at most nine digits')
+}
 
 android {
     namespace = "com.tradeup.zerotohome"
@@ -13,8 +17,8 @@ android {
         applicationId "com.tradeup.zerotohome"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode androidVersionCode.toInteger()
+        versionName "1.0.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         // Google-provided demo ID is for closed testing only. Supply the real
         // Android AdMob app ID before any production release.

@@ -9,6 +9,8 @@ import {
   type CSSProperties,
 } from "react";
 import { App as CapacitorApp } from "@capacitor/app";
+import { Capacitor } from "@capacitor/core";
+import { bindAndroidBack } from "./infrastructure/androidBack";
 import "./App.css";
 
 const shellThemeStyles: Record<string, CSSProperties> = {
@@ -222,6 +224,24 @@ export default function App() {
     },
   } as const;
   const [tab, setTab] = useState<Tab>("market");
+  const currentTabRef = useRef(tab);
+  useEffect(() => { currentTabRef.current = tab; }, [tab]);
+  useEffect(() => {
+    if (Capacitor.getPlatform() !== "android") return;
+    return bindAndroidBack(
+      CapacitorApp,
+      () => {
+        const escape = new KeyboardEvent("keydown", { key: "Escape", cancelable: true });
+        window.dispatchEvent(escape);
+        return escape.defaultPrevented;
+      },
+      () => {
+        if (currentTabRef.current === "market") return false;
+        setTab("market");
+        return true;
+      },
+    );
+  }, []);
   const [portfolioSegment, setPortfolioSegment] =
     useState<PortfolioSegment>("inventory");
   const [marketCategory, setMarketCategory] = useState(ALL_MARKET_CATEGORIES);

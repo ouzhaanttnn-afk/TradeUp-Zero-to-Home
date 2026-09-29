@@ -1,5 +1,8 @@
 # Mağaza Yayın Kontrol Listesi
 
+Android için güncel ve platforma özel durum: [Android hazırlığı](ANDROID_RELEASE_READINESS.md).
+Bu eski karma listedeki Apple maddeleri için ayrıca `IOS_RELEASE_READINESS.md` ve son App Review gönderim kaydını esas al.
+
 - [x] Production web build
 - [x] Seed'li pazar ve deterministik pazarlık testleri
 - [x] Sürümlü IndexedDB kayıt ve offline clamp
