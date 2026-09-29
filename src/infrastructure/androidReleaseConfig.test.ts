@@ -44,5 +44,11 @@ describe("Android closed-test release safety", () => {
     expect(workflow).not.toContain("cap:sync:ios");
     expect(workflow).toContain(":app:lintRelease");
     expect(workflow).toContain(":app:connectedDebugAndroidTest");
+    // Third-party emulator/setup steps do not receive signing passwords.
+    const jobEnvironment = workflow.split("    env:")[1].split("    steps:")[0];
+    expect(jobEnvironment).not.toContain("secrets.");
+    expect(workflow).toContain("connected_android_test_additional_output/");
+    expect(read("android/app/src/androidTest/java/com/tradeup/zerotohome/TradeUpWebViewSmokeTest.java"))
+      .toContain('getString("additionalTestOutputDir")');
   });
 });

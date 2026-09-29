@@ -52,8 +52,10 @@ canlı reklam yerine test reklamları kullanılır. Kayıt cihazda tutulur.
 - Tür: Oyun; kategori: Simülasyon; ücretsiz indirme.
 - Hedef kitle: GDD uyarınca 13+; içerik derecelendirmesi form sonuçlarına göre.
 - Destek e-postası: `nostoscomp@gmail.com`.
-- Gizlilik ve destek: mevcut TradeUp yayın alanındaki `/privacy.html` ve
-  `/support.html`. Tam canlı URL ve dışarıdan erişim konsolda tekrar doğrulanmalı.
+- Gizlilik: `https://trade-up-zero-to-home.vercel.app/privacy.html`
+- Destek: `https://trade-up-zero-to-home.vercel.app/support.html`
+- İki URL de 29 Eylül 2026'da HTTP 200 verdi; güncel Android test açıklamaları
+  canlı sayfalarda doğrulandı. Gönderim günü erişimi tekrar kontrol et.
 - Uygulama hesap/giriş istemez; satın almalar için gelecekte Google hesabı
   gerekir. İnceleme ekibinden TradeUp demo hesabı isteme.
 

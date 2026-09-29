@@ -165,7 +165,10 @@ public class TradeUpWebViewSmokeTest {
 
     private void screenshot(String name) throws Exception {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        File directory = new File(context.getExternalFilesDir(null), "native-smoke");
+        // AGP pulls this directory before uninstalling the test application.
+        String outputPath = InstrumentationRegistry.getArguments().getString("additionalTestOutputDir");
+        File outputRoot = outputPath == null ? context.getExternalFilesDir(null) : new File(outputPath);
+        File directory = new File(outputRoot, "native-smoke");
         assertTrue(directory.isDirectory() || directory.mkdirs());
         Bitmap bitmap = InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
         assertNotNull(bitmap);
