@@ -1,5 +1,27 @@
 # TradeUp iOS Release Readiness
 
+## 1 Ekim 2026, 06:03 — 1.0.4 (41) App Review'a gönderildi
+
+- Kullanıcının açık talebiyle yeni imzalı **1.0.4 (41)** hazırlandı ve Apple
+  işlemesi tamamlandıktan sonra eski 1.0.2 (40) başvurusu geri çekildi.
+- Uygulama ve **altı kalıcı IAP**, aynı
+  [5e2b1215-1abe-42a6-8403-c39540502061 başvurusunda](https://appstoreconnect.apple.com/apps/6811362281/distribution/reviewsubmissions/details/5e2b1215-1abe-42a6-8403-c39540502061)
+  gönderildi. Canlı detay sayfası `Items Submitted (7)` ve her öğe için
+  **Waiting for Review** gösteriyor. Mağaza yayını manuel kalır.
+- [Build 41 workflow'u](https://github.com/ouzhaanttnn-afk/TradeUp-Zero-to-Home/actions/runs/36807475532)
+  kaynak kontrolleri, iOS arşivi, imzalı IPA, Apple doğrulaması ve yüklemeyi
+  başarıyla tamamladı. Gerçek IPA sürümü 1.0.4 / build 41 olarak doğrulandı;
+  TestFlight'ta `Ready to Submit` ve mevcut Betatest grubuna bağlı.
+- Yerelde **401 birim testi**, lint, production build, iOS sync ve
+  **37 Playwright akışı** geçti; isteğe bağlı görsel üretim testi atlandı.
+  Yeni native cihaz veya StoreKit testi yapılmış sayılmaz.
+- Bu çalışmada yalnız iOS sürüm numarası, ilgili test ve sürüm belgeleri
+  değişti. Ekonomi, oynanış, satın alma kapsamı/fiyatı, reklam davranışı,
+  Android sürümü ve mevcut mağaza görselleri değişmedi.
+- Sürüm değişikliği incelemeyi hızlandırma garantisi değildir; yeni
+  başvuruyla bekleme süreci yeniden başladı. Ayrıntı:
+  [1 Ekim yeniden gönderim kaydı](APP_REVIEW_RESUBMISSION_2026-10-01.md).
+
 ## 29 Eylül 2026, 20:09 — yeniden App Review'a gönderildi
 
 - **TradeUp 1.0.2 (40) ve altı kalıcı IAP**, aynı
