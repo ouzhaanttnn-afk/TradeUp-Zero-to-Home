@@ -13,6 +13,7 @@ import {
   type ShellTheme,
 } from "../domain/appearance";
 import { hasPremiumEntitlement } from "../domain/monetization";
+import { getMonetizationAdapters } from "../services/monetization";
 
 const themeChoices: {
   id: ShellTheme;
@@ -361,9 +362,11 @@ export default function PurchasesSheet({
               >
                 {t("store.restore")}
               </button>
-              <button className="text-button" onClick={() => void showPrivacyOptions()}>
-                {t("store.privacy")}
-              </button>
+              {getMonetizationAdapters().consent.available !== false ? (
+                <button className="text-button" onClick={() => void showPrivacyOptions()}>
+                  {t("store.privacy")}
+                </button>
+              ) : null}
             </div>
           </div>
         </div>

@@ -40,6 +40,7 @@ describe("Android closed-test release safety", () => {
   it("keeps closed-test advertising isolated from production and Apple uploads", () => {
     const workflow = read(".github/workflows/android-aab.yml");
     expect(workflow).toContain("VITE_ADMOB_PRODUCTION_ENABLED: 'false'");
+    expect(workflow).toContain("VITE_ADMOB_TEST_ENABLED: 'true'");
     expect(workflow).toContain("ca-app-pub-3940256099942544~3347511713");
     expect(workflow).not.toContain("cap:sync:ios");
     expect(workflow).toContain(":app:lintRelease");

@@ -40,6 +40,8 @@ export type ConsentSnapshot = {
 };
 
 export interface ConsentAdapter {
+  /** Runtime provider capability, not the player's saved consent decision. */
+  available?: boolean;
   refresh(): Promise<ConsentSnapshot>;
   openPrivacyOptions(): Promise<void>;
 }
@@ -118,6 +120,7 @@ export const deniedConsentAdapter: ConsentAdapter = {
 };
 
 export const unavailableConsentAdapter: ConsentAdapter = {
+  available: false,
   async refresh() {
     throw new Error("CONSENT_UNAVAILABLE");
   },

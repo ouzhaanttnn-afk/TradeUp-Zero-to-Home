@@ -70,6 +70,7 @@ import {
   type PlayerOfferMode,
 } from "./game";
 import { useGameStore } from "./stores/gameStore";
+import { getMonetizationAdapters } from "./services/monetization";
 import { useTapHaptics } from "./hooks/useTapHaptics";
 import { Icon, type IconName } from "./ui/Icon";
 import {
@@ -521,7 +522,9 @@ export default function App() {
       : t("wallet.buyingPower", { remaining: money(quote.remainingMinor, lang) });
   const premiumReward = hasAdFreeEntitlement(game);
   const rewardProviderAvailable =
-    premiumReward || game.monetization.consent.canRequestAds;
+    premiumReward ||
+    (getMonetizationAdapters().consent.available !== false &&
+      game.monetization.consent.canRequestAds);
   const canClaimReward = (placementId: keyof typeof rewardCopy) =>
     rewardProviderAvailable && getRewardEligibility(game, placementId).ok;
   const rewardLabel = (placementId: keyof typeof rewardCopy) =>

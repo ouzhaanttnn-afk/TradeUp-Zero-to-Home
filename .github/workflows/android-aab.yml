@@ -16,6 +16,7 @@ jobs:
     timeout-minutes: 45
     env:
       VITE_ADMOB_PRODUCTION_ENABLED: 'false'
+      VITE_ADMOB_TEST_ENABLED: 'true'
       # Each new run gets a higher Play version code. Retry of a run retains it.
       TRADEUP_ANDROID_VERSION_CODE: ${{ github.run_number }}
       # Official Google sample app ID; this workflow is for closed testing,

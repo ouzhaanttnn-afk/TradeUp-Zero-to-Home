@@ -16,11 +16,12 @@ describe("AdMob production safety", () => {
     expect(isProductionAdServingEnabled(undefined)).toBe(false);
   });
 
-  it("uses official demo units until the production gate is enabled", () => {
-    expect(resolveRewardedAdId("MARKET_SCOUT", "ios", false)).toBe(
+  it("uses official demo units only with explicit test serving", () => {
+    expect(resolveRewardedAdId("MARKET_SCOUT", "ios", false)).toBeNull();
+    expect(resolveRewardedAdId("MARKET_SCOUT", "ios", false, true)).toBe(
       "ca-app-pub-3940256099942544/1712485313",
     );
-    expect(resolveRewardedAdId("LISTING_REACH", "android", false)).toBe(
+    expect(resolveRewardedAdId("LISTING_REACH", "android", false, true)).toBe(
       "ca-app-pub-3940256099942544/5224354917",
     );
     expect(resolveRewardedAdId("MARKET_SCOUT", "android", true)).toBeNull();
@@ -43,8 +44,9 @@ describe("AdMob production safety", () => {
     expect(ids.every((id) => id?.startsWith("ca-app-pub-"))).toBe(true);
   });
 
-  it("uses a test interstitial until the iOS production gate opens", () => {
-    expect(resolveTradeInterstitialId("ios", false)).toBe(
+  it("uses a test interstitial only with explicit test serving", () => {
+    expect(resolveTradeInterstitialId("ios", false)).toBeNull();
+    expect(resolveTradeInterstitialId("ios", false, true)).toBe(
       "ca-app-pub-3940256099942544/4411468910",
     );
     expect(resolveTradeInterstitialId("ios", true)).toBe(
@@ -55,6 +57,42 @@ describe("AdMob production safety", () => {
 });
 
 describe("AdMob native adapters", () => {
+  it("disabled mode makes zero native calls and cannot grant a reward", async () => {
+    const port = Object.fromEntries(
+      [
+        "initialize",
+        "requestConsentInfo",
+        "showConsentForm",
+        "showPrivacyOptionsForm",
+        "trackingAuthorizationStatus",
+        "requestTrackingAuthorization",
+        "prepareRewardVideoAd",
+        "showRewardVideoAd",
+        "prepareInterstitial",
+        "showInterstitial",
+        "addListener",
+      ].map((name) => [name, vi.fn()]),
+    );
+    const adapters = createAdMobAdapters(port as never, {
+      platform: "ios",
+      productionEnabled: false,
+      testEnabled: false,
+    });
+    expect(adapters.consent.available).toBe(false);
+    expect(await adapters.consent.refresh()).toEqual({
+      canRequestAds: false,
+      adPersonalizationAllowed: false,
+    });
+    await expect(adapters.consent.openPrivacyOptions()).rejects.toThrow(
+      "PRIVACY_OPTIONS_UNAVAILABLE",
+    );
+    expect(await adapters.rewarded.show("MARKET_SCOUT")).toEqual({
+      status: "FAILED",
+      reason: "PROVIDER",
+    });
+    expect(await adapters.showTradeInterstitial()).toBe(false);
+    for (const call of Object.values(port)) expect(call).not.toHaveBeenCalled();
+  });
   it("does not request an ad before consent allows it", async () => {
     const port = {
       initialize: vi.fn().mockResolvedValue(undefined),
@@ -75,6 +113,7 @@ describe("AdMob native adapters", () => {
     const adapters = createAdMobAdapters(port as never, {
       platform: "ios",
       productionEnabled: false,
+      testEnabled: true,
     });
     await adapters.consent.refresh();
     expect(await adapters.rewarded.show("MARKET_SCOUT")).toEqual({
@@ -107,6 +146,7 @@ describe("AdMob native adapters", () => {
     const adapters = createAdMobAdapters(port as never, {
       platform: "ios",
       productionEnabled: false,
+      testEnabled: true,
     });
     await adapters.consent.refresh();
     expect(await adapters.showTradeInterstitial()).toBe(true);
@@ -143,6 +183,7 @@ describe("AdMob native adapters", () => {
     const adapters = createAdMobAdapters(port as never, {
       platform: "ios",
       productionEnabled: false,
+      testEnabled: true,
     });
     await adapters.consent.refresh();
     const result = await adapters.rewarded.show("FAST_INSPECTION");
@@ -172,7 +213,10 @@ describe("AdMob native adapters", () => {
       prepareRewardVideoAd: vi.fn(),
       showRewardVideoAd: vi.fn(),
     };
-    const adapters = createAdMobAdapters(port as never, { platform: "ios" });
+    const adapters = createAdMobAdapters(port as never, {
+      platform: "ios",
+      testEnabled: true,
+    });
     await adapters.consent.refresh();
     expect(await adapters.rewarded.show("MARKET_SCOUT")).toEqual({
       status: "FAILED",
@@ -211,6 +255,7 @@ describe("AdMob native adapters", () => {
       };
       const adapters = createAdMobAdapters(port as never, {
         platform: "ios",
+        testEnabled: true,
         rewardTimeoutMs: scenario === "timeout" ? 5 : 1000,
       });
       await adapters.consent.refresh();
@@ -274,6 +319,7 @@ describe("AdMob native adapters", () => {
       if (stage === "removal") remove.mockImplementationOnce(() => stuck);
       const adapters = createAdMobAdapters(port as never, {
         platform: "ios",
+        testEnabled: true,
         rewardTimeoutMs: 5,
       });
       await adapters.consent.refresh();

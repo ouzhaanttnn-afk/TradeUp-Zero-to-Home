@@ -18,6 +18,8 @@ jobs:
       APP_BUNDLE_ID: com.tradeup.zerotohome
       APPLE_TEAM_ID: 8X6KZC5R23
       PROFILE_NAME: TradeUp App Store
+      VITE_ADMOB_PRODUCTION_ENABLED: 'false'
+      VITE_ADMOB_TEST_ENABLED: 'false'
     steps:
       - uses: actions/checkout@v4
 
@@ -38,6 +40,7 @@ jobs:
           pnpm test
           pnpm lint
           pnpm build
+          node scripts/check-review-ad-config.mjs
           pnpm cap:sync:ios
 
       - name: Install signing certificate and profile

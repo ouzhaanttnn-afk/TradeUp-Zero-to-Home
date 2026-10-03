@@ -7,8 +7,10 @@ import {
   createSandboxBillingAdapter,
   createSandboxConsentAdapter,
   createSandboxRewardedAdAdapter,
+  unavailableBillingAdapter,
   type StoreProductMetadata,
 } from "../infrastructure/monetization";
+import { createAdMobAdapters } from "../infrastructure/admob";
 import {
   purchaseStoreProduct,
   refreshMonetization,
@@ -286,7 +288,11 @@ describe("monetization application service", () => {
         },
       },
     });
-    const result = await purchaseStoreProduct(initialState(), "tradeup_no_ads_lifetime", billing);
+    const result = await purchaseStoreProduct(
+      initialState(),
+      "tradeup_no_ads_lifetime",
+      billing,
+    );
     expect(result.status).toBe("OWNED");
     expect(result.state.monetization.entitlements[0]).toMatchObject({
       productId: "tradeup_no_ads_lifetime",
@@ -357,24 +363,61 @@ describe("monetization application service", () => {
     expect(earned.state.monetization.usage.sessionRewardCount).toBe(1);
   });
 
-  it("routes premium through the same cap and payload without showing an ad", async () => {
-    const state = unlockedState();
-    state.monetization.entitlements.push({
-      productId: "tradeup_premium_lifetime",
-      entitlementId: "premium_lifetime",
-      status: "OWNED",
-      platform: "android",
-    });
-    let shown = 0;
-    const result = await runRewardedAction(state, "MARKET_SCOUT", "premium", {
-      async show() {
-        shown += 1;
-        return { status: "CANCELLED" };
-      },
-    });
+  it.each([
+    ["tradeup_premium_lifetime", "premium_lifetime"],
+    ["tradeup_no_ads_lifetime", "no_ads_lifetime"],
+  ] as const)(
+    "keeps %s bypass and caps intact with disabled ad serving",
+    async (productId, entitlementId) => {
+      const state = unlockedState();
+      state.monetization.entitlements.push({
+        productId,
+        entitlementId,
+        status: "OWNED",
+        platform: "android",
+      });
+      const ads = createAdMobAdapters({} as never, {
+        platform: "ios",
+        productionEnabled: false,
+        testEnabled: false,
+      });
+      const refreshed = await refreshMonetization(state, {
+        ...ads,
+        billing: unavailableBillingAdapter,
+      });
+      expect(refreshed.state.monetization.consent.canRequestAds).toBe(false);
+      let shown = 0;
+      const result = await runRewardedAction(
+        refreshed.state,
+        "MARKET_SCOUT",
+        "premium",
+        {
+          async show() {
+            shown += 1;
+            return { status: "CANCELLED" };
+          },
+        },
+      );
 
-    expect(result.status).toBe("APPLIED");
-    expect(shown).toBe(0);
-    expect(result.state.monetization.usage.sessionRewardCount).toBe(1);
-  });
+      expect(result.status).toBe("APPLIED");
+      expect(shown).toBe(0);
+      expect(result.state.monetization.usage.sessionRewardCount).toBe(1);
+      expect(result.state.monetization.marketScanCredits).toBe(25);
+      expect(result.state.cashMinor).toBe(state.cashMinor);
+      expect(result.state.transactionJournal).toEqual(state.transactionJournal);
+      expect(reconcileJournal(result.state)).toEqual({
+        cash: true,
+        activeBookCost: true,
+        realizedProfit: true,
+      });
+      const retry = await runRewardedAction(
+        result.state,
+        "MARKET_SCOUT",
+        "premium",
+        ads.rewarded,
+      );
+      expect(retry.status).toBe("INELIGIBLE");
+      expect(retry.state.monetization.usage.sessionRewardCount).toBe(1);
+    },
+  );
 });

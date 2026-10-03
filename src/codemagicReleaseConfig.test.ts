@@ -25,5 +25,7 @@ describe("Codemagic release safety", () => {
     expect(workflow).toContain("'1.1.0'");
     expect(workflow).toContain("submit_to_app_store: false");
     expect(workflow).toContain('VITE_ADMOB_PRODUCTION_ENABLED: "false"');
+    expect(workflow).toContain('VITE_ADMOB_TEST_ENABLED: "false"');
+    expect(workflow).toContain("node scripts/check-review-ad-config.mjs");
   });
 });

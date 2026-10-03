@@ -20,6 +20,7 @@ workflows:
         APP_STORE_APPLE_ID: "6811362281"
         TRADEUP_IOS_BUILD_NUMBER: "${{ inputs.build_number }}"
         VITE_ADMOB_PRODUCTION_ENABLED: "false"
+        VITE_ADMOB_TEST_ENABLED: "false"
     scripts:
       - name: Reject missing or reused build numbers
         script: |
@@ -37,6 +38,7 @@ workflows:
           pnpm test
           pnpm lint
           pnpm build
+          node scripts/check-review-ad-config.mjs
           pnpm cap:sync:ios
       - name: Apply existing signing identities
         script: |

@@ -72,7 +72,9 @@ test("profile and settings stay accessible from the mobile game header", async (
   expect(titleBounds!.x + titleBounds!.width).toBeLessThanOrEqual(closeBounds!.x);
   await shop.getByRole("button", { name: "Kapat", exact: true }).focus();
   await page.keyboard.press("Shift+Tab");
-  await expect(shop.getByRole("button", { name: "Gizlilik", exact: true })).toBeFocused();
+  // No provider is configured on web: unavailable privacy/ad controls are absent.
+  await expect(shop.getByRole("button", { name: "Gizlilik", exact: true })).toHaveCount(0);
+  await expect(shop.locator(".cosmetic-picker").last().getByRole("button", { name: "Klasik", exact: true })).toBeFocused();
   await page.keyboard.press("Tab");
   await expect(shop.getByRole("button", { name: "Kapat", exact: true })).toBeFocused();
   await dialog.locator(".extra-purchases summary").focus();

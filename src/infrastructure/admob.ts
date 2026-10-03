@@ -16,10 +16,14 @@ import type {
 
 type NativeAdPlatform = "ios" | "android";
 
-const TEST_REWARDED_IDS: Record<NativeAdPlatform, string> = {
-  ios: "ca-app-pub-3940256099942544/1712485313",
-  android: "ca-app-pub-3940256099942544/5224354917",
-};
+// Vite removes demo identities from release JS unless test serving is explicit.
+const TEST_REWARDED_IDS: Record<NativeAdPlatform, string> | null =
+  import.meta.env.DEV || import.meta.env.VITE_ADMOB_TEST_ENABLED === "true"
+    ? {
+        ios: "ca-app-pub-3940256099942544/1712485313",
+        android: "ca-app-pub-3940256099942544/5224354917",
+      }
+    : null;
 
 const IOS_PRODUCTION_REWARDED_IDS: Record<RewardPlacementId, string> = {
   MARKET_SCOUT: "ca-app-pub-4229088811556918/4710266110",
@@ -28,18 +32,24 @@ const IOS_PRODUCTION_REWARDED_IDS: Record<RewardPlacementId, string> = {
   LISTING_REACH: "ca-app-pub-4229088811556918/4992979324",
 };
 
-const TEST_IOS_INTERSTITIAL_ID = "ca-app-pub-3940256099942544/4411468910";
+const TEST_IOS_INTERSTITIAL_ID =
+  import.meta.env.DEV || import.meta.env.VITE_ADMOB_TEST_ENABLED === "true"
+    ? "ca-app-pub-3940256099942544/4411468910"
+    : null;
 const IOS_PRODUCTION_INTERSTITIAL_ID = "ca-app-pub-4229088811556918/1985851659";
 
 export const resolveTradeInterstitialId = (
   platform: NativeAdPlatform,
   productionEnabled: boolean,
+  testEnabled = false,
 ) =>
   platform !== "ios"
     ? null
     : productionEnabled
       ? IOS_PRODUCTION_INTERSTITIAL_ID
-      : TEST_IOS_INTERSTITIAL_ID;
+      : testEnabled
+        ? TEST_IOS_INTERSTITIAL_ID
+        : null;
 
 export const isProductionAdServingEnabled = (value: unknown) =>
   value === "true";
@@ -48,8 +58,10 @@ export const resolveRewardedAdId = (
   placementId: RewardPlacementId,
   platform: NativeAdPlatform,
   productionEnabled: boolean,
+  testEnabled = false,
 ) => {
-  if (!productionEnabled) return TEST_REWARDED_IDS[platform];
+  if (!productionEnabled)
+    return testEnabled ? (TEST_REWARDED_IDS?.[platform] ?? null) : null;
   return platform === "ios" ? IOS_PRODUCTION_REWARDED_IDS[placementId] : null;
 };
 
@@ -89,6 +101,7 @@ export const createAdMobAdapters = (
   options: {
     platform?: NativeAdPlatform;
     productionEnabled?: boolean;
+    testEnabled?: boolean;
     rewardTimeoutMs?: number;
   } = {},
 ): {
@@ -104,6 +117,10 @@ export const createAdMobAdapters = (
   const productionEnabled =
     options.productionEnabled ??
     isProductionAdServingEnabled(import.meta.env.VITE_ADMOB_PRODUCTION_ENABLED);
+  const testEnabled =
+    options.testEnabled ??
+    isProductionAdServingEnabled(import.meta.env.VITE_ADMOB_TEST_ENABLED);
+  const available = Boolean(platform && (productionEnabled || testEnabled));
   let initialized: Promise<void> | undefined;
   let canRequestAds = false;
   let showingInterstitial = false;
@@ -120,7 +137,7 @@ export const createAdMobAdapters = (
   };
 
   const refreshConsent = async () => {
-    if (!platform) {
+    if (!available) {
       return { canRequestAds: false, adPersonalizationAllowed: false };
     }
     await initialize();
@@ -147,22 +164,24 @@ export const createAdMobAdapters = (
 
   return {
     consent: {
+      available,
       refresh: refreshConsent,
       async openPrivacyOptions() {
-        if (!platform) throw new Error("ADMOB_NATIVE_ONLY");
+        if (!available) throw new Error("PRIVACY_OPTIONS_UNAVAILABLE");
         await initialize();
         await port.showPrivacyOptionsForm();
       },
     },
     rewarded: {
       async show(placementId) {
-        if (!platform || !canRequestAds || showingReward) {
+        if (!available || !platform || !canRequestAds || showingReward) {
           return { status: "FAILED", reason: "PROVIDER" };
         }
         const adId = resolveRewardedAdId(
           placementId,
           platform,
           productionEnabled,
+          testEnabled,
         );
         if (!adId) return { status: "FAILED", reason: "PROVIDER" };
         showingReward = true;
@@ -247,8 +266,13 @@ export const createAdMobAdapters = (
       },
     },
     async showTradeInterstitial() {
-      if (!platform || !canRequestAds || showingInterstitial) return false;
-      const adId = resolveTradeInterstitialId(platform, productionEnabled);
+      if (!available || !platform || !canRequestAds || showingInterstitial)
+        return false;
+      const adId = resolveTradeInterstitialId(
+        platform,
+        productionEnabled,
+        testEnabled,
+      );
       if (!adId) return false;
       showingInterstitial = true;
       try {

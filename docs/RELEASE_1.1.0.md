@@ -39,17 +39,17 @@ Bu otomatik strateji simülasyonudur; gerçek oyuncu süresi veya garantili kaza
 
 ## Doğrulama
 
-- `pnpm test`: 65 dosya, 422 test başarılı.
+- `pnpm test`: 65 dosya, 425 test başarılı; kapalı reklam adapter'ında sıfır SDK isteği ve her iki reklamsız entitlement'ın değişmeyen hak limitleri dahil.
 - `pnpm lint` ve `pnpm build`: başarılı.
 - Mobil tarayıcı: 40 test başarılı; 1 mağaza görseli üretim testi yalnız talep üzerine çalıştığı için atlandı. 320/390/430 px, görsel fallback, erişilebilirlik, temalar, offline akış ve çekirdek döngü doğrulandı.
 - Windows web doğrulaması native imzalı IPA veya gerçek iPhone testi yerine geçmez.
 
 ## Yayın güvenliği
 
-Codemagic workflow manuel, yalnız ücretsiz M2 makine; Apple'a binary yükler, App Review veya beta review başlatmaz. `TradeUp App Store Connect` entegrasyonu, mevcut imzalama sertifikası/profili ve yalnız bu repo için GitHub erişimi hesap tarafında doğrulanmadan build hazır sayılamaz. Varsayılan reklam servisi test modundadır; production kalite kapısı ayrıca korunur. Test reklamlı build otomatik olarak mağaza başvurusuna alınmaz.
+Codemagic workflow manuel, yalnız ücretsiz M2 makine; Apple'a binary yükler, App Review veya beta review başlatmaz. İnceleme akışında production ve test reklamları ayrı flag'lerle kapalıdır: SDK/UMP/ATT/reklam isteği yapılmaz, video CTA görünmez; doğrulanmış Premium/Reklamsız bypass aynı limitleri korur. Test servisi yalnız açık test config'iyle çalışır. `check-review-ad-config.mjs` derlenmiş uygulama web payload'ında resmi demo kimliği bulursa arşivi durdurur; bu kontrol vendor SDK kaynaklarındaki kullanılmayan fallback literal'ları kapsamaz. Production aktivasyonu GDD'nin gerçek saha kalite kapısını ayrıca gerektirir.
 
 Eski 1.0.4 (41) başvurusu yeni imzalı 1.1.0 Apple'da işlenmeden geri çekilmez. Yeni App Review başvurusunda altı IAP birlikte bulunur, yayın manuel kalır. Uygulama veya IAP kaydı silinmez.
 
-2026-10-03 hesap kontrolü: Codemagic ücretsiz M2 süresinde 20/500 dakika kullanılmış, ancak TradeUp uygulaması ve Apple bağlantısı hesapta henüz kurulmamış. Yeni servise API/imzalama yetkisi aktarımı için kullanıcı onayı istendi; henüz aktarılmadı. GitHub Mobile doğrulama isteği zaman aşımına uğradı. Yeni imzalı build yüklenmedi ve App Review başlatılmadı. Apple'daki mevcut 1.0.4 (41) ve altı IAP, tek başvuruda Waiting for Review durumunda korunuyor.
+2026-10-03 hesap kontrolü: Kullanıcının açık onayıyla mevcut TradeUp Apple API anahtarı, dağıtım sertifikası ve App Store profili Codemagic'e bağlandı. Bundle ID `com.tradeup.zerotohome`, profil ve sertifika Eylül 2027'ye kadar geçerli. Codemagic'in GitHub seçili depo listesine yalnız TradeUp eklendi; diğer uygulamanın mevcut izni değişmedi. Yeni imzalı build henüz yüklenmedi ve App Review başlatılmadı. Apple'daki mevcut 1.0.4 (41) ve altı IAP, tek başvuruda Waiting for Review durumunda korunuyor.
 
 OmniRoute yerel servisine erişilemedi; bu blokta Omni inference kullanımı 0. Kod, fiyatlandırma, doğrulama ve yayın kararları ana Codex tarafından kontrol edildi.
