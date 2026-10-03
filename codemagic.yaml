@@ -33,7 +33,8 @@ workflows:
       - name: Verify release source and synchronize native resources
         script: |
           set -euo pipefail
-          npm install --global pnpm@11.19.0
+          # Builder images already contain a pnpm shim; pin it in this ephemeral machine.
+          npm install --global pnpm@11.19.0 --force
           pnpm install --frozen-lockfile
           pnpm test
           pnpm lint
