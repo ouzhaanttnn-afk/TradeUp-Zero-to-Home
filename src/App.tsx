@@ -414,13 +414,17 @@ export default function App() {
   const radarSignalNow = radarSignal(game.seed, game.gameTimeMin);
   const scanRefill = marketScanRefillStatus(game, wallClockNow);
   useEffect(() => {
-    if (tab !== "market" || scanRefill.full) return undefined;
+    const rewardCooling =
+      (game.monetization.rewardCooldownUntilWallMs ?? 0) > wallClockNow;
+    if (!ready || !sessionActive || ((tab !== "market" || scanRefill.full) && !rewardCooling))
+      return undefined;
     const timer = window.setInterval(() => {
       setWallClockNow(Date.now());
       refreshMarketScanCredits();
     }, 1_000);
     return () => window.clearInterval(timer);
-  }, [refreshMarketScanCredits, scanRefill.full, tab]);
+  }, [refreshMarketScanCredits, scanRefill.full, tab, ready, sessionActive,
+    game.monetization.rewardCooldownUntilWallMs, wallClockNow]);
   const marketListings = useMemo(() => activeMarketListings(game), [game]);
   const marketCategoryOptions = useMemo(
     () => marketCategories(marketListings),

@@ -124,7 +124,7 @@ describe("decision vertical slice", () => {
   });
 
   it("adds 32 more starter and mid-tier products with bounded prices", () => {
-    expect(families).toHaveLength(213);
+    expect(families).toHaveLength(237);
     expect(starterExpansionFamilies).toHaveLength(32);
     expect(
       new Set(starterExpansionFamilies.map((family) => family.id)).size,
@@ -247,11 +247,11 @@ describe("decision vertical slice", () => {
         ),
       )
         .flat()
-        .some((listing) => listing.instance.family.category === "Araç"),
+        .some((listing) => vehicleFamilies.some((family) => family.id === listing.familyId)),
     ).toBe(false);
     expect(
       Array.from({ length: 80 }, (_, cycle) =>
-        market(91_300, MARKET_ACCESS_CONFIG.tier4WealthMinor, cycle, cycle, 24),
+        market(91_300, MARKET_ACCESS_CONFIG.tier4WealthMinor, cycle, cycle, 24, ["Araç"]),
       )
         .flat()
         .some((listing) => listing.familyId === "urban_motorcycle"),

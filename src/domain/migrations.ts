@@ -537,7 +537,47 @@ export function migrateStateToCurrent(value: unknown): unknown {
   next = migrateStateToV17(next);
   next = migrateStateToV18(next);
   next = migrateStateToV19(next);
-  return migrateStateToV20(next);
+  return migrateStateToV21(migrateStateToV20(next));
+}
+
+// Legacy reward timestamps used accelerated game time. Anchor them conservatively
+// to the last persisted real time; never infer free capacity from fast refreshes.
+export function migrateStateToV21(value: unknown): unknown {
+  const source = record(value);
+  if (integer(source.version) >= 21) return value;
+  const monetization = record(source.monetization);
+  const usage = record(monetization.usage);
+  const wallMs = Math.max(0, number(source.lastWallClockMs));
+  const cooldownMinutes = Math.max(
+    0,
+    number(monetization.rewardCooldownUntilGameMin) -
+      number(source.gameTimeMin),
+  );
+  return {
+    ...source,
+    version: 21,
+    monetization: {
+      ...monetization,
+      rewardClockWallMs: wallMs,
+      rewardCooldownUntilGameMin: undefined,
+      rewardCooldownUntilWallMs:
+        cooldownMinutes > 0
+          ? wallMs + Math.min(90_000, cooldownMinutes * 60_000)
+          : undefined,
+      usage: { ...usage, rewardSessionId: 0, rewardRequestSequence: 0 },
+      rewardTransactions: array(monetization.rewardTransactions).map(
+        (value) => {
+          const entry = record(value);
+          return {
+            ...entry,
+            sessionId: 0,
+            requestedAtWallMs: wallMs,
+            ...(entry.status === "APPLIED" ? { appliedAtWallMs: wallMs } : {}),
+          };
+        },
+      ),
+    },
+  };
 }
 
 // Existing careers retain their balance when early access expands to 50.

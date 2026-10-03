@@ -1,6 +1,7 @@
 import fs from 'fs';
 
 const dict = {
+  ...Object.fromEntries(JSON.parse(fs.readFileSync(new URL('../src/content/release110.json', import.meta.url), 'utf8')).map(entry => [entry.id, entry.translations])),
   // 1-20
   notebook: { en: "Leather Journal Box Set", de: "Leder-Notizbuch im Schuber", es: "Cuaderno en caja de cuero" },
   vinyl: { en: "Collectible Classic Vinyl", de: "Klassische Sammler-Schallplatte", es: "Vinilo clásico de colección" },
@@ -241,9 +242,12 @@ const fams = JSON.parse(fs.readFileSync('scratch_families.json', 'utf8'));
 const trNameToId = {};
 const idToTrName = {};
 for (const f of fams) {
-  trNameToId[f.name] = f.id;
-  idToTrName[f.id] = f.name;
+  const name = ({ laser_engraver: 'Kompakt Lazer Kazıma Makinesi', desktop_laser_engraver: 'Profesyonel Lazer Kazıma Makinesi' })[f.id] ?? f.name;
+  trNameToId[name] = f.id;
+  idToTrName[f.id] = name;
 }
+// Preserve the ambiguous old save label; current names remain unambiguous.
+trNameToId['Masaüstü Lazer Kazıma Makinesi'] = 'desktop_laser_engraver';
 
 const output = `// Auto-generated product family translations dictionary
 export const productTranslations: Record<string, { en: string; de: string; es: string }> = ${JSON.stringify(dict, null, 2)};

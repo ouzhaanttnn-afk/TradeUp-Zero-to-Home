@@ -1,4 +1,28 @@
 import notebook from "./assets/products/prd_notebook.webp";
+import smartLock from "./assets/products/prd_smart_lock.webp";
+import rotaryHammer from "./assets/products/prd_rotary_hammer.webp";
+import spotCleaner from "./assets/products/prd_spot_cleaner.webp";
+import documentScanner from "./assets/products/prd_document_scanner.webp";
+import guitarAmplifier from "./assets/products/prd_guitar_amplifier.webp";
+import sewingOverlocker from "./assets/products/prd_sewing_overlocker.webp";
+import benchDrill from "./assets/products/prd_bench_drill.webp";
+import resinPrinter from "./assets/products/prd_resin_printer.webp";
+import studioSubwoofer from "./assets/products/prd_studio_subwoofer.webp";
+import digitalOscilloscope from "./assets/products/prd_digital_oscilloscope.webp";
+import shortThrowProjector from "./assets/products/prd_short_throw_projector.webp";
+import magneticExerciseBike from "./assets/products/prd_magnetic_exercise_bike.webp";
+import commercialCoffeeGrinder from "./assets/products/prd_commercial_coffee_grinder.webp";
+import commercialDeckOven from "./assets/products/prd_commercial_deck_oven.webp";
+import doughSheeter from "./assets/products/prd_dough_sheeter.webp";
+import industrialDustExtractor from "./assets/products/prd_industrial_dust_extractor.webp";
+import rackAudioPowerAmp from "./assets/products/prd_rack_audio_power_amp.webp";
+import cineFollowFocusKit from "./assets/products/prd_cine_follow_focus_kit.webp";
+import professionalBandSaw from "./assets/products/prd_professional_band_saw.webp";
+import largeFormatPrinter from "./assets/products/prd_large_format_printer.webp";
+import enterpriseNetworkSwitch from "./assets/products/prd_enterprise_network_switch.webp";
+import industrialUvPrinter from "./assets/products/prd_industrial_uv_printer.webp";
+import modularSynthRack from "./assets/products/prd_modular_synth_rack.webp";
+import professionalLaminator from "./assets/products/prd_professional_laminator.webp";
 import headset from "./assets/products/prd_headset.webp";
 import watch from "./assets/products/prd_watch.webp";
 import consoleImg from "./assets/products/prd_console.webp";
@@ -215,6 +239,30 @@ import stageFogMachine from "./assets/products/prd_stage_fog_machine.webp";
 import electricPalletJack from "./assets/products/prd_electric_pallet_jack.webp";
 
 const dedicatedAssets: Record<string, string> = {
+  prd_smart_lock: smartLock,
+  prd_rotary_hammer: rotaryHammer,
+  prd_spot_cleaner: spotCleaner,
+  prd_document_scanner: documentScanner,
+  prd_guitar_amplifier: guitarAmplifier,
+  prd_sewing_overlocker: sewingOverlocker,
+  prd_bench_drill: benchDrill,
+  prd_resin_printer: resinPrinter,
+  prd_studio_subwoofer: studioSubwoofer,
+  prd_digital_oscilloscope: digitalOscilloscope,
+  prd_short_throw_projector: shortThrowProjector,
+  prd_magnetic_exercise_bike: magneticExerciseBike,
+  prd_commercial_coffee_grinder: commercialCoffeeGrinder,
+  prd_commercial_deck_oven: commercialDeckOven,
+  prd_dough_sheeter: doughSheeter,
+  prd_industrial_dust_extractor: industrialDustExtractor,
+  prd_rack_audio_power_amp: rackAudioPowerAmp,
+  prd_cine_follow_focus_kit: cineFollowFocusKit,
+  prd_professional_band_saw: professionalBandSaw,
+  prd_large_format_printer: largeFormatPrinter,
+  prd_enterprise_network_switch: enterpriseNetworkSwitch,
+  prd_industrial_uv_printer: industrialUvPrinter,
+  prd_modular_synth_rack: modularSynthRack,
+  prd_professional_laminator: professionalLaminator,
   prd_notebook: notebook,
   prd_headset: headset,
   prd_watch: watch,

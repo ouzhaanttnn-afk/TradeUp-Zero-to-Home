@@ -4,6 +4,50 @@ import { reconcileJournal } from "./economy";
 import { migrateStateToCurrent } from "./migrations";
 
 describe("save migration", () => {
+  it("conservatively migrates real reward limits without changing economic totals", () => {
+    const current = initialState(100_000, "SANDBOX");
+    const legacy = {
+      ...current,
+      version: 20,
+      monetization: {
+        ...current.monetization,
+        rewardClockWallMs: undefined,
+        rewardCooldownUntilGameMin: current.gameTimeMin + 1.5,
+        rewardTransactions: [
+          {
+            id: "legacy-reward",
+            placementId: "MARKET_SCOUT",
+            source: "ad",
+            status: "APPLIED",
+            requestedAt: 0,
+            appliedAt: 0,
+          },
+        ],
+        usage: {
+          ...current.monetization.usage,
+          sessionRewardCount: 4,
+          rewardSessionId: undefined,
+          rewardRequestSequence: undefined,
+        },
+      },
+    };
+    const migrated = validateState(migrateStateToCurrent(legacy));
+    expect(migrated.monetization.rewardClockWallMs).toBe(100_000);
+    expect(migrated.monetization.rewardCooldownUntilWallMs).toBe(190_000);
+    expect(migrated.monetization.rewardTransactions[0]).toMatchObject({
+      appliedAtWallMs: 100_000,
+      sessionId: 0,
+    });
+    expect(migrated.monetization.usage.sessionRewardCount).toBe(4);
+    expect(migrated.cashMinor).toBe(current.cashMinor);
+    expect(migrated.transactionJournal).toEqual(current.transactionJournal);
+    expect(reconcileJournal(migrated)).toEqual({
+      cash: true,
+      activeBookCost: true,
+      realizedProfit: true,
+    });
+    expect(migrateStateToCurrent(migrated)).toBe(migrated);
+  });
   it("retains a v19 early balance and clamps only post-threshold careers", () => {
     const early = initialState(500, "SANDBOX");
     const earlyV19 = {

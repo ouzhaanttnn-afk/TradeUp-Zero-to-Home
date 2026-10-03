@@ -39,7 +39,7 @@ export type {
   TransactionJournalEntry,
 } from "./domain/models";
 export { families } from "./content/families";
-export const SAVE_VERSION = 20;
+export const SAVE_VERSION = 21;
 export const HOME_GOAL_MINOR = 350_000_000;
 
 const attributeDefinitionSchema = z.object({
@@ -404,6 +404,9 @@ const rewardTransactionSchema = z.object({
   requestedAt: z.number().int().nonnegative(),
   appliedAt: z.number().int().nonnegative().optional(),
   targetId: z.string().optional(),
+  requestedAtWallMs: z.number().nonnegative().optional(),
+  appliedAtWallMs: z.number().nonnegative().optional(),
+  sessionId: z.number().int().nonnegative().optional(),
 });
 const entitlementSchema = z.object({
   productId: z.string(),
@@ -423,6 +426,8 @@ const monetizationSchema = z.object({
   }),
   usage: z.object({
     rewardSessionStartedAt: z.number().int().nonnegative(),
+    rewardSessionId: z.number().int().nonnegative(),
+    rewardRequestSequence: z.number().int().nonnegative(),
     sessionRewardCount: z.number().int().nonnegative(),
     rollingRewardTimestamps: z.array(z.number().int().nonnegative()),
     placementUsage: z.record(
@@ -438,6 +443,8 @@ const monetizationSchema = z.object({
   firstSaleComplete: z.boolean(),
   lifetimeActivePlayMinutes: z.number().int().nonnegative(),
   rewardCooldownUntilGameMin: z.number().nonnegative().optional(),
+  rewardClockWallMs: z.number().nonnegative(),
+  rewardCooldownUntilWallMs: z.number().nonnegative().optional(),
   rewardTransactions: z.array(rewardTransactionSchema),
   marketScanCredits: z.number().int().nonnegative().max(50),
   marketScanRefillAnchorWallMs: z.number().nonnegative(),
@@ -852,6 +859,8 @@ const createDefaultMonetizationState = (
   },
   usage: {
     rewardSessionStartedAt: gameTimeMin,
+    rewardSessionId: 0,
+    rewardRequestSequence: 0,
     sessionRewardCount: 0,
     rollingRewardTimestamps: [],
     placementUsage: {
@@ -864,6 +873,7 @@ const createDefaultMonetizationState = (
   firstSaleComplete: false,
   lifetimeActivePlayMinutes: 0,
   rewardCooldownUntilGameMin: undefined,
+  rewardClockWallMs: wallClockMs,
   rewardTransactions: [],
   marketScanCredits: EARLY_GAME_CONFIG.scanCapBoosted,
   marketScanRefillAnchorWallMs: wallClockMs,

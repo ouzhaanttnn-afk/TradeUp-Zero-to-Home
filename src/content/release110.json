@@ -1,0 +1,338 @@
+[
+  {
+    "id": "smart_lock",
+    "name": "Elektronik Kapı Kilidi",
+    "tier": 2,
+    "baseValueMinor": 950000,
+    "category": "Ev/Yaşam",
+    "attributeLabels": ["Model", "Pil", "Montaj seti"],
+    "evidenceLabels": ["Panel durumu", "Kilit testi"],
+    "translations": {
+      "en": "Electronic Door Lock",
+      "de": "Elektronisches Türschloss",
+      "es": "Cerradura electrónica"
+    }
+  },
+  {
+    "id": "rotary_hammer",
+    "name": "Kırıcı Delici Matkap",
+    "tier": 2,
+    "baseValueMinor": 1650000,
+    "category": "Ev/Yaşam",
+    "attributeLabels": ["Mod", "Darbe gücü", "Çanta"],
+    "evidenceLabels": ["Mandren durumu", "Motor testi"],
+    "translations": {
+      "en": "Rotary Hammer Drill",
+      "de": "Bohrhammer",
+      "es": "Martillo perforador"
+    }
+  },
+  {
+    "id": "spot_cleaner",
+    "name": "Koltuk Yıkama Makinesi",
+    "tier": 2,
+    "baseValueMinor": 1350000,
+    "category": "Ev/Yaşam",
+    "attributeLabels": ["Hazne türü", "Çekiş gücü", "Başlık"],
+    "evidenceLabels": ["Hortum durumu", "Pompa testi"],
+    "translations": {
+      "en": "Upholstery Spot Cleaner",
+      "de": "Polster-Waschsauger",
+      "es": "Limpiadora de tapicerías"
+    }
+  },
+  {
+    "id": "document_scanner",
+    "name": "Çift Taraflı Belge Tarayıcı",
+    "tier": 2,
+    "baseValueMinor": 1400000,
+    "category": "Bilgisayar",
+    "attributeLabels": ["Besleme türü", "Tarama hızı", "Adaptör"],
+    "evidenceLabels": ["Cam durumu", "Besleme testi"],
+    "translations": {
+      "en": "Duplex Document Scanner",
+      "de": "Duplex-Dokumentenscanner",
+      "es": "Escáner de documentos dúplex"
+    }
+  },
+  {
+    "id": "guitar_amplifier",
+    "name": "Elektro Gitar Amfisi",
+    "tier": 2,
+    "baseValueMinor": 1200000,
+    "category": "Müzik",
+    "attributeLabels": ["Devre türü", "Güç", "Ayak pedalı"],
+    "evidenceLabels": ["Kabin durumu", "Ses testi"],
+    "translations": {
+      "en": "Electric Guitar Amplifier",
+      "de": "E-Gitarrenverstärker",
+      "es": "Amplificador de guitarra eléctrica"
+    }
+  },
+  {
+    "id": "sewing_overlocker",
+    "name": "Dört İplik Overlok Makinesi",
+    "tier": 2,
+    "baseValueMinor": 1800000,
+    "category": "Ev/Yaşam",
+    "attributeLabels": ["Dikiş türü", "İplik sayısı", "Pedal"],
+    "evidenceLabels": ["Bıçak durumu", "Dikiş testi"],
+    "translations": {
+      "en": "Four-Thread Overlocker",
+      "de": "Vierfaden-Overlockmaschine",
+      "es": "Remalladora de cuatro hilos"
+    }
+  },
+  {
+    "id": "bench_drill",
+    "name": "Tezgâh Tipi Sütunlu Matkap",
+    "tier": 3,
+    "baseValueMinor": 2400000,
+    "category": "Ev/Yaşam",
+    "attributeLabels": ["Mandren türü", "Devir", "Siperlik"],
+    "evidenceLabels": ["Tabla durumu", "Motor testi"],
+    "translations": {
+      "en": "Benchtop Drill Press",
+      "de": "Tischbohrmaschine",
+      "es": "Taladro de columna de sobremesa"
+    }
+  },
+  {
+    "id": "resin_printer",
+    "name": "Reçineli Masaüstü 3D Yazıcı",
+    "tier": 3,
+    "baseValueMinor": 3800000,
+    "category": "Bilgisayar",
+    "attributeLabels": ["Ekran türü", "Baskı hacmi", "Kapak"],
+    "evidenceLabels": ["Hazne durumu", "Baskı testi"],
+    "translations": {
+      "en": "Desktop Resin 3D Printer",
+      "de": "Desktop-Resin-3D-Drucker",
+      "es": "Impresora 3D de resina"
+    }
+  },
+  {
+    "id": "studio_subwoofer",
+    "name": "Aktif Stüdyo Bas Monitörü",
+    "tier": 3,
+    "baseValueMinor": 2650000,
+    "category": "Ses",
+    "attributeLabels": ["Sürücü türü", "Güç", "Kablo"],
+    "evidenceLabels": ["Kabin durumu", "Frekans testi"],
+    "translations": {
+      "en": "Active Studio Subwoofer",
+      "de": "Aktiver Studio-Subwoofer",
+      "es": "Subwoofer activo de estudio"
+    }
+  },
+  {
+    "id": "digital_oscilloscope",
+    "name": "Dijital Osiloskop",
+    "tier": 3,
+    "baseValueMinor": 3600000,
+    "category": "Bilgisayar",
+    "attributeLabels": ["Ekran türü", "Kanal sayısı", "Prob seti"],
+    "evidenceLabels": ["Soket durumu", "Ölçüm testi"],
+    "translations": {
+      "en": "Digital Oscilloscope",
+      "de": "Digitales Oszilloskop",
+      "es": "Osciloscopio digital"
+    }
+  },
+  {
+    "id": "short_throw_projector",
+    "name": "Kısa Mesafeli Ev Projektörü",
+    "tier": 3,
+    "baseValueMinor": 5400000,
+    "category": "Bilgisayar",
+    "attributeLabels": ["Işık kaynağı", "Çalışma saati", "Kumanda"],
+    "evidenceLabels": ["Lens durumu", "Görüntü testi"],
+    "translations": {
+      "en": "Short-Throw Home Projector",
+      "de": "Kurzdistanz-Heimprojektor",
+      "es": "Proyector doméstico de tiro corto"
+    }
+  },
+  {
+    "id": "magnetic_exercise_bike",
+    "name": "Manyetik Kondisyon Bisikleti",
+    "tier": 3,
+    "baseValueMinor": 3100000,
+    "category": "Ev/Yaşam",
+    "attributeLabels": ["Direnç türü", "Kademe", "Adaptör"],
+    "evidenceLabels": ["Kadro durumu", "Mekanizma testi"],
+    "translations": {
+      "en": "Magnetic Exercise Bike",
+      "de": "Magnet-Ergometer",
+      "es": "Bicicleta estática magnética"
+    }
+  },
+  {
+    "id": "commercial_coffee_grinder",
+    "name": "Ticari Kahve Değirmeni",
+    "tier": 4,
+    "baseValueMinor": 13200000,
+    "category": "Ev/Yaşam",
+    "attributeLabels": ["Öğütücü türü", "Hazne", "Tutucu"],
+    "evidenceLabels": ["Diş durumu", "Öğütme testi"],
+    "translations": {
+      "en": "Commercial Coffee Grinder",
+      "de": "Gewerbliche Kaffeemühle",
+      "es": "Molinillo de café comercial"
+    }
+  },
+  {
+    "id": "commercial_deck_oven",
+    "name": "Katlı Ticari Pişirme Fırını",
+    "tier": 4,
+    "baseValueMinor": 21000000,
+    "category": "Ev/Yaşam",
+    "attributeLabels": ["Isıtma türü", "Kat sayısı", "Tepsi seti"],
+    "evidenceLabels": ["Hazne durumu", "Isı testi"],
+    "translations": {
+      "en": "Commercial Deck Oven",
+      "de": "Gewerblicher Etagenofen",
+      "es": "Horno comercial de pisos"
+    }
+  },
+  {
+    "id": "dough_sheeter",
+    "name": "Profesyonel Hamur Açma Makinesi",
+    "tier": 4,
+    "baseValueMinor": 18000000,
+    "category": "Ev/Yaşam",
+    "attributeLabels": ["Bant türü", "Genişlik", "Kılavuz"],
+    "evidenceLabels": ["Bant durumu", "Motor testi"],
+    "translations": {
+      "en": "Professional Dough Sheeter",
+      "de": "Professionelle Teigausrollmaschine",
+      "es": "Laminadora profesional de masa"
+    }
+  },
+  {
+    "id": "industrial_dust_extractor",
+    "name": "Atölye Toz Emiş Sistemi",
+    "tier": 4,
+    "baseValueMinor": 14000000,
+    "category": "Ev/Yaşam",
+    "attributeLabels": ["Filtre türü", "Güç", "Hortum seti"],
+    "evidenceLabels": ["Filtre durumu", "Fan testi"],
+    "translations": {
+      "en": "Workshop Dust Extraction System",
+      "de": "Werkstatt-Absauganlage",
+      "es": "Sistema de aspiración de taller"
+    }
+  },
+  {
+    "id": "rack_audio_power_amp",
+    "name": "Rack Tipi Sahne Güç Amfisi",
+    "tier": 4,
+    "baseValueMinor": 15500000,
+    "category": "Ses",
+    "attributeLabels": ["Devre türü", "Kanal sayısı", "Rack kulağı"],
+    "evidenceLabels": ["Panel durumu", "Yük testi"],
+    "translations": {
+      "en": "Rack-Mount Stage Power Amplifier",
+      "de": "Rack-Endstufe für die Bühne",
+      "es": "Etapa de potencia de escenario"
+    }
+  },
+  {
+    "id": "cine_follow_focus_kit",
+    "name": "Kablosuz Sinema Netleme Seti",
+    "tier": 4,
+    "baseValueMinor": 12800000,
+    "category": "Fotoğraf",
+    "attributeLabels": ["Kontrol türü", "Motor sayısı", "Dişli seti"],
+    "evidenceLabels": ["Soket durumu", "Odak testi"],
+    "translations": {
+      "en": "Wireless Cinema Follow-Focus Kit",
+      "de": "Kabelloses Follow-Focus-Set",
+      "es": "Kit de enfoque cinematográfico inalámbrico"
+    }
+  },
+  {
+    "id": "professional_band_saw",
+    "name": "Profesyonel Şerit Testere",
+    "tier": 5,
+    "baseValueMinor": 30000000,
+    "category": "Ev/Yaşam",
+    "attributeLabels": ["Bıçak türü", "Kesim yüksekliği", "Kılavuz"],
+    "evidenceLabels": ["Tabla durumu", "Kesim testi"],
+    "translations": {
+      "en": "Professional Band Saw",
+      "de": "Professionelle Bandsäge",
+      "es": "Sierra de cinta profesional"
+    }
+  },
+  {
+    "id": "large_format_printer",
+    "name": "Geniş Format Baskı Yazıcısı",
+    "tier": 5,
+    "baseValueMinor": 36000000,
+    "category": "Bilgisayar",
+    "attributeLabels": ["Baskı türü", "Baskı genişliği", "Rulo tutucu"],
+    "evidenceLabels": ["Baskı kafası", "Besleme testi"],
+    "translations": {
+      "en": "Large-Format Printer",
+      "de": "Großformatdrucker",
+      "es": "Impresora de gran formato"
+    }
+  },
+  {
+    "id": "enterprise_network_switch",
+    "name": "Kurumsal Ağ Anahtarı",
+    "tier": 5,
+    "baseValueMinor": 32000000,
+    "category": "Bilgisayar",
+    "attributeLabels": ["Ağ standardı", "Port sayısı", "Rack kulağı"],
+    "evidenceLabels": ["Port durumu", "Bağlantı testi"],
+    "translations": {
+      "en": "Enterprise Network Switch",
+      "de": "Unternehmens-Netzwerkswitch",
+      "es": "Conmutador de red empresarial"
+    }
+  },
+  {
+    "id": "industrial_uv_printer",
+    "name": "Endüstriyel UV Baskı Makinesi",
+    "tier": 5,
+    "baseValueMinor": 48000000,
+    "category": "Bilgisayar",
+    "attributeLabels": ["Baskı türü", "Çalışma alanı", "Koruma"],
+    "evidenceLabels": ["Ray durumu", "Baskı testi"],
+    "translations": {
+      "en": "Industrial UV Printer",
+      "de": "Industrieller UV-Drucker",
+      "es": "Impresora UV industrial"
+    }
+  },
+  {
+    "id": "modular_synth_rack",
+    "name": "Modüler Synthesizer Kabini",
+    "tier": 5,
+    "baseValueMinor": 30000000,
+    "category": "Müzik",
+    "attributeLabels": ["Modül türü", "Modül sayısı", "Kablo seti"],
+    "evidenceLabels": ["Panel durumu", "Sinyal testi"],
+    "translations": {
+      "en": "Modular Synthesizer Rack",
+      "de": "Modularer Synthesizer-Rack",
+      "es": "Rack de sintetizador modular"
+    }
+  },
+  {
+    "id": "professional_laminator",
+    "name": "Profesyonel Rulo Laminasyon Makinesi",
+    "tier": 5,
+    "baseValueMinor": 28000000,
+    "category": "Ev/Yaşam",
+    "attributeLabels": ["Besleme türü", "Rulo genişliği", "Ayak"],
+    "evidenceLabels": ["Silindir durumu", "Isı testi"],
+    "translations": {
+      "en": "Professional Roll Laminator",
+      "de": "Professioneller Rollenlaminator",
+      "es": "Laminadora profesional de rodillos"
+    }
+  }
+]

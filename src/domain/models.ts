@@ -335,6 +335,9 @@ export type RewardActionTransaction = {
   requestedAt: number;
   appliedAt?: number;
   targetId?: string;
+  requestedAtWallMs?: number;
+  appliedAtWallMs?: number;
+  sessionId?: number;
 };
 
 export type MonetizationUsage = {
@@ -342,6 +345,8 @@ export type MonetizationUsage = {
   sessionRewardCount: number;
   placementUsage: Record<RewardPlacementId, number[]>;
   rewardSessionStartedAt: number;
+  rewardSessionId: number;
+  rewardRequestSequence: number;
 };
 
 export type MonetizationConsentState = {
@@ -358,6 +363,8 @@ export type MonetizationState = {
   firstSaleComplete: boolean;
   lifetimeActivePlayMinutes: number;
   rewardCooldownUntilGameMin?: number;
+  rewardClockWallMs: number;
+  rewardCooldownUntilWallMs?: number;
   rewardTransactions: RewardActionTransaction[];
   marketScanCredits: number;
   marketScanRefillAnchorWallMs: number;

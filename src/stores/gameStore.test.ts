@@ -34,6 +34,79 @@ import {
 } from "../services/monetization";
 
 describe("application lifecycle", () => {
+  it("opens exactly one cold reward session and does not reset it on pause/resume", async () => {
+    await useGameStore.getState().flush();
+    const clock = vi
+      .spyOn(systemTimeProvider, "nowWallMs")
+      .mockReturnValue(1000);
+    configureMonetizationAdapters(unavailableMonetizationAdapters);
+    const saved = initialState(1000, "SANDBOX");
+    saved.monetization.usage.sessionRewardCount = 4;
+    vi.mocked(loadGameWithStatus).mockResolvedValueOnce({
+      state: saved,
+      recovery: "NONE",
+    });
+    useGameStore.setState({ ready: false, sessionActive: true });
+    try {
+      await useGameStore.getState().hydrate();
+      const hydrated = useGameStore.getState().game;
+      expect(hydrated.monetization.usage).toMatchObject({
+        rewardSessionId: 1,
+        sessionRewardCount: 0,
+      });
+      expect(hydrated.transactionJournal).toEqual(saved.transactionJournal);
+      hydrated.monetization.usage.sessionRewardCount = 2;
+      await useGameStore.getState().hydrate();
+      await useGameStore.getState().pause();
+      clock.mockReturnValue(2000);
+      await useGameStore.getState().resume();
+      expect(useGameStore.getState().game.monetization.usage).toMatchObject({
+        rewardSessionId: 1,
+        sessionRewardCount: 2,
+      });
+    } finally {
+      clock.mockRestore();
+    }
+  });
+
+  it("releases the shared purchase/reward busy gate after an early ad close", async () => {
+    const game = initialState(1000, "SANDBOX");
+    game.monetization.firstSaleComplete = true;
+    game.monetization.lifetimeActivePlayMinutes = 20;
+    game.monetization.marketScanCredits = 0;
+    game.monetization.consent.canRequestAds = true;
+    let finish!: (value: { status: "CANCELLED" }) => void;
+    configureMonetizationAdapters({
+      ...unavailableMonetizationAdapters,
+      rewarded: {
+        show: () =>
+          new Promise((resolve) => {
+            finish = resolve;
+          }),
+      },
+    });
+    useGameStore.setState({ game, ready: true, monetizationBusy: false });
+    try {
+      const pending = useGameStore.getState().claimReward("MARKET_SCOUT");
+      expect(useGameStore.getState().monetizationBusy).toBe(true);
+      finish({ status: "CANCELLED" });
+      await pending;
+      expect(useGameStore.getState().monetizationBusy).toBe(false);
+      expect(
+        useGameStore.getState().game.monetization.usage.sessionRewardCount,
+      ).toBe(0);
+      expect(useGameStore.getState().game.monetization.marketScanCredits).toBe(
+        0,
+      );
+      expect(reconcileJournal(useGameStore.getState().game)).toEqual({
+        cash: true,
+        activeBookCost: true,
+        realizedProfit: true,
+      });
+    } finally {
+      configureMonetizationAdapters(unavailableMonetizationAdapters);
+    }
+  });
   it("keeps the background boundary when a provider responds while paused", async () => {
     await useGameStore.getState().flush();
     const clock = vi
@@ -90,6 +163,7 @@ describe("application lifecycle", () => {
           finish = resolve;
         }),
     );
+    useGameStore.setState({ ready: false });
     const first = useGameStore.getState().hydrate();
     const second = useGameStore.getState().hydrate();
     expect(first).toBe(second);
@@ -258,7 +332,11 @@ describe("delayed provider responses", () => {
     async (action) => {
       await useGameStore.getState().flush();
       const game = initialState(0, "SANDBOX");
-      useGameStore.setState({ game, ready: true, monetizationBusy: false });
+      useGameStore.setState({
+        game,
+        ready: action !== "hydrate",
+        monetizationBusy: false,
+      });
       vi.mocked(loadGameWithStatus).mockResolvedValueOnce({
         state: game,
         recovery: "NONE",
@@ -661,6 +739,7 @@ describe("accessibility preferences", () => {
 });
 
 describe("persistence recovery notice", () => {
+  beforeEach(() => useGameStore.setState({ ready: false }));
   it("does not overwrite an unreadable save with fallback gameplay", async () => {
     await useGameStore.getState().flush();
     vi.mocked(saveGame).mockClear();
@@ -676,6 +755,7 @@ describe("persistence recovery notice", () => {
       state: initialState(1_000, "SANDBOX"),
       recovery: "NONE",
     });
+    useGameStore.setState({ ready: false });
     await useGameStore.getState().hydrate();
     await useGameStore.getState().flush();
     expect(saveGame).toHaveBeenCalled();

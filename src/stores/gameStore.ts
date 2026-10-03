@@ -57,6 +57,8 @@ import {
 } from "../domain/ftue";
 import {
   advanceRewardState,
+  advanceRewardClock,
+  beginRewardSession,
   hasAdFreeEntitlement,
   rechargeMarketScanCredits,
 } from "../domain/monetization";
@@ -381,11 +383,12 @@ export const useGameStore = create<Store>((set, get) => ({
   clearProfitGained: () => set({ lastProfitGained: null }),
   hydrate: () => {
     if (hydration) return hydration;
+    if (get().ready) return Promise.resolve();
     hydration = (async () => {
       await saveQueue.catch(() => undefined);
       const { state: loadedGame, recovery } = await loadGameWithStatus();
       const game = rechargeMarketScanCredits(
-        withExplicitAnalyticsConsent(loadedGame),
+        beginRewardSession(withExplicitAnalyticsConsent(loadedGame), systemTimeProvider.nowWallMs()),
         systemTimeProvider.nowWallMs(),
       );
       const restoredScanCredits = Math.max(
@@ -537,7 +540,10 @@ export const useGameStore = create<Store>((set, get) => ({
       game.monetization.marketScanCredits ===
         previous.monetization.marketScanCredits &&
       game.monetization.marketScanRefillAnchorWallMs ===
-        previous.monetization.marketScanRefillAnchorWallMs
+        previous.monetization.marketScanRefillAnchorWallMs &&
+      !(previous.monetization.rewardCooldownUntilWallMs !== undefined &&
+        previous.monetization.rewardClockWallMs < previous.monetization.rewardCooldownUntilWallMs &&
+        game.monetization.rewardClockWallMs >= previous.monetization.rewardCooldownUntilWallMs)
     )
       return;
     set({ game: stampAndPersist(game) });
@@ -1569,8 +1575,9 @@ export const useGameStore = create<Store>((set, get) => ({
   },
   claimReward: async (placementId) => {
     if (get().monetizationBusy) return;
-    const state = get().game;
-    recordReplayCommand(state, "CLAIM_REWARD", { placementId });
+    const state = advanceRewardClock(get().game, systemTimeProvider.nowWallMs());
+    set({ game: state });
+    recordReplayCommand(state, "CLAIM_REWARD", { placementId, wallClockMs: state.monetization.rewardClockWallMs });
     const premium = hasAdFreeEntitlement(state);
     set({ monetizationBusy: true });
     const result = await runRewardedAction(
@@ -1579,7 +1586,7 @@ export const useGameStore = create<Store>((set, get) => ({
       premium ? "premium" : "ad",
       getMonetizationAdapters().rewarded,
       {
-        read: () => get().game,
+        read: () => advanceRewardClock(get().game, systemTimeProvider.nowWallMs()),
         publish: (game) => set({ game: stampAndPersist(game) }),
       },
     );

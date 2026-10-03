@@ -2,9 +2,10 @@ import {
   AdMob,
   AdmobConsentStatus,
   MaxAdContentRating,
+  RewardAdPluginEvents,
   type AdmobConsentInfo,
 } from "@capacitor-community/admob";
-import { Capacitor } from "@capacitor/core";
+import { Capacitor, type PluginListenerHandle } from "@capacitor/core";
 import type { RewardPlacementId } from "../domain/models";
 import type {
   ConsentAdapter,
@@ -73,6 +74,7 @@ type AdMobPort = Pick<
   | "showRewardVideoAd"
   | "prepareInterstitial"
   | "showInterstitial"
+  | "addListener"
 >;
 
 const consentSnapshot = (info: AdmobConsentInfo): ConsentSnapshot => ({
@@ -87,6 +89,7 @@ export const createAdMobAdapters = (
   options: {
     platform?: NativeAdPlatform;
     productionEnabled?: boolean;
+    rewardTimeoutMs?: number;
   } = {},
 ): {
   consent: ConsentAdapter;
@@ -104,6 +107,7 @@ export const createAdMobAdapters = (
   let initialized: Promise<void> | undefined;
   let canRequestAds = false;
   let showingInterstitial = false;
+  let showingReward = false;
 
   const initialize = () => {
     initialized ??= port.initialize({
@@ -133,10 +137,10 @@ export const createAdMobAdapters = (
     return consentSnapshot(info);
   };
 
-  const requestTrackingIfNeeded = async () => {
+  const requestTrackingIfNeeded = async (isCancelled = () => false) => {
     if (platform !== "ios") return;
     const authorization = await port.trackingAuthorizationStatus();
-    if (authorization.status === "notDetermined") {
+    if (!isCancelled() && authorization.status === "notDetermined") {
       await port.requestTrackingAuthorization();
     }
   };
@@ -152,7 +156,7 @@ export const createAdMobAdapters = (
     },
     rewarded: {
       async show(placementId) {
-        if (!platform || !canRequestAds) {
+        if (!platform || !canRequestAds || showingReward) {
           return { status: "FAILED", reason: "PROVIDER" };
         }
         const adId = resolveRewardedAdId(
@@ -161,24 +165,84 @@ export const createAdMobAdapters = (
           productionEnabled,
         );
         if (!adId) return { status: "FAILED", reason: "PROVIDER" };
+        showingReward = true;
+        const listeners: PluginListenerHandle[] = [];
+        let settle!: (result: RewardedAdResult) => void;
+        let settled = false;
+        let earned = false;
+        const result = new Promise<RewardedAdResult>((resolve) => {
+          settle = (value) => {
+            if (settled) return;
+            settled = true;
+            resolve(value);
+          };
+        });
+        const earnedResult = (): RewardedAdResult => ({
+          status: "USER_EARNED",
+          providerTransactionId: `admob-${placementId}-${globalThis.crypto?.randomUUID?.() ?? Date.now()}`,
+        });
+        const removeListener = (listener: PluginListenerHandle) => {
+          // Native cleanup is best-effort: a stuck remove promise must not keep
+          // the game busy. Stale callbacks also check this operation's settled flag.
+          try {
+            void Promise.resolve(listener.remove()).catch(() => {});
+          } catch {
+            // Native teardown can fail after an app lifecycle interruption.
+          }
+        };
+        const addListener = async (
+          listenerPromise: Promise<PluginListenerHandle>,
+        ) => {
+          const listener = await listenerPromise;
+          if (settled) removeListener(listener);
+          else listeners.push(listener);
+        };
+        // Bound tracking, loading and listener setup too, not only presentation.
+        const timeout = setTimeout(
+          () => settle({ status: "FAILED", reason: "NETWORK" }),
+          options.rewardTimeoutMs ?? 180_000,
+        );
         try {
-          await requestTrackingIfNeeded();
-          await port.prepareRewardVideoAd({
-            adId,
-            isTesting: !productionEnabled,
-            npa: true,
+          void (async () => {
+            await requestTrackingIfNeeded(() => settled);
+            if (settled) return;
+            await port.prepareRewardVideoAd({
+              adId,
+              isTesting: !productionEnabled,
+              npa: true,
+            });
+            if (settled) return;
+            // iOS leaves the show promise pending when an unearned ad is closed.
+            // Native events therefore settle an operation-owned result instead.
+            await addListener(
+              port.addListener(RewardAdPluginEvents.Rewarded, () => {
+                if (!settled) earned = true;
+              }),
+            );
+            if (settled) return;
+            await addListener(
+              port.addListener(RewardAdPluginEvents.Dismissed, () => {
+                settle(earned ? earnedResult() : { status: "CANCELLED" });
+              }),
+            );
+            if (settled) return;
+            await addListener(
+              port.addListener(RewardAdPluginEvents.FailedToShow, () => {
+                settle({ status: "FAILED", reason: "PROVIDER" });
+              }),
+            );
+            if (settled) return;
+            await port.showRewardVideoAd({ adId });
+            // Resolution is the SDK's userDidEarnReward callback, not merely show.
+            settle(earnedResult());
+          })().catch((error: unknown) => {
+            settle({ status: "FAILED", reason: classifyAdMobFailure(error) });
           });
-          await port.showRewardVideoAd({ adId });
-          const suffix = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}`;
-          return {
-            status: "USER_EARNED",
-            providerTransactionId: `admob-${placementId}-${suffix}`,
-          };
-        } catch (error) {
-          return {
-            status: "FAILED",
-            reason: classifyAdMobFailure(error),
-          };
+          return await result;
+        } finally {
+          clearTimeout(timeout);
+          listeners.forEach(removeListener);
+          showingReward = false;
         }
       },
     },

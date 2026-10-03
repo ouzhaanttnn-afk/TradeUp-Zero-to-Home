@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { RewardAdPluginEvents } from "@capacitor-community/admob";
 import {
   classifyAdMobFailure,
   createAdMobAdapters,
@@ -64,7 +65,9 @@ describe("AdMob native adapters", () => {
       }),
       showConsentForm: vi.fn(),
       showPrivacyOptionsForm: vi.fn(),
-      trackingAuthorizationStatus: vi.fn().mockResolvedValue({ status: "denied" }),
+      trackingAuthorizationStatus: vi
+        .fn()
+        .mockResolvedValue({ status: "denied" }),
       requestTrackingAuthorization: vi.fn(),
       prepareRewardVideoAd: vi.fn(),
       showRewardVideoAd: vi.fn(),
@@ -92,7 +95,9 @@ describe("AdMob native adapters", () => {
       }),
       showConsentForm: vi.fn(),
       showPrivacyOptionsForm: vi.fn(),
-      trackingAuthorizationStatus: vi.fn().mockResolvedValue({ status: "notDetermined" }),
+      trackingAuthorizationStatus: vi
+        .fn()
+        .mockResolvedValue({ status: "notDetermined" }),
       requestTrackingAuthorization: vi.fn().mockResolvedValue(undefined),
       prepareRewardVideoAd: vi.fn(),
       showRewardVideoAd: vi.fn(),
@@ -111,9 +116,9 @@ describe("AdMob native adapters", () => {
       npa: true,
     });
     expect(port.requestTrackingAuthorization).toHaveBeenCalledOnce();
-    expect(port.requestTrackingAuthorization.mock.invocationCallOrder[0]).toBeLessThan(
-      port.prepareInterstitial.mock.invocationCallOrder[0],
-    );
+    expect(
+      port.requestTrackingAuthorization.mock.invocationCallOrder[0],
+    ).toBeLessThan(port.prepareInterstitial.mock.invocationCallOrder[0]);
     expect(port.showInterstitial).toHaveBeenCalledOnce();
   });
 
@@ -127,10 +132,13 @@ describe("AdMob native adapters", () => {
       }),
       showConsentForm: vi.fn(),
       showPrivacyOptionsForm: vi.fn(),
-      trackingAuthorizationStatus: vi.fn().mockResolvedValue({ status: "denied" }),
+      trackingAuthorizationStatus: vi
+        .fn()
+        .mockResolvedValue({ status: "denied" }),
       requestTrackingAuthorization: vi.fn(),
       prepareRewardVideoAd: vi.fn().mockResolvedValue({ adUnitId: "test" }),
       showRewardVideoAd: vi.fn().mockResolvedValue({ amount: 1, type: "test" }),
+      addListener: vi.fn().mockResolvedValue({ remove: vi.fn() }),
     };
     const adapters = createAdMobAdapters(port as never, {
       platform: "ios",
@@ -155,8 +163,12 @@ describe("AdMob native adapters", () => {
       }),
       showConsentForm: vi.fn(),
       showPrivacyOptionsForm: vi.fn(),
-      trackingAuthorizationStatus: vi.fn().mockResolvedValue({ status: "notDetermined" }),
-      requestTrackingAuthorization: vi.fn().mockRejectedValue(new Error("unavailable")),
+      trackingAuthorizationStatus: vi
+        .fn()
+        .mockResolvedValue({ status: "notDetermined" }),
+      requestTrackingAuthorization: vi
+        .fn()
+        .mockRejectedValue(new Error("unavailable")),
       prepareRewardVideoAd: vi.fn(),
       showRewardVideoAd: vi.fn(),
     };
@@ -174,4 +186,118 @@ describe("AdMob native adapters", () => {
     expect(classifyAdMobFailure(new Error("Network timeout"))).toBe("NETWORK");
     expect(classifyAdMobFailure(new Error("unknown"))).toBe("PROVIDER");
   });
+
+  it.each(["cancel", "failure", "earned", "timeout"] as const)(
+    "settles and removes listeners after native %s even if show never resolves",
+    async (scenario) => {
+      const callbacks = new Map<string, () => void>();
+      const remove = vi.fn().mockResolvedValue(undefined);
+      const port = {
+        initialize: vi.fn().mockResolvedValue(undefined),
+        requestConsentInfo: vi.fn().mockResolvedValue({
+          status: "NOT_REQUIRED",
+          canRequestAds: true,
+        }),
+        trackingAuthorizationStatus: vi
+          .fn()
+          .mockResolvedValue({ status: "denied" }),
+        requestTrackingAuthorization: vi.fn().mockResolvedValue(undefined),
+        prepareRewardVideoAd: vi.fn().mockResolvedValue({}),
+        showRewardVideoAd: vi.fn(() => new Promise(() => {})),
+        addListener: vi.fn(async (event: string, callback: () => void) => {
+          callbacks.set(event, callback);
+          return { remove };
+        }),
+      };
+      const adapters = createAdMobAdapters(port as never, {
+        platform: "ios",
+        rewardTimeoutMs: scenario === "timeout" ? 5 : 1000,
+      });
+      await adapters.consent.refresh();
+      const pending = adapters.rewarded.show("MARKET_SCOUT");
+      await vi.waitFor(() =>
+        expect(port.showRewardVideoAd).toHaveBeenCalledOnce(),
+      );
+      if (scenario === "earned")
+        callbacks.get(RewardAdPluginEvents.Rewarded)?.();
+      if (scenario === "failure")
+        callbacks.get(RewardAdPluginEvents.FailedToShow)?.();
+      if (scenario === "cancel" || scenario === "earned") {
+        callbacks.get(RewardAdPluginEvents.Dismissed)?.();
+        callbacks.get(RewardAdPluginEvents.Dismissed)?.();
+      }
+      const result = await pending;
+      expect(result.status).toBe(
+        scenario === "earned"
+          ? "USER_EARNED"
+          : scenario === "cancel"
+            ? "CANCELLED"
+            : "FAILED",
+      );
+      expect(remove).toHaveBeenCalledTimes(3);
+      port.showRewardVideoAd.mockImplementation(
+        () => Promise.resolve({}) as never,
+      );
+      expect((await adapters.rewarded.show("MARKET_SCOUT")).status).toBe(
+        "USER_EARNED",
+      );
+    },
+  );
+
+  it.each(["tracking", "preparation", "registration", "removal"] as const)(
+    "bounds unresolved native %s without granting or retaining the busy guard",
+    async (stage) => {
+      let release!: (value: never) => void;
+      const stuck = new Promise((resolve) => {
+        release = resolve;
+      });
+      const remove = vi.fn().mockResolvedValue(undefined);
+      const port = {
+        initialize: vi.fn().mockResolvedValue(undefined),
+        requestConsentInfo: vi
+          .fn()
+          .mockResolvedValue({ status: "NOT_REQUIRED", canRequestAds: true }),
+        trackingAuthorizationStatus: vi
+          .fn()
+          .mockResolvedValue({ status: "denied" }),
+        requestTrackingAuthorization: vi.fn().mockResolvedValue(undefined),
+        prepareRewardVideoAd: vi.fn().mockResolvedValue({}),
+        showRewardVideoAd: vi.fn().mockResolvedValue({}),
+        addListener: vi.fn().mockResolvedValue({ remove }),
+      };
+      if (stage === "tracking")
+        port.trackingAuthorizationStatus.mockImplementationOnce(() => stuck);
+      if (stage === "preparation")
+        port.prepareRewardVideoAd.mockImplementationOnce(() => stuck);
+      if (stage === "registration")
+        port.addListener.mockImplementationOnce(() => stuck);
+      if (stage === "removal") remove.mockImplementationOnce(() => stuck);
+      const adapters = createAdMobAdapters(port as never, {
+        platform: "ios",
+        rewardTimeoutMs: 5,
+      });
+      await adapters.consent.refresh();
+      const result = await adapters.rewarded.show("MARKET_SCOUT");
+      expect(result.status).toBe(
+        stage === "removal" ? "USER_EARNED" : "FAILED",
+      );
+      if (stage !== "removal")
+        expect(port.showRewardVideoAd).not.toHaveBeenCalled();
+      release(
+        (stage === "registration"
+          ? { remove }
+          : { status: "notDetermined" }) as never,
+      );
+      await Promise.resolve();
+      await Promise.resolve();
+      if (stage === "registration") expect(remove).toHaveBeenCalledOnce();
+      expect(port.requestTrackingAuthorization).not.toHaveBeenCalled();
+      expect((await adapters.rewarded.show("MARKET_SCOUT")).status).toBe(
+        "USER_EARNED",
+      );
+      expect(port.showRewardVideoAd).toHaveBeenCalledTimes(
+        stage === "removal" ? 2 : 1,
+      );
+    },
+  );
 });

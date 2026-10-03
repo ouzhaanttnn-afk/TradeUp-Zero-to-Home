@@ -16,8 +16,36 @@ import {
 } from "./index";
 import { money, signedMoney } from "../game";
 import { listingAgeLabel } from "../ui/marketCard";
+import { families, release110Families } from "../content/families";
+import { attributeLabelsDict, evidenceLabelsDict } from "./labelTranslations";
 
 describe("i18n localization suite", () => {
+  it("keeps all catalog names distinct and resolves them to the correct family", () => {
+    expect(new Set(families.map((family) => family.name)).size).toBe(
+      families.length,
+    );
+    for (const family of families)
+      for (const lang of ["en", "de", "es"] as const) {
+        expect(localizeProduct(family.name, family.name, lang)).toBe(
+          localizeProduct(family.id, family.name, lang),
+        );
+      }
+  });
+  it("localizes all1.1.0 products and their decision labels in each supported language", () => {
+    for (const family of release110Families)
+      for (const lang of ["en", "de", "es"] as const) {
+        expect(localizeProduct(family.id, family.name, lang)).not.toBe(
+          family.name,
+        );
+        expect(localizeProduct(family.name, family.name, lang)).not.toBe(
+          family.name,
+        );
+        for (const attribute of family.attributes)
+          expect(attributeLabelsDict[attribute.label]?.[lang]).toBeTruthy();
+        for (const evidence of family.evidence)
+          expect(evidenceLabelsDict[evidence.label]?.[lang]).toBeTruthy();
+      }
+  });
   describe("currency and money formatting (1 USD = 50 TRY rate)", () => {
     it("formats Turkish Lira correctly in 'tr' locale", () => {
       expect(money(10_000, "tr")).toBe("₺100");
@@ -67,15 +95,19 @@ describe("i18n localization suite", () => {
       expect(localizeProduct("notebook", "Deri Kapaklı Defter", "es")).toBe(
         "Cuaderno en caja de cuero",
       );
-      expect(localizeProduct("notebook", "Deri Kapaklı Kutu Defteri", "tr")).toBe(
-        "Deri Kapaklı Kutu Defteri",
-      );
+      expect(
+        localizeProduct("notebook", "Deri Kapaklı Kutu Defteri", "tr"),
+      ).toBe("Deri Kapaklı Kutu Defteri");
     });
 
     it("translates by Turkish product name lookup across languages", () => {
-      expect(localizeProduct("Koleksiyonluk Klasik Plak", "Koleksiyonluk Klasik Plak", "en")).toBe(
-        "Collectible Classic Vinyl",
-      );
+      expect(
+        localizeProduct(
+          "Koleksiyonluk Klasik Plak",
+          "Koleksiyonluk Klasik Plak",
+          "en",
+        ),
+      ).toBe("Collectible Classic Vinyl");
       expect(localizeProduct("Elektro Gitar", "Elektro Gitar", "en")).toBe(
         "Electric Guitar",
       );
@@ -88,9 +120,9 @@ describe("i18n localization suite", () => {
     });
 
     it("gracefully falls back to defaultName if unknown ID", () => {
-      expect(localizeProduct("unknown_product_id", "Default Widget", "en")).toBe(
-        "Default Widget",
-      );
+      expect(
+        localizeProduct("unknown_product_id", "Default Widget", "en"),
+      ).toBe("Default Widget");
     });
   });
 
@@ -130,15 +162,30 @@ describe("i18n localization suite", () => {
 
   describe("avatars localization", () => {
     it("localizes avatar names and roles across languages", () => {
-      const enAvatar = localizeAvatar("pazar-kasifi", "Pazar Kaşifi", "Fırsat avcısı", "en");
+      const enAvatar = localizeAvatar(
+        "pazar-kasifi",
+        "Pazar Kaşifi",
+        "Fırsat avcısı",
+        "en",
+      );
       expect(enAvatar.name).toBe("Market Scout");
       expect(enAvatar.role).toBe("Bargain Hunter");
 
-      const deAvatar = localizeAvatar("atolye-ustasi", "Atölye Ustası", "Ürün yenileyici", "de");
+      const deAvatar = localizeAvatar(
+        "atolye-ustasi",
+        "Atölye Ustası",
+        "Ürün yenileyici",
+        "de",
+      );
       expect(deAvatar.name).toBe("Werkstatt-Meister");
       expect(deAvatar.role).toBe("Restaurierungs-Spezialist");
 
-      const esAvatar = localizeAvatar("koleksiyon-uzmani", "Koleksiyon Uzmanı", "Detay", "es");
+      const esAvatar = localizeAvatar(
+        "koleksiyon-uzmani",
+        "Koleksiyon Uzmanı",
+        "Detay",
+        "es",
+      );
       expect(esAvatar.name).toBe("Experto Coleccionista");
     });
   });
@@ -154,7 +201,9 @@ describe("i18n localization suite", () => {
     it("localizes preparation actions", () => {
       expect(localizePreparation("CLEAN", "Temizle", "en")).toBe("Clean");
       expect(localizePreparation("TEST", "Test et", "de")).toBe("Testen");
-      expect(localizePreparation("RESTORE", "Bakım yap", "es")).toBe("Restaurar");
+      expect(localizePreparation("RESTORE", "Bakım yap", "es")).toBe(
+        "Restaurar",
+      );
     });
 
     it("localizes sellers", () => {
@@ -188,7 +237,9 @@ describe("i18n localization suite", () => {
     it("localizes evidence labels across languages", () => {
       expect(localizeEvidence("Kapak izi", "en")).toBe("Cover mark");
       expect(localizeEvidence("Eksik sayfa", "de")).toBe("Fehlende Seite");
-      expect(localizeEvidence("Batarya sağlık testi", "es")).toBe("Prueba de salud de batería");
+      expect(localizeEvidence("Batarya sağlık testi", "es")).toBe(
+        "Prueba de salud de batería",
+      );
       expect(localizeEvidence("Kapak izi", "tr")).toBe("Kapak izi");
     });
 
@@ -200,18 +251,18 @@ describe("i18n localization suite", () => {
     });
 
     it("localizes notices across languages including dynamic patterns", () => {
-      expect(localizeNotice("Piyasa canlı. İyi fırsatlar beklemez.", "en")).toBe(
-        "Market is live. Good deals don't wait.",
-      );
+      expect(
+        localizeNotice("Piyasa canlı. İyi fırsatlar beklemez.", "en"),
+      ).toBe("Market is live. Good deals don't wait.");
       expect(localizeNotice("25 yenileme hakkın geri doldu.", "en")).toBe(
         "25 scan credits restored.",
       );
       expect(localizeNotice("25 yenileme hakkın geri doldu.", "de")).toBe(
         "25 Scan-Credits wieder aufgeladen.",
       );
-      expect(localizeNotice("Ses seviyesi kapalı olarak ayarlandı.", "en")).toBe(
-        "Sound level set to Off.",
-      );
+      expect(
+        localizeNotice("Ses seviyesi kapalı olarak ayarlandı.", "en"),
+      ).toBe("Sound level set to Off.");
       expect(localizeNotice("Bu ürün zaten satın alındı.", "es")).toBe(
         "Este producto ya fue comprado.",
       );

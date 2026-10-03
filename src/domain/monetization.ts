@@ -31,7 +31,8 @@ type RewardRequestResult =
 type RewardEligibility =
   { ok: true; targetId?: string } | { ok: false; reason: RewardRequestReason };
 
-const REWARD_WINDOW_MIN = MONETIZATION_CONFIG.reward.rollingWindowHours * 60;
+const REWARD_WINDOW_MS =
+  MONETIZATION_CONFIG.reward.rollingWindowHours * 3_600_000;
 const SESSION_CAP = MONETIZATION_CONFIG.reward.sessionCap;
 const GLOBAL_CAP = MONETIZATION_CONFIG.reward.globalCap;
 const FIRST_SALE_LOCK_MIN =
@@ -63,6 +64,8 @@ export const createDefaultMonetizationState = (
   entitlements: [],
   usage: {
     rewardSessionStartedAt: gameTimeMin,
+    rewardSessionId: 0,
+    rewardRequestSequence: 0,
     sessionRewardCount: 0,
     rollingRewardTimestamps: [],
     placementUsage: defaultPlacementUsage(),
@@ -70,10 +73,54 @@ export const createDefaultMonetizationState = (
   firstSaleComplete: false,
   lifetimeActivePlayMinutes: 0,
   rewardCooldownUntilGameMin: undefined,
+  rewardClockWallMs: wallClockMs,
   rewardTransactions: [],
   marketScanCredits: EARLY_GAME_CONFIG.scanCapBoosted,
   marketScanRefillAnchorWallMs: wallClockMs,
 });
+
+// Wall time is supplied by the infrastructure boundary, never read by the engine.
+export const advanceRewardClock = (
+  state: GameState,
+  requestedWallMs: number,
+): GameState => {
+  const now = Math.max(
+    state.monetization.rewardClockWallMs,
+    state.lastWallClockMs,
+    Number.isFinite(requestedWallMs) ? requestedWallMs : 0,
+  );
+  return now === state.monetization.rewardClockWallMs
+    ? state
+    : {
+        ...state,
+        monetization: { ...state.monetization, rewardClockWallMs: now },
+      };
+};
+
+// A native ad/consent sheet can pause the app. Only cold hydration opens a session.
+export const beginRewardSession = (
+  state: GameState,
+  wallMs: number,
+): GameState => {
+  const next = advanceRewardClock(state, wallMs);
+  return {
+    ...next,
+    monetization: {
+      ...next.monetization,
+      rewardTransactions: next.monetization.rewardTransactions.map((entry) =>
+        entry.status === "REQUESTED"
+          ? { ...entry, status: "CANCELLED" }
+          : entry,
+      ),
+      usage: {
+        ...next.monetization.usage,
+        rewardSessionId: next.monetization.usage.rewardSessionId + 1,
+        rewardSessionStartedAt: next.gameTimeMin,
+        sessionRewardCount: 0,
+      },
+    },
+  };
+};
 
 const MARKET_SCAN_CAP =
   MONETIZATION_CONFIG.reward.placementReward.MARKET_SCOUT_SCAN_CREDITS;
@@ -95,6 +142,7 @@ export const rechargeMarketScanCredits = (
   state: GameState,
   requestedWallMs: number,
 ): GameState => {
+  state = advanceRewardClock(state, requestedWallMs);
   const regenCap = marketScanRegenCap(state);
   const credits = Math.min(regenCap, state.monetization.marketScanCredits);
   const nowWallMs = Math.max(
@@ -190,18 +238,27 @@ export const markFirstSaleComplete = (state: GameState): GameState =>
 
 const cleanupRewardTransactions = (
   state: GameState,
-  nowGameMin: number,
+  nowWallMs: number,
 ): RewardActionTransaction[] => {
   return state.monetization.rewardTransactions.filter(
     (entry) =>
-      !entry.appliedAt ||
-      nowGameMin - Math.floor(entry.appliedAt / 60) <= REWARD_WINDOW_MIN,
+      entry.status !== "APPLIED" ||
+      entry.sessionId === state.monetization.usage.rewardSessionId ||
+      entry.appliedAtWallMs === undefined ||
+      nowWallMs - entry.appliedAtWallMs < REWARD_WINDOW_MS,
   );
 };
 
 const countCaps = (state: GameState) => {
-  const nowMin = state.gameTimeMin;
-  const rewards = cleanupRewardTransactions(state, nowMin);
+  const rewards = cleanupRewardTransactions(
+    state,
+    state.monetization.rewardClockWallMs,
+  ).filter(
+    (entry) =>
+      entry.appliedAtWallMs === undefined ||
+      state.monetization.rewardClockWallMs - entry.appliedAtWallMs <
+        REWARD_WINDOW_MS,
+  );
   const placementCounts: Record<RewardPlacementId, number> = {
     MARKET_SCOUT: 0,
     FAST_INSPECTION: 0,
@@ -247,7 +304,7 @@ const nextPlacementTarget = (
       asset.instance.preparationHistory.some(
         (entry) =>
           entry.state === "IN_PROGRESS" &&
-          entry.completesAtGameMin > state.gameTimeMin,
+          entry.completesAtGameMin - state.gameTimeMin > 1,
       ),
     )?.id;
   }
@@ -255,7 +312,23 @@ const nextPlacementTarget = (
   return activePlayerListings(state).find(
     (listing) =>
       state.gameTimeMin - listing.createdAtGameMin >=
-        LISTING_REACH_MAX_AGE_MIN && !listOffersByListing(state, listing.id),
+        LISTING_REACH_MAX_AGE_MIN &&
+      !listOffersByListing(state, listing.id) &&
+      // The economic journal outlives the 24-hour reward ledger. A reach roll
+      // belongs to this listing lifecycle even when it created no buyer offer.
+      !state.transactionJournal.some(
+        (entry) =>
+          entry.kind === "REWARD" &&
+          entry.metadata.placementId === "LISTING_REACH" &&
+          entry.metadata.listingId === listing.id &&
+          entry.metadata.exposureRollCompleted === true,
+      ) &&
+      !state.monetization.rewardTransactions.some(
+        (entry) =>
+          entry.status === "APPLIED" &&
+          entry.placementId === "LISTING_REACH" &&
+          entry.targetId === listing.id,
+      ),
   )?.id;
 };
 
@@ -341,10 +414,16 @@ const applyReward = (
     requestedAt: transaction?.requestedAt ?? nowSeconds(state),
     appliedAt: nowSeconds(state),
     targetId,
+    requestedAtWallMs:
+      transaction?.requestedAtWallMs ?? state.monetization.rewardClockWallMs,
+    appliedAtWallMs: state.monetization.rewardClockWallMs,
+    sessionId:
+      transaction?.sessionId ?? state.monetization.usage.rewardSessionId,
   };
-  const rewards = cleanupRewardTransactions(next, next.gameTimeMin).filter(
-    (entry) => entry.id !== actionId,
-  );
+  const rewards = cleanupRewardTransactions(
+    next,
+    next.monetization.rewardClockWallMs,
+  ).filter((entry) => entry.id !== actionId);
 
   const nextPlacementUsage = {
     ...next.monetization.usage.placementUsage,
@@ -358,9 +437,11 @@ const applyReward = (
     ...next,
     monetization: {
       ...next.monetization,
-      rewardCooldownUntilGameMin:
+      rewardCooldownUntilGameMin: undefined,
+      rewardCooldownUntilWallMs:
         MONETIZATION_CONFIG.reward.cooldownSeconds > 0
-          ? next.gameTimeMin + MONETIZATION_CONFIG.reward.cooldownSeconds / 60
+          ? next.monetization.rewardClockWallMs +
+            MONETIZATION_CONFIG.reward.cooldownSeconds * 1000
           : undefined,
       rewardTransactions: [...rewards, applied].slice(-1200),
       usage: {
@@ -385,9 +466,9 @@ export const getRewardEligibility = (
   state: GameState,
   placementId: RewardPlacementId,
 ): RewardEligibility => {
-  const nowMin = state.gameTimeMin;
+  const nowWallMs = state.monetization.rewardClockWallMs;
   const targetId = nextPlacementTarget(placementId, state);
-  const normalizedTransactions = cleanupRewardTransactions(state, nowMin);
+  const normalizedTransactions = cleanupRewardTransactions(state, nowWallMs);
 
   if (
     normalizedTransactions.length !==
@@ -406,7 +487,11 @@ export const getRewardEligibility = (
     return { ok: false, reason: "FIRST_REWARD_BLOCKED" };
   }
   const latestForPlacement = normalizedTransactions
-    .filter((entry) => entry.placementId === placementId)
+    .filter(
+      (entry) =>
+        entry.placementId === placementId &&
+        entry.sessionId === state.monetization.usage.rewardSessionId,
+    )
     .slice(-2);
   if (
     latestForPlacement.length === 2 &&
@@ -427,8 +512,8 @@ export const getRewardEligibility = (
     return { ok: false, reason: "NO_ELIGIBLE_TARGET" };
   }
   if (
-    state.monetization.rewardCooldownUntilGameMin !== undefined &&
-    nowMin < state.monetization.rewardCooldownUntilGameMin
+    state.monetization.rewardCooldownUntilWallMs !== undefined &&
+    nowWallMs < state.monetization.rewardCooldownUntilWallMs
   ) {
     return { ok: false, reason: "COOLDOWN" };
   }
@@ -437,6 +522,17 @@ export const getRewardEligibility = (
   }
 
   const caps = countCaps(state);
+  if (
+    placementId === "MARKET_SCOUT" &&
+    normalizedTransactions.some(
+      (entry) =>
+        entry.placementId === placementId &&
+        entry.status === "APPLIED" &&
+        entry.sessionId === state.monetization.usage.rewardSessionId,
+    )
+  ) {
+    return { ok: false, reason: "PLACEMENT_CAP" };
+  }
   if (caps.globalCount >= GLOBAL_CAP)
     return { ok: false, reason: "GLOBAL_CAP" };
   if (
@@ -458,7 +554,10 @@ export const requestMonetizedAction = (
     ...state,
     monetization: {
       ...state.monetization,
-      rewardTransactions: cleanupRewardTransactions(state, state.gameTimeMin),
+      rewardTransactions: cleanupRewardTransactions(
+        state,
+        state.monetization.rewardClockWallMs,
+      ),
     },
   };
 
@@ -466,6 +565,8 @@ export const requestMonetizedAction = (
     (entry) =>
       entry.placementId === placementId &&
       entry.source === source &&
+      entry.status === "REQUESTED" &&
+      entry.sessionId === normalized.monetization.usage.rewardSessionId &&
       entry.requestedAt === nowSeconds(normalized),
   );
   if (existing) {
@@ -485,7 +586,8 @@ export const requestMonetizedAction = (
   }
 
   const targetId = eligibility.targetId;
-  const rewardId = `reward:${placementId}:${source}:${normalized.gameTimeMin}:${targetId ?? "global"}`;
+  const sequence = normalized.monetization.usage.rewardRequestSequence + 1;
+  const rewardId = `reward:${placementId}:${source}:${normalized.monetization.usage.rewardSessionId}:${sequence}:${targetId ?? "global"}`;
   if (transactionExists(normalized, rewardId)) {
     return { ok: true, state: normalized, rewardId };
   }
@@ -497,11 +599,17 @@ export const requestMonetizedAction = (
     status: "REQUESTED",
     requestedAt: nowSeconds(normalized),
     targetId,
+    requestedAtWallMs: normalized.monetization.rewardClockWallMs,
+    sessionId: normalized.monetization.usage.rewardSessionId,
   };
   const requestedState = {
     ...normalized,
     monetization: {
       ...normalized.monetization,
+      usage: {
+        ...normalized.monetization.usage,
+        rewardRequestSequence: sequence,
+      },
       rewardTransactions: [
         ...normalized.monetization.rewardTransactions,
         requested,
@@ -512,7 +620,7 @@ export const requestMonetizedAction = (
     ok: true,
     state:
       source === "premium"
-        ? applyReward(requestedState, placementId, source, targetId)
+        ? applyReward(requestedState, placementId, source, targetId, requested)
         : requestedState,
     rewardId,
   };
@@ -638,9 +746,7 @@ export const syncVerifiedEntitlement = (
       entitlementId,
       status,
       platform,
-      ...(status === "REVOKED"
-        ? { verifiedAtGameMin: state.gameTimeMin }
-        : {}),
+      ...(status === "REVOKED" ? { verifiedAtGameMin: state.gameTimeMin } : {}),
     },
   ];
   const animatedAvatarsStillOwned = remainingEntitlements.some(

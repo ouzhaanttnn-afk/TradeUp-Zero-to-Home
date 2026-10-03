@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { families, initialState } from "./game";
-import { heroFamilies, nextUpdateFamilies } from "./content/families";
+import { heroFamilies, nextUpdateFamilies, release110Families } from "./content/families";
 import {
   assetFor,
   hasDedicatedAsset,
@@ -9,6 +9,18 @@ import {
 } from "./assets";
 
 describe("asset manifest and visual treatments", () => {
+  it("adds12 middle and12 advanced originals without replacing existing families", () => {
+    expect(release110Families).toHaveLength(24);
+    expect(release110Families.slice(0, 12).every((family) => family.tier === 2 || family.tier === 3)).toBe(true);
+    expect(release110Families.slice(12).every((family) => family.tier === 4 || family.tier === 5)).toBe(true);
+    expect(new Set(families.map((family) => family.id)).size).toBe(237);
+    for (const family of release110Families) {
+      expect(hasDedicatedAsset(family.assetKey)).toBe(true);
+      expect(family.evidence).toHaveLength(2);
+      expect(family.preparation).toHaveLength(3);
+      expect(Number.isInteger(family.baseValueMinor)).toBe(true);
+    }
+  });
   it("adds 24 distinct illustrated families across the career", () => {
     expect(nextUpdateFamilies).toHaveLength(24);
     expect(

@@ -1662,4 +1662,11 @@ Bu eşikler sektör garantisi değil, Studio Nostos’un karar kapılarıdır. �
 | Mevcut TradeUp repo + v1.0 GDD | Teknik gerçek, kilitli kararlar ve gap audit |
 
 ## v2.2 karar özeti
+### 2026-10-03 — Onaylı 1.1.0 içerik genişlemesi ve uyumluluk düzeltmesi
+
+- Kullanıcı 24 yeni orta/ileri ürün istedi: 12 Tier 2–3 ve 12 Tier 4–5 aile, `src/content/release110.json`. Katalog 213→237. Her aile ayrı özgün raster görsel, yerelleştirme, iki kanıt ve mevcut üç hazırlık seçeneğiyle eklenir; yeni mekanik veya fiyatlandırma formülü eklenmez.
+- Rewarded oturum, yalnız soğuk uygulama açılışında başlar. Reklam/izin/satın alma sayfasının arka plana geçişi yeni oturum değildir. Oturum sayacı yenilenir; kalıcı haklar, günlük kullanım, 90 sn bekleme ve ekonomi korunur.
+- Rolling 24 saat ve 90 sn bekleme gerçek, enjekte edilen monoton duvar saatiyle ölçülür; hızlandırılmış oyun dakikaları veya saat geri alma bu limitleri açmaz. Eski kayıtlar mevcut ödülleri son kayıt saatine muhafazakâr biçimde sabitler.
+- Erken kapanan veya gösterilemeyen native reklam ödül vermez; kullanım limiti tüketmez ve satın alma/hızlandırma kontrollerini kilitlemez.
+
 > **[BELGE SONU] v2.2 karar özeti:** TradeUp; karşılaştırma, kanıt, likidite, tam iki teklif ve değer ekleme üzerinden oyuncunun kendi ticaret hikâyesini kurduğu mobil pazar simülasyonudur. İlk açılış profili ve ücretsiz avatar seçimi oyuncu kimliğini kurar; canlı avatar paketi yalnız sunumu kişiselleştirir. Gelir modeli, yalnız açıkça seçilen zaman kolaylıkları ve karar okunabilirliğini bozmayan kalıcı kozmetiklerden oluşur; bu belge sonrası v1.0’a kadar mekanik tasarım dondurulmuştur.

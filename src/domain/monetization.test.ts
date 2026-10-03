@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { initialState } from "../game";
 import type { Listing } from "./models";
 import {
+  advanceRewardClock,
+  beginRewardSession,
   applyRewardedResult,
   advanceRewardState,
   closeRewardedAction,
@@ -15,6 +17,11 @@ import {
   syncVerifiedEntitlement,
 } from "./monetization";
 import { ownsAnimatedAvatars } from "./profile";
+import {
+  createPlayerListing,
+  purchaseListing,
+  withdrawPlayerListing,
+} from "./economy";
 
 const makeReadyForRewards = () => {
   const unlocked = advanceRewardState(
@@ -168,6 +175,214 @@ describe("monetization reward eligibility", () => {
     );
     expect(failed.monetization.usage.sessionRewardCount).toBe(0);
     expect(failed.monetization.rewardCooldownUntilGameMin).toBeUndefined();
+    expect(failed.monetization.rewardCooldownUntilWallMs).toBeUndefined();
+  });
+
+  it("starts a cold session without resetting daily caps, entitlements, cash or cooldown", () => {
+    const first = requestMonetizedAction(
+      makeReadyForRewards(),
+      "MARKET_SCOUT",
+      "ad",
+    );
+    if (!first.ok) throw new Error("Expected request");
+    const applied = applyRewardedResult(first.state, first.rewardId);
+    const cold = beginRewardSession(
+      {
+        ...applied,
+        monetization: { ...applied.monetization, marketScanCredits: 0 },
+      },
+      30_000,
+    );
+    expect(cold.monetization.usage.sessionRewardCount).toBe(0);
+    expect(cold.monetization.usage.rewardSessionId).toBe(1);
+    expect(cold.monetization.rewardTransactions).toEqual(
+      applied.monetization.rewardTransactions,
+    );
+    expect(cold.cashMinor).toBe(applied.cashMinor);
+    expect(cold.transactionJournal).toEqual(applied.transactionJournal);
+    expect(getRewardEligibility(cold, "MARKET_SCOUT")).toEqual({
+      ok: false,
+      reason: "COOLDOWN",
+    });
+    const second = requestMonetizedAction(
+      advanceRewardClock(cold, 90_000),
+      "MARKET_SCOUT",
+      "ad",
+    );
+    if (!second.ok) throw new Error("Expected second session request");
+    const secondApplied = applyRewardedResult(second.state, second.rewardId);
+    const thirdSession = beginRewardSession(
+      {
+        ...secondApplied,
+        monetization: { ...secondApplied.monetization, marketScanCredits: 0 },
+      },
+      180_000,
+    );
+    expect(getRewardEligibility(thirdSession, "MARKET_SCOUT")).toEqual({
+      ok: false,
+      reason: "PLACEMENT_CAP",
+    });
+    expect(
+      getRewardEligibility(
+        advanceRewardClock(thirdSession, 86_490_000),
+        "MARKET_SCOUT",
+      ).ok,
+    ).toBe(true);
+  });
+
+  it("fast game-time advancement and clock rollback cannot bypass real reward limits", () => {
+    const first = requestMonetizedAction(
+      makeReadyForRewards(),
+      "MARKET_SCOUT",
+      "ad",
+    );
+    if (!first.ok) throw new Error("Expected request");
+    const applied = applyRewardedResult(first.state, first.rewardId);
+    const fast = {
+      ...applied,
+      gameTimeMin: 10_000,
+      monetization: { ...applied.monetization, marketScanCredits: 0 },
+    };
+    expect(getRewardEligibility(fast, "MARKET_SCOUT")).toEqual({
+      ok: false,
+      reason: "COOLDOWN",
+    });
+    const later = advanceRewardClock(fast, 90_000);
+    expect(advanceRewardClock(later, 1).monetization.rewardClockWallMs).toBe(
+      90_000,
+    );
+    expect(getRewardEligibility(later, "MARKET_SCOUT")).toEqual({
+      ok: false,
+      reason: "PLACEMENT_CAP",
+    });
+  });
+
+  it("a cancelled request can be retried without advancing the game or consuming limits", () => {
+    const first = requestMonetizedAction(
+      makeReadyForRewards(),
+      "MARKET_SCOUT",
+      "ad",
+    );
+    if (!first.ok) throw new Error("Expected request");
+    const cancelled = closeRewardedAction(
+      first.state,
+      first.rewardId,
+      "CANCELLED",
+    );
+    const retry = requestMonetizedAction(cancelled, "MARKET_SCOUT", "ad");
+    if (!retry.ok) throw new Error("Expected retry");
+    expect(retry.rewardId).not.toBe(first.rewardId);
+    expect(retry.state.monetization.usage.sessionRewardCount).toBe(0);
+  });
+
+  it("applies reach once per listing lifecycle, including after a no-offer roll and cold reload", () => {
+    const ready = { ...makeReadyForRewards(), seed: 1, cashMinor: 100_000_000 };
+    const listing = ready.listings[0];
+    const bought = purchaseListing(ready, listing, listing.priceMinor, 0);
+    if (!bought.ok) throw new Error("Expected purchase");
+    const asset = bought.state.ownedAssets.at(-1)!;
+    // A deliberately overpriced listing makes the no-offer path deterministic.
+    const listed = createPlayerListing(
+      bought.state,
+      asset.id,
+      asset.instance.fairValueMinor * 20,
+      0,
+    );
+    if (!listed.ok) throw new Error("Expected listing");
+    const request = requestMonetizedAction(
+      { ...listed.state, gameTimeMin: 5 },
+      "LISTING_REACH",
+      "ad",
+    );
+    if (!request.ok) throw new Error("Expected reach request");
+    const applied = applyRewardedResult(request.state, request.rewardId);
+    expect(applied.buyerOffers).toHaveLength(0);
+    expect(applied.monetization.usage.sessionRewardCount).toBe(1);
+    const listingId = listed.state.playerListings.at(-1)!.id;
+    expect(
+      applied.transactionJournal.filter(
+        (entry) => entry.metadata.exposureRollCompleted === true,
+      ),
+    ).toHaveLength(1);
+    expect(
+      getRewardEligibility(
+        advanceRewardClock(applied, 90_000),
+        "LISTING_REACH",
+      ),
+    ).toEqual({ ok: false, reason: "NO_ELIGIBLE_TARGET" });
+    // Simulate persisted data being reopened beyond the rolling reward window.
+    const cold = beginRewardSession(
+      JSON.parse(JSON.stringify(applied)),
+      86_490_000,
+    );
+    const cleaned = requestMonetizedAction(cold, "LISTING_REACH", "ad");
+    expect(cleaned.ok).toBe(false);
+    expect(cleaned.state.monetization.rewardTransactions).toHaveLength(0);
+    expect(getRewardEligibility(cleaned.state, "LISTING_REACH")).toEqual({
+      ok: false,
+      reason: "NO_ELIGIBLE_TARGET",
+    });
+    expect(cleaned.state.cashMinor).toBe(applied.cashMinor);
+    expect(cleaned.state.transactionJournal).toEqual(
+      applied.transactionJournal,
+    );
+    const withdrawn = withdrawPlayerListing(cleaned.state, listingId, 6);
+    if (!withdrawn.ok) throw new Error("Expected withdrawal");
+    const relisted = createPlayerListing(
+      withdrawn.state,
+      asset.id,
+      asset.instance.fairValueMinor * 20,
+      6,
+    );
+    if (!relisted.ok) throw new Error("Expected new lifecycle");
+    expect(
+      getRewardEligibility(
+        { ...relisted.state, gameTimeMin: 11 },
+        "LISTING_REACH",
+      ),
+    ).toMatchObject({
+      ok: true,
+      targetId: relisted.state.playerListings.at(-1)!.id,
+    });
+  });
+
+  it("preserves the rolling global cap across cold starts and session-scoped failure recovery", () => {
+    const ready = makeReadyForRewards();
+    ready.monetization.rewardTransactions = Array.from(
+      { length: 8 },
+      (_, index) => ({
+        id: `applied:${index}`,
+        placementId: "LISTING_REACH",
+        source: "ad",
+        status: "APPLIED",
+        requestedAt: 0,
+        appliedAt: 0,
+        appliedAtWallMs: 0,
+        sessionId: 0,
+      }),
+    );
+    const cold = beginRewardSession(ready, 90_000);
+    expect(getRewardEligibility(cold, "MARKET_SCOUT")).toEqual({
+      ok: false,
+      reason: "GLOBAL_CAP",
+    });
+    ready.monetization.rewardTransactions = [0, 1].map((index) => ({
+      id: `failed:${index}`,
+      placementId: "MARKET_SCOUT",
+      source: "ad",
+      status: "FAILED",
+      requestedAt: index,
+      requestedAtWallMs: 0,
+      sessionId: 0,
+    }));
+    expect(getRewardEligibility(ready, "MARKET_SCOUT")).toEqual({
+      ok: false,
+      reason: "PROVIDER_FAILURE_HIDDEN",
+    });
+    expect(
+      getRewardEligibility(beginRewardSession(ready, 90_000), "MARKET_SCOUT")
+        .ok,
+    ).toBe(true);
   });
 
   it("restores exactly 25 scans without changing the existing market", () => {
@@ -215,22 +430,56 @@ describe("monetization reward eligibility", () => {
     expect(claimed.ok).toBe(true);
     if (!claimed.ok) throw new Error("Expected ad-free claim");
     expect(claimed.state.monetization.usage.sessionRewardCount).toBe(1);
-    expect(claimed.state.monetization.rewardTransactions[0]?.source).toBe("premium");
-    const revoked = syncVerifiedEntitlement(noAds, "tradeup_no_ads_lifetime", "REVOKED", "ios");
+    expect(claimed.state.monetization.rewardTransactions[0]?.source).toBe(
+      "premium",
+    );
+    const revoked = syncVerifiedEntitlement(
+      noAds,
+      "tradeup_no_ads_lifetime",
+      "REVOKED",
+      "ios",
+    );
     expect(hasAdFreeEntitlement(revoked)).toBe(false);
-    expect(requestMonetizedAction(revoked, "MARKET_SCOUT", "premium").ok).toBe(false);
+    expect(requestMonetizedAction(revoked, "MARKET_SCOUT", "premium").ok).toBe(
+      false,
+    );
   });
 
   it("Premium avatar access survives a standalone refund and standalone access survives Premium refund", () => {
-    const premium = setRewardEntitlement(initialState(0, "SANDBOX"), "tradeup_premium_lifetime", true, "ios");
+    const premium = setRewardEntitlement(
+      initialState(0, "SANDBOX"),
+      "tradeup_premium_lifetime",
+      true,
+      "ios",
+    );
     premium.profile.avatarId = "gece-analisti";
     expect(ownsAnimatedAvatars(premium)).toBe(true);
-    const withStandalone = setRewardEntitlement(premium, "tradeup_animated_avatars_01", true, "ios");
-    const standaloneRevoked = syncVerifiedEntitlement(withStandalone, "tradeup_animated_avatars_01", "REVOKED", "ios");
+    const withStandalone = setRewardEntitlement(
+      premium,
+      "tradeup_animated_avatars_01",
+      true,
+      "ios",
+    );
+    const standaloneRevoked = syncVerifiedEntitlement(
+      withStandalone,
+      "tradeup_animated_avatars_01",
+      "REVOKED",
+      "ios",
+    );
     expect(standaloneRevoked.profile.avatarId).toBe("gece-analisti");
-    const restoredStandalone = syncVerifiedEntitlement(withStandalone, "tradeup_premium_lifetime", "REVOKED", "ios");
+    const restoredStandalone = syncVerifiedEntitlement(
+      withStandalone,
+      "tradeup_premium_lifetime",
+      "REVOKED",
+      "ios",
+    );
     expect(restoredStandalone.profile.avatarId).toBe("gece-analisti");
-    const premiumRevoked = syncVerifiedEntitlement(standaloneRevoked, "tradeup_premium_lifetime", "REVOKED", "ios");
+    const premiumRevoked = syncVerifiedEntitlement(
+      standaloneRevoked,
+      "tradeup_premium_lifetime",
+      "REVOKED",
+      "ios",
+    );
     expect(premiumRevoked.profile.avatarId).toBe("pazar-kasifi");
   });
 

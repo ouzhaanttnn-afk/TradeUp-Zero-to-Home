@@ -4,6 +4,7 @@ import type {
   Family,
   PreparationDefinition,
 } from "../domain/models";
+import release110Content from "./release110.json" with { type: "json" };
 
 type Seed = Omit<
   Family,
@@ -1584,7 +1585,7 @@ const upperMidSeeds: Seed[] = [
   ],
   [
     "laser_engraver",
-    "Masaüstü Lazer Kazıma Makinesi",
+    "Kompakt Lazer Kazıma Makinesi",
     "prd_laser_engraver",
     3_600_000,
     "Bilgisayar",
@@ -2879,7 +2880,7 @@ const nextUpdateSeeds: Seed[] = [
   ],
   [
     "desktop_laser_engraver",
-    "Masaüstü Lazer Kazıma Makinesi",
+    "Profesyonel Lazer Kazıma Makinesi",
     "prd_desktop_laser_engraver",
     9_800_000,
     "Bilgisayar",
@@ -2998,6 +2999,31 @@ const nextUpdateSeeds: Seed[] = [
 
 export const nextUpdateFamilies: Family[] = nextUpdateSeeds.map(defineFamily);
 
+// Data-only expansion: existing valuation, evidence and preparation rules apply.
+export const release110Families: Family[] = release110Content.map((entry, index) => {
+  const family = defineFamily({
+    id: entry.id, name: entry.name, tier: entry.tier, category: entry.category,
+    baseValueMinor: entry.baseValueMinor, assetKey: `prd_${entry.id}`,
+    attributeLabels: entry.attributeLabels as [string, string, string],
+    evidenceLabels: entry.evidenceLabels as [string, string],
+    demand: 0.58 + (index % 4) * 0.05,
+    liquidity: 0.53 + (index % 3) * 0.06,
+    rarity: 1 + (index % 2), conditionCap: 96,
+  });
+  // Count attributes describe equipment, not a generic 1–100 quality score.
+  const countRanges: Record<string, [number, number]> = {
+    sewing_overlocker: [4, 4], digital_oscilloscope: [2, 4],
+    commercial_deck_oven: [2, 4], rack_audio_power_amp: [2, 4],
+    cine_follow_focus_kit: [1, 1], enterprise_network_switch: [24, 24],
+    modular_synth_rack: [8, 24],
+  };
+  const range = countRanges[entry.id];
+  if (range) family.attributes[1] = { ...family.attributes[1], min: range[0], max: range[1] };
+  if (entry.id === "smart_lock") family.attributes[1].label = "Pil sağlığı";
+  if (entry.id === "commercial_coffee_grinder") family.attributes[1].label = "Hazne kapasitesi";
+  return family;
+});
+
 export const families: Family[] = [
   ...heroFamilies,
   ...scaledSeeds.map(defineFamily),
@@ -3008,6 +3034,7 @@ export const families: Family[] = [
   ...lateCareerExpansionFamilies,
   ...vehicleFamilies,
   ...nextUpdateFamilies,
+  ...release110Families,
 ];
 export const familyById = (id: string) =>
   families.find((family) => family.id === id);

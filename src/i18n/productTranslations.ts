@@ -1,5 +1,7 @@
 // Auto-generated product family translations dictionary
+import release110Content from "../content/release110.json" with { type: "json" };
 export const productTranslations: Record<string, { en: string; de: string; es: string }> = {
+  ...Object.fromEntries(release110Content.map((entry) => [entry.id, entry.translations])),
   "notebook": {
     "en": "Leather Journal Box Set",
     "de": "Leder-Notizbuch im Schuber",
@@ -1068,6 +1070,7 @@ export const productTranslations: Record<string, { en: string; de: string; es: s
 };
 
 export const trNameToId: Record<string, string> = {
+  ...Object.fromEntries(release110Content.map((entry) => [entry.name, entry.id])),
   "Deri Kapaklı Kutu Defteri": "notebook",
   "Koleksiyonluk Klasik Plak": "vinyl",
   "Koleksiyonluk İlk Baskı Kitap Seti": "book",
@@ -1208,6 +1211,8 @@ export const trNameToId: Record<string, string> = {
   "Beş Parça Akustik Davul Seti": "acoustic_drum_kit",
   "İki Işıklı Stüdyo Paraflaş Seti": "studio_strobe_kit",
   "Masaüstü Lazer Kazıma Makinesi": "desktop_laser_engraver",
+  "Kompakt Lazer Kazıma Makinesi": "laser_engraver",
+  "Profesyonel Lazer Kazıma Makinesi": "desktop_laser_engraver",
   "Tezgâh Tipi Daire Testere": "table_saw",
   "Taşınabilir Sessiz Jeneratör": "portable_generator",
   "Yüksek Basınçlı Yıkama Makinesi": "pressure_washer",
@@ -1283,6 +1288,7 @@ export const trNameToId: Record<string, string> = {
 };
 
 export const idToTrName: Record<string, string> = {
+  ...Object.fromEntries(release110Content.map((entry) => [entry.id, entry.name])),
   "notebook": "Deri Kapaklı Kutu Defteri",
   "vinyl": "Koleksiyonluk Klasik Plak",
   "book": "Koleksiyonluk İlk Baskı Kitap Seti",
@@ -1422,7 +1428,7 @@ export const idToTrName: Record<string, string> = {
   "digital_piano": "88 Tuş Mobilya Tipi Dijital Piyano",
   "acoustic_drum_kit": "Beş Parça Akustik Davul Seti",
   "studio_strobe_kit": "İki Işıklı Stüdyo Paraflaş Seti",
-  "laser_engraver": "Masaüstü Lazer Kazıma Makinesi",
+  "laser_engraver": "Kompakt Lazer Kazıma Makinesi",
   "table_saw": "Tezgâh Tipi Daire Testere",
   "portable_generator": "Taşınabilir Sessiz Jeneratör",
   "pressure_washer": "Yüksek Basınçlı Yıkama Makinesi",
@@ -1487,7 +1493,7 @@ export const idToTrName: Record<string, string> = {
   "pressure_cooker": "Elektrikli Basınçlı Pişirici",
   "label_cutter": "Masaüstü Etiket Kesici",
   "spiral_dough_mixer": "Profesyonel Hamur Mikseri",
-  "desktop_laser_engraver": "Masaüstü Lazer Kazıma Makinesi",
+  "desktop_laser_engraver": "Profesyonel Lazer Kazıma Makinesi",
   "thermal_camera": "Termal Görüntüleme Kamerası",
   "drone_controller": "Ekranlı Drone Kumandası",
   "electric_cargo_bicycle": "Elektrikli Yük Bisikleti",

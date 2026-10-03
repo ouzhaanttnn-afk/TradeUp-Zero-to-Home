@@ -1,11 +1,30 @@
 import { stat } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import assetManifest from "./assets/manifest/assetManifest.json";
+import sharp from "sharp";
+import release110Content from "./content/release110.json" with { type: "json" };
 
 describe("product asset delivery budget", () => {
+  it("keeps every new object complete inside a transparent512 px canvas", async () => {
+    for (const product of release110Content) {
+      const { data, info } = await sharp(fileURLToPath(new URL(`./assets/products/prd_${product.id}.webp`, import.meta.url)))
+        .ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+      expect([info.width, info.height, info.channels]).toEqual([512, 512, 4]);
+      expect(data[3]).toBe(0);
+      let visible = 0;
+      for (let y = 0; y < 512; y++) for (let x = 0; x < 512; x++) {
+        if (data[(y * 512 + x) * 4 + 3] > 8) {
+          visible++;
+          if (x < 30 || x > 481 || y < 30 || y > 481) throw new Error(`Clipped art: ${product.id}`);
+        }
+      }
+      expect(visible).toBeGreaterThan(15_000);
+    }
+  });
   it("ships every dedicated product as a compact WebP", async () => {
     const manifestSources = assetManifest.assets.map((asset) => asset.source);
-    expect(manifestSources).toHaveLength(213);
+    expect(manifestSources).toHaveLength(237);
     expect(manifestSources.every((source) => source.endsWith(".webp"))).toBe(
       true,
     );

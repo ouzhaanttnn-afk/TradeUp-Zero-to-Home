@@ -1,0 +1,65 @@
+workflows:
+  tradeup-ios-testflight:
+    name: TradeUp 1.1.0 signed iOS upload
+    instance_type: mac_mini_m2
+    max_build_duration: 45
+    # Manual only. Do not auto-build every content commit or spend paid minutes.
+    inputs:
+      build_number:
+        description: Unused Apple build number greater than 41
+        type: number
+    integrations:
+      app_store_connect: TradeUp App Store Connect
+    environment:
+      node: "24"
+      xcode: "26.6"
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.tradeup.zerotohome
+      vars:
+        APP_STORE_APPLE_ID: "6811362281"
+        TRADEUP_IOS_BUILD_NUMBER: "${{ inputs.build_number }}"
+        VITE_ADMOB_PRODUCTION_ENABLED: "false"
+    scripts:
+      - name: Reject missing or reused build numbers
+        script: |
+          set -euo pipefail
+          [[ "$TRADEUP_IOS_BUILD_NUMBER" =~ ^[1-9][0-9]*$ ]]
+          (( TRADEUP_IOS_BUILD_NUMBER > 41 ))
+          latest=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID")
+          [[ "$latest" =~ ^[0-9]+$ ]]
+          (( TRADEUP_IOS_BUILD_NUMBER > latest ))
+      - name: Verify release source and synchronize native resources
+        script: |
+          set -euo pipefail
+          npm install --global pnpm@11.19.0
+          pnpm install --frozen-lockfile
+          pnpm test
+          pnpm lint
+          pnpm build
+          pnpm cap:sync:ios
+      - name: Apply existing signing identities
+        script: |
+          set -euo pipefail
+          xcode-project use-profiles --project "$CM_BUILD_DIR/ios/App/App.xcodeproj"
+      - name: Archive and export signed IPA
+        script: |
+          set -euo pipefail
+          xcode-project build-ipa \
+            --project "$CM_BUILD_DIR/ios/App/App.xcodeproj" \
+            --scheme App \
+            --archive-flags="-destination generic/platform=iOS CURRENT_PROJECT_VERSION=$TRADEUP_IOS_BUILD_NUMBER"
+          archive=$(find "$CM_BUILD_DIR/build/ios/xcarchive" -maxdepth 1 -name '*.xcarchive' -print -quit)
+          test -n "$archive"
+          app_plist="$archive/Products/Applications/App.app/Info.plist"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app_plist")" = '1.1.0'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$app_plist")" = "$TRADEUP_IOS_BUILD_NUMBER"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - build/ios/xcarchive/**/*.dSYM
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: false
+        submit_to_app_store: false

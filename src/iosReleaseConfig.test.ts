@@ -14,7 +14,7 @@ describe("iOS release device contract", () => {
 
     expect(project).not.toContain('TARGETED_DEVICE_FAMILY = "1,2";');
     expect(project.match(/TARGETED_DEVICE_FAMILY = 1;/g)).toHaveLength(2);
-    expect(project.match(/MARKETING_VERSION = 1\.0\.4;/g)).toHaveLength(2);
+    expect(project.match(/MARKETING_VERSION = 1\.1\.0;/g)).toHaveLength(2);
     expect(info).not.toContain("UISupportedInterfaceOrientations~ipad");
   });
 });

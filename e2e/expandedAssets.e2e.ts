@@ -1,7 +1,12 @@
 import { expect, test, type Page } from "@playwright/test";
 import { completeFirstLaunch } from "./helpers";
-import { familyById } from "../src/content/families";
-import { initialState, validateState, type GameState } from "../src/game";
+import { familyById, release110Families } from "../src/content/families";
+import {
+  initialState,
+  market,
+  validateState,
+  type GameState,
+} from "../src/game";
 
 const persistGame = async (page: Page, game: GameState) => {
   await page.evaluate(async (savedGame) => {
@@ -22,6 +27,74 @@ const persistGame = async (page: Page, game: GameState) => {
     }
   }, game);
 };
+
+for (const width of [320, 390, 430])
+  test(`release1.1.0 artwork loads and fits at${width}px`, async ({
+    page,
+  }, testInfo) => {
+    await page.setViewportSize({ width, height: 844 });
+    const state = initialState(Date.now(), "SANDBOX");
+    const canonicalListings = new Map<string, GameState["listings"][number]>();
+    for (let cycle = 0; cycle < 1000 && canonicalListings.size < 24; cycle++) {
+      for (const listing of market(90_421, 500_000_000, cycle, 0, 24)) {
+        if (release110Families.some((family) => family.id === listing.familyId))
+          canonicalListings.set(listing.familyId, listing);
+      }
+    }
+    expect(canonicalListings.size).toBe(24);
+    state.listings = release110Families.map((family) => ({
+      ...canonicalListings.get(family.id)!,
+      id: `release110:${family.id}`,
+    }));
+    await page.goto("/");
+    await completeFirstLaunch(page);
+    await persistGame(page, validateState(state));
+    await page.reload();
+    for (const family of release110Families) {
+      const card = page.locator(
+        `.market-card:has(img[src*="${family.assetKey}"])`,
+      );
+      await expect(card).toHaveCount(1);
+      await expect(card.locator(".product-visual")).not.toHaveClass(/fallback/);
+      await expect
+        .poll(() =>
+          card
+            .locator("img")
+            .evaluate(
+              (image: HTMLImageElement) =>
+                image.complete && image.naturalWidth === 512,
+            ),
+        )
+        .toBe(true);
+    }
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    await page.screenshot({
+      path: testInfo.outputPath(`release110-market-${width}.png`),
+      animations: "disabled",
+    });
+    await page.locator(".market-card").first().click();
+    const bounds = await page.locator(".hero-art").evaluate((hero) => {
+      const frame = hero.getBoundingClientRect();
+      const image = hero.querySelector("img")!.getBoundingClientRect();
+      return {
+        frameHeight: frame.height,
+        imageHeight: image.height,
+        top: image.top - frame.top,
+        bottom: frame.bottom - image.bottom,
+      };
+    });
+    expect(bounds.imageHeight).toBeLessThanOrEqual(bounds.frameHeight);
+    expect(bounds.top).toBeGreaterThanOrEqual(0);
+    expect(bounds.bottom).toBeGreaterThanOrEqual(0);
+    await page.screenshot({
+      path: testInfo.outputPath(`release110-detail-${width}.png`),
+      animations: "disabled",
+    });
+  });
 
 test("expanded product families use dedicated mobile artwork", async ({
   page,
