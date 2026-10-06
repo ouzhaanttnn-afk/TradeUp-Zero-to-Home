@@ -2,6 +2,11 @@ name: iOS TestFlight
 
 on:
   workflow_dispatch:
+    inputs:
+      build_number:
+        description: Unused Apple build number (defaults to the run number)
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -18,6 +23,9 @@ jobs:
       APP_BUNDLE_ID: com.tradeup.zerotohome
       APPLE_TEAM_ID: 8X6KZC5R23
       PROFILE_NAME: TradeUp App Store
+      APP_STORE_APPLE_ID: '6811362281'
+      EXPECTED_MARKETING_VERSION: 1.1.0
+      TRADEUP_IOS_BUILD_NUMBER: ${{ inputs.build_number || github.run_number }}
       VITE_ADMOB_PRODUCTION_ENABLED: 'false'
       VITE_ADMOB_TEST_ENABLED: 'false'
     steps:
@@ -42,6 +50,23 @@ jobs:
           pnpm build
           node scripts/check-review-ad-config.mjs
           pnpm cap:sync:ios
+
+      - name: Install App Store Connect API key
+        env:
+          APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+        run: |
+          mkdir -p "$HOME/.appstoreconnect/private_keys"
+          API_KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
+          echo -n "$APP_STORE_CONNECT_API_KEY_BASE64" | base64 --decode -o "$API_KEY_PATH"
+          chmod 600 "$API_KEY_PATH"
+          echo "APP_STORE_CONNECT_API_KEY_PATH=$API_KEY_PATH" >> "$GITHUB_ENV"
+
+      - name: Reject missing or reused build numbers
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        run: node scripts/asc-build.mjs guard "$TRADEUP_IOS_BUILD_NUMBER"
 
       - name: Install signing certificate and profile
         env:
@@ -78,8 +103,20 @@ jobs:
             -configuration Release \
             -destination generic/platform=iOS \
             -archivePath "$RUNNER_TEMP/TradeUp.xcarchive" \
-            CURRENT_PROJECT_VERSION="$GITHUB_RUN_NUMBER" \
+            CURRENT_PROJECT_VERSION="$TRADEUP_IOS_BUILD_NUMBER" \
             clean archive
+
+      - name: Verify archived Info.plist
+        run: |
+          APP_PLIST="$RUNNER_TEMP/TradeUp.xcarchive/Products/Applications/App.app/Info.plist"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP_PLIST")" = "$EXPECTED_MARKETING_VERSION"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP_PLIST")" = "$TRADEUP_IOS_BUILD_NUMBER"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP_PLIST")" = "$APP_BUNDLE_ID"
+          if /usr/libexec/PlistBuddy -c 'Print :NSUserTrackingUsageDescription' "$APP_PLIST" >/dev/null 2>&1; then
+            echo "Archived Info.plist declares App Tracking Transparency" >&2
+            exit 1
+          fi
+          echo "Archive: $APP_BUNDLE_ID $EXPECTED_MARKETING_VERSION ($TRADEUP_IOS_BUILD_NUMBER), no NSUserTrackingUsageDescription"
 
       - name: Export signed IPA
         run: |
@@ -114,16 +151,19 @@ jobs:
 
       - name: Upload to App Store Connect
         env:
-          APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
           APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
         run: |
-          mkdir -p "$HOME/.appstoreconnect/private_keys"
-          API_KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
-          echo -n "$APP_STORE_CONNECT_API_KEY_BASE64" | base64 --decode -o "$API_KEY_PATH"
-          chmod 600 "$API_KEY_PATH"
           IPA_PATH=$(find "$RUNNER_TEMP/export" -maxdepth 1 -name '*.ipa' -print -quit)
           test -n "$IPA_PATH"
+          IPA_PLIST="$RUNNER_TEMP/ipa-Info.plist"
+          unzip -p "$IPA_PATH" 'Payload/App.app/Info.plist' > "$IPA_PLIST"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$IPA_PLIST")" = "$TRADEUP_IOS_BUILD_NUMBER"
+          if /usr/libexec/PlistBuddy -c 'Print :NSUserTrackingUsageDescription' "$IPA_PLIST" >/dev/null 2>&1; then
+            echo "Signed IPA declares App Tracking Transparency" >&2
+            exit 1
+          fi
+          shasum -a 256 "$IPA_PATH"
           xcrun altool --validate-app --type ios --file "$IPA_PATH" \
             --apiKey "$APP_STORE_CONNECT_KEY_ID" \
             --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID"
@@ -131,11 +171,17 @@ jobs:
             --apiKey "$APP_STORE_CONNECT_KEY_ID" \
             --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID"
 
+      - name: Report App Store Connect processing
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        run: node scripts/asc-build.mjs wait "$TRADEUP_IOS_BUILD_NUMBER"
+
       - name: Upload IPA diagnostic artifact
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: tradeup-ios-${{ github.run_number }}
+          name: tradeup-ios-${{ env.TRADEUP_IOS_BUILD_NUMBER }}
           path: ${{ runner.temp }}/export/*.ipa
           if-no-files-found: ignore
           retention-days: 3
