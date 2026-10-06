@@ -1,5 +1,26 @@
 # TradeUp iOS Release Readiness
 
+## 6 Ekim 2026 — 1.1.0 (43) ATT'siz build yüklendi, App Review'a gönderilmedi
+
+- Apple, **1.1.0 (42)** sürümünü **2.1** kapsamında reddetti: binary
+  `NSUserTrackingUsageDescription` ile ATT desteği bildiriyordu ama inceleme
+  cihazında (iPadOS 27.0.1) ATT izni görünmedi. TradeUp takip yapmaz; ATT
+  bildirimi ve izin akışı kaldırıldı (`06776f1`). Reklamlar UMP/`canRequestAds`
+  kapısıyla ve `npa: true` olarak kalır; Firebase `AnalyticsWithoutAdIdSupport`
+  ve `FIREBASE_ANALYTICS_COLLECTION_ENABLED=false` korunur. Gizlilik/destek
+  e-postası `studionostos.dev@gmail.com`.
+- GitHub iOS workflow'u artık App Store Connect'teki son build'den büyük
+  numara ister, arşiv/IPA `Info.plist` içinde ATT anahtarı olmadığını ve
+  sürüm/build değerlerini doğrular (`103fca8`).
+- [Build 43 workflow'u](https://github.com/ouzhaanttnn-afk/TradeUp-Zero-to-Home/actions/runs/37520959306)
+  `103fca8` kaynağından macOS 26 / Xcode 26.6 ile arşiv, imzalı IPA, Apple
+  doğrulaması (`VERIFY SUCCEEDED`) ve yüklemeyi (`UPLOAD SUCCEEDED`, delivery
+  `f5dbb706-fce9-431c-9426-ca4f4aa8c0da`) tamamladı. IPA SHA-256:
+  `73c5e4f857dc9181558ead4a0ae52db59ce2019d8e05c26eee913efd0ff23ff8`.
+  App Store Connect işleme durumu: `1.1.0 (43): VALID`.
+- App Review'a gönderilmedi; App Privacy ve build seçimi kullanıcıda.
+  Production ve test reklam bayrakları bu binary'de de kapalı.
+
 ## 1 Ekim 2026, 06:03 — 1.0.4 (41) App Review'a gönderildi
 
 - Kullanıcının açık talebiyle yeni imzalı **1.0.4 (41)** hazırlandı ve Apple
