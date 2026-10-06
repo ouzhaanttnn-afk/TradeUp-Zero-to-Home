@@ -74,14 +74,13 @@ export const classifyAdMobFailure = (
   return "PROVIDER";
 };
 
+// TradeUp does not track: no ATT/IDFA request, and every ad request is npa.
 type AdMobPort = Pick<
   typeof AdMob,
   | "initialize"
   | "requestConsentInfo"
   | "showConsentForm"
   | "showPrivacyOptionsForm"
-  | "trackingAuthorizationStatus"
-  | "requestTrackingAuthorization"
   | "prepareRewardVideoAd"
   | "showRewardVideoAd"
   | "prepareInterstitial"
@@ -154,14 +153,6 @@ export const createAdMobAdapters = (
     return consentSnapshot(info);
   };
 
-  const requestTrackingIfNeeded = async (isCancelled = () => false) => {
-    if (platform !== "ios") return;
-    const authorization = await port.trackingAuthorizationStatus();
-    if (!isCancelled() && authorization.status === "notDetermined") {
-      await port.requestTrackingAuthorization();
-    }
-  };
-
   return {
     consent: {
       available,
@@ -216,15 +207,13 @@ export const createAdMobAdapters = (
           if (settled) removeListener(listener);
           else listeners.push(listener);
         };
-        // Bound tracking, loading and listener setup too, not only presentation.
+        // Bound loading and listener setup too, not only presentation.
         const timeout = setTimeout(
           () => settle({ status: "FAILED", reason: "NETWORK" }),
           options.rewardTimeoutMs ?? 180_000,
         );
         try {
           void (async () => {
-            await requestTrackingIfNeeded(() => settled);
-            if (settled) return;
             await port.prepareRewardVideoAd({
               adId,
               isTesting: !productionEnabled,
@@ -276,7 +265,6 @@ export const createAdMobAdapters = (
       if (!adId) return false;
       showingInterstitial = true;
       try {
-        await requestTrackingIfNeeded();
         await port.prepareInterstitial({
           adId,
           isTesting: !productionEnabled,

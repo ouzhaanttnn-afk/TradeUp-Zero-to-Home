@@ -14,7 +14,7 @@
         ><a href="/terms.html">Kullanım şartları</a
         ><a href="/support.html">Destek</a>
       </nav>
-      <span class="eyebrow">Gizlilik politikası · 29 Eylül 2026</span>
+      <span class="eyebrow">Gizlilik politikası · 6 Ekim 2026</span>
       <h1>Verileriniz hakkında açık bilgi.</h1>
       <p class="lead">
         TradeUp: Zero to Home hesap açmanızı istemez. Oyun ilerlemeniz cihazda
@@ -37,22 +37,26 @@
           satışın tamamlanması) Google Firebase Analytics'e gönderilir. Oyun içi adınız,
           fiyatlarınız, bakiyeniz ve olayların yerel kimlikleri gönderilmez.
           Firebase SDK'sı uygulama örneği ve cihazla ilgili teknik bilgileri de
-          işleyebilir. Analitiği kapatmak cihazdaki olay kuyruğunu temizler ve
+          işleyebilir; iOS'ta Firebase reklam tanımlayıcısı (IDFA) desteği
+          olmadan çalışır. Analitiği kapatmak cihazdaki olay kuyruğunu temizler ve
           Firebase veri toplamayı durdurur. Oyun analitik olmadan da çalışır.
           Android test sürümünde Firebase analitiği devre dışıdır.
         </p>
         <h2>Reklam ve izin altyapısı</h2>
         <p>
           iOS ve Android uygulamaları açıldığında reklam izni durumunu kontrol etmek için
-          Google AdMob ve izin altyapısı başlatılabilir; bu yalnızca ödüllü
-          reklam düğmesine bastığınızda gerçekleşmez. İzin ve reklam sunumu
-          sırasında Google Mobile Ads SDK; IP adresi, cihaz veya reklam
-          tanımlayıcıları, uygulama performansı ve çökme kayıtları ile reklam
-          etkileşimleri gibi bilgileri işleyebilir. Google'ın iOS SDK bildirimi,
-          cihaz kimliğinin uygulamalar arası reklam ölçümü veya takip amacıyla
-          kullanılabileceğini belirtir; iOS'ta buna ilişkin izin ve tercihlerinizi
-          cihaz ayarlarından yönetebilirsiniz. Uygulama, kişiselleştirilmemiş
-          reklam ister; ödüllü reklamlar isteğe bağlıdır. Belirlenen ticaret
+          Google AdMob ve Google'ın izin altyapısı (UMP) başlatılabilir; bu yalnızca ödüllü
+          reklam düğmesine bastığınızda gerçekleşmez. TradeUp, App Tracking
+          Transparency (Uygulama Takip Şeffaflığı) izni istemez, reklam
+          tanımlayıcısına (IDFA) erişim talep etmez ve cihaz tanımlayıcılarını
+          uygulamalar arası takip için kullanmaz. Uygulama tüm reklamları
+          kişiselleştirilmemiş olarak ister; kişiselleştirilmiş reklam sunmaz.
+          Buna karşın Google Mobile Ads SDK, reklamı sunmak, ölçmek, güvenliğini
+          sağlamak, sorunlarını gidermek ve reklam hizmetini işletmek için IP
+          adresi, cihaz ve uygulama bilgileri, uygulama performansı ve çökme
+          kayıtları ile reklam etkileşimleri gibi teknik bilgileri Google'ın
+          kendi gizlilik uygulamalarına göre işleyebilir. Ödüllü reklamlar
+          isteğe bağlıdır. Belirlenen ticaret
           eşiklerinde iOS sürümünde geçiş reklamı da gösterilebilir. Android test
           sürümünde yalnız Google'ın test ödüllü reklam birimleri kullanılır;
           otomatik geçiş reklamı yoktur. Bölgenizde gerektiğinde
@@ -73,7 +77,8 @@
         </p>
         <h2>İzinler ve kontrolünüz</h2>
         <p>
-          Oyun konum, kişiler, kamera veya mikrofona erişim istemez. Yerel oyun
+          Oyun konum, kişiler, kamera, mikrofon veya uygulama takibi (ATT)
+          izni istemez. Yerel oyun
           kaydını uygulamanın Profil ve Ayarlar bölümünden sıfırlayabilirsiniz.
           Gizlilik talebi veya sorunuz için aşağıdaki adrese yazabilirsiniz.
           Üçüncü tarafların veri işleme uygulamaları kendi politikalarına tabidir.
@@ -81,8 +86,8 @@
         <h2>İletişim</h2>
         <p>
           Gizlilik soruları için
-          <a href="mailto:nostoscomp@gmail.com?subject=TradeUp%20Gizlilik"
-            >nostoscomp@gmail.com</a
+          <a href="mailto:studionostos.dev@gmail.com?subject=TradeUp%20Gizlilik"
+            >studionostos.dev@gmail.com</a
           >
           adresine yazabilirsiniz.
         </p>

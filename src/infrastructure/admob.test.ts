@@ -56,6 +56,17 @@ describe("AdMob production safety", () => {
   });
 });
 
+// ATT was removed from TradeUp. These legacy plugin methods throw so any
+// accidental reintroduction of an ATT/IDFA gate fails the ad flow tests.
+const attTripwires = () => ({
+  trackingAuthorizationStatus: vi.fn(() => {
+    throw new Error("ATT_MUST_NOT_BE_QUERIED");
+  }),
+  requestTrackingAuthorization: vi.fn(() => {
+    throw new Error("ATT_MUST_NOT_BE_REQUESTED");
+  }),
+});
+
 describe("AdMob native adapters", () => {
   it("disabled mode makes zero native calls and cannot grant a reward", async () => {
     const port = Object.fromEntries(
@@ -64,8 +75,6 @@ describe("AdMob native adapters", () => {
         "requestConsentInfo",
         "showConsentForm",
         "showPrivacyOptionsForm",
-        "trackingAuthorizationStatus",
-        "requestTrackingAuthorization",
         "prepareRewardVideoAd",
         "showRewardVideoAd",
         "prepareInterstitial",
@@ -103,12 +112,11 @@ describe("AdMob native adapters", () => {
       }),
       showConsentForm: vi.fn(),
       showPrivacyOptionsForm: vi.fn(),
-      trackingAuthorizationStatus: vi
-        .fn()
-        .mockResolvedValue({ status: "denied" }),
-      requestTrackingAuthorization: vi.fn(),
+      ...attTripwires(),
       prepareRewardVideoAd: vi.fn(),
       showRewardVideoAd: vi.fn(),
+      prepareInterstitial: vi.fn(),
+      showInterstitial: vi.fn(),
     };
     const adapters = createAdMobAdapters(port as never, {
       platform: "ios",
@@ -122,6 +130,54 @@ describe("AdMob native adapters", () => {
     });
     expect(port.prepareRewardVideoAd).not.toHaveBeenCalled();
     expect(await adapters.showTradeInterstitial()).toBe(false);
+    expect(port.prepareInterstitial).not.toHaveBeenCalled();
+  });
+
+  it("keeps UMP as the only gate: no ad before refresh, form when required", async () => {
+    const port = {
+      initialize: vi.fn().mockResolvedValue(undefined),
+      requestConsentInfo: vi.fn().mockResolvedValue({
+        status: "REQUIRED",
+        isConsentFormAvailable: true,
+        canRequestAds: false,
+      }),
+      showConsentForm: vi.fn().mockResolvedValue({
+        status: "OBTAINED",
+        canRequestAds: true,
+      }),
+      showPrivacyOptionsForm: vi.fn().mockResolvedValue(undefined),
+      ...attTripwires(),
+      prepareRewardVideoAd: vi.fn().mockResolvedValue({}),
+      showRewardVideoAd: vi.fn().mockResolvedValue({}),
+      prepareInterstitial: vi.fn().mockResolvedValue({}),
+      showInterstitial: vi.fn().mockResolvedValue(undefined),
+      addListener: vi.fn().mockResolvedValue({ remove: vi.fn() }),
+    };
+    const adapters = createAdMobAdapters(port as never, {
+      platform: "ios",
+      testEnabled: true,
+    });
+    expect(await adapters.rewarded.show("MARKET_SCOUT")).toEqual({
+      status: "FAILED",
+      reason: "PROVIDER",
+    });
+    expect(await adapters.showTradeInterstitial()).toBe(false);
+    expect(port.prepareRewardVideoAd).not.toHaveBeenCalled();
+    expect(port.prepareInterstitial).not.toHaveBeenCalled();
+
+    expect(await adapters.consent.refresh()).toEqual({
+      canRequestAds: true,
+      adPersonalizationAllowed: false,
+    });
+    expect(port.showConsentForm).toHaveBeenCalledOnce();
+    await adapters.consent.openPrivacyOptions();
+    expect(port.showPrivacyOptionsForm).toHaveBeenCalledOnce();
+    expect((await adapters.rewarded.show("MARKET_SCOUT")).status).toBe(
+      "USER_EARNED",
+    );
+    expect(await adapters.showTradeInterstitial()).toBe(true);
+    expect(port.trackingAuthorizationStatus).not.toHaveBeenCalled();
+    expect(port.requestTrackingAuthorization).not.toHaveBeenCalled();
   });
 
   it("tries one interstitial with the official test unit after consent", async () => {
@@ -134,10 +190,7 @@ describe("AdMob native adapters", () => {
       }),
       showConsentForm: vi.fn(),
       showPrivacyOptionsForm: vi.fn(),
-      trackingAuthorizationStatus: vi
-        .fn()
-        .mockResolvedValue({ status: "notDetermined" }),
-      requestTrackingAuthorization: vi.fn().mockResolvedValue(undefined),
+      ...attTripwires(),
       prepareRewardVideoAd: vi.fn(),
       showRewardVideoAd: vi.fn(),
       prepareInterstitial: vi.fn().mockResolvedValue({ adUnitId: "test" }),
@@ -155,10 +208,8 @@ describe("AdMob native adapters", () => {
       isTesting: true,
       npa: true,
     });
-    expect(port.requestTrackingAuthorization).toHaveBeenCalledOnce();
-    expect(
-      port.requestTrackingAuthorization.mock.invocationCallOrder[0],
-    ).toBeLessThan(port.prepareInterstitial.mock.invocationCallOrder[0]);
+    expect(port.trackingAuthorizationStatus).not.toHaveBeenCalled();
+    expect(port.requestTrackingAuthorization).not.toHaveBeenCalled();
     expect(port.showInterstitial).toHaveBeenCalledOnce();
   });
 
@@ -172,10 +223,7 @@ describe("AdMob native adapters", () => {
       }),
       showConsentForm: vi.fn(),
       showPrivacyOptionsForm: vi.fn(),
-      trackingAuthorizationStatus: vi
-        .fn()
-        .mockResolvedValue({ status: "denied" }),
-      requestTrackingAuthorization: vi.fn(),
+      ...attTripwires(),
       prepareRewardVideoAd: vi.fn().mockResolvedValue({ adUnitId: "test" }),
       showRewardVideoAd: vi.fn().mockResolvedValue({ amount: 1, type: "test" }),
       addListener: vi.fn().mockResolvedValue({ remove: vi.fn() }),
@@ -191,10 +239,47 @@ describe("AdMob native adapters", () => {
     expect(port.prepareRewardVideoAd).toHaveBeenCalledWith(
       expect.objectContaining({ isTesting: true, npa: true }),
     );
+    expect(port.trackingAuthorizationStatus).not.toHaveBeenCalled();
     expect(port.requestTrackingAuthorization).not.toHaveBeenCalled();
   });
 
-  it("skips the ad without granting a reward if the tracking permission flow fails", async () => {
+  it("keeps production rewarded and interstitial requests non-personalized", async () => {
+    const port = {
+      initialize: vi.fn().mockResolvedValue(undefined),
+      requestConsentInfo: vi
+        .fn()
+        .mockResolvedValue({ status: "OBTAINED", canRequestAds: true }),
+      ...attTripwires(),
+      prepareRewardVideoAd: vi.fn().mockResolvedValue({}),
+      showRewardVideoAd: vi.fn().mockResolvedValue({}),
+      prepareInterstitial: vi.fn().mockResolvedValue({}),
+      showInterstitial: vi.fn().mockResolvedValue(undefined),
+      addListener: vi.fn().mockResolvedValue({ remove: vi.fn() }),
+    };
+    const adapters = createAdMobAdapters(port as never, {
+      platform: "ios",
+      productionEnabled: true,
+    });
+    await adapters.consent.refresh();
+    expect((await adapters.rewarded.show("LISTING_REACH")).status).toBe(
+      "USER_EARNED",
+    );
+    expect(await adapters.showTradeInterstitial()).toBe(true);
+    expect(port.prepareRewardVideoAd).toHaveBeenCalledWith({
+      adId: "ca-app-pub-4229088811556918/4992979324",
+      isTesting: false,
+      npa: true,
+    });
+    expect(port.prepareInterstitial).toHaveBeenCalledWith({
+      adId: "ca-app-pub-4229088811556918/1985851659",
+      isTesting: false,
+      npa: true,
+    });
+    expect(port.trackingAuthorizationStatus).not.toHaveBeenCalled();
+    expect(port.requestTrackingAuthorization).not.toHaveBeenCalled();
+  });
+
+  it("grants no reward and shows nothing when ad preparation fails", async () => {
     const port = {
       initialize: vi.fn().mockResolvedValue(undefined),
       requestConsentInfo: vi.fn().mockResolvedValue({
@@ -204,14 +289,15 @@ describe("AdMob native adapters", () => {
       }),
       showConsentForm: vi.fn(),
       showPrivacyOptionsForm: vi.fn(),
-      trackingAuthorizationStatus: vi
-        .fn()
-        .mockResolvedValue({ status: "notDetermined" }),
-      requestTrackingAuthorization: vi
+      ...attTripwires(),
+      prepareRewardVideoAd: vi
         .fn()
         .mockRejectedValue(new Error("unavailable")),
-      prepareRewardVideoAd: vi.fn(),
       showRewardVideoAd: vi.fn(),
+      prepareInterstitial: vi
+        .fn()
+        .mockRejectedValue(new Error("unavailable")),
+      showInterstitial: vi.fn(),
     };
     const adapters = createAdMobAdapters(port as never, {
       platform: "ios",
@@ -222,7 +308,9 @@ describe("AdMob native adapters", () => {
       status: "FAILED",
       reason: "PROVIDER",
     });
-    expect(port.prepareRewardVideoAd).not.toHaveBeenCalled();
+    expect(port.showRewardVideoAd).not.toHaveBeenCalled();
+    expect(await adapters.showTradeInterstitial()).toBe(false);
+    expect(port.showInterstitial).not.toHaveBeenCalled();
   });
 
   it("classifies provider failures without exposing native error details", () => {
@@ -242,10 +330,7 @@ describe("AdMob native adapters", () => {
           status: "NOT_REQUIRED",
           canRequestAds: true,
         }),
-        trackingAuthorizationStatus: vi
-          .fn()
-          .mockResolvedValue({ status: "denied" }),
-        requestTrackingAuthorization: vi.fn().mockResolvedValue(undefined),
+        ...attTripwires(),
         prepareRewardVideoAd: vi.fn().mockResolvedValue({}),
         showRewardVideoAd: vi.fn(() => new Promise(() => {})),
         addListener: vi.fn(async (event: string, callback: () => void) => {
@@ -289,7 +374,7 @@ describe("AdMob native adapters", () => {
     },
   );
 
-  it.each(["tracking", "preparation", "registration", "removal"] as const)(
+  it.each(["preparation", "registration", "removal"] as const)(
     "bounds unresolved native %s without granting or retaining the busy guard",
     async (stage) => {
       let release!: (value: never) => void;
@@ -302,16 +387,11 @@ describe("AdMob native adapters", () => {
         requestConsentInfo: vi
           .fn()
           .mockResolvedValue({ status: "NOT_REQUIRED", canRequestAds: true }),
-        trackingAuthorizationStatus: vi
-          .fn()
-          .mockResolvedValue({ status: "denied" }),
-        requestTrackingAuthorization: vi.fn().mockResolvedValue(undefined),
+        ...attTripwires(),
         prepareRewardVideoAd: vi.fn().mockResolvedValue({}),
         showRewardVideoAd: vi.fn().mockResolvedValue({}),
         addListener: vi.fn().mockResolvedValue({ remove }),
       };
-      if (stage === "tracking")
-        port.trackingAuthorizationStatus.mockImplementationOnce(() => stuck);
       if (stage === "preparation")
         port.prepareRewardVideoAd.mockImplementationOnce(() => stuck);
       if (stage === "registration")
@@ -329,15 +409,10 @@ describe("AdMob native adapters", () => {
       );
       if (stage !== "removal")
         expect(port.showRewardVideoAd).not.toHaveBeenCalled();
-      release(
-        (stage === "registration"
-          ? { remove }
-          : { status: "notDetermined" }) as never,
-      );
+      release((stage === "registration" ? { remove } : {}) as never);
       await Promise.resolve();
       await Promise.resolve();
       if (stage === "registration") expect(remove).toHaveBeenCalledOnce();
-      expect(port.requestTrackingAuthorization).not.toHaveBeenCalled();
       expect((await adapters.rewarded.show("MARKET_SCOUT")).status).toBe(
         "USER_EARNED",
       );
