@@ -35,7 +35,10 @@ export function saveFirebaseAnalyticsConsent(enabled: boolean): boolean {
 
 export function withExplicitAnalyticsConsent(game: GameState): GameState {
   const enabled = hasFirebaseAnalyticsConsent();
-  if (game.analytics.enabled === enabled && (enabled || game.analytics.events.length === 0))
+  if (
+    game.analytics.enabled === enabled &&
+    (enabled || game.analytics.events.length === 0)
+  )
     return game;
   return {
     ...game,
@@ -50,7 +53,9 @@ function sentIds(): Set<string> {
   try {
     const stored = JSON.parse(storage()?.getItem(SENT_KEY) ?? "[]") as unknown;
     return new Set(
-      Array.isArray(stored) ? stored.filter((id): id is string => typeof id === "string") : [],
+      Array.isArray(stored)
+        ? stored.filter((id): id is string => typeof id === "string")
+        : [],
     );
   } catch {
     return new Set();
@@ -65,10 +70,17 @@ export function pendingFirebaseEvents(
   return events.filter((event) => !sent.has(`${seed}:${event.id}`));
 }
 
-function markSent(seed: number, event: AnalyticsEvent, delivered: Set<string>): void {
+function markSent(
+  seed: number,
+  event: AnalyticsEvent,
+  delivered: Set<string>,
+): void {
   delivered.add(`${seed}:${event.id}`);
   try {
-    storage()?.setItem(SENT_KEY, JSON.stringify([...delivered].slice(-MAX_SENT_IDS)));
+    storage()?.setItem(
+      SENT_KEY,
+      JSON.stringify([...delivered].slice(-MAX_SENT_IDS)),
+    );
   } catch {
     // Restricted storage must never interrupt gameplay.
   }
@@ -80,30 +92,50 @@ type GameSource = {
   subscribe: (listener: () => void) => () => void;
 };
 
-let nativeAnalytics: Promise<typeof import("@capacitor-firebase/analytics")> | undefined;
+let nativeAnalytics:
+  Promise<typeof import("@capacitor-firebase/analytics")> | undefined;
+let consentUpdate = Promise.resolve();
 
 function loadNativeAnalytics() {
   nativeAnalytics ??= import("@capacitor-firebase/analytics");
   return nativeAnalytics;
 }
 
-export async function applyFirebaseAnalyticsConsent(enabled: boolean): Promise<void> {
-  if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== "ios") return;
-  try {
-    const { FirebaseAnalytics, ConsentType, ConsentStatus } = await loadNativeAnalytics();
-    await FirebaseAnalytics.setConsent({
-      type: ConsentType.AnalyticsStorage,
-      status: enabled ? ConsentStatus.Granted : ConsentStatus.Denied,
-    });
-    await FirebaseAnalytics.setEnabled({ enabled });
-    if (!enabled) await FirebaseAnalytics.resetAnalyticsData();
-  } catch {
-    // Optional telemetry never blocks the offline game.
-  }
+export async function applyFirebaseAnalyticsConsent(
+  enabled: boolean,
+): Promise<void> {
+  if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== "ios")
+    return;
+  consentUpdate = consentUpdate.then(async () => {
+    try {
+      const { FirebaseAnalytics, ConsentType, ConsentStatus } =
+        await loadNativeAnalytics();
+      for (const type of [
+        ConsentType.AdStorage,
+        ConsentType.AdUserData,
+        ConsentType.AdPersonalization,
+      ]) {
+        await FirebaseAnalytics.setConsent({
+          type,
+          status: ConsentStatus.Denied,
+        });
+      }
+      await FirebaseAnalytics.setConsent({
+        type: ConsentType.AnalyticsStorage,
+        status: enabled ? ConsentStatus.Granted : ConsentStatus.Denied,
+      });
+      await FirebaseAnalytics.setEnabled({ enabled });
+      if (!enabled) await FirebaseAnalytics.resetAnalyticsData();
+    } catch {
+      // Optional telemetry never blocks the offline game.
+    }
+  });
+  await consentUpdate;
 }
 
 export function startFirebaseAnalytics(source: GameSource): void {
-  if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== "ios") return;
+  if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== "ios")
+    return;
   // Collection is also disabled by default in Info.plist. Old local-only
   // analytics preferences cannot grant Firebase consent on upgrade.
   let eligibleThisLaunch = hasFirebaseAnalyticsConsent();
@@ -115,10 +147,16 @@ export function startFirebaseAnalytics(source: GameSource): void {
     flushing = true;
     try {
       await initialized;
+      await consentUpdate;
       const { FirebaseAnalytics } = await loadNativeAnalytics();
       while (true) {
         const snapshot = source.getState();
-        if (!snapshot.ready || !snapshot.game.analytics.enabled || !hasFirebaseAnalyticsConsent()) break;
+        if (
+          !snapshot.ready ||
+          !snapshot.game.analytics.enabled ||
+          !hasFirebaseAnalyticsConsent()
+        )
+          break;
         const event = pendingFirebaseEvents(
           snapshot.game.analytics.events,
           delivered,
@@ -137,7 +175,7 @@ export function startFirebaseAnalytics(source: GameSource): void {
     }
   };
   source.subscribe(() => {
-    if (!hasFirebaseAnalyticsConsent()) eligibleThisLaunch = false;
+    eligibleThisLaunch = hasFirebaseAnalyticsConsent();
     void flush();
   });
   void flush();

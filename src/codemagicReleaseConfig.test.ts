@@ -2,6 +2,26 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 describe("Codemagic release safety", () => {
+  it("provides a manual artifact-only workflow without Apple publication", () => {
+    const workflow = readFileSync(
+      new URL("../codemagic.yaml", import.meta.url),
+      "utf8",
+    ).split("  tradeup-ios-testflight:")[0];
+    expect(workflow).toContain("tradeup-ios-artifact:");
+    expect(workflow).not.toMatch(/^\s+publishing:/m);
+    expect(workflow).not.toContain("triggering:");
+    for (const command of [
+      "--upload-app",
+      "app-store-connect publish",
+      "submit_to_testflight: true",
+      "submit_to_app_store: true",
+    ])
+      expect(workflow).not.toMatch(new RegExp(`^\\s+[^#\\n]*${command}`, "m"));
+    expect(workflow).toContain("TRADEUP_IOS_BUILD_NUMBER > 43");
+    expect(workflow).toContain("verify-ios-artifact.py");
+    expect(workflow).toContain('VITE_ADMOB_PRODUCTION_ENABLED: "true"');
+    expect(workflow).toContain('VITE_ADMOB_TEST_ENABLED: "false"');
+  });
   it("uses only the free M2 workflow and cannot silently reuse an Apple build", () => {
     const workflow = readFileSync(
       new URL("../codemagic.yaml", import.meta.url),

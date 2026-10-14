@@ -70,6 +70,9 @@ describe("application lifecycle", () => {
   });
 
   it("releases the shared purchase/reward busy gate after an early ad close", async () => {
+    const clock = vi
+      .spyOn(systemTimeProvider, "nowWallMs")
+      .mockReturnValue(1000);
     const game = initialState(1000, "SANDBOX");
     game.monetization.firstSaleComplete = true;
     game.monetization.lifetimeActivePlayMinutes = 20;
@@ -104,6 +107,7 @@ describe("application lifecycle", () => {
         realizedProfit: true,
       });
     } finally {
+      clock.mockRestore();
       configureMonetizationAdapters(unavailableMonetizationAdapters);
     }
   });

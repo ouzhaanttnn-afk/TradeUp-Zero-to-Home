@@ -12,7 +12,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/ionic-team/capacitor-swift-pm.git", exact: "8.5.1"),
-        .package(name: "CapacitorCommunityAdmob", path: "../../../node_modules/.pnpm/@capacitor-community+admob@8.1.0/node_modules/@capacitor-community/admob"),
+        .package(name: "CapacitorCommunityAdmob", path: "../../../node_modules/.pnpm/@capacitor-community+admob@_fcb6561a4879c15fe9dd07de4a87c58c/node_modules/@capacitor-community/admob"),
         .package(name: "CapacitorFirebaseAnalytics", path: "../../../node_modules/.pnpm/@capacitor-firebase+analyti_935b6d9b7665a42e10c3ffe276436377/node_modules/@capacitor-firebase/analytics", traits: ["AnalyticsWithoutAdIdSupport"]),
         .package(name: "CapacitorApp", path: "../../../node_modules/.pnpm/@capacitor+app@8.1.1_@capacitor+core@8.5.1/node_modules/@capacitor/app"),
         .package(name: "CapacitorHaptics", path: "../../../node_modules/.pnpm/@capacitor+haptics@8.0.2_@capacitor+core@8.5.1/node_modules/@capacitor/haptics"),

@@ -139,6 +139,6 @@ test("public help pages expose working policy and support navigation", async ({
   }
   await page.getByRole("link", { name: "Destek", exact: true }).click();
   await expect(
-    page.getByRole("link", { name: "studionostos.dev@gmail.com" }),
-  ).toHaveAttribute("href", /mailto:studionostos.dev@gmail.com/);
+    page.getByRole("link", { name: "nostoscomp@gmail.com" }),
+  ).toHaveAttribute("href", /mailto:nostoscomp@gmail.com/);
 });

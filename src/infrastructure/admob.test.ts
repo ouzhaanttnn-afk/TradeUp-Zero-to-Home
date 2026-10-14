@@ -131,6 +131,7 @@ describe("AdMob native adapters", () => {
     expect(port.prepareRewardVideoAd).not.toHaveBeenCalled();
     expect(await adapters.showTradeInterstitial()).toBe(false);
     expect(port.prepareInterstitial).not.toHaveBeenCalled();
+    expect(port.initialize).not.toHaveBeenCalled();
   });
 
   it("keeps UMP as the only gate: no ad before refresh, form when required", async () => {
@@ -148,7 +149,7 @@ describe("AdMob native adapters", () => {
       showPrivacyOptionsForm: vi.fn().mockResolvedValue(undefined),
       ...attTripwires(),
       prepareRewardVideoAd: vi.fn().mockResolvedValue({}),
-      showRewardVideoAd: vi.fn().mockResolvedValue({}),
+      showRewardVideoAd: vi.fn().mockResolvedValue({ amount: 1, type: "test" }),
       prepareInterstitial: vi.fn().mockResolvedValue({}),
       showInterstitial: vi.fn().mockResolvedValue(undefined),
       addListener: vi.fn().mockResolvedValue({ remove: vi.fn() }),
@@ -170,6 +171,12 @@ describe("AdMob native adapters", () => {
       adPersonalizationAllowed: false,
     });
     expect(port.showConsentForm).toHaveBeenCalledOnce();
+    expect(port.requestConsentInfo.mock.invocationCallOrder[0]).toBeLessThan(
+      port.initialize.mock.invocationCallOrder[0],
+    );
+    expect(port.showConsentForm.mock.invocationCallOrder[0]).toBeLessThan(
+      port.initialize.mock.invocationCallOrder[0],
+    );
     await adapters.consent.openPrivacyOptions();
     expect(port.showPrivacyOptionsForm).toHaveBeenCalledOnce();
     expect((await adapters.rewarded.show("MARKET_SCOUT")).status).toBe(
@@ -251,7 +258,7 @@ describe("AdMob native adapters", () => {
         .mockResolvedValue({ status: "OBTAINED", canRequestAds: true }),
       ...attTripwires(),
       prepareRewardVideoAd: vi.fn().mockResolvedValue({}),
-      showRewardVideoAd: vi.fn().mockResolvedValue({}),
+      showRewardVideoAd: vi.fn().mockResolvedValue({ amount: 1, type: "test" }),
       prepareInterstitial: vi.fn().mockResolvedValue({}),
       showInterstitial: vi.fn().mockResolvedValue(undefined),
       addListener: vi.fn().mockResolvedValue({ remove: vi.fn() }),
@@ -290,13 +297,9 @@ describe("AdMob native adapters", () => {
       showConsentForm: vi.fn(),
       showPrivacyOptionsForm: vi.fn(),
       ...attTripwires(),
-      prepareRewardVideoAd: vi
-        .fn()
-        .mockRejectedValue(new Error("unavailable")),
+      prepareRewardVideoAd: vi.fn().mockRejectedValue(new Error("unavailable")),
       showRewardVideoAd: vi.fn(),
-      prepareInterstitial: vi
-        .fn()
-        .mockRejectedValue(new Error("unavailable")),
+      prepareInterstitial: vi.fn().mockRejectedValue(new Error("unavailable")),
       showInterstitial: vi.fn(),
     };
     const adapters = createAdMobAdapters(port as never, {
@@ -366,7 +369,7 @@ describe("AdMob native adapters", () => {
       );
       expect(remove).toHaveBeenCalledTimes(3);
       port.showRewardVideoAd.mockImplementation(
-        () => Promise.resolve({}) as never,
+        () => Promise.resolve({ amount: 1, type: "test" }) as never,
       );
       expect((await adapters.rewarded.show("MARKET_SCOUT")).status).toBe(
         "USER_EARNED",
@@ -389,7 +392,9 @@ describe("AdMob native adapters", () => {
           .mockResolvedValue({ status: "NOT_REQUIRED", canRequestAds: true }),
         ...attTripwires(),
         prepareRewardVideoAd: vi.fn().mockResolvedValue({}),
-        showRewardVideoAd: vi.fn().mockResolvedValue({}),
+        showRewardVideoAd: vi
+          .fn()
+          .mockResolvedValue({ amount: 1, type: "test" }),
         addListener: vi.fn().mockResolvedValue({ remove }),
       };
       if (stage === "preparation")

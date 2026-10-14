@@ -1274,25 +1274,7 @@ export default function App() {
                           </option>
                         </select>
                       </label>
-                      {game.monetization.marketScanCredits === 0 &&
-                      canClaimReward("MARKET_SCOUT") ? (
-                        <button
-                          className="market-refresh market-refresh--reward"
-                          disabled={monetizationBusy}
-                          onClick={() => void claimReward("MARKET_SCOUT")}
-                          aria-label={rewardLabel("MARKET_SCOUT")}
-                        >
-                          <Icon name="refresh" />
-                          <span className="market-refresh-copy">
-                            <b>{t("market.refreshButton")}</b>
-                            <small>
-                              +25 · +1{" "}
-                              {shortDuration(scanRefill.nextCreditSeconds)}
-                            </small>
-                          </span>
-                        </button>
-                      ) : (
-                        <button
+                      <button
                           className="market-refresh"
                           disabled={game.monetization.marketScanCredits === 0}
                           onClick={refreshMarket}
@@ -1310,11 +1292,21 @@ export default function App() {
                             </small>
                           </span>
                         </button>
-                      )}
+
                     </>
                   ) : null}
                 </div>
               </div>
+            ) : null}
+            {!ftueActive && canClaimReward("MARKET_SCOUT") ? (
+              <button
+                className="market-scout-refill"
+                disabled={monetizationBusy}
+                onClick={() => void claimReward("MARKET_SCOUT")}
+                aria-label={rewardLabel("MARKET_SCOUT")}
+              >
+                {rewardLabel("MARKET_SCOUT")}
+              </button>
             ) : null}
             {!ftueActive && marketEvent ? (
               <aside className="market-event" aria-label={t("market.eventAria")}>

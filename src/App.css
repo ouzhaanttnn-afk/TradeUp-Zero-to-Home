@@ -745,6 +745,14 @@ main {
 .market-refresh--reward {
   color: #ffe39a;
 }
+.market-scout-refill {
+  display: block;
+  min-height: 44px;
+  margin: -4px 0 8px auto;
+  padding: 8px 14px;
+  border: 1px solid var(--accent);
+  border-radius: 14px;
+}
 .market-refresh--reward::before {
   border-color: rgba(224, 183, 83, 0.48);
   background: linear-gradient(145deg, #3a3218, #201d12);

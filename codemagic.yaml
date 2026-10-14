@@ -1,4 +1,61 @@
 workflows:
+  tradeup-ios-artifact:
+    name: TradeUp 1.1.0 IPA only - NEVER upload to Apple
+    instance_type: mac_mini_m2
+    max_build_duration: 20
+    inputs:
+      build_number:
+        description: Unused Apple build number above 43
+        type: number
+    # Existing API integration is used for read-only build-number checks and signing.
+    integrations:
+      app_store_connect: TradeUp App Store Connect
+    environment:
+      node: "24"
+      xcode: "26.6"
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.tradeup.zerotohome
+      vars:
+        APP_STORE_APPLE_ID: "6811362281"
+        TRADEUP_IOS_BUILD_NUMBER: "${{ inputs.build_number }}"
+        VITE_ADMOB_PRODUCTION_ENABLED: "true"
+        VITE_ADMOB_TEST_ENABLED: "false"
+    scripts:
+      - name: Read-only Apple build-number guard
+        script: |
+          set -euo pipefail
+          [[ "$TRADEUP_IOS_BUILD_NUMBER" =~ ^[1-9][0-9]*$ ]]
+          (( TRADEUP_IOS_BUILD_NUMBER > 43 ))
+          latest=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID")
+          [[ "$latest" =~ ^[0-9]+$ ]]
+          (( TRADEUP_IOS_BUILD_NUMBER > latest ))
+      - name: Build already-tested source with approved production ad flags
+        script: |
+          set -euo pipefail
+          npm install --global pnpm@11.19.0 --force
+          pnpm install --frozen-lockfile
+          node scripts/check-native-ad-privacy.mjs
+          pnpm build
+          node scripts/check-review-ad-config.mjs
+          pnpm cap:sync:ios
+          node scripts/check-native-ad-privacy.mjs
+      - name: Apply existing signing and export IPA without publishing
+        script: |
+          set -euo pipefail
+          xcode-project use-profiles --project "$CM_BUILD_DIR/ios/App/App.xcodeproj"
+          xcode-project build-ipa \
+            --project "$CM_BUILD_DIR/ios/App/App.xcodeproj" \
+            --scheme App \
+            --archive-flags="-destination generic/platform=iOS CURRENT_PROJECT_VERSION=$TRADEUP_IOS_BUILD_NUMBER"
+          ipa=$(find "$CM_BUILD_DIR/build/ios/ipa" -maxdepth 1 -name '*.ipa' -print -quit)
+          test -n "$ipa"
+          python3 scripts/verify-ios-artifact.py "$ipa" --build "$TRADEUP_IOS_BUILD_NUMBER" --ads production > "$CM_BUILD_DIR/build/ios/ipa/verification.json"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - build/ios/ipa/verification.json
+      - /tmp/xcodebuild_logs/*.log
+    # No publishing block: no Apple upload, TestFlight submission, or release.
   tradeup-ios-testflight:
     name: TradeUp 1.1.0 signed iOS upload
     instance_type: mac_mini_m2

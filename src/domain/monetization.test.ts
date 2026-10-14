@@ -93,9 +93,9 @@ describe("monetization reward eligibility", () => {
       rechargeMarketScanCredits(empty, 10_000).monetization.marketScanCredits,
     ).toBe(0);
   });
-  it("requires first sale unlock and play time before reward actions", () => {
+  it("keeps the first-sale unlock for other placements, not market scout", () => {
     const locked = initialState(0, "SANDBOX");
-    const before = requestMonetizedAction(locked, "MARKET_SCOUT", "ad");
+    const before = requestMonetizedAction(locked, "FAST_INSPECTION", "ad");
     if (before.ok) throw new Error("Expected blocked until unlock");
     expect(before.ok).toBe(false);
     expect(before.reason).toBe("FIRST_REWARD_BLOCKED");
@@ -109,7 +109,7 @@ describe("monetization reward eligibility", () => {
     );
   });
 
-  it("enforces cooldown for repeated reward actions", () => {
+  it("allows consecutive scouts without a cooldown", () => {
     const base = makeReadyForRewards();
     const ready = {
       ...base,
@@ -134,9 +134,7 @@ describe("monetization reward eligibility", () => {
       monetization: { ...applied.monetization, marketScanCredits: 0 },
     };
     const second = requestMonetizedAction(later, "MARKET_SCOUT", "ad");
-    expect(second.ok).toBe(false);
-    if (second.ok) throw new Error("Expected cooldown block");
-    expect(second.reason).toBe("COOLDOWN");
+    expect(second.ok).toBe(true);
   });
 
   it("blocks missing placement-specific target", () => {
@@ -200,9 +198,8 @@ describe("monetization reward eligibility", () => {
     );
     expect(cold.cashMinor).toBe(applied.cashMinor);
     expect(cold.transactionJournal).toEqual(applied.transactionJournal);
-    expect(getRewardEligibility(cold, "MARKET_SCOUT")).toEqual({
-      ok: false,
-      reason: "COOLDOWN",
+    expect(getRewardEligibility(cold, "MARKET_SCOUT")).toMatchObject({
+      ok: true,
     });
     const second = requestMonetizedAction(
       advanceRewardClock(cold, 90_000),
@@ -218,9 +215,8 @@ describe("monetization reward eligibility", () => {
       },
       180_000,
     );
-    expect(getRewardEligibility(thirdSession, "MARKET_SCOUT")).toEqual({
-      ok: false,
-      reason: "PLACEMENT_CAP",
+    expect(getRewardEligibility(thirdSession, "MARKET_SCOUT")).toMatchObject({
+      ok: true,
     });
     expect(
       getRewardEligibility(
@@ -230,7 +226,7 @@ describe("monetization reward eligibility", () => {
     ).toBe(true);
   });
 
-  it("fast game-time advancement and clock rollback cannot bypass real reward limits", () => {
+  it("keeps the clock monotonic while scout has no time-based limit", () => {
     const first = requestMonetizedAction(
       makeReadyForRewards(),
       "MARKET_SCOUT",
@@ -243,17 +239,15 @@ describe("monetization reward eligibility", () => {
       gameTimeMin: 10_000,
       monetization: { ...applied.monetization, marketScanCredits: 0 },
     };
-    expect(getRewardEligibility(fast, "MARKET_SCOUT")).toEqual({
-      ok: false,
-      reason: "COOLDOWN",
+    expect(getRewardEligibility(fast, "MARKET_SCOUT")).toMatchObject({
+      ok: true,
     });
     const later = advanceRewardClock(fast, 90_000);
     expect(advanceRewardClock(later, 1).monetization.rewardClockWallMs).toBe(
       90_000,
     );
-    expect(getRewardEligibility(later, "MARKET_SCOUT")).toEqual({
-      ok: false,
-      reason: "PLACEMENT_CAP",
+    expect(getRewardEligibility(later, "MARKET_SCOUT")).toMatchObject({
+      ok: true,
     });
   });
 
@@ -348,6 +342,7 @@ describe("monetization reward eligibility", () => {
 
   it("preserves the rolling global cap across cold starts and session-scoped failure recovery", () => {
     const ready = makeReadyForRewards();
+    ready.transactionJournal.push(inspectionEntry);
     ready.monetization.rewardTransactions = Array.from(
       { length: 8 },
       (_, index) => ({
@@ -362,25 +357,25 @@ describe("monetization reward eligibility", () => {
       }),
     );
     const cold = beginRewardSession(ready, 90_000);
-    expect(getRewardEligibility(cold, "MARKET_SCOUT")).toEqual({
+    expect(getRewardEligibility(cold, "FAST_INSPECTION")).toEqual({
       ok: false,
       reason: "GLOBAL_CAP",
     });
     ready.monetization.rewardTransactions = [0, 1].map((index) => ({
       id: `failed:${index}`,
-      placementId: "MARKET_SCOUT",
+      placementId: "FAST_INSPECTION",
       source: "ad",
       status: "FAILED",
       requestedAt: index,
       requestedAtWallMs: 0,
       sessionId: 0,
     }));
-    expect(getRewardEligibility(ready, "MARKET_SCOUT")).toEqual({
+    expect(getRewardEligibility(ready, "FAST_INSPECTION")).toEqual({
       ok: false,
       reason: "PROVIDER_FAILURE_HIDDEN",
     });
     expect(
-      getRewardEligibility(beginRewardSession(ready, 90_000), "MARKET_SCOUT")
+      getRewardEligibility(beginRewardSession(ready, 90_000), "FAST_INSPECTION")
         .ok,
     ).toBe(true);
   });
@@ -418,7 +413,7 @@ describe("monetization reward eligibility", () => {
     const claimed = requestMonetizedAction(owned, "MARKET_SCOUT", "premium");
     expect(claimed.ok).toBe(true);
     if (!claimed.ok) throw new Error("Expected premium claim");
-    expect(claimed.state.monetization.usage.sessionRewardCount).toBe(1);
+    expect(claimed.state.monetization.usage.sessionRewardCount).toBe(0);
   });
 
   it("No Ads bypasses video without cosmetics or extra reward capacity", () => {
@@ -429,7 +424,7 @@ describe("monetization reward eligibility", () => {
     const claimed = requestMonetizedAction(noAds, "MARKET_SCOUT", "premium");
     expect(claimed.ok).toBe(true);
     if (!claimed.ok) throw new Error("Expected ad-free claim");
-    expect(claimed.state.monetization.usage.sessionRewardCount).toBe(1);
+    expect(claimed.state.monetization.usage.sessionRewardCount).toBe(0);
     expect(claimed.state.monetization.rewardTransactions[0]?.source).toBe(
       "premium",
     );

@@ -4,13 +4,16 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@capacitor-community/admob@8.1.0': f36813ab9a7daf1c36bb58044d8fc27b2bb9e8e10205d530efb18a5517efe492
+
 importers:
 
   .:
     dependencies:
       '@capacitor-community/admob':
         specifier: 8.1.0
-        version: 8.1.0
+        version: 8.1.0(patch_hash=f36813ab9a7daf1c36bb58044d8fc27b2bb9e8e10205d530efb18a5517efe492)
       '@capacitor-firebase/analytics':
         specifier: 8.5.2
         version: 8.5.2(@capacitor/core@8.5.1)(firebase@12.19.0)
@@ -1783,7 +1786,7 @@ snapshots:
 
   '@bcoe/v8-coverage@1.0.2': {}
 
-  '@capacitor-community/admob@8.1.0':
+  '@capacitor-community/admob@8.1.0(patch_hash=f36813ab9a7daf1c36bb58044d8fc27b2bb9e8e10205d530efb18a5517efe492)':
     dependencies:
       '@capacitor/core': 8.5.1
       '@rdlabo/capacitor-docgen': 0.4.1

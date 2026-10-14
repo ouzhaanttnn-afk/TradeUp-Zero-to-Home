@@ -240,12 +240,25 @@ const cleanupRewardTransactions = (
   state: GameState,
   nowWallMs: number,
 ): RewardActionTransaction[] => {
+  // Unlimited scouts must not evict the other placements' daily-cap evidence.
+  const retainedScouts = new Set(
+    state.monetization.rewardTransactions
+      .filter(
+        (entry) =>
+          entry.placementId === "MARKET_SCOUT" && entry.status !== "REQUESTED",
+      )
+      .slice(-4)
+      .map((entry) => entry.id),
+  );
   return state.monetization.rewardTransactions.filter(
     (entry) =>
-      entry.status !== "APPLIED" ||
-      entry.sessionId === state.monetization.usage.rewardSessionId ||
-      entry.appliedAtWallMs === undefined ||
-      nowWallMs - entry.appliedAtWallMs < REWARD_WINDOW_MS,
+      (entry.placementId !== "MARKET_SCOUT" ||
+        entry.status === "REQUESTED" ||
+        retainedScouts.has(entry.id)) &&
+      (entry.status !== "APPLIED" ||
+        entry.sessionId === state.monetization.usage.rewardSessionId ||
+        entry.appliedAtWallMs === undefined ||
+        nowWallMs - entry.appliedAtWallMs < REWARD_WINDOW_MS),
   );
 };
 
@@ -267,12 +280,16 @@ const countCaps = (state: GameState) => {
   };
 
   for (const reward of rewards) {
-    if (reward.status !== "APPLIED") continue;
+    if (reward.status !== "APPLIED" || reward.placementId === "MARKET_SCOUT")
+      continue;
     placementCounts[reward.placementId] += 1;
   }
 
   return {
-    globalCount: rewards.filter((reward) => reward.status === "APPLIED").length,
+    globalCount: rewards.filter(
+      (reward) =>
+        reward.status === "APPLIED" && reward.placementId !== "MARKET_SCOUT",
+    ).length,
     placementCounts,
   };
 };
@@ -285,7 +302,7 @@ const nextPlacementTarget = (
   state: GameState,
 ): string | undefined => {
   if (placementId === "MARKET_SCOUT") {
-    return state.monetization.marketScanCredits === 0
+    return state.monetization.marketScanCredits < marketScanRegenCap(state)
       ? `market-scout:${state.marketCycle}:${state.gameTimeMin}`
       : undefined;
   }
@@ -349,7 +366,15 @@ const applyReward = (
       ...state,
       monetization: {
         ...state.monetization,
-        marketScanCredits: MARKET_SCOUT_SCAN_CREDITS,
+        marketScanCredits: Math.min(
+          marketScanRegenCap(state),
+          state.monetization.marketScanCredits + MARKET_SCOUT_SCAN_CREDITS,
+        ),
+        marketScanRefillAnchorWallMs:
+          state.monetization.marketScanCredits + MARKET_SCOUT_SCAN_CREDITS >=
+          marketScanRegenCap(state)
+            ? state.monetization.rewardClockWallMs
+            : state.monetization.marketScanRefillAnchorWallMs,
       },
     };
   }
@@ -439,15 +464,23 @@ const applyReward = (
       ...next.monetization,
       rewardCooldownUntilGameMin: undefined,
       rewardCooldownUntilWallMs:
-        MONETIZATION_CONFIG.reward.cooldownSeconds > 0
-          ? next.monetization.rewardClockWallMs +
-            MONETIZATION_CONFIG.reward.cooldownSeconds * 1000
-          : undefined,
+        placementId === "MARKET_SCOUT"
+          ? next.monetization.rewardCooldownUntilWallMs
+          : MONETIZATION_CONFIG.reward.cooldownSeconds > 0
+            ? next.monetization.rewardClockWallMs +
+              MONETIZATION_CONFIG.reward.cooldownSeconds * 1000
+            : undefined,
       rewardTransactions: [...rewards, applied].slice(-1200),
       usage: {
         ...next.monetization.usage,
         rewardSessionStartedAt: next.monetization.usage.rewardSessionStartedAt,
-        sessionRewardCount: next.monetization.usage.sessionRewardCount + 1,
+        sessionRewardCount:
+          next.monetization.rewardTransactions.filter(
+            (entry) =>
+              entry.status === "APPLIED" &&
+              entry.placementId !== "MARKET_SCOUT" &&
+              entry.sessionId === next.monetization.usage.rewardSessionId,
+          ).length + (placementId === "MARKET_SCOUT" ? 0 : 1),
         rollingRewardTimestamps: [
           ...next.monetization.usage.rollingRewardTimestamps,
           next.gameTimeMin,
@@ -468,6 +501,12 @@ export const getRewardEligibility = (
 ): RewardEligibility => {
   const nowWallMs = state.monetization.rewardClockWallMs;
   const targetId = nextPlacementTarget(placementId, state);
+  // A voluntary +25 refill, independent of the other placements' limits.
+  if (placementId === "MARKET_SCOUT") {
+    return targetId
+      ? { ok: true, targetId }
+      : { ok: false, reason: "MISSING_PRECONDITION" };
+  }
   const normalizedTransactions = cleanupRewardTransactions(state, nowWallMs);
 
   if (
@@ -499,9 +538,6 @@ export const getRewardEligibility = (
   ) {
     return { ok: false, reason: "PROVIDER_FAILURE_HIDDEN" };
   }
-  if (placementId === "MARKET_SCOUT" && !targetId) {
-    return { ok: false, reason: "MISSING_PRECONDITION" };
-  }
   if (placementId === "FAST_INSPECTION" && !targetId) {
     return { ok: false, reason: "NO_ELIGIBLE_TARGET" };
   }
@@ -517,22 +553,18 @@ export const getRewardEligibility = (
   ) {
     return { ok: false, reason: "COOLDOWN" };
   }
-  if (state.monetization.usage.sessionRewardCount >= SESSION_CAP) {
+  if (
+    normalizedTransactions.filter(
+      (entry) =>
+        entry.status === "APPLIED" &&
+        entry.placementId !== "MARKET_SCOUT" &&
+        entry.sessionId === state.monetization.usage.rewardSessionId,
+    ).length >= SESSION_CAP
+  ) {
     return { ok: false, reason: "SESSION_CAP" };
   }
 
   const caps = countCaps(state);
-  if (
-    placementId === "MARKET_SCOUT" &&
-    normalizedTransactions.some(
-      (entry) =>
-        entry.placementId === placementId &&
-        entry.status === "APPLIED" &&
-        entry.sessionId === state.monetization.usage.rewardSessionId,
-    )
-  ) {
-    return { ok: false, reason: "PLACEMENT_CAP" };
-  }
   if (caps.globalCount >= GLOBAL_CAP)
     return { ok: false, reason: "GLOBAL_CAP" };
   if (
@@ -567,7 +599,8 @@ export const requestMonetizedAction = (
       entry.source === source &&
       entry.status === "REQUESTED" &&
       entry.sessionId === normalized.monetization.usage.rewardSessionId &&
-      entry.requestedAt === nowSeconds(normalized),
+      (placementId === "MARKET_SCOUT" ||
+        entry.requestedAt === nowSeconds(normalized)),
   );
   if (existing) {
     return { ok: true, state: normalized, rewardId: existing.id };
@@ -637,9 +670,8 @@ export const applyRewardedResult = (
   if (transaction.status !== "REQUESTED") return state;
   const eligibility = getRewardEligibility(state, transaction.placementId);
   if (
-    !eligibility.ok ||
-    (transaction.placementId !== "MARKET_SCOUT" &&
-      eligibility.targetId !== transaction.targetId)
+    transaction.placementId !== "MARKET_SCOUT" &&
+    (!eligibility.ok || eligibility.targetId !== transaction.targetId)
   )
     return closeRewardedAction(state, rewardId, "FAILED");
   return applyReward(

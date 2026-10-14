@@ -45,10 +45,10 @@ export const resolveTradeInterstitialId = (
 ) =>
   platform !== "ios"
     ? null
-    : productionEnabled
-      ? IOS_PRODUCTION_INTERSTITIAL_ID
-      : testEnabled
-        ? TEST_IOS_INTERSTITIAL_ID
+    : testEnabled
+      ? TEST_IOS_INTERSTITIAL_ID
+      : productionEnabled
+        ? IOS_PRODUCTION_INTERSTITIAL_ID
         : null;
 
 export const isProductionAdServingEnabled = (value: unknown) =>
@@ -60,8 +60,8 @@ export const resolveRewardedAdId = (
   productionEnabled: boolean,
   testEnabled = false,
 ) => {
-  if (!productionEnabled)
-    return testEnabled ? (TEST_REWARDED_IDS?.[platform] ?? null) : null;
+  if (testEnabled) return TEST_REWARDED_IDS?.[platform] ?? null;
+  if (!productionEnabled) return null;
   return platform === "ios" ? IOS_PRODUCTION_REWARDED_IDS[placementId] : null;
 };
 
@@ -113,25 +113,35 @@ export const createAdMobAdapters = (
     nativePlatform === "ios" || nativePlatform === "android"
       ? nativePlatform
       : null;
-  const productionEnabled =
-    options.productionEnabled ??
-    isProductionAdServingEnabled(import.meta.env.VITE_ADMOB_PRODUCTION_ENABLED);
   const testEnabled =
     options.testEnabled ??
     isProductionAdServingEnabled(import.meta.env.VITE_ADMOB_TEST_ENABLED);
+  // An explicit test run can never create real impressions, even if both flags exist.
+  const productionEnabled =
+    !testEnabled &&
+    (options.productionEnabled ??
+      isProductionAdServingEnabled(
+        import.meta.env.VITE_ADMOB_PRODUCTION_ENABLED,
+      ));
   const available = Boolean(platform && (productionEnabled || testEnabled));
   let initialized: Promise<void> | undefined;
   let canRequestAds = false;
   let showingInterstitial = false;
   let showingReward = false;
+  let consentRefresh: Promise<ConsentSnapshot> | undefined;
 
   const initialize = () => {
-    initialized ??= port.initialize({
-      initializeForTesting: false,
-      tagForChildDirectedTreatment: false,
-      tagForUnderAgeOfConsent: false,
-      maxAdContentRating: MaxAdContentRating.Teen,
-    });
+    initialized ??= port
+      .initialize({
+        initializeForTesting: testEnabled,
+        tagForChildDirectedTreatment: false,
+        tagForUnderAgeOfConsent: false,
+        maxAdContentRating: MaxAdContentRating.Teen,
+      })
+      .catch((error: unknown) => {
+        initialized = undefined;
+        throw error;
+      });
     return initialized;
   };
 
@@ -139,7 +149,8 @@ export const createAdMobAdapters = (
     if (!available) {
       return { canRequestAds: false, adPersonalizationAllowed: false };
     }
-    await initialize();
+    // The pinned native patch makes UMP usable without starting Mobile Ads.
+    canRequestAds = false;
     let info = await port.requestConsentInfo({
       tagForUnderAgeOfConsent: false,
     });
@@ -149,23 +160,41 @@ export const createAdMobAdapters = (
     ) {
       info = await port.showConsentForm();
     }
-    canRequestAds = info.canRequestAds;
-    return consentSnapshot(info);
+    const allowed =
+      info.canRequestAds &&
+      (info.status === AdmobConsentStatus.NOT_REQUIRED ||
+        info.status === AdmobConsentStatus.OBTAINED);
+    if (allowed) await initialize();
+    canRequestAds = allowed;
+    return consentSnapshot({ ...info, canRequestAds });
   };
 
   return {
     consent: {
       available,
-      refresh: refreshConsent,
+      refresh() {
+        consentRefresh ??= refreshConsent().finally(() => {
+          consentRefresh = undefined;
+        });
+        return consentRefresh;
+      },
       async openPrivacyOptions() {
         if (!available) throw new Error("PRIVACY_OPTIONS_UNAVAILABLE");
-        await initialize();
+        await consentRefresh;
+        canRequestAds = false;
         await port.showPrivacyOptionsForm();
+        await refreshConsent();
       },
     },
     rewarded: {
       async show(placementId) {
-        if (!available || !platform || !canRequestAds || showingReward) {
+        if (
+          !available ||
+          !platform ||
+          !canRequestAds ||
+          showingReward ||
+          showingInterstitial
+        ) {
           return { status: "FAILED", reason: "PROVIDER" };
         }
         const adId = resolveRewardedAdId(
@@ -240,9 +269,18 @@ export const createAdMobAdapters = (
               }),
             );
             if (settled) return;
-            await port.showRewardVideoAd({ adId });
+            const reward = await port.showRewardVideoAd({ adId });
             // Resolution is the SDK's userDidEarnReward callback, not merely show.
-            settle(earnedResult());
+            settle(
+              earned ||
+                (reward &&
+                  Number.isFinite(reward.amount) &&
+                  reward.amount > 0 &&
+                  typeof reward.type === "string" &&
+                  reward.type.length > 0)
+                ? earnedResult()
+                : { status: "CANCELLED" },
+            );
           })().catch((error: unknown) => {
             settle({ status: "FAILED", reason: classifyAdMobFailure(error) });
           });
@@ -255,7 +293,13 @@ export const createAdMobAdapters = (
       },
     },
     async showTradeInterstitial() {
-      if (!available || !platform || !canRequestAds || showingInterstitial)
+      if (
+        !available ||
+        !platform ||
+        !canRequestAds ||
+        showingInterstitial ||
+        showingReward
+      )
         return false;
       const adId = resolveTradeInterstitialId(
         platform,

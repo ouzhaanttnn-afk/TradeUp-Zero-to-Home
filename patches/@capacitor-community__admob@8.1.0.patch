@@ -1,0 +1,78 @@
+diff --git a/ios/Sources/AdMobPlugin/AdMobPlugin.swift b/ios/Sources/AdMobPlugin/AdMobPlugin.swift
+index 2e450d3750cfa892dfdbfc69d091559d087ad2ab..5f8c2348fbcaa3a85ea9c5ebeb022f4d1fbeb2ea 100644
+--- a/ios/Sources/AdMobPlugin/AdMobPlugin.swift
++++ b/ios/Sources/AdMobPlugin/AdMobPlugin.swift
+@@ -1,9 +1,6 @@
+ import Foundation
+ import Capacitor
+ import GoogleMobileAds
+-#if canImport(AppTrackingTransparency)
+-import AppTrackingTransparency
+-#endif
+ 
+ @objc(AdMobPlugin)
+ public class AdMobPlugin: CAPPlugin, CAPBridgedPlugin {
+@@ -78,6 +75,8 @@ public class AdMobPlugin: CAPPlugin, CAPBridgedPlugin {
+         self.consentExecutor.plugin = self
+         self.setRequestConfiguration(call)
+ 
++        MobileAds.shared.requestConfiguration.setPublisherFirstPartyIDEnabled(false)
++        MobileAds.shared.requestConfiguration.publisherPrivacyPersonalizationState = .disabled
+         MobileAds.shared.start(completionHandler: nil)
+         call.resolve([:])
+     }
+@@ -86,17 +85,8 @@ public class AdMobPlugin: CAPPlugin, CAPBridgedPlugin {
+      * DEPRECATED: It's now ship with Admob UMP Consent
+      */
+     @objc func requestTrackingAuthorization(_ call: CAPPluginCall) {
+-        if #available(iOS 14, *) {
+-            #if canImport(AppTrackingTransparency)
+-            ATTrackingManager.requestTrackingAuthorization(completionHandler: { _ in
+-                call.resolve([:])
+-            })
+-            #else
+-            call.resolve([:])
+-            #endif
+-        } else {
+-            call.resolve([:])
+-        }
++        // TradeUp never requests cross-app tracking, including through legacy APIs.
++        call.reject("Tracking is unavailable in TradeUp")
+     }
+ 
+     @objc func setApplicationMuted(_ call: CAPPluginCall) {
+@@ -212,24 +202,7 @@ public class AdMobPlugin: CAPPlugin, CAPBridgedPlugin {
+     }
+ 
+     @objc func trackingAuthorizationStatus(_ call: CAPPluginCall) {
+-        DispatchQueue.main.async {
+-            if #available(iOS 14, *) {
+-                switch ATTrackingManager.trackingAuthorizationStatus {
+-                case .authorized:
+-                    call.resolve(["status": AuthorizationStatusEnum.Authorized.rawValue])
+-                case .denied:
+-                    call.resolve(["status": AuthorizationStatusEnum.Denied.rawValue])
+-                case .restricted:
+-                    call.resolve(["status": AuthorizationStatusEnum.Restricted.rawValue])
+-                case .notDetermined:
+-                    call.resolve(["status": AuthorizationStatusEnum.NotDetermined.rawValue])
+-                @unknown default:
+-                    call.reject("trackingAuthorizationStatus can't get status")
+-                }
+-            } else {
+-                call.resolve(["status": AuthorizationStatusEnum.Authorized])
+-            }
+-        }
++        call.reject("Tracking is unavailable in TradeUp")
+     }
+ 
+     /**
+@@ -237,6 +210,8 @@ public class AdMobPlugin: CAPPlugin, CAPBridgedPlugin {
+      * https://support.google.com/admob/answer/10113005?hl=en
+      */
+     @objc func requestConsentInfo(_ call: CAPPluginCall) {
++        // UMP must be usable before MobileAds.start, including presenting its form.
++        self.consentExecutor.plugin = self
+         let debugGeography = call.getInt("debugGeography", 0)
+ 
+         let testDeviceJSArray = call.getArray("testDeviceIdentifiers") ?? []

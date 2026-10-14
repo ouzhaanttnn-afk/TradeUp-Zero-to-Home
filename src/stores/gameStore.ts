@@ -57,7 +57,6 @@ import {
 } from "../domain/ftue";
 import {
   advanceRewardState,
-  advanceRewardClock,
   beginRewardSession,
   hasAdFreeEntitlement,
   rechargeMarketScanCredits,
@@ -1575,7 +1574,7 @@ export const useGameStore = create<Store>((set, get) => ({
   },
   claimReward: async (placementId) => {
     if (get().monetizationBusy) return;
-    const state = advanceRewardClock(get().game, systemTimeProvider.nowWallMs());
+    const state = rechargeMarketScanCredits(get().game, systemTimeProvider.nowWallMs());
     set({ game: state });
     recordReplayCommand(state, "CLAIM_REWARD", { placementId, wallClockMs: state.monetization.rewardClockWallMs });
     const premium = hasAdFreeEntitlement(state);
@@ -1586,7 +1585,7 @@ export const useGameStore = create<Store>((set, get) => ({
       premium ? "premium" : "ad",
       getMonetizationAdapters().rewarded,
       {
-        read: () => advanceRewardClock(get().game, systemTimeProvider.nowWallMs()),
+        read: () => rechargeMarketScanCredits(get().game, systemTimeProvider.nowWallMs()),
         publish: (game) => set({ game: stampAndPersist(game) }),
       },
     );

@@ -5,6 +5,8 @@ Kullanıcıya gösterilen güncel metin: [`public/privacy.html`](../public/priva
 App Store Connect gizlilik URL'si: `https://trade-up-zero-to-home.vercel.app/privacy.html`.
 Destek URL'si: `https://trade-up-zero-to-home.vercel.app/support.html`.
 
+Gizlilik ve destek e-postası: **nostoscomp@gmail.com** (14 Ekim 2026 kullanıcı onayı).
+
 Bu dosya eski bir gizlilik metni kopyası değildir. Reklam SDK'sı veya satın alma
 akışı değiştiğinde kullanıcıya gösterilen sayfa ve App Store veri beyanı birlikte
 gözden geçirilmelidir.

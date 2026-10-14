@@ -187,7 +187,7 @@ describe("monetization application service", () => {
         (entry) => entry.id === requested.id,
       ),
     ).toMatchObject({ status: "APPLIED", requestedAt: requested.requestedAt });
-    expect(result.state.monetization.usage.sessionRewardCount).toBe(1);
+    expect(result.state.monetization.usage.sessionRewardCount).toBe(0);
     expect(applyRewardedResult(result.state, requested.id)).toBe(result.state);
   });
 
@@ -360,7 +360,7 @@ describe("monetization application service", () => {
       ]),
     );
     expect(earned.status).toBe("APPLIED");
-    expect(earned.state.monetization.usage.sessionRewardCount).toBe(1);
+    expect(earned.state.monetization.usage.sessionRewardCount).toBe(0);
   });
 
   it.each([
@@ -401,7 +401,7 @@ describe("monetization application service", () => {
 
       expect(result.status).toBe("APPLIED");
       expect(shown).toBe(0);
-      expect(result.state.monetization.usage.sessionRewardCount).toBe(1);
+      expect(result.state.monetization.usage.sessionRewardCount).toBe(0);
       expect(result.state.monetization.marketScanCredits).toBe(25);
       expect(result.state.cashMinor).toBe(state.cashMinor);
       expect(result.state.transactionJournal).toEqual(state.transactionJournal);
@@ -416,8 +416,19 @@ describe("monetization application service", () => {
         "premium",
         ads.rewarded,
       );
-      expect(retry.status).toBe("INELIGIBLE");
-      expect(retry.state.monetization.usage.sessionRewardCount).toBe(1);
+      expect(retry.status).toBe("APPLIED");
+      expect(retry.state.monetization.marketScanCredits).toBe(50);
+      expect(retry.state.monetization.usage.sessionRewardCount).toBe(0);
+      expect(
+        (
+          await runRewardedAction(
+            retry.state,
+            "MARKET_SCOUT",
+            "premium",
+            ads.rewarded,
+          )
+        ).status,
+      ).toBe("INELIGIBLE");
     },
   );
 });

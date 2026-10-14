@@ -51,7 +51,7 @@ canlı reklam yerine test reklamları kullanılır. Kayıt cihazda tutulur.
 
 - Tür: Oyun; kategori: Simülasyon; ücretsiz indirme.
 - Hedef kitle: GDD uyarınca 13+; içerik derecelendirmesi form sonuçlarına göre.
-- Destek e-postası: `studionostos.dev@gmail.com`.
+- Destek e-postası: `nostoscomp@gmail.com`.
 - Gizlilik: `https://trade-up-zero-to-home.vercel.app/privacy.html`
 - Destek: `https://trade-up-zero-to-home.vercel.app/support.html`
 - İki URL de 29 Eylül 2026'da HTTP 200 verdi; güncel Android test açıklamaları

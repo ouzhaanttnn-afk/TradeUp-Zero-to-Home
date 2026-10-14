@@ -26,11 +26,19 @@
 	<true/>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
-	<key>GADIsAdManagerApp</key>
+	<key>GADDelayAppMeasurementInit</key>
 	<true/>
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-4229088811556918~1245306004</string>
 	<key>FIREBASE_ANALYTICS_COLLECTION_ENABLED</key>
+	<false/>
+	<key>GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED</key>
+	<false/>
+	<key>GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS</key>
+	<false/>
+	<key>GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_STORAGE</key>
+	<false/>
+	<key>GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_USER_DATA</key>
 	<false/>
 	<key>SKAdNetworkItems</key>
 	<array>

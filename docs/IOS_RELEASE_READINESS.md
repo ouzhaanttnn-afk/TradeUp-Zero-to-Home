@@ -1,5 +1,13 @@
 # TradeUp iOS Release Readiness
 
+## 14 Ekim 2026 — yükleme yapılmadan hazırlanan düzeltme
+
+Güncel gizlilik ve destek iletişimi **nostoscomp@gmail.com**; kullanıcı bu adresi
+14 Ekim'de açıkça doğruladı. Önceki bölümdeki eski adres artık kullanılmaz.
+Yeni ödüllü/geçiş reklam aktivasyonu kullanıcı tarafından ayrıca onaylandı.
+Apple'daki mevcut 1.1.0 (43) başvurusuna dokunulmaz. Build 44 için yalnız
+imzalı artifact hazırlanır; ayrıntılar `FINAL_FIX_2026-10-14.md` belgesindedir.
+
 ## 6 Ekim 2026 — 1.1.0 (43) ATT'siz build yüklendi, App Review'a gönderilmedi
 
 - Apple, **1.1.0 (42)** sürümünü **2.1** kapsamında reddetti: binary
@@ -8,7 +16,7 @@
   bildirimi ve izin akışı kaldırıldı (`06776f1`). Reklamlar UMP/`canRequestAds`
   kapısıyla ve `npa: true` olarak kalır; Firebase `AnalyticsWithoutAdIdSupport`
   ve `FIREBASE_ANALYTICS_COLLECTION_ENABLED=false` korunur. Gizlilik/destek
-  e-postası `studionostos.dev@gmail.com`.
+  e-postası `nostoscomp@gmail.com` (14 Ekim'de yeniden doğrulandı).
 - GitHub iOS workflow'u artık App Store Connect'teki son build'den büyük
   numara ister, arşiv/IPA `Info.plist` içinde ATT anahtarı olmadığını ve
   sürüm/build değerlerini doğrular (`103fca8`).

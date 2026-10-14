@@ -38,6 +38,7 @@ export const deliveryBudgetViolation = (
 };
 
 // https://vite.dev/config/
+let buildAdConfiguration = { productionEnabled: false, testEnabled: false };
 export default defineConfig({
   test: {
     coverage: {
@@ -66,6 +67,25 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    {
+      name: "tradeup-release-ad-record",
+      apply: "build",
+      configResolved(config) {
+        const testEnabled = config.env.VITE_ADMOB_TEST_ENABLED === "true";
+        buildAdConfiguration = {
+          testEnabled,
+          productionEnabled:
+            !testEnabled && config.env.VITE_ADMOB_PRODUCTION_ENABLED === "true",
+        };
+      },
+      generateBundle() {
+        this.emitFile({
+          type: "asset",
+          fileName: "release-ad-config.json",
+          source: JSON.stringify(buildAdConfiguration),
+        });
+      },
+    },
     {
       name: "tradeup-delivery-budget",
       apply: "build",

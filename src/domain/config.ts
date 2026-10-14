@@ -158,7 +158,7 @@ export const MONETIZATION_CONFIG = {
     sessionCap: 4,
     cooldownSeconds: 90,
     placementCap: {
-      MARKET_SCOUT: 2,
+      MARKET_SCOUT: Number.POSITIVE_INFINITY,
       FAST_INSPECTION: 3,
       FAST_PREPARATION: 3,
       LISTING_REACH: 2,

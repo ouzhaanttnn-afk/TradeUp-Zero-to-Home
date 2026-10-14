@@ -23,8 +23,8 @@ export const extendedTranslations: Record<Language, Record<string, string>> = {
     "offerMode.safeDetail": "Kabul şansı daha yüksek",
 
     // Rewards
-    "reward.marketScoutAd": "25 tarama hakkı · Video",
-    "reward.marketScoutPremium": "25 tarama hakkını yenile",
+    "reward.marketScoutAd": "+25 yenileme · Video",
+    "reward.marketScoutPremium": "+25 yenileme",
     "reward.fastInspectionAd": "İncelemeyi şimdi bitir · Video",
     "reward.fastInspectionPremium": "İncelemeyi şimdi bitir",
     "reward.fastPreparationAd": "Hazırlığı şimdi bitir · Video",
@@ -473,8 +473,8 @@ export const extendedTranslations: Record<Language, Record<string, string>> = {
     "offerMode.safeDetail": "Higher acceptance chance",
 
     // Rewards
-    "reward.marketScoutAd": "25 scans · Ad",
-    "reward.marketScoutPremium": "Refill 25 scans",
+    "reward.marketScoutAd": "+25 refreshes · Ad",
+    "reward.marketScoutPremium": "+25 refreshes",
     "reward.fastInspectionAd": "Finish inspection now · Ad",
     "reward.fastInspectionPremium": "Finish inspection now",
     "reward.fastPreparationAd": "Finish preparation now · Ad",
@@ -923,8 +923,8 @@ export const extendedTranslations: Record<Language, Record<string, string>> = {
     "offerMode.safeDetail": "Höhere Erfolgschance",
 
     // Rewards
-    "reward.marketScoutAd": "25 Scans · Video",
-    "reward.marketScoutPremium": "25 Scans aufladen",
+    "reward.marketScoutAd": "+25 Scans · Video",
+    "reward.marketScoutPremium": "+25 Scans",
     "reward.fastInspectionAd": "Prüfung sofort beenden · Video",
     "reward.fastInspectionPremium": "Prüfung sofort beenden",
     "reward.fastPreparationAd": "Vorbereitung sofort beenden · Video",
@@ -1373,8 +1373,8 @@ export const extendedTranslations: Record<Language, Record<string, string>> = {
     "offerMode.safeDetail": "Mayor probabilidad de aceptación",
 
     // Rewards
-    "reward.marketScoutAd": "25 exploraciones · Vídeo",
-    "reward.marketScoutPremium": "Recargar 25 exploraciones",
+    "reward.marketScoutAd": "+25 renovaciones · Vídeo",
+    "reward.marketScoutPremium": "+25 renovaciones",
     "reward.fastInspectionAd": "Terminar inspección ahora · Vídeo",
     "reward.fastInspectionPremium": "Terminar inspección ahora",
     "reward.fastPreparationAd": "Terminar preparación ahora · Vídeo",
