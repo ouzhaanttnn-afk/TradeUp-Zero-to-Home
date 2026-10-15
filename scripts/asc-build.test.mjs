@@ -76,8 +76,8 @@ describe("App Store Connect build guard", () => {
     expect(
       workflow.match(/Print :NSUserTrackingUsageDescription/g),
     ).toHaveLength(2);
-    expect(workflow).toContain("EXPECTED_MARKETING_VERSION: 1.1.0");
-    expect(workflow).toContain("VITE_ADMOB_PRODUCTION_ENABLED: 'false'");
+    expect(workflow).toContain("EXPECTED_MARKETING_VERSION: 1.1.1");
+    expect(workflow).toContain("VITE_ADMOB_PRODUCTION_ENABLED: 'true'");
     expect(workflow).toContain("VITE_ADMOB_TEST_ENABLED: 'false'");
     expect(workflow).not.toMatch(/submit|reviewSubmission|appStoreVersion/i);
   });

@@ -1,6 +1,6 @@
 workflows:
   tradeup-ios-artifact:
-    name: TradeUp 1.1.0 IPA only - NEVER upload to Apple
+    name: TradeUp 1.1.1 IPA only - NEVER upload to Apple
     instance_type: mac_mini_m2
     max_build_duration: 20
     inputs:
@@ -50,14 +50,14 @@ workflows:
             --archive-flags="-destination generic/platform=iOS CURRENT_PROJECT_VERSION=$TRADEUP_IOS_BUILD_NUMBER"
           ipa=$(find "$CM_BUILD_DIR/build/ios/ipa" -maxdepth 1 -name '*.ipa' -print -quit)
           test -n "$ipa"
-          python3 scripts/verify-ios-artifact.py "$ipa" --build "$TRADEUP_IOS_BUILD_NUMBER" --ads production > "$CM_BUILD_DIR/build/ios/ipa/verification.json"
+          python3 scripts/verify-ios-artifact.py "$ipa" --build "$TRADEUP_IOS_BUILD_NUMBER" --version 1.1.1 --ads production > "$CM_BUILD_DIR/build/ios/ipa/verification.json"
     artifacts:
       - build/ios/ipa/*.ipa
       - build/ios/ipa/verification.json
       - /tmp/xcodebuild_logs/*.log
     # No publishing block: no Apple upload, TestFlight submission, or release.
   tradeup-ios-testflight:
-    name: TradeUp 1.1.0 signed iOS upload
+    name: TradeUp 1.1.1 approved TestFlight upload - manual store release
     instance_type: mac_mini_m2
     max_build_duration: 45
     # Manual only. Do not auto-build every content commit or spend paid minutes.
@@ -76,7 +76,7 @@ workflows:
       vars:
         APP_STORE_APPLE_ID: "6811362281"
         TRADEUP_IOS_BUILD_NUMBER: "${{ inputs.build_number }}"
-        VITE_ADMOB_PRODUCTION_ENABLED: "false"
+        VITE_ADMOB_PRODUCTION_ENABLED: "true"
         VITE_ADMOB_TEST_ENABLED: "false"
     scripts:
       - name: Reject missing or reused build numbers
@@ -93,11 +93,13 @@ workflows:
           # Builder images already contain a pnpm shim; pin it in this ephemeral machine.
           npm install --global pnpm@11.19.0 --force
           pnpm install --frozen-lockfile
+          node scripts/check-native-ad-privacy.mjs
           pnpm test
           pnpm lint
           pnpm build
           node scripts/check-review-ad-config.mjs
           pnpm cap:sync:ios
+          node scripts/check-native-ad-privacy.mjs
       - name: Apply existing signing identities
         script: |
           set -euo pipefail
@@ -112,10 +114,14 @@ workflows:
           archive=$(find "$CM_BUILD_DIR/build/ios/xcarchive" -maxdepth 1 -name '*.xcarchive' -print -quit)
           test -n "$archive"
           app_plist="$archive/Products/Applications/App.app/Info.plist"
-          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app_plist")" = '1.1.0'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app_plist")" = '1.1.1'
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$app_plist")" = "$TRADEUP_IOS_BUILD_NUMBER"
+          ipa=$(find "$CM_BUILD_DIR/build/ios/ipa" -maxdepth 1 -name '*.ipa' -print -quit)
+          test -n "$ipa"
+          python3 scripts/verify-ios-artifact.py "$ipa" --build "$TRADEUP_IOS_BUILD_NUMBER" --version 1.1.1 --ads production > "$CM_BUILD_DIR/build/ios/ipa/verification.json"
     artifacts:
       - build/ios/ipa/*.ipa
+      - build/ios/ipa/verification.json
       - /tmp/xcodebuild_logs/*.log
       - build/ios/xcarchive/**/*.dSYM
     publishing:
