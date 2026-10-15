@@ -1,5 +1,15 @@
 # TradeUp iOS Release Readiness
 
+## 15 Ekim 2026 — 1.1.1 (45) TestFlight ve App Review
+
+Kullanıcı yükleme ve inceleme gönderimini açıkça istedi. Canlı Apple kontrolünde
+1.1.0 (43) yayımlanmış olduğundan yeni düzeltme **1.1.1 (45)** olarak paketlendi.
+TestFlight **Betatest** grubunda **IN_BETA_TESTING**, App Review başvurusunda
+**WAITING_FOR_REVIEW** doğrulandı. Yayın **MANUAL** kalır. Altı IAP onaylıdır.
+Güncel gizlilik/destek e-postası ve app-ads.txt kullanıcı onayıyla canlıda
+yayımlandı; main merge edilmedi ve web oyun dosyaları değişmedi.
+Tam kayıt: [1.1.1 gönderim raporu](APP_REVIEW_1.1.1_2026-10-15.md).
+
 ## 14 Ekim 2026 — yükleme yapılmadan hazırlanan düzeltme
 
 Güncel gizlilik ve destek iletişimi **nostoscomp@gmail.com**; kullanıcı bu adresi
