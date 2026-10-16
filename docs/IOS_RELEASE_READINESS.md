@@ -1,5 +1,14 @@
 # TradeUp iOS Release Readiness
 
+## 16 Ekim 2026 — 1.1.2 (46) App Review'a gönderildi
+
+Kullanıcının açık talebiyle kompakt ödüllü yenileme düzeltmesi ayrı daldan,
+mevcut ücretsiz Codemagic M2 kotasında tek native build ile hazırlandı.
+Apple yüklemesi hatasız, build **VALID / APP_STORE_ELIGIBLE**; yeni başvuru
+**WAITING_FOR_REVIEW** (16 Ekim 16:54:11 Europe/Istanbul). Yayın **MANUAL**,
+main değişmedi ve production web oyunu yayımlanmadı. Altı IAP onaylı kalır.
+Tam kayıt: [1.1.2 gönderim raporu](APP_REVIEW_1.1.2_2026-10-16.md).
+
 ## 15 Ekim 2026 — 1.1.1 (45) TestFlight ve App Review
 
 Kullanıcı yükleme ve inceleme gönderimini açıkça istedi. Canlı Apple kontrolünde
