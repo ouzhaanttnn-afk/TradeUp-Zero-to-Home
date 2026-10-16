@@ -60,6 +60,7 @@ import {
   beginRewardSession,
   hasAdFreeEntitlement,
   rechargeMarketScanCredits,
+  syncConsentState,
 } from "../domain/monetization";
 import { shouldShowTradeInterstitial } from "../domain/tradeInterstitial";
 import { isAnimatedAvatar, ownsAnimatedAvatars } from "../domain/profile";
@@ -1574,6 +1575,26 @@ export const useGameStore = create<Store>((set, get) => ({
   },
   claimReward: async (placementId) => {
     if (get().monetizationBusy) return;
+    const adapters = getMonetizationAdapters();
+    if (placementId === "MARKET_SCOUT" && !hasAdFreeEntitlement(get().game)) {
+      if (adapters.consent.available === false) {
+        set({ notice: t("reward.mobileOnly") });
+        return;
+      }
+      set({ monetizationBusy: true, notice: t("reward.preparing") });
+      // A failed cold-start UMP request must not permanently hide/disable refill.
+      // Retry only after an explicit tap; never serve an ad without fresh consent.
+      const consent = await adapters.consent.refresh().catch(() => ({
+        canRequestAds: false,
+        adPersonalizationAllowed: false,
+      }));
+      const game = syncConsentState(get().game, consent.canRequestAds, consent.adPersonalizationAllowed);
+      set({ game: stampAndPersist(game) });
+      if (!consent.canRequestAds) {
+        set({ monetizationBusy: false, notice: t("reward.consentUnavailable") });
+        return;
+      }
+    }
     const state = rechargeMarketScanCredits(get().game, systemTimeProvider.nowWallMs());
     set({ game: state });
     recordReplayCommand(state, "CLAIM_REWARD", { placementId, wallClockMs: state.monetization.rewardClockWallMs });
@@ -1583,7 +1604,7 @@ export const useGameStore = create<Store>((set, get) => ({
       state,
       placementId,
       premium ? "premium" : "ad",
-      getMonetizationAdapters().rewarded,
+      adapters.rewarded,
       {
         read: () => rechargeMarketScanCredits(get().game, systemTimeProvider.nowWallMs()),
         publish: (game) => set({ game: stampAndPersist(game) }),

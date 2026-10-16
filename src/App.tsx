@@ -529,6 +529,10 @@ export default function App() {
     rewardProviderAvailable && getRewardEligibility(game, placementId).ok;
   const rewardLabel = (placementId: keyof typeof rewardCopy) =>
     rewardCopy[placementId][premiumReward ? "premium" : "ad"];
+  const scoutRefresh = game.monetization.marketScanCredits === 0;
+  // Capability keeps the retry entry visible even when startup consent failed.
+  const scoutAvailable = premiumReward ||
+    getMonetizationAdapters().consent.available !== false;
   const coach = localizeFtueCopy(game.ftue.stage, ftueCopy[game.ftue.stage], lang);
   const showCoach =
     ftueActive && !game.ftue.dismissedStages.includes(game.ftue.stage);
@@ -1275,17 +1279,22 @@ export default function App() {
                         </select>
                       </label>
                       <button
-                          className="market-refresh"
-                          disabled={game.monetization.marketScanCredits === 0}
-                          onClick={refreshMarket}
-                          aria-label={t("market.refreshAria", { credits: game.monetization.marketScanCredits })}
+                          className={`market-refresh${scoutRefresh ? " market-refresh--reward" : ""}`}
+                          disabled={scoutRefresh && (monetizationBusy || !scoutAvailable)}
+                          onClick={scoutRefresh ? () => void claimReward("MARKET_SCOUT") : refreshMarket}
+                          aria-label={scoutRefresh ? rewardLabel("MARKET_SCOUT") : t("market.refreshAria", { credits: game.monetization.marketScanCredits })}
+                          aria-busy={scoutRefresh && monetizationBusy}
+                          title={scoutRefresh && !scoutAvailable ? t("reward.mobileOnly") : undefined}
                         >
                           <Icon name="refresh" />
                           <span className="market-refresh-copy">
-                            <b>{t("market.refreshButton")}</b>
+                            <b>{scoutRefresh
+                              ? monetizationBusy ? t("reward.preparing")
+                                : premiumReward ? rewardLabel("MARKET_SCOUT")
+                                  : t("reward.watchVideo")
+                              : t("market.refreshButton")}</b>
                             <small>
-                              {game.monetization.marketScanCredits}/
-                              {scanRefill.cap}
+                              {scoutRefresh && !premiumReward ? "+25" : `${game.monetization.marketScanCredits}/${scanRefill.cap}`}
                               {!scanRefill.full
                                 ? ` · +1 ${shortDuration(scanRefill.nextCreditSeconds)}`
                                 : ""}
@@ -1297,16 +1306,6 @@ export default function App() {
                   ) : null}
                 </div>
               </div>
-            ) : null}
-            {!ftueActive && canClaimReward("MARKET_SCOUT") ? (
-              <button
-                className="market-scout-refill"
-                disabled={monetizationBusy}
-                onClick={() => void claimReward("MARKET_SCOUT")}
-                aria-label={rewardLabel("MARKET_SCOUT")}
-              >
-                {rewardLabel("MARKET_SCOUT")}
-              </button>
             ) : null}
             {!ftueActive && marketEvent ? (
               <aside className="market-event" aria-label={t("market.eventAria")}>

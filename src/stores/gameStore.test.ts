@@ -32,6 +32,94 @@ import {
   configureMonetizationAdapters,
   unavailableMonetizationAdapters,
 } from "../services/monetization";
+import { syncVerifiedEntitlement } from "../domain/monetization";
+
+describe("explicit scout consent retry", () => {
+  it("retries a failed startup on tap and ignores duplicate taps while consent is pending", async () => {
+    const clock = vi.spyOn(systemTimeProvider, "nowWallMs").mockReturnValue(1000);
+    const game = initialState(1000, "SANDBOX");
+    game.monetization.marketScanCredits = 0;
+    let approve!: (value: { canRequestAds: boolean; adPersonalizationAllowed: boolean }) => void;
+    const refresh = vi.fn(() => new Promise<{ canRequestAds: boolean; adPersonalizationAllowed: boolean }>((resolve) => { approve = resolve; }));
+    const show = vi.fn(async () => ({ status: "USER_EARNED" as const, providerTransactionId: "retry-scout" }));
+    configureMonetizationAdapters({ ...unavailableMonetizationAdapters,
+      consent: { available: true, refresh, openPrivacyOptions: async () => {} },
+      rewarded: { show },
+    });
+    useGameStore.setState({ game, ready: true, monetizationBusy: false });
+    try {
+      const pending = useGameStore.getState().claimReward("MARKET_SCOUT");
+      await useGameStore.getState().claimReward("MARKET_SCOUT");
+      expect(refresh).toHaveBeenCalledTimes(1);
+      expect(show).not.toHaveBeenCalled();
+      expect(useGameStore.getState().monetizationBusy).toBe(true);
+      // Consent can finish after ordinary game state has changed.
+      useGameStore.setState({ game: { ...useGameStore.getState().game, profile: { ...game.profile, displayName: "Güncel oyuncu" } } });
+      approve({ canRequestAds: true, adPersonalizationAllowed: false });
+      await pending;
+      const next = useGameStore.getState();
+      expect(show).toHaveBeenCalledTimes(1);
+      expect(next.game.monetization.marketScanCredits).toBe(25);
+      expect(next.game.profile.displayName).toBe("Güncel oyuncu");
+      expect(reconcileJournal(next.game)).toEqual({ cash: true, activeBookCost: true, realizedProfit: true });
+      expect(next.monetizationBusy).toBe(false);
+    } finally {
+      clock.mockRestore();
+      configureMonetizationAdapters(unavailableMonetizationAdapters);
+      useGameStore.setState({ monetizationBusy: false });
+    }
+  });
+
+  it.each([false, true])("does not request an ad or grant credits when consent fails (throws=%s)", async (throws) => {
+    const clock = vi.spyOn(systemTimeProvider, "nowWallMs").mockReturnValue(1000);
+    const game = initialState(1000, "SANDBOX");
+    game.monetization.marketScanCredits = 0;
+    game.monetization.consent.canRequestAds = true;
+    const show = vi.fn();
+    configureMonetizationAdapters({ ...unavailableMonetizationAdapters,
+      consent: { available: true, refresh: async () => {
+        if (throws) throw new Error("UMP request failed");
+        return { canRequestAds: false, adPersonalizationAllowed: false };
+      }, openPrivacyOptions: async () => {} }, rewarded: { show },
+    });
+    useGameStore.setState({ game, ready: true, monetizationBusy: false });
+    try {
+      await useGameStore.getState().claimReward("MARKET_SCOUT");
+      expect(show).not.toHaveBeenCalled();
+      const next = useGameStore.getState();
+      expect(next.game.monetization.marketScanCredits).toBe(0);
+      expect(next.game.monetization.consent.canRequestAds).toBe(false);
+      expect(next.game.monetization.rewardTransactions).toHaveLength(0);
+      expect(next.monetizationBusy).toBe(false);
+      expect(next.notice).toContain("Reklam izni");
+    } finally {
+      clock.mockRestore();
+      configureMonetizationAdapters(unavailableMonetizationAdapters);
+    }
+  });
+
+  it.each(["tradeup_no_ads_lifetime", "tradeup_premium_lifetime"] as const)("keeps %s refill video-free even when consent is unavailable", async (product) => {
+    const clock = vi.spyOn(systemTimeProvider, "nowWallMs").mockReturnValue(1000);
+    const game = syncVerifiedEntitlement(initialState(1000, "SANDBOX"), product, "OWNED", "ios");
+    game.monetization.marketScanCredits = 0;
+    const refresh = vi.fn();
+    const show = vi.fn();
+    configureMonetizationAdapters({ ...unavailableMonetizationAdapters,
+      consent: { available: false, refresh, openPrivacyOptions: async () => {} }, rewarded: { show },
+    });
+    useGameStore.setState({ game, ready: true, monetizationBusy: false });
+    try {
+      await useGameStore.getState().claimReward("MARKET_SCOUT");
+      expect(useGameStore.getState().game.monetization.marketScanCredits).toBe(25);
+      expect(refresh).not.toHaveBeenCalled();
+      expect(show).not.toHaveBeenCalled();
+      expect(useGameStore.getState().monetizationBusy).toBe(false);
+    } finally {
+      clock.mockRestore();
+      configureMonetizationAdapters(unavailableMonetizationAdapters);
+    }
+  });
+});
 
 describe("application lifecycle", () => {
   it("opens exactly one cold reward session and does not reset it on pause/resume", async () => {
@@ -81,6 +169,7 @@ describe("application lifecycle", () => {
     let finish!: (value: { status: "CANCELLED" }) => void;
     configureMonetizationAdapters({
       ...unavailableMonetizationAdapters,
+      consent: { available: true, refresh: async () => ({ canRequestAds: true, adPersonalizationAllowed: false }), openPrivacyOptions: async () => {} },
       rewarded: {
         show: () =>
           new Promise((resolve) => {
@@ -92,6 +181,7 @@ describe("application lifecycle", () => {
     try {
       const pending = useGameStore.getState().claimReward("MARKET_SCOUT");
       expect(useGameStore.getState().monetizationBusy).toBe(true);
+      await vi.waitFor(() => expect(finish).toBeTypeOf("function"));
       finish({ status: "CANCELLED" });
       await pending;
       expect(useGameStore.getState().monetizationBusy).toBe(false);

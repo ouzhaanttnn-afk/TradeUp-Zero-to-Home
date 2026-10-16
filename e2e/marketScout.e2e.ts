@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { completeFirstLaunch } from "./helpers";
 
 for (const width of [320, 390, 430]) {
-  test(`scout refill is separate from refresh and capped at ${width}px`, async ({ page }) => {
+  test(`one compact refresh switches to refill only at zero at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 844 });
     await page.goto("/");
     await completeFirstLaunch(page);
@@ -25,7 +25,7 @@ for (const width of [320, 390, 430]) {
           ...state,
           monetization: {
             ...(state.monetization as Record<string, unknown>),
-            marketScanCredits: 10,
+            marketScanCredits: 0,
             marketScanRefillAnchorWallMs: Date.now(),
             entitlements: [{ productId: "tradeup_no_ads_lifetime", entitlementId: "no_ads_lifetime", status: "OWNED", platform: "ios" }],
           },
@@ -36,16 +36,55 @@ for (const width of [320, 390, 430]) {
       db.close();
     });
     await page.reload();
-    const refill = page.getByRole("button", { name: "+25 yenileme", exact: true });
+    const refill = page.locator(".market-refresh");
     await expect(refill).toBeVisible();
+    await expect(refill).toHaveAccessibleName("+25 yenileme");
+    await expect(refill).toHaveClass(/market-refresh--reward/);
+    await expect(page.locator(".market-scout-refill")).toHaveCount(0);
     const counter = page.locator(".market-refresh-copy small");
-    await expect(counter).toContainText("10/50");
+    await expect(counter).toContainText("0/50");
     await refill.click();
-    await expect(counter).toContainText("35/50");
+    await expect(counter).toContainText("25/50");
+    await expect(refill).toHaveAccessibleName("Pazarı yenile · 25 hak kaldı");
+    await expect(refill).not.toHaveClass(/market-refresh--reward/);
     await refill.click();
-    await expect(counter).toContainText("50/50");
-    await expect(refill).toHaveCount(0);
-    await expect(page.locator(".market-refresh")).toBeEnabled();
+    await expect(counter).toContainText("24/50");
+    for (let credit = 24; credit > 0; credit -= 1) await refill.click();
+    await expect(counter).toContainText("0/50");
+    await expect(refill).toHaveAccessibleName("+25 yenileme");
+    await expect(refill).toBeEnabled();
+    await refill.click();
+    await expect(counter).toContainText("25/50");
+    await expect(refill).not.toHaveClass(/market-refresh--reward/);
+    expect((await refill.boundingBox())?.height).toBeGreaterThanOrEqual(44);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   });
 }
+
+test("zero-credit video entry stays in the refresh button on web with an explicit native-only reason", async ({ page }) => {
+  await page.goto("/");
+  await completeFirstLaunch(page);
+  await page.getByRole("button", { name: "Teklifi kabul et · ₺420" }).click();
+  const refresh = page.locator(".market-refresh");
+  for (let credit = 50; credit > 0; credit -= 1) await refresh.click();
+  await expect(refresh).toHaveAccessibleName("Reklam izle +25");
+  await expect(refresh).toContainText("Reklam izle");
+  await expect(refresh).toContainText("+25");
+  await expect(refresh).toBeDisabled();
+  await expect(refresh).toHaveAttribute("title", "Video reklamlar mobil uygulamada kullanılabilir.");
+  await expect(page.locator(".market-scout-refill")).toHaveCount(0);
+  await page.getByRole("button", { name: "Ayarlar", exact: true }).click();
+  const settings = page.getByRole("dialog", { name: "Profil ve Ayarlar" });
+  await settings.getByRole("button", { name: "Standart", exact: true }).click();
+  await settings.getByRole("button", { name: "Ayarları kapat", exact: true }).click();
+  for (const width of [320, 390, 430]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.screenshot({ path: `release-artifacts/compact-scout-large-${width}.png` });
+    expect(await refresh.evaluate((button) => {
+      const bounds = button.getBoundingClientRect();
+      const copy = button.querySelector(".market-refresh-copy")!.getBoundingClientRect();
+      return copy.right <= bounds.right && copy.bottom <= bounds.bottom;
+    })).toBe(true);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+});

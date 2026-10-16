@@ -23,7 +23,11 @@ export const extendedTranslations: Record<Language, Record<string, string>> = {
     "offerMode.safeDetail": "Kabul şansı daha yüksek",
 
     // Rewards
-    "reward.marketScoutAd": "+25 yenileme · Video",
+    "reward.marketScoutAd": "Reklam izle +25",
+    "reward.watchVideo": "Reklam izle",
+    "reward.preparing": "Hazırlanıyor…",
+    "reward.mobileOnly": "Video reklamlar mobil uygulamada kullanılabilir.",
+    "reward.consentUnavailable": "Reklam izni kontrol edilemedi. Bağlantını kontrol edip tekrar dene.",
     "reward.marketScoutPremium": "+25 yenileme",
     "reward.fastInspectionAd": "İncelemeyi şimdi bitir · Video",
     "reward.fastInspectionPremium": "İncelemeyi şimdi bitir",
@@ -473,7 +477,11 @@ export const extendedTranslations: Record<Language, Record<string, string>> = {
     "offerMode.safeDetail": "Higher acceptance chance",
 
     // Rewards
-    "reward.marketScoutAd": "+25 refreshes · Ad",
+    "reward.marketScoutAd": "Watch ad +25",
+    "reward.watchVideo": "Watch ad",
+    "reward.preparing": "Preparing…",
+    "reward.mobileOnly": "Video ads are available in the mobile app.",
+    "reward.consentUnavailable": "Ad permission could not be checked. Check your connection and try again.",
     "reward.marketScoutPremium": "+25 refreshes",
     "reward.fastInspectionAd": "Finish inspection now · Ad",
     "reward.fastInspectionPremium": "Finish inspection now",
@@ -923,7 +931,11 @@ export const extendedTranslations: Record<Language, Record<string, string>> = {
     "offerMode.safeDetail": "Höhere Erfolgschance",
 
     // Rewards
-    "reward.marketScoutAd": "+25 Scans · Video",
+    "reward.marketScoutAd": "Video ansehen +25",
+    "reward.watchVideo": "Video ansehen",
+    "reward.preparing": "Vorbereitung…",
+    "reward.mobileOnly": "Videowerbung ist in der mobilen App verfügbar.",
+    "reward.consentUnavailable": "Die Werbeeinwilligung konnte nicht geprüft werden. Prüfe deine Verbindung und versuche es erneut.",
     "reward.marketScoutPremium": "+25 Scans",
     "reward.fastInspectionAd": "Prüfung sofort beenden · Video",
     "reward.fastInspectionPremium": "Prüfung sofort beenden",
@@ -1373,7 +1385,11 @@ export const extendedTranslations: Record<Language, Record<string, string>> = {
     "offerMode.safeDetail": "Mayor probabilidad de aceptación",
 
     // Rewards
-    "reward.marketScoutAd": "+25 renovaciones · Vídeo",
+    "reward.marketScoutAd": "Ver anuncio +25",
+    "reward.watchVideo": "Ver anuncio",
+    "reward.preparing": "Preparando…",
+    "reward.mobileOnly": "Los anuncios de vídeo están disponibles en la aplicación móvil.",
+    "reward.consentUnavailable": "No se pudo comprobar el permiso de anuncios. Comprueba tu conexión e inténtalo de nuevo.",
     "reward.marketScoutPremium": "+25 renovaciones",
     "reward.fastInspectionAd": "Terminar inspección ahora · Vídeo",
     "reward.fastInspectionPremium": "Terminar inspección ahora",
