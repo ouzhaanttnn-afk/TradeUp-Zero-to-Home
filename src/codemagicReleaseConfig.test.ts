@@ -42,7 +42,7 @@ describe("Codemagic release safety", () => {
     ])
       expect(workflow).toContain(command);
     expect(workflow).toContain("CFBundleShortVersionString");
-    expect(workflow).toContain("'1.1.1'");
+    expect(workflow).toContain("'1.1.2'");
     expect(workflow).toContain("submit_to_app_store: false");
     expect(workflow).not.toContain('VITE_ADMOB_PRODUCTION_ENABLED: "false"');
     expect(workflow).toContain('VITE_ADMOB_PRODUCTION_ENABLED: "true"');
