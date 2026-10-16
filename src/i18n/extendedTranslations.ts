@@ -25,6 +25,7 @@ export const extendedTranslations: Record<Language, Record<string, string>> = {
     // Rewards
     "reward.marketScoutAd": "Reklam izle +25",
     "reward.watchVideo": "Reklam izle",
+    "reward.marketScoutApplied": "Yenileme hakkın: {credits}/{cap}.",
     "reward.preparing": "Hazırlanıyor…",
     "reward.mobileOnly": "Video reklamlar mobil uygulamada kullanılabilir.",
     "reward.consentUnavailable": "Reklam izni kontrol edilemedi. Bağlantını kontrol edip tekrar dene.",
@@ -479,6 +480,7 @@ export const extendedTranslations: Record<Language, Record<string, string>> = {
     // Rewards
     "reward.marketScoutAd": "Watch ad +25",
     "reward.watchVideo": "Watch ad",
+    "reward.marketScoutApplied": "Your refresh credits: {credits}/{cap}.",
     "reward.preparing": "Preparing…",
     "reward.mobileOnly": "Video ads are available in the mobile app.",
     "reward.consentUnavailable": "Ad permission could not be checked. Check your connection and try again.",
@@ -933,6 +935,7 @@ export const extendedTranslations: Record<Language, Record<string, string>> = {
     // Rewards
     "reward.marketScoutAd": "Video ansehen +25",
     "reward.watchVideo": "Video ansehen",
+    "reward.marketScoutApplied": "Deine Aktualisierungen: {credits}/{cap}.",
     "reward.preparing": "Vorbereitung…",
     "reward.mobileOnly": "Videowerbung ist in der mobilen App verfügbar.",
     "reward.consentUnavailable": "Die Werbeeinwilligung konnte nicht geprüft werden. Prüfe deine Verbindung und versuche es erneut.",
@@ -1387,6 +1390,7 @@ export const extendedTranslations: Record<Language, Record<string, string>> = {
     // Rewards
     "reward.marketScoutAd": "Ver anuncio +25",
     "reward.watchVideo": "Ver anuncio",
+    "reward.marketScoutApplied": "Tus renovaciones: {credits}/{cap}.",
     "reward.preparing": "Preparando…",
     "reward.mobileOnly": "Los anuncios de vídeo están disponibles en la aplicación móvil.",
     "reward.consentUnavailable": "No se pudo comprobar el permiso de anuncios. Comprueba tu conexión e inténtalo de nuevo.",

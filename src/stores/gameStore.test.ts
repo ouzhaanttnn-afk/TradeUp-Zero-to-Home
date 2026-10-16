@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Haptics } from "@capacitor/haptics";
+import { RewardAdPluginEvents } from "@capacitor-community/admob";
+import { createAdMobAdapters } from "../infrastructure/admob";
 
 vi.mock("@capacitor/haptics", () => ({
   Haptics: { notification: vi.fn(() => Promise.resolve()) },
@@ -35,6 +37,76 @@ import {
 import { syncVerifiedEntitlement } from "../domain/monetization";
 
 describe("explicit scout consent retry", () => {
+  it.each(["earned-event", "earned-promise", "cancelled", "no-fill"] as const)(
+    "connects the scout action to the native rewarded adapter (%s)",
+    async (outcome) => {
+      const clock = vi.spyOn(systemTimeProvider, "nowWallMs").mockReturnValue(1000);
+      const game = initialState(1000, "SANDBOX");
+      game.monetization.marketScanCredits = 0;
+      const callbacks = new Map<string, () => void>();
+      const remove = vi.fn().mockResolvedValue(undefined);
+      // Only the native boundary is mocked: store, UMP adapter, rewarded
+      // adapter and the domain reward transaction all run together. No ad traffic.
+      const port = {
+        requestConsentInfo: vi.fn().mockResolvedValue({
+          status: "NOT_REQUIRED", canRequestAds: true,
+        }),
+        initialize: vi.fn().mockResolvedValue(undefined),
+        prepareRewardVideoAd: vi.fn().mockImplementation(async () => {
+          if (outcome === "no-fill") throw new Error("No fill");
+          return {};
+        }),
+        addListener: vi.fn(async (event: string, callback: () => void) => {
+          callbacks.set(event, callback);
+          return { remove };
+        }),
+        showRewardVideoAd: vi.fn(async () => {
+          // Preparing/presenting a video alone must never grant credits.
+          expect(useGameStore.getState().game.monetization.marketScanCredits).toBe(0);
+          if (outcome === "earned-promise") return { amount: 1, type: "reward" };
+          if (outcome === "earned-event") {
+            callbacks.get(RewardAdPluginEvents.Rewarded)?.();
+            callbacks.get(RewardAdPluginEvents.Rewarded)?.();
+          }
+          callbacks.get(RewardAdPluginEvents.Dismissed)?.();
+          // iOS can leave this promise pending on dismissal; events settle it.
+          return new Promise<never>(() => {});
+        }),
+      };
+      const native = createAdMobAdapters(port as never, {
+        platform: "ios", productionEnabled: true, testEnabled: false,
+      });
+      configureMonetizationAdapters({ ...unavailableMonetizationAdapters, ...native });
+      useGameStore.setState({ game, ready: true, monetizationBusy: false });
+      try {
+        await useGameStore.getState().claimReward("MARKET_SCOUT");
+        expect(port.requestConsentInfo).toHaveBeenCalledOnce();
+        expect(port.initialize).toHaveBeenCalledOnce();
+        expect(port.prepareRewardVideoAd).toHaveBeenCalledWith({
+          adId: "ca-app-pub-4229088811556918/4710266110",
+          isTesting: false, npa: true,
+        });
+        const next = useGameStore.getState();
+        const earned = outcome.startsWith("earned");
+        expect(next.game.monetization.marketScanCredits).toBe(earned ? 25 : 0);
+        expect(next.game.monetization.rewardTransactions).toHaveLength(1);
+        expect(next.game.monetization.rewardTransactions[0].status).toBe(
+          earned ? "APPLIED" : outcome === "cancelled" ? "CANCELLED" : "FAILED",
+        );
+        expect(next.monetizationBusy).toBe(false);
+        expect(reconcileJournal(next.game)).toEqual({ cash: true, activeBookCost: true, realizedProfit: true });
+        expect(next.game.cashMinor).toBe(game.cashMinor);
+        if (outcome === "no-fill") expect(port.showRewardVideoAd).not.toHaveBeenCalled();
+        else expect(remove).toHaveBeenCalledTimes(3);
+        if (earned) expect(next.notice).toContain("25/50");
+      } finally {
+        clock.mockRestore();
+        configureMonetizationAdapters(unavailableMonetizationAdapters);
+        useGameStore.setState({ monetizationBusy: false });
+      }
+    },
+  );
+
   it("retries a failed startup on tap and ignores duplicate taps while consent is pending", async () => {
     const clock = vi.spyOn(systemTimeProvider, "nowWallMs").mockReturnValue(1000);
     const game = initialState(1000, "SANDBOX");

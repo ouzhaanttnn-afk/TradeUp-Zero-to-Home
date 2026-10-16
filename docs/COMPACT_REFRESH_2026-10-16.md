@@ -38,3 +38,24 @@ aynı düğme açık mobil-uygulama açıklamasıyla devre dışıdır; sahte re
 Ponytail yaklaşımıyla mevcut düğme/altın varyantı yeniden kullanıldı; ayrı CTA
 ve CSS kaldırıldı. Doğrulama becerisiyle UI→store→izin→ödül sınırları ayrı
 kontrol edildi; canlı reklam/cihaz doğrulamasıyla karıştırılmadı. Omni kullanılmadı.
+
+## Ödüllü bağlantının yeniden kontrolü
+
+Kullanıcının ek isteği üzerine `claimReward("MARKET_SCOUT")` → gerçek AdMob
+adapter'ı → domain ödül işlemi birlikte sınandı. Yalnız native SDK sınırı mock;
+gerçek reklam trafiği oluşturulmadı. İstek iOS ödüllü birimi
+`ca-app-pub-4229088811556918/4710266110`, `npa: true` ve yayın yapılandırmasında
+`isTesting: false` kullanır. Gösterimin başlaması ödül değildir. SDK ödül callback'i
+veya geçerli ödül sonucu hak verir; yinelenen callback ikinci ödül vermez.
+Erken kapatma ve no-fill hak vermez, busy kilidini bırakır, nakdi değiştirmez.
+Başarı bildirimi artık genel hızlandırma mesajı yerine güncel hak/kapasiteyi söyler.
+
+- **473 birim testi**, lint, TypeScript ve production web build başarılı.
+- Yayın build'i `VITE_ADMOB_PRODUCTION_ENABLED=true`, test bayrağı `false` ile alındı.
+- Demo reklam kimliği kontrolü ve ATT'siz native gizlilik kontrolü başarılı.
+- 320/390/430 px kompakt düğme ve büyük yazı tarayıcı senaryoları tekrar sınandı.
+  İlk turda üç genişlik geçti; build ile çakışan son senaryo Ayarlar yüklemesinde
+  zaman aşımına uğradı. Sabit build üzerinde tek başına yeniden çalıştırıldı ve geçti.
+- Apple'a/TestFlight'a yükleme, inceleme, merge veya production site yayını yapılmadı.
+  Yeni IPA üretilmedi; sonraki native release derlemesi bu dalı kaynak almalıdır.
+  Canlı dolum/UMP hesap yapılandırması için fiziksel cihaz doğrulaması hâlâ gerekir.

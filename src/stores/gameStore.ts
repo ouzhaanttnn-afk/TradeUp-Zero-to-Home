@@ -59,6 +59,7 @@ import {
   advanceRewardState,
   beginRewardSession,
   hasAdFreeEntitlement,
+  marketScanRegenCap,
   rechargeMarketScanCredits,
   syncConsentState,
 } from "../domain/monetization";
@@ -1629,7 +1630,9 @@ export const useGameStore = create<Store>((set, get) => ({
       monetizationBusy: false,
       notice:
         result.status === "APPLIED"
-          ? "İsteğe bağlı hızlandırma uygulandı."
+          ? placementId === "MARKET_SCOUT"
+            ? t("reward.marketScoutApplied", { credits: next.monetization.marketScanCredits, cap: marketScanRegenCap(next) })
+            : "İsteğe bağlı hızlandırma uygulandı."
           : result.status === "CANCELLED"
             ? "Video erken kapatıldı; hak ve limit kullanılmadı."
             : result.status === "INELIGIBLE"
