@@ -4,6 +4,8 @@ Araştırma, cila değerlendirmesi ve geliştirme planı · 16 Ekim 2026
 
 Durum: uygulamaya alınmamış ürün önerisi. Sürüm adı çalışma adıdır.
 
+Güncelleme: kullanıcının tüm kararların kodlamadan önce verilmesi talimatıyla [uygulama şartnamesi ve karar kaydı](TRADEUP_1.2_IMPLEMENTATION_SPEC_2026-10-16.md) hazırlanmıştır. Bu araştırmadaki seçenekler, açık sorular ve prototip hipotezleriyle çelişen yerde yeni şartname esas alınır. Araştırma bulguları tarihsel kanıt olarak korunmuştur; geliştirme başlamamıştır.
+
 İncelenen kaynak: `a1317e2` commit’indeki TradeUp. Bu belge için oyun kodu, ekonomi, satın alma kayıtları ve Apple başvurusu değiştirilmedi. Kullanıcının son talimatıyla öneriler GDD kapsam dondurmasına bağlı değildir; GDD geçmiş kararların anlaşılması için kullanılmıştır. Bu serbestlik, mevcut kayıtları veya oyuncuya satılmış hakları bozma izni değildir.
 
 ## 1. Karar özeti
