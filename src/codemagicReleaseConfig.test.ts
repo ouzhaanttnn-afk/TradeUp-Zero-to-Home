@@ -2,6 +2,10 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 describe("Codemagic release safety", () => {
+  it("disables Vercel auto-deployment only for the authorized native test branch", () => {
+    const config = JSON.parse(readFileSync(new URL("../vercel.json", import.meta.url), "utf8"));
+    expect(config.git.deploymentEnabled).toEqual({ "codex/first-home-polish": false });
+  });
   it("provides a manual artifact-only workflow without Apple publication", () => {
     const workflow = readFileSync(
       new URL("../codemagic.yaml", import.meta.url),
@@ -42,7 +46,7 @@ describe("Codemagic release safety", () => {
     ])
       expect(workflow).toContain(command);
     expect(workflow).toContain("CFBundleShortVersionString");
-    expect(workflow).toContain("'1.1.2'");
+    expect(workflow).toContain("'1.2.0'");
     expect(workflow).toContain("submit_to_app_store: false");
     expect(workflow).not.toContain('VITE_ADMOB_PRODUCTION_ENABLED: "false"');
     expect(workflow).toContain('VITE_ADMOB_PRODUCTION_ENABLED: "true"');

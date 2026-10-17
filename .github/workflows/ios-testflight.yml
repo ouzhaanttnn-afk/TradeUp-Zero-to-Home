@@ -24,7 +24,7 @@ jobs:
       APPLE_TEAM_ID: 8X6KZC5R23
       PROFILE_NAME: TradeUp App Store
       APP_STORE_APPLE_ID: '6811362281'
-      EXPECTED_MARKETING_VERSION: 1.1.2
+      EXPECTED_MARKETING_VERSION: 1.2.0
       TRADEUP_IOS_BUILD_NUMBER: ${{ inputs.build_number || github.run_number }}
       VITE_ADMOB_PRODUCTION_ENABLED: 'true'
       VITE_ADMOB_TEST_ENABLED: 'false'
