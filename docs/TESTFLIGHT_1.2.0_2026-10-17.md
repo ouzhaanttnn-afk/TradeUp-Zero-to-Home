@@ -11,7 +11,14 @@
 
 ## Durum
 
-Sürüm ve build güvenlik kontrolleri hazırlanıyor. İmzalı IPA, Apple işlemesi ve Betatest erişimi doğrulanmadan yükleme tamamlandı sayılmaz.
+- 76 dosyada **496 test**, lint, TypeScript ve production build başarılı. Üretim reklam flag'i true, test flag'i false; demo kimliği ve ATT'siz native gizlilik kontrolü geçti.
+- Kaynak dalı pushlandı; derlenen commit `edb46dcbb677ff63b545da9960d5c0fdc146faf1`. Main merge edilmedi.
+- [Codemagic build 6ad37d847550aed8108f949c](https://codemagic.io/app/6ac0a97ff49075906ade5690/build/6ad37d847550aed8108f949c) **17 Ekim 2026 16:52 Europe/Istanbul** tarihinde ücretsiz Mac mini M2 üzerinde başlatıldı. TestFlight-only workflow ve doğru kaynak commit'i build ekranında doğrulandı.
+- Tek native build **3m 53s** içinde tamamlandı. Arşiv/imza, IPA sürüm/bundle/build ve reklam/gizlilik artifact kontrolleri CI'da başarılı. IPA boyutu 23.038.769 bayt; Codemagic artifact bölümünde saklanıyor.
+- Apple yükleyicisi **UPLOAD SUCCEEDED with no errors** bildirdi. Delivery UUID: `2d68d13c-8fea-4d13-985d-47e057916a60`. Bu yükleme App Review gönderimi değildir.
+- Yükleme kanıtı: `release-artifacts/testflight-47-upload-success.jpg`. Artifact-only indirme API'si yetkili oturum istedi; tarayıcı indirmesinde client engeli görüldü. Bu nedenle yerel IPA dosyası veya yerel SHA kontrolü yapılmış gibi gösterilmez; bulut artifact doğrulaması başarılıdır. Yeniden build açılmadı.
+- Apple işlemesi tamamlandı: TestFlight'ta **1.2.0 (47)** ve **Betatest** grubu bağlantısı (3 davet) canlı ekranda doğrulandı. İç test erişimi hazır; harici test için görünen “Ready to Submit” durumu App Review gönderildiği anlamına gelmez.
+- İsteğe bağlı test notlarını kaydetmeden Apple oturumu sona erdi; notlar güncellenmiş gibi raporlanmaz. Mevcut App Review başvurusu değiştirilmedi.
 
 ## Cihaz testinde bakılacaklar
 
