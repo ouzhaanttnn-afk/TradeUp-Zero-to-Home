@@ -1,9 +1,11 @@
 import { EARLY_GAME_CONFIG, MONETIZATION_CONFIG, WORLD_CONFIG } from "./config";
 import { familyById, families } from "../content/families";
+import { createFirstHomeSummary } from "./careerRecords";
 import type {
   BuyerOffer,
   CareerEvent,
   Family,
+  GameState,
   Listing,
   Negotiation,
   OwnedAsset,
@@ -537,7 +539,24 @@ export function migrateStateToCurrent(value: unknown): unknown {
   next = migrateStateToV17(next);
   next = migrateStateToV18(next);
   next = migrateStateToV19(next);
-  return migrateStateToV21(migrateStateToV20(next));
+  return migrateStateToV22(migrateStateToV21(migrateStateToV20(next)));
+}
+
+export function migrateStateToV22(value: unknown): unknown {
+  const source = record(value);
+  if (integer(source.version) >= 22) return value;
+  const next = {
+    ...source,
+    version: 22,
+    careerId:
+      string(source.careerId) ||
+      `local:${integer(source.seed)}:${Math.floor(number(source.lastWallClockMs))}`,
+    firstHomeSummary: undefined,
+  } as GameState;
+  return {
+    ...next,
+    firstHomeSummary: createFirstHomeSummary(next, "RECONSTRUCTED"),
+  };
 }
 
 // Legacy reward timestamps used accelerated game time. Anchor them conservatively

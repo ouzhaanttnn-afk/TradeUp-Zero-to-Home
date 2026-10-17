@@ -194,6 +194,19 @@ describe("explicit scout consent retry", () => {
 });
 
 describe("application lifecycle", () => {
+  it("only confirms the home memory after persistence and safely retries a failed write", async () => {
+    await useGameStore.getState().flush().catch(() => undefined);
+    const game = initialState(1_000, "SANDBOX");
+    game.home = { ...game.home, purchased: true };
+    game.firstHomeSummary = { summaryVersion: 1, careerId: game.careerId, completeness: "PARTIAL", origin: "RECONSTRUCTED" };
+    useGameStore.setState({ game, ready: true, sessionActive: true });
+    vi.mocked(saveGame).mockRejectedValueOnce(new Error("disk full"));
+    expect(await useGameStore.getState().confirmHomeMemorySaved()).toBe(false);
+    expect(useGameStore.getState().game.transactionJournal).toEqual(game.transactionJournal);
+    expect(await useGameStore.getState().confirmHomeMemorySaved()).toBe(true);
+    expect(useGameStore.getState().game.cashMinor).toBe(game.cashMinor);
+    expect(vi.mocked(saveGame).mock.calls.at(-1)?.[0].firstHomeSummary).toEqual(game.firstHomeSummary);
+  });
   it("opens exactly one cold reward session and does not reset it on pause/resume", async () => {
     await useGameStore.getState().flush();
     const clock = vi

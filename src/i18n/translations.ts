@@ -3,6 +3,7 @@ import { extendedTranslations } from "./extendedTranslations";
 
 const baseTranslations: Record<Language, Record<string, string>> = {
   tr: {
+    "notice.profileNameInvalid": "İsim boş olamaz; satır sonu veya kontrol karakteri içeremez.",
     // Navigation
     "nav.market": "Pazar",
     "nav.radar": "Radar",
@@ -300,6 +301,7 @@ const baseTranslations: Record<Language, Record<string, string>> = {
   },
 
   en: {
+    "notice.profileNameInvalid": "Enter a name without line breaks or control characters.",
     // Navigation
     "nav.market": "Market",
     "nav.radar": "Radar",
@@ -597,6 +599,7 @@ const baseTranslations: Record<Language, Record<string, string>> = {
   },
 
   de: {
+    "notice.profileNameInvalid": "Gib einen Namen ohne Zeilenumbrüche oder Steuerzeichen ein.",
     // Navigation
     "nav.market": "Markt",
     "nav.radar": "Radar",
@@ -894,6 +897,7 @@ const baseTranslations: Record<Language, Record<string, string>> = {
   },
 
   es: {
+    "notice.profileNameInvalid": "Escribe un nombre sin saltos de línea ni caracteres de control.",
     // Navigation
     "nav.market": "Mercado",
     "nav.radar": "Radar",

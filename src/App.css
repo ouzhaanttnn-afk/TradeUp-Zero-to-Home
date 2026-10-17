@@ -984,7 +984,7 @@ main {
 }
 .market-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 5px;
+  gap: 6px;
 }
 .market-grid > .starting-sale,
 .market-grid > .reward-cta {
@@ -1004,8 +1004,8 @@ main {
 }
 .market-grid .product-art {
   width: 100%;
-  height: clamp(68px, 20vw, 82px);
-  aspect-ratio: auto;
+  height: auto;
+  aspect-ratio: 4 / 3;
   flex: 0 0 auto;
   border-radius: 9px;
   background: radial-gradient(circle at 35% 20%, #2b503f, #12221b 72%);
@@ -1014,42 +1014,50 @@ main {
   position: relative;
   flex: 0 0 auto;
 }
-.market-condition-signal {
+.market-badges {
   position: absolute;
   z-index: 5;
-  right: 4px;
-  max-width: calc(100% - 8px);
+  inset: 4px 4px auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 3px;
+  pointer-events: none;
+}
+.market-condition-signal {
+  flex: 0 0 auto;
+  margin-left: auto;
   padding: 2px 4px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 999px;
   background: rgba(5, 17, 12, 0.84);
   color: #e7f1ec;
-  font-size: calc(8px + var(--text-size-boost));
+  font-size: calc(11px + var(--text-size-boost));
   font-weight: 750;
   line-height: 1.15;
   white-space: nowrap;
   text-overflow: ellipsis;
   pointer-events: none;
 }
-.market-condition-signal {
-  top: 4px;
-}
 .market-heat {
-  position: absolute;
-  z-index: 4;
-  top: 9px;
-  left: 9px;
-  max-width: calc(100% - 18px);
-  padding: 3px 5px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  padding: 2px 4px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 999px;
   background: rgba(5, 17, 12, 0.86);
   color: #d9e6df;
-  font-size: calc(8px + var(--text-size-boost));
+  font-size: calc(11px + var(--text-size-boost));
   font-weight: 750;
   line-height: 1.2;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.market-heat > span:last-child {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -1076,11 +1084,12 @@ main {
 }
 .market-grid .listing h3 {
   display: -webkit-box;
-  min-height: 2.44em;
+  min-height: 30px;
   margin: 1px 0 1px;
   overflow: hidden;
-  font-size: calc(8px + var(--text-size-boost));
-  line-height: 1.22;
+  font-size: calc(12px + var(--text-size-boost));
+  font-weight: 600;
+  line-height: 1.25;
   white-space: normal;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -1096,9 +1105,9 @@ main {
 .market-price-row > strong {
   min-width: 0;
   overflow: hidden;
-  font-size: calc(11px + var(--text-size-boost));
+  font-size: calc(15px + var(--text-size-boost));
   font-variant-numeric: tabular-nums;
-  line-height: 1.05;
+  line-height: 1.2;
   white-space: nowrap;
   text-overflow: ellipsis;
   color: #f4f8f6;
@@ -1138,7 +1147,7 @@ main {
   padding: 6px;
 }
 .app-shell.large-text .market-grid .product-art {
-  height: 84px;
+  height: auto;
 }
 .listing {
   display: grid;
@@ -5144,7 +5153,7 @@ main {
 
 .market-grid .listing h3 {
   color: #dce9e2;
-  font-weight: 720;
+  font-weight: 600;
   letter-spacing: -0.015em;
 }
 
@@ -6051,7 +6060,7 @@ nav .active::before {
 .profit-margin-pill { font-size: 9px; font-weight: 800; padding: 1px 5px; border-radius: 6px; background: #58b68429; color: #7ecd9a; border: 1px solid #58b68459; }
 .header-spec-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; background: #ffffff0f; border: 1px solid #7ecda540; border-radius: 12px; color: #c9ded5; cursor: pointer; font-size: 11px; }
 .header-spec-chip small { font-size: 10px; color: #a8e8c6; white-space: nowrap; max-width: 90px; overflow: hidden; text-overflow: ellipsis; }
-.market-luxury-badge { position: absolute; top: 4px; left: 4px; z-index: 6; font-size: 10px; background: #120e05d9; border: 1px solid #f1cf6d80; border-radius: 6px; padding: 1px 4px; line-height: 1; }
+.market-luxury-badge { flex: 0 0 auto; color: #f2cc78; line-height: 1; }
 .floating-cash-fx { position: fixed; top: calc(75px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 9999; pointer-events: none; display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 20px; background: #0e2319f2; border: 1px solid #58e19199; box-shadow: 0 8px 24px #00ff8059; font-weight: 800; color: #55efc4; animation: float-cash-up 2s ease-out forwards; }
 .floating-cash-fx.loss { background: #230e0ef2; border-color: #ff634899; box-shadow: 0 8px 24px #ff4b4b59; color: #ff7675; }
 .cash-fx-amount { font-size: 14px; }

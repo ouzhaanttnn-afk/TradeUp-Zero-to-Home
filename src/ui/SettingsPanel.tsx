@@ -1,16 +1,17 @@
-import { useRef, useState } from "react";
-import { avatars } from "../content/avatars";
-import { nextLadderHome } from "../content/homes";
+import { useMemo, useRef, useState } from "react";
+import { avatarById, avatars } from "../content/avatars";
 import { marketExpertiseLevel } from "../domain/meta";
-import { ownsAnimatedAvatars } from "../domain/profile";
+import { normalizeProfileName, ownsAnimatedAvatars } from "../domain/profile";
 import type { AccessibilityPreferences } from "../domain/models";
-import { HOME_GOAL_MINOR, wealth } from "../game";
+import { money } from "../game";
 import { useGameStore } from "../stores/gameStore";
 import { AvatarPortrait } from "./AvatarPortrait";
 import { Icon } from "./Icon";
 import PurchasesSheet from "./PurchasesSheet";
 import { useModalFocus } from "./useModalFocus";
 import { useTranslation, localizeAvatar } from "../i18n";
+import { careerRecords } from "../domain/careerRecords";
+import { careerCopy } from "./careerPresentation";
 
 type SoundLevel = AccessibilityPreferences["soundLevel"];
 
@@ -22,6 +23,7 @@ const nextSoundLevel: Record<SoundLevel, SoundLevel> = {
 
 export default function SettingsPanel({ onClose }: { onClose: () => void }) {
   const { t, lang, setLanguage, supportedLanguages } = useTranslation();
+  const copy = careerCopy(lang);
   const {
     game,
     storeProducts,
@@ -42,25 +44,24 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
   const [profileDraft, setProfileDraft] = useState(game.profile.displayName);
   const [purchasesOpen, setPurchasesOpen] = useState(false);
   const [resetArmed, setResetArmed] = useState(false);
+  const [avatarDraft, setAvatarDraft] = useState(game.profile.avatarId);
+  const validProfileDraft = normalizeProfileName(profileDraft);
+  const avatarDisclosureRef = useRef<HTMLDetailsElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
 
   useModalFocus(true, panelRef, closeRef, onClose);
 
   const marketLevel = marketExpertiseLevel(game);
-  const settingsLadderTarget = nextLadderHome(game.home);
-  const homeProgress = !game.home.purchased
-    ? Math.min(100, Math.floor((wealth(game) / HOME_GOAL_MINOR) * 100))
-    : settingsLadderTarget
-      ? Math.min(
-          100,
-          Math.floor((wealth(game) / settingsLadderTarget.priceMinor) * 100),
-        )
-      : 100;
   const animatedAvatarsOwned = ownsAnimatedAvatars(game);
-  const completedSales = game.transactionJournal.filter(
-    (entry) => entry.kind === "SALE",
-  ).length;
+  const records = useMemo(
+    () =>
+      careerRecords({
+        ownedAssets: game.ownedAssets,
+        transactionJournal: game.transactionJournal,
+      }),
+    [game.ownedAssets, game.transactionJournal],
+  );
 
   const currentSoundLabel =
     game.accessibility.soundLevel === "OFF"
@@ -97,10 +98,9 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
           className="profile-card"
           onSubmit={(event) => {
             event.preventDefault();
-            setProfileName(profileDraft);
-            setProfileDraft(
-              profileDraft.trim().replace(/\s+/g, " ").slice(0, 20),
-            );
+            if (!validProfileDraft) return;
+            setProfileName(validProfileDraft);
+            setProfileDraft(validProfileDraft);
           }}
         >
           <AvatarPortrait
@@ -108,13 +108,16 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
             className="profile-avatar"
           />
           <div className="profile-identity">
-            <span className="profile-kicker">{t("settings.level")} {marketLevel}</span>
+            <span className="profile-kicker">
+              {t("settings.level")} {marketLevel}
+            </span>
             <label>
               <span>{t("settings.playerName")}</span>
               <input
                 value={profileDraft}
                 maxLength={20}
                 autoComplete="nickname"
+                aria-invalid={profileDraft.length > 0 && !validProfileDraft}
                 onChange={(event) => setProfileDraft(event.target.value)}
               />
             </label>
@@ -122,60 +125,105 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
           <button
             className="primary"
             disabled={
-              !profileDraft.trim() ||
-              profileDraft.trim().replace(/\s+/g, " ") ===
-                game.profile.displayName
+              !validProfileDraft ||
+              validProfileDraft === game.profile.displayName
             }
             type="submit"
           >
             {t("settings.save")}
           </button>
-          <div className="profile-stats" role="group" aria-label={t("settings.profileSummary")}>
+          <div
+            className="profile-stats"
+            role="group"
+            aria-label={t("settings.profileSummary")}
+          >
             <span>
-              <small>{t("settings.level")}</small>
-              <b>{marketLevel}</b>
+              <small>{copy.trades}</small>
+              <b>{records.marketTradeCount}</b>
             </span>
             <span>
-              <small>{t("settings.sales")}</small>
-              <b>{completedSales}</b>
+              <small>{copy.best}</small>
+              <b>
+                {records.bestSale
+                  ? money(records.bestSale.profitMinor, lang)
+                  : "—"}
+              </b>
             </span>
             <span>
               <small>{t("settings.homeGoal")}</small>
-              <b>{lang === "tr" ? `%${homeProgress}` : `${homeProgress}%`}</b>
+              <b>{game.home.purchased ? copy.completed : copy.noHome}</b>
             </span>
           </div>
         </form>
-        <fieldset className="avatar-picker avatar-picker--settings">
-          <legend>{t("settings.avatars")}</legend>
-          <div className="avatar-options">
-            {avatars.map((avatar) => {
-              const locked = avatar.premium && !animatedAvatarsOwned;
-              const localized = localizeAvatar(
-                avatar.id,
-                avatar.name,
-                avatar.role,
-                lang,
-              );
-              return (
+        <details className="avatar-disclosure" ref={avatarDisclosureRef}>
+          <summary>{copy.avatar}</summary>
+          <fieldset className="avatar-picker avatar-picker--settings">
+            <legend>{t("settings.avatars")}</legend>
+            <div className="avatar-options">
+              {avatars.map((avatar) => {
+                const locked = avatar.premium && !animatedAvatarsOwned;
+                const localized = localizeAvatar(
+                  avatar.id,
+                  avatar.name,
+                  avatar.role,
+                  lang,
+                );
+                return (
+                  <button
+                    key={avatar.id}
+                    type="button"
+                    aria-pressed={avatarDraft === avatar.id}
+                    aria-label={`${localized.name}${locked ? ", Premium" : ""}`}
+                    onClick={() => setAvatarDraft(avatar.id)}
+                  >
+                    <AvatarPortrait avatarId={avatar.id} />
+                    <span>
+                      <b>{localized.name}</b>
+                      <small>{locked ? "Premium" : localized.role}</small>
+                    </span>
+                    {locked ? <i aria-hidden="true">◇</i> : null}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="avatar-confirmation">
+              <AvatarPortrait avatarId={avatarDraft} />
+              {avatarById(avatarDraft).premium && !animatedAvatarsOwned ? (
                 <button
-                  key={avatar.id}
-                  type="button"
-                  disabled={locked}
-                  aria-pressed={game.profile.avatarId === avatar.id}
-                  aria-label={`${localized.name}${locked ? ", " + t("onboarding.comingSoon") : ""}`}
-                  onClick={() => setProfileAvatar(avatar.id)}
+                  className="secondary"
+                  onClick={() => {
+                    void openPurchases();
+                    setPurchasesOpen(true);
+                  }}
                 >
-                  <AvatarPortrait avatarId={avatar.id} />
-                  <span>
-                    <b>{localized.name}</b>
-                    <small>{locked ? t("onboarding.comingSoon") : localized.role}</small>
-                  </span>
-                  {locked ? <i aria-hidden="true">◇</i> : null}
+                  {copy.shop}
                 </button>
-              );
-            })}
-          </div>
-        </fieldset>
+              ) : (
+                <button
+                  className="primary"
+                  disabled={avatarDraft === game.profile.avatarId}
+                  onClick={() => {
+                    setProfileAvatar(avatarDraft);
+                    if (avatarDisclosureRef.current)
+                      avatarDisclosureRef.current.open = false;
+                  }}
+                >
+                  {copy.use}
+                </button>
+              )}
+              <button
+                className="secondary"
+                onClick={() => {
+                  setAvatarDraft(game.profile.avatarId);
+                  if (avatarDisclosureRef.current)
+                    avatarDisclosureRef.current.open = false;
+                }}
+              >
+                {copy.cancel}
+              </button>
+            </div>
+          </fieldset>
+        </details>
       </div>
       <section
         className="settings-section"
@@ -237,7 +285,9 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
             aria-pressed={game.accessibility.largeText}
             onClick={() => setLargeText(!game.accessibility.largeText)}
           >
-            {game.accessibility.largeText ? t("settings.textSizeLarge") : t("settings.textSizeStandard")}
+            {game.accessibility.largeText
+              ? t("settings.textSizeLarge")
+              : t("settings.textSizeStandard")}
           </button>
         </div>
         <div className="settings-row">
@@ -266,7 +316,11 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
             <b>{t("settings.language")}</b>
             <small>{t("settings.languageSub")}</small>
           </span>
-          <div className="language-selector" role="group" aria-label={t("settings.language")}>
+          <div
+            className="language-selector"
+            role="group"
+            aria-label={t("settings.language")}
+          >
             {supportedLanguages.map((option) => (
               <button
                 key={option.code}
@@ -326,7 +380,10 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
           onClose={() => setPurchasesOpen(false)}
         />
       ) : null}
-      <section className="settings-section" aria-label={t("settings.helpLegal")}>
+      <section
+        className="settings-section"
+        aria-label={t("settings.helpLegal")}
+      >
         <div className="settings-section-heading">
           <div>
             <h3>{t("settings.helpLegal")}</h3>
@@ -345,7 +402,10 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
           </a>
         </div>
       </section>
-      <section className="settings-danger-zone" aria-label={t("settings.saveManagement")}>
+      <section
+        className="settings-danger-zone"
+        aria-label={t("settings.saveManagement")}
+      >
         <div>
           <b>{t("settings.saveManagement")}</b>
           <small>{t("settings.saveManagementSub")}</small>

@@ -2,19 +2,31 @@ import { expect, test } from "@playwright/test";
 import { completeFirstLaunch } from "./helpers";
 import { initialState, validateState } from "../src/game";
 import { HOME_OPTIONS } from "../src/content/homes";
+import { purchaseListing, settleAssetSale } from "../src/domain/economy";
 
 test("wealth atmosphere culminates in an accessible home purchase finale", async ({
   page,
 }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  const saved = initialState(Date.now(), "SANDBOX");
+  let saved = initialState(Date.now(), "SANDBOX");
   const selectedHomePriceMinor = HOME_OPTIONS[0].priceMinor;
-  saved.cashMinor = selectedHomePriceMinor;
+  saved.cashMinor = selectedHomePriceMinor - 18_000;
   saved.gameTimeMin = 180;
   saved.transactionJournal[0] = {
     ...saved.transactionJournal[0],
-    cashDeltaMinor: selectedHomePriceMinor,
+    cashDeltaMinor: saved.cashMinor,
   };
+  const bought = purchaseListing(saved, saved.listings[0], 20_000, 10);
+  if (!bought.ok) throw new Error(bought.reason);
+  const sold = settleAssetSale(
+    bought.state,
+    bought.state.ownedAssets.at(-1)!.id,
+    38_000,
+    "finale:sale:1",
+    20,
+  );
+  if (!sold.ok) throw new Error(sold.reason);
+  saved = sold.state;
   saved.home = {
     unlocked: true,
     searchStartedAtGameMin: 0,
@@ -74,7 +86,7 @@ test("wealth atmosphere culminates in an accessible home purchase finale", async
   });
   await page.getByRole("button", { name: "Bu evi seç" }).first().click();
 
-  const finale = page.getByRole("dialog", { name: "Anahtar artık sende." });
+  const finale = page.getByRole("dialog", { name: "İlk evin senin." });
   await expect(finale).toBeVisible();
   await expect(page.locator(".app-shell")).toHaveClass(/home-atmosphere-pulse/);
   expect(
@@ -86,8 +98,17 @@ test("wealth atmosphere culminates in an accessible home purchase finale", async
     frame: "home-milestone-frame",
     gold: "home-atmosphere-arrival",
   });
-  await expect(finale).toContainText("İlk satışını tamamladın");
-  await expect(finale).toContainText("Yeni en iyi satışın");
+  // Legacy career labels are not economic evidence; only the journal is used.
+  await expect(finale).not.toContainText("Yeni en iyi satışın");
+  await expect(finale).toContainText("Ticaret");
+  await expect(finale).toContainText("Piyasa kârı");
+  await expect(finale.locator(".home-sale-memories article")).toHaveCount(1);
+  await expect(finale.locator(".home-sale-memories article")).toContainText(
+    "İlk kârlı satış · En iyi satış",
+  );
+  await expect(finale.locator(".home-sale-memories article")).toContainText(
+    "₺180",
+  );
   await expect(page.locator(".app-shell")).toHaveClass(/home-complete/);
   await expect(page.locator(".app-shell")).toHaveCSS(
     "--home-gold-progress",
@@ -103,7 +124,16 @@ test("wealth atmosphere culminates in an accessible home purchase finale", async
     animations: "disabled",
   });
   await finale.getByRole("button", { name: "Yolculuğa devam et" }).click();
+  await page.reload();
+  await page.getByRole("button", { name: "Yolculuk", exact: true }).click();
+  await page.locator(".career-records-disclosure summary").click();
+  await expect(page.locator(".career-records-disclosure")).toContainText(
+    "1 ticaret",
+  );
   await expect(finale).toBeHidden();
+  await page.getByRole("button", { name: "İlk ev anını gör" }).click();
+  await expect(finale).toBeVisible();
+  await finale.getByRole("button", { name: "Yolculuğa devam et" }).click();
   // The home ladder continues: garden_edge was the cheapest option, so the
   // next-priciest already-revealed home becomes the new goal instead of a
   // dead "coming soon" placeholder.

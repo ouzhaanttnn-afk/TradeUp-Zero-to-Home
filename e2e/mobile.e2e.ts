@@ -44,7 +44,8 @@ async function checkLayout(page: Page) {
         issues.push(
           `overflow: ${element.className} ${element.textContent?.slice(0, 50)}`,
         );
-      if (element.tagName === "BUTTON" && (rect.width < 44 || rect.height < 44))
+      // Fractional viewport geometry may report 44 CSS px as 43.99998.
+      if (element.tagName === "BUTTON" && (rect.width < 44 - 1 / 64 || rect.height < 44 - 1 / 64))
         issues.push(`small target ${rect.width}x${rect.height}: ${element.outerHTML.slice(0, 120)}`);
     }
     return issues;
@@ -153,13 +154,22 @@ for (const width of [320, 390, 430]) {
       "loading",
       "eager",
     );
-    await expect(page.locator(".hero-art img")).toHaveCSS("height", "94px");
+    await expect(page.locator(".hero-art")).toHaveCSS("aspect-ratio", "16 / 7");
+    const heroGeometry = await page.locator(".hero-art").evaluate((hero) => {
+      const frame = hero.getBoundingClientRect();
+      const image = hero.querySelector("img")!.getBoundingClientRect();
+      return { frame: { left: frame.left, right: frame.right, top: frame.top, bottom: frame.bottom }, image: { left: image.left, right: image.right, top: image.top, bottom: image.bottom } };
+    });
+    expect(heroGeometry.image.left).toBeGreaterThanOrEqual(heroGeometry.frame.left);
+    expect(heroGeometry.image.right).toBeLessThanOrEqual(heroGeometry.frame.right);
+    expect(heroGeometry.image.top).toBeGreaterThanOrEqual(heroGeometry.frame.top);
+    expect(heroGeometry.image.bottom).toBeLessThanOrEqual(heroGeometry.frame.bottom);
     await expect(page.locator(".sheet-summary")).toHaveCSS("display", "grid");
     expect(
       await page
         .locator(".sheet-hero-shell")
         .evaluate((element) => element.getBoundingClientRect().height),
-    ).toBeLessThanOrEqual(120);
+    ).toBeLessThanOrEqual(width * 7 / 16);
     await expect(page.locator(".sheet-decision-heading")).toContainText(
       "KARARIN",
     );

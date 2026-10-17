@@ -1,7 +1,7 @@
 import type { Listing } from "../domain/models";
 import { money } from "../game";
 import { Icon } from "./Icon";
-import { listingAgeLabel } from "./marketCard";
+import { compactMarketRisk, listingAgeLabel } from "./marketCard";
 import { ProductVisual } from "./ProductVisual";
 import {
   useTranslation,
@@ -44,7 +44,11 @@ export function MarketListingCard({
   const { lang, t } = useTranslation();
   const ageLabel = listingAgeLabel(item.createdAtGameMin, gameTimeMin, lang);
   const upperMarket = item.instance.family.tier >= 4;
-  const productName = localizeProduct(item.instance.family.id, item.instance.family.name, lang);
+  const productName = localizeProduct(
+    item.instance.family.id,
+    item.instance.family.name,
+    lang,
+  );
   const categoryName = localizeCategory(item.instance.family.category, lang);
   const confidence = localizeConfidence(item.instance.evidenceConfidence, lang);
   const signalText = localizeSignal(itemSignal.text, lang);
@@ -56,7 +60,7 @@ export function MarketListingCard({
       data-price-minor={item.priceMinor}
       data-market-tier={item.instance.family.tier}
       onClick={onSelect}
-      aria-label={`${productName}, ${money(item.priceMinor, lang)}, ${lang === "tr" ? `%${item.instance.condition}` : `${item.instance.condition}%`}, ${confidence}, ${ageLabel}, ${signalText}. ${t("market.openDetail")}`}
+      aria-label={`${productName}, ${money(item.priceMinor, lang)}, ${lang === "tr" ? `%${item.instance.condition}` : `${item.instance.condition}%`}, ${confidence}, ${ageLabel}, ${signalText}, ${localizeRisk(risk.text, lang)}. ${t("market.openDetail")}`}
     >
       <div className="market-visual-frame">
         <ProductVisual
@@ -64,20 +68,31 @@ export function MarketListingCard({
           className="product-art"
           priority={priority}
         />
-        <span className="market-condition-signal">
-          {lang === "tr" ? `%${item.instance.condition}` : `${item.instance.condition}%`}
-        </span>
-        {upperMarket ? (
-          <span className="market-luxury-badge" title={t("market.luxuryTier") || "Lüks"}>
-            ✨
+        <div className="market-badges">
+          {risk.level !== "low" || upperMarket ? (
+            <span
+              className={`market-heat market-heat--${risk.level}`}
+              title={localizeRisk(risk.text, lang)}
+            >
+              {upperMarket ? (
+                <span
+                  className="market-luxury-badge"
+                  title={t("market.luxuryTier")}
+                  aria-label={t("market.luxuryTier")}
+                >
+                  ✦
+                </span>
+              ) : null}
+              <span>{compactMarketRisk(risk.level, lang)}</span>
+            </span>
+          ) : null}
+          <span className="market-condition-signal">
+            {lang === "tr"
+              ? `%${item.instance.condition}`
+              : `${item.instance.condition}%`}
           </span>
-        ) : null}
+        </div>
       </div>
-      {risk.level !== "low" ? (
-        <span className={`market-heat market-heat--${risk.level}`}>
-          {localizeRisk(risk.text, lang)}
-        </span>
-      ) : null}
       <div className="listing-copy">
         <small className="market-category">
           {categoryName} · {t("journey.categoryLevel")} {categoryLevel}
@@ -93,7 +108,13 @@ export function MarketListingCard({
         </div>
         <div className="tags">
           <b className={itemSignal.cls}>{signalText}</b>
-          <span>{lang === "tr" ? `%${item.instance.condition}` : `${item.instance.condition}%`} {t("market.conditionLabel") || (lang === "tr" ? "kondisyon" : "condition")}</span>
+          <span>
+            {lang === "tr"
+              ? `%${item.instance.condition}`
+              : `${item.instance.condition}%`}{" "}
+            {t("market.conditionLabel") ||
+              (lang === "tr" ? "kondisyon" : "condition")}
+          </span>
         </div>
         <div className="market-card-facts">
           <span>{confidence}</span>
@@ -103,4 +124,3 @@ export function MarketListingCard({
     </button>
   );
 }
-

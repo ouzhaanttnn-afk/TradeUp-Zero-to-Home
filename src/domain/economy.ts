@@ -9,7 +9,13 @@ import type {
   TransactionJournalEntry,
   TransactionKind,
 } from "./models";
-import { EARLY_GAME_CONFIG, WORLD_CONFIG } from "./config";
+import {
+  EARLY_GAME_CONFIG,
+  FTUE_STARTING_ASSET_ID,
+  WORLD_CONFIG,
+} from "./config";
+import { createFirstHomeSummary } from "./careerRecords";
+export { FTUE_STARTING_ASSET_ID } from "./config";
 import { exitPricingBps } from "./valuation";
 import { buyerPersona } from "./buyers";
 import { availableHomeOptions, homeOptionById } from "../content/homes";
@@ -33,12 +39,6 @@ export type EconomyCommandResult =
   | { ok: false; state: GameState; reason: EconomyFailureReason };
 
 const isOwned = (asset: OwnedAsset) => asset.state !== "SOLD_COMPLETE";
-
-// The scripted FTUE notebook is gifted (purchasePriceMinor 0) and sold
-// through the same settleAssetSale path as any other asset, so it needs a
-// stable identity to exclude from "completed trade" counters that gate
-// early-game pacing support.
-export const FTUE_STARTING_ASSET_ID = "asset:ftue-starting-notebook";
 
 // A completed trade is a market purchase later closed by a sale, excluding
 // the gifted starting notebook. Used to taper early-game pacing support
@@ -272,40 +272,41 @@ export function purchaseHome(
     return { ok: false, state, reason: "INSUFFICIENT_CASH" };
   }
 
+  const next: GameState = {
+    ...state,
+    cashMinor: state.cashMinor - purchasePriceMinor,
+    home: { ...state.home, purchased: true, purchasedHomeId: home.id },
+    career: [
+      ...state.career,
+      {
+        id: `career:${transactionId}`,
+        type: "HOME_PURCHASE",
+        group: "HOME",
+        atGameMin: gameTime,
+        label: currentHome
+          ? `${home.name} ile yükseldin`
+          : `${home.name} artık senin`,
+        amountMinor: purchasePriceMinor,
+      },
+    ],
+    transactionJournal: [
+      ...state.transactionJournal,
+      journalEntry(
+        transactionId,
+        "HOME_PURCHASE",
+        gameTime,
+        undefined,
+        -purchasePriceMinor,
+        0,
+        0,
+        { purchasePriceMinor, homeId },
+      ),
+    ],
+  };
   return {
     ok: true,
     idempotent: false,
-    state: {
-      ...state,
-      cashMinor: state.cashMinor - purchasePriceMinor,
-      home: { ...state.home, purchased: true, purchasedHomeId: home.id },
-      career: [
-        ...state.career,
-        {
-          id: `career:${transactionId}`,
-          type: "HOME_PURCHASE",
-          group: "HOME",
-          atGameMin: gameTime,
-          label: currentHome
-            ? `${home.name} ile yükseldin`
-            : `${home.name} artık senin`,
-          amountMinor: purchasePriceMinor,
-        },
-      ],
-      transactionJournal: [
-        ...state.transactionJournal,
-        journalEntry(
-          transactionId,
-          "HOME_PURCHASE",
-          gameTime,
-          undefined,
-          -purchasePriceMinor,
-          0,
-          0,
-          { purchasePriceMinor, homeId },
-        ),
-      ],
-    },
+    state: { ...next, firstHomeSummary: createFirstHomeSummary(next, "LIVE") },
   };
 }
 

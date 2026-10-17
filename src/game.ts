@@ -39,7 +39,7 @@ export type {
   TransactionJournalEntry,
 } from "./domain/models";
 export { families } from "./content/families";
-export const SAVE_VERSION = 21;
+export const SAVE_VERSION = 22;
 export const HOME_GOAL_MINOR = 350_000_000;
 
 const attributeDefinitionSchema = z.object({
@@ -473,9 +473,55 @@ const ftueSchema = z.object({
   firstPlayerListingId: z.string().optional(),
 });
 
+const marketSaleMemorySchema = z.object({
+  transactionId: z.string(),
+  assetId: z.string(),
+  familyId: z.string(),
+  assetKey: z.string(),
+  categoryId: z.string(),
+  purchasePriceMinor: z.number().int().nonnegative(),
+  salePriceMinor: z.number().int().nonnegative(),
+  bookCostMinor: z.number().int().nonnegative(),
+  profitMinor: z.number().int(),
+  atGameMin: z.number().int().nonnegative(),
+});
+const firstHomeSummarySchema = z
+  .object({
+    summaryVersion: z.literal(1),
+    careerId: z.string(),
+    sourceTransactionId: z.string().optional(),
+    homeId: z.string().optional(),
+    homePriceMinor: z.number().int().positive().optional(),
+    atGameMin: z.number().int().nonnegative().optional(),
+    marketTradeCount: z.number().int().nonnegative().optional(),
+    marketProfitMinor: z.number().int().optional(),
+    firstProfitableSale: marketSaleMemorySchema.optional(),
+    bestSale: marketSaleMemorySchema.optional(),
+    dominantCategoryId: z.string().optional(),
+    completeness: z.enum(["COMPLETE", "PARTIAL"]),
+    origin: z.enum(["LIVE", "RECONSTRUCTED"]),
+  })
+  .superRefine((summary, context) => {
+    if (
+      summary.completeness === "COMPLETE" &&
+      (summary.sourceTransactionId === undefined ||
+        summary.homeId === undefined ||
+        summary.homePriceMinor === undefined ||
+        summary.atGameMin === undefined ||
+        summary.marketTradeCount === undefined ||
+        summary.marketProfitMinor === undefined)
+    )
+      context.addIssue({
+        code: "custom",
+        message: "Complete first home memory needs its historical evidence",
+      });
+  });
+
 const stateSchema = z
   .object({
     version: z.literal(SAVE_VERSION),
+    careerId: z.string().min(1),
+    firstHomeSummary: firstHomeSummarySchema.optional(),
     cashMinor: z.number().int().nonnegative(),
     ownedAssets: z.array(ownedAssetSchema),
     realizedProfitMinor: z.number().int(),
@@ -500,6 +546,16 @@ const stateSchema = z
     lastWallClockMs: z.number().nonnegative(),
   })
   .superRefine((state, context) => {
+    if (
+      state.firstHomeSummary &&
+      (state.firstHomeSummary.careerId !== state.careerId ||
+        !state.home.purchased)
+    )
+      context.addIssue({
+        code: "custom",
+        message: "First home memory belongs to its purchased-home career",
+        path: ["firstHomeSummary"],
+      });
     if (
       completedTradeCount(state) >= EARLY_GAME_CONFIG.completedTradeThreshold &&
       state.monetization.marketScanCredits > 25
@@ -887,6 +943,7 @@ export const initialState = (
   const sandboxCashMinor = 42_000;
   const base: GameState = {
     version: SAVE_VERSION,
+    careerId: `local:${seed}:${Math.floor(lastWallClockMs)}`,
     cashMinor: mode === "SANDBOX" ? sandboxCashMinor : 0,
     ownedAssets: [],
     realizedProfitMinor: 0,

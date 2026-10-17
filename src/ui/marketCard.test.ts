@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { initialState } from "../game";
 import {
   ALL_MARKET_CATEGORIES,
+  compactMarketRisk,
   filterMarketListings,
   listingAgeLabel,
   marketCategories,
@@ -9,6 +10,12 @@ import {
 } from "./marketCard";
 
 describe("market card age", () => {
+  it("uses complete short interest labels while the card retains its full accessible description", () => {
+    expect(compactMarketRisk("high", "tr")).toBe("İlgi ↑");
+    expect(compactMarketRisk("critical", "en")).toBe("Offer");
+    expect(compactMarketRisk("medium", "de")).toBe("Gefragt");
+    expect(compactMarketRisk("low", "es")).toBe("Calma");
+  });
   it("uses short labels that fit a compact tile", () => {
     expect(listingAgeLabel(0, 0)).toBe("Yeni");
     expect(listingAgeLabel(4, 3)).toBe("Yeni");

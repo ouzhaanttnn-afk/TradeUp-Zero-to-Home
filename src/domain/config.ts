@@ -1,3 +1,6 @@
+// The gifted notebook shares settlement accounting but is not a market trade.
+export const FTUE_STARTING_ASSET_ID = "asset:ftue-starting-notebook";
+
 export const WORLD_CONFIG = {
   activeTickMin: 1,
   scanAdvanceMin: 2,

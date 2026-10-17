@@ -1,5 +1,10 @@
 import type { AvatarId, GameState } from "./models";
 
+export const normalizeProfileName = (name: string): string | undefined => {
+  if (/[\p{Cc}\p{Zl}\p{Zp}]/u.test(name)) return undefined;
+  return name.trim().replace(/\s+/g, " ").slice(0, 20) || undefined;
+};
+
 export const ANIMATED_AVATAR_IDS = [
   "neon-araci",
   "altin-vizyoner",

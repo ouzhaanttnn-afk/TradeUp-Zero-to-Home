@@ -7,6 +7,10 @@
 - In ambiguity, choose the simpler, less advantageous, less intrusive implementation that changes neither the economy nor monetization.
 - Do not silently add deferred ideas to a working build.
 
+### Approved First Home patch exception (2026-10-17)
+
+The user explicitly approved implementing `docs/TRADEUP_1.2_IMPLEMENTATION_SPEC_2026-10-16.md` and waived the old scope freeze for that plan. Within this patch, the specification takes precedence for UI, local career records, first-home memories and the separately staged optional leaderboard. Its 1.2/1.3 delivery boundary is binding: no live global service, paid cloud setup, merge, push, deployment or Apple submission is authorized by implementation approval alone. Keep the existing economy, ad rules, IAP ownership and saves intact. Other work still follows GDD v2.2.
+
 ## Locked product rules
 
 - Priority never changes: economic correctness, decision depth, first session, active market, retention, monetization, then content scale.

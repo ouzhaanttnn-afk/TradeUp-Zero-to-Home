@@ -39,7 +39,52 @@ test("profile and settings stay accessible from the mobile game header", async (
   await expect(page.getByLabel("Oyuncu adı")).toHaveValue("Pazar Ustası");
   await expect(
     dialog.getByRole("group", { name: "Profil özeti" }),
-  ).toContainText("Pazar seviyesi");
+  ).toContainText("Ticaret");
+  const avatarChoices = dialog.locator(".avatar-disclosure");
+  const currentPortrait = dialog.locator(
+    ".profile-card > .avatar-portrait img",
+  );
+  const originalPortrait = await currentPortrait.getAttribute("src");
+  await expect(avatarChoices).not.toHaveAttribute("open");
+  await avatarChoices.locator("summary").click();
+  await avatarChoices
+    .getByRole("button", { name: "Atölye Ustası", exact: true })
+    .click();
+  await expect(currentPortrait).toHaveAttribute("src", originalPortrait!);
+  await avatarChoices
+    .getByRole("button", { name: "İptal", exact: true })
+    .click();
+  await avatarChoices.locator("summary").click();
+  await expect(
+    avatarChoices.getByRole("button", { name: "Pazar Kaşifi", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await avatarChoices
+    .getByRole("button", { name: "Atölye Ustası", exact: true })
+    .click();
+  await avatarChoices
+    .getByRole("button", { name: "Kullan", exact: true })
+    .click();
+  await expect(currentPortrait).not.toHaveAttribute("src", originalPortrait!);
+  await avatarChoices.locator("summary").click();
+  await expect(
+    avatarChoices.getByRole("button", { name: /, Premium$/ }),
+  ).toHaveCount(3);
+  await avatarChoices
+    .getByRole("button", { name: "Neon Aracı, Premium", exact: true })
+    .click();
+  await expect(
+    avatarChoices.getByRole("button", { name: "Kullan", exact: true }),
+  ).toHaveCount(0);
+  await avatarChoices
+    .getByRole("button", { name: "Mağazada gör", exact: true })
+    .click();
+  await expect(
+    page.getByRole("dialog", { name: "Satın Almalar & Görünüm" }),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+  await avatarChoices
+    .getByRole("button", { name: "İptal", exact: true })
+    .click();
   for (const [name, path] of [
     ["Destek", "/support.html"],
     ["Gizlilik", "/privacy.html"],
@@ -57,32 +102,50 @@ test("profile and settings stay accessible from the mobile game header", async (
     .click();
   await expect(dialog.locator(".purchase-list article")).toHaveCount(6);
   await expect(dialog.locator(".purchase-list article:visible")).toHaveCount(2);
-  await expect(dialog.locator(".purchase-list--main article").first()).toContainText("Reklamsız");
-  await expect(dialog.locator(".purchase-list--main article").last()).toContainText("TradeUp Premium");
+  await expect(
+    dialog.locator(".purchase-list--main article").first(),
+  ).toContainText("Reklamsız");
+  await expect(
+    dialog.locator(".purchase-list--main article").last(),
+  ).toContainText("TradeUp Premium");
   await expect(dialog.locator(".extra-purchases")).not.toHaveAttribute("open");
   await expect(dialog).toContainText("Reklamsız");
   await expect(dialog).toContainText("Şu an kullanılamıyor");
   await expect(dialog).not.toContainText("Fiyat yüklenemedi");
   const shop = page.getByRole("dialog", { name: "Satın Almalar & Görünüm" });
-  const closeBounds = await shop.getByRole("button", { name: "Kapat", exact: true }).boundingBox();
-  const titleBounds = await shop.getByRole("heading", { name: "Satın Almalar & Görünüm" }).boundingBox();
+  const closeBounds = await shop
+    .getByRole("button", { name: "Kapat", exact: true })
+    .boundingBox();
+  const titleBounds = await shop
+    .getByRole("heading", { name: "Satın Almalar & Görünüm" })
+    .boundingBox();
   expect(closeBounds).not.toBeNull();
   expect(titleBounds).not.toBeNull();
   expect(closeBounds!.width).toBeLessThanOrEqual(60);
-  expect(titleBounds!.x + titleBounds!.width).toBeLessThanOrEqual(closeBounds!.x);
+  expect(titleBounds!.x + titleBounds!.width).toBeLessThanOrEqual(
+    closeBounds!.x,
+  );
   await shop.getByRole("button", { name: "Kapat", exact: true }).focus();
   await page.keyboard.press("Shift+Tab");
   // No provider is configured on web: unavailable privacy/ad controls are absent.
-  await expect(shop.getByRole("button", { name: "Gizlilik", exact: true })).toHaveCount(0);
-  await expect(shop.locator(".cosmetic-picker").last().getByRole("button", { name: "Klasik", exact: true })).toBeFocused();
+  await expect(
+    shop.getByRole("button", { name: "Gizlilik", exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    shop.locator(".cosmetic-picker").last().locator("summary"),
+  ).toBeFocused();
   await page.keyboard.press("Tab");
-  await expect(shop.getByRole("button", { name: "Kapat", exact: true })).toBeFocused();
+  await expect(
+    shop.getByRole("button", { name: "Kapat", exact: true }),
+  ).toBeFocused();
   await dialog.locator(".extra-purchases summary").focus();
   await page.keyboard.press("Enter");
   await expect(dialog.locator(".purchase-list article:visible")).toHaveCount(6);
   await page.keyboard.press("Enter");
   await expect(dialog.locator(".purchase-list article:visible")).toHaveCount(2);
-  await shop.locator(".sheet-scroll").evaluate((element) => element.scrollTo(0, 0));
+  await shop
+    .locator(".sheet-scroll")
+    .evaluate((element) => element.scrollTo(0, 0));
   await page.screenshot({
     path: testInfo.outputPath("profile-settings-320.png"),
     animations: "disabled",
@@ -108,8 +171,12 @@ test("profile and settings stay accessible from the mobile game header", async (
   await page.keyboard.press("Escape");
   await expect(shop).not.toBeVisible();
   await expect(dialog).toBeVisible();
-  await expect(dialog.getByRole("button", { name: /Satın almalar & görünüm/i })).toBeFocused();
-  expect(await page.evaluate(() => document.body.style.overflow)).toBe("hidden");
+  await expect(
+    dialog.getByRole("button", { name: /Satın almalar & görünüm/i }),
+  ).toBeFocused();
+  expect(await page.evaluate(() => document.body.style.overflow)).toBe(
+    "hidden",
+  );
   await page.keyboard.press("Escape");
   await expect(settingsButton).toBeFocused();
   expect(await page.evaluate(() => document.body.style.overflow)).toBe("");

@@ -453,8 +453,39 @@ export type FtueState = {
   firstPlayerListingId?: ListingId;
 };
 
+export type MarketSaleMemory = {
+  transactionId: string;
+  assetId: string;
+  familyId: string;
+  assetKey: string;
+  categoryId: string;
+  purchasePriceMinor: number;
+  salePriceMinor: number;
+  bookCostMinor: number;
+  profitMinor: number;
+  atGameMin: number;
+};
+
+export type FirstHomeSummary = {
+  summaryVersion: 1;
+  careerId: string;
+  sourceTransactionId?: string;
+  homeId?: string;
+  homePriceMinor?: number;
+  atGameMin?: number;
+  marketTradeCount?: number;
+  marketProfitMinor?: number;
+  firstProfitableSale?: MarketSaleMemory;
+  bestSale?: MarketSaleMemory;
+  dominantCategoryId?: string;
+  completeness: "COMPLETE" | "PARTIAL";
+  origin: "LIVE" | "RECONSTRUCTED";
+};
+
 export type GameState = {
   version: number;
+  careerId: string;
+  firstHomeSummary?: FirstHomeSummary;
   cashMinor: number;
   ownedAssets: OwnedAsset[];
   realizedProfitMinor: number;

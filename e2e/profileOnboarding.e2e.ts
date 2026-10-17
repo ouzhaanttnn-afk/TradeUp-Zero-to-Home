@@ -36,6 +36,7 @@ test("first launch creates a named avatar profile before the market", async ({
   await page.reload();
   await page.getByRole("button", { name: "Ayarlar" }).click();
   await expect(page.getByLabel("Oyuncu adı")).toHaveValue("Gece Avcısı");
+  await page.getByText("Avatarını değiştir", { exact: true }).click();
   await expect(
     page.getByRole("button", { name: /Koleksiyon Uzmanı/ }),
   ).toHaveAttribute("aria-pressed", "true");

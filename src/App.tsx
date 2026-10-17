@@ -13,27 +13,6 @@ import { Capacitor } from "@capacitor/core";
 import { bindAndroidBack } from "./infrastructure/androidBack";
 import "./App.css";
 
-const shellThemeStyles: Record<string, CSSProperties> = {
-  classic: {},
-  obsidian: {
-    "--surface-0": "#090b10", "--surface-1": "#11141c", "--surface-2": "#181c26",
-    "--line-soft": "rgba(204,213,232,.11)", "--line-strong": "rgba(221,228,242,.24)",
-    "--accent": "#d7deec", "--muted": "#a5adbd",
-    background: "radial-gradient(circle at 82% 4%,rgba(133,148,181,.16),transparent 30%),linear-gradient(180deg,#11141c,#07090d 72%)",
-  } as CSSProperties,
-  "night-market": {
-    "--surface-0": "#08081a", "--surface-1": "#11112a", "--surface-2": "#17163a",
-    "--line-soft": "rgba(167,155,255,.14)", "--line-strong": "rgba(139,113,255,.32)",
-    "--accent": "#9e8cff", "--muted": "#aaa5c8",
-    background: "radial-gradient(circle at 18% 5%,rgba(116,73,255,.22),transparent 32%),linear-gradient(180deg,#11102e,#070714 76%)",
-  } as CSSProperties,
-  workshop: {
-    "--surface-0": "#15100b", "--surface-1": "#211910", "--surface-2": "#2c2116",
-    "--line-soft": "rgba(224,174,104,.13)", "--line-strong": "rgba(228,164,75,.3)",
-    "--accent": "#e2a84f", "--muted": "#b6a38c",
-    background: "radial-gradient(circle at 82% 5%,rgba(215,139,45,.18),transparent 30%),linear-gradient(180deg,#24190e,#0f0c09 76%)",
-  } as CSSProperties,
-};
 import { assetFor, fallbackAssetFor } from "./assets";
 import {
   activeOwnedAssets,
@@ -81,6 +60,7 @@ import {
 } from "./domain/dialogues";
 import { isShowcaseItem } from "./domain/showcase";
 import ShowcaseRoom from "./ui/ShowcaseRoom";
+import MarketEventCard from "./ui/MarketEventCard";
 import { evidencePresentation } from "./ui/evidencePresentation";
 import { ownershipPresentation } from "./ui/ownershipPresentation";
 import { latestSaleResult } from "./ui/saleResult";
@@ -121,7 +101,6 @@ import {
   localizeSeller,
   localizeConfidence,
   localizeBuyerPersona,
-  localizeMarketEvent,
   localizeFtueStage,
   localizeFtueCopy,
   localizeInspection,
@@ -269,6 +248,7 @@ export default function App() {
   const [revisedListingPrice, setRevisedListingPrice] = useState("");
   const [focusedAssetId, setFocusedAssetId] = useState<string | null>(null);
   const [homeFinaleOpen, setHomeFinaleOpen] = useState(false);
+  const [homeMemoryStatus, setHomeMemoryStatus] = useState<"IDLE" | "SAVING" | "FAILED">("IDLE");
   const [homePulseStage, setHomePulseStage] = useState<number | null>(null);
   const [scanSpinKey, setScanSpinKey] = useState(0);
   const [startupElapsed, setStartupElapsed] = useState(false);
@@ -566,19 +546,18 @@ export default function App() {
     const timer = window.setTimeout(() => setHomePulseStage(null), 1_600);
     return () => window.clearTimeout(timer);
   }, [atmosphereStage, ready]);
-  const finaleHighlights = useMemo(
-    () =>
-      (
-        [
-          "FIRST_SALE",
-          "BEST_FLIP_UPDATED",
-          "DOMINANT_CATEGORY_CHANGED",
-        ] as const
-      )
-        .map((type) => game.career.findLast((event) => event.type === type))
-        .filter((event) => event !== undefined),
-    [game.career],
-  );
+  const openHomeMemory = async () => {
+    if (homeMemoryStatus === "SAVING") return;
+    const careerId = useGameStore.getState().game.careerId;
+    setHomeMemoryStatus("SAVING");
+    const saved = await useGameStore.getState().confirmHomeMemorySaved();
+    if (useGameStore.getState().game.careerId !== careerId) {
+      setHomeMemoryStatus("IDLE");
+      return;
+    }
+    setHomeMemoryStatus(saved ? "IDLE" : "FAILED");
+    if (saved) setHomeFinaleOpen(true);
+  };
 
   if (!ready || !startupElapsed) return <StartupSkeleton ready={ready} />;
 
@@ -1081,7 +1060,6 @@ export default function App() {
       className={`app-shell theme-${appearance.shellTheme} home-style-${appearance.homeInteriorStyle} tab-${tab}${game.accessibility.reducedMotion ? " reduced-motion" : ""}${game.accessibility.largeText ? " large-text" : ""}${game.home.purchased ? " home-complete" : ""}${homePulseStage !== null ? " home-atmosphere-pulse" : ""}`}
       style={
         {
-          ...shellThemeStyles[appearance.shellTheme],
           "--home-gold-progress": `${goldPercent / 100}`,
         } as CSSProperties
       }
@@ -1107,8 +1085,8 @@ export default function App() {
             </div>
           </div>
           {hasPremiumEntitlement(game) ? (
-            <span className="entitlement-state" title="TradeUp Premium kurucusu">
-              ◆ KURUCU
+            <span className="entitlement-state" title="TradeUp Premium">
+              ◆ Premium
             </span>
           ) : null}
           <button
@@ -1155,7 +1133,7 @@ export default function App() {
 
       {!settingsOpen ? (
         <div className="notice" role="status" key={notice}>
-          {localizeNotice(notice, lang)}
+          <span title={localizeNotice(notice, lang)}>{localizeNotice(notice, lang)}</span>
         </div>
       ) : null}
       {!settingsOpen && showCoachHere ? (
@@ -1308,14 +1286,7 @@ export default function App() {
               </div>
             ) : null}
             {!ftueActive && marketEvent ? (
-              <aside className="market-event" aria-label={t("market.eventAria")}>
-                <span aria-hidden="true">↗</span>
-                <div>
-                  <small>{t("market.eventBadge")}</small>
-                  <b>{localizeMarketEvent(marketEvent, lang).title}</b>
-                  <p>{localizeMarketEvent(marketEvent, lang).message}</p>
-                </div>
-              </aside>
+              <MarketEventCard event={marketEvent} />
             ) : null}
             {!ftueActive && marketCategoryOptions.length > 1 ? (
               <div
@@ -1898,8 +1869,10 @@ export default function App() {
                 homeProgress={homeProgress}
                 onBuyHome={(homeId) => {
                   const wasFirstHome = !game.home.purchasedHomeId;
-                  if (buyHome(homeId) && wasFirstHome) setHomeFinaleOpen(true);
+                  if (buyHome(homeId) && wasFirstHome) void openHomeMemory();
                 }}
+                onOpenHomeMemory={() => void openHomeMemory()}
+                homeMemoryStatus={homeMemoryStatus}
                 onOpenPortfolio={() => navigate("portfolio")}
               />
             </Suspense>
@@ -2004,11 +1977,10 @@ export default function App() {
         </Suspense>
       ) : null}
 
-      {homeFinaleOpen ? (
+      {homeFinaleOpen && game.firstHomeSummary ? (
         <Suspense fallback={null}>
           <HomeFinale
-            highlights={finaleHighlights}
-            homeId={game.home.purchasedHomeId}
+            summary={game.firstHomeSummary}
             interiorStyle={appearance.homeInteriorStyle}
             buttonRef={homeFinaleButtonRef}
             onClose={() => setHomeFinaleOpen(false)}

@@ -7,6 +7,7 @@ import {
 import { initialState } from "../game";
 import type { StoreProductMetadata } from "../infrastructure/monetization";
 import PurchasesSheet from "./PurchasesSheet";
+import { Capacitor } from "@capacitor/core";
 
 vi.mock("../stores/gameStore", () => ({
   useGameStore: () => ({
@@ -33,9 +34,19 @@ const renderShop = (
   );
 
 describe("two main store packs", () => {
-  afterEach(() =>
-    configureMonetizationAdapters(unavailableMonetizationAdapters),
-  );
+  afterEach(() => {
+    configureMonetizationAdapters(unavailableMonetizationAdapters);
+    vi.restoreAllMocks();
+  });
+
+  it("keeps theme and interior choices collapsed and offers price retry only on native", () => {
+    const web = renderShop();
+    expect(web.match(/<details class="cosmetic-picker"/g)).toHaveLength(2);
+    expect(web).not.toContain("Fiyatları yeniden yükle");
+    vi.spyOn(Capacitor, "isNativePlatform").mockReturnValue(true);
+    expect(renderShop()).toContain("Fiyatları yeniden yükle");
+    expect(renderShop()).not.toContain("Satın al ·");
+  });
 
   it("hides unavailable privacy controls but retains them for an active denied-consent provider", () => {
     configureMonetizationAdapters(unavailableMonetizationAdapters);
@@ -94,13 +105,13 @@ describe("two main store packs", () => {
     });
     const html = renderShop(game);
     expect(html).toContain("Reklamsız aktif");
-    expect(html).not.toContain('data-product-id="tradeup_no_ads_lifetime"');
-    expect(html.match(/data-product-id=/g)).toHaveLength(5);
+    expect(html).toContain('data-product-id="tradeup_no_ads_lifetime"');
+    expect(html.match(/data-product-id=/g)).toHaveLength(6);
     expect(html).toContain('data-product-id="tradeup_premium_lifetime"');
     expect(html).not.toContain("Premium ile açık");
   });
 
-  it("hides all redundant purchases for Premium owners but retains pending payment feedback", () => {
+  it("shows owned main packs without redundant purchase controls and retains pending feedback", () => {
     const game = initialState();
     game.monetization.entitlements.push({
       productId: "tradeup_premium_lifetime",
@@ -108,7 +119,8 @@ describe("two main store packs", () => {
       platform: "ios",
       status: "OWNED",
     });
-    expect(renderShop(game)).not.toContain("data-product-id=");
+    expect(renderShop(game).match(/data-product-id=/g)).toHaveLength(2);
+    expect(renderShop(game)).not.toContain("Satın al ·");
     expect(renderShop(game)).toContain("Premium ile açık");
     game.monetization.entitlements[0].status = "PENDING";
     const html = renderShop(game, [

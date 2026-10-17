@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { completeFirstLaunch } from "./helpers";
 
-test("the founder badge belongs to Premium, not the No Ads purchase", async ({
+test("the clearly named Premium badge belongs to Premium, not the No Ads purchase", async ({
   page,
 }) => {
   await page.goto("/");
@@ -58,11 +58,11 @@ test("the founder badge belongs to Premium, not the No Ads purchase", async ({
 
   await setOwnedPack("tradeup_no_ads_lifetime", "no_ads_lifetime");
   await expect(
-    page.locator(".entitlement-state").filter({ hasText: "KURUCU" }),
+    page.locator(".entitlement-state").filter({ hasText: "Premium" }),
   ).toHaveCount(0);
 
   await setOwnedPack("tradeup_premium_lifetime", "premium_lifetime");
   await expect(
-    page.locator(".entitlement-state").filter({ hasText: "KURUCU" }),
+    page.locator(".entitlement-state").filter({ hasText: "Premium" }),
   ).toBeVisible();
 });

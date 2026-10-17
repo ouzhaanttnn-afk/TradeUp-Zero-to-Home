@@ -27,19 +27,26 @@ import { simplifyLegacyPlayerCopy } from "./playerLanguage";
 import { saleHistoryCopy } from "./saleHistory";
 import { formatEstimate, wealthPresentation } from "./wealthPresentation";
 import { useTranslation, localizeHome, localizeCategory } from "../i18n";
+import CareerRecordsCard from "./CareerRecordsCard";
+import { careerCopy } from "./careerPresentation";
 
 export default function JourneyPanel({
   game,
   homeProgress,
   onBuyHome,
   onOpenPortfolio,
+  onOpenHomeMemory,
+  homeMemoryStatus,
 }: {
   game: GameState;
   homeProgress: number;
   onBuyHome: (homeId: string) => void;
   onOpenPortfolio: () => void;
+  onOpenHomeMemory: () => void;
+  homeMemoryStatus: "IDLE" | "SAVING" | "FAILED";
 }) {
   const { lang, t } = useTranslation();
+  const copy = careerCopy(lang);
   const timelinePageSize = 4;
   const [timelineFilter, setTimelineFilter] = useState<TimelineFilter>("ALL");
   const [timelineExpanded, setTimelineExpanded] = useState(false);
@@ -81,9 +88,7 @@ export default function JourneyPanel({
   const showHomeMarket = game.home.purchased
     ? Boolean(ladderTarget)
     : homeProgress >= 100;
-  const cashTargetMinor = game.home.purchased
-    ? ladderTarget?.priceMinor
-    : HOME_GOAL_MINOR;
+  const cashTargetMinor = ladderTarget?.priceMinor;
   const showCashPlan =
     cashTargetMinor !== undefined &&
     showHomeMarket &&
@@ -105,7 +110,7 @@ export default function JourneyPanel({
             </span>
           </div>
           <div>
-            <small>{t("journey.homeJourney")} · {lang === "tr" ? `%${homeProgress}` : `${homeProgress}%`}</small>
+            <small>{game.home.purchased ? copy.completed : homeProgress >= 100 ? copy.research : copy.estimated} · {lang === "tr" ? `%${homeProgress}` : `${homeProgress}%`}</small>
             <h3>
               {!game.home.purchased
                 ? t("journey.pathToOwnSpace")
@@ -231,6 +236,7 @@ export default function JourneyPanel({
           </div>
         </section>
       )}
+      <CareerRecordsCard game={game} onOpenMemory={onOpenHomeMemory} status={homeMemoryStatus} />
       {game.home.purchased && !ladderTarget ? (
         <section className="next-goal-card">
           <div>

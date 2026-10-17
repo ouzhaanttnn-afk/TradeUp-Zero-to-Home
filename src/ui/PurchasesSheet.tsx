@@ -14,6 +14,7 @@ import {
 } from "../domain/appearance";
 import { hasPremiumEntitlement } from "../domain/monetization";
 import { getMonetizationAdapters } from "../services/monetization";
+import { careerCopy } from "./careerPresentation";
 
 const themeChoices: {
   id: ShellTheme;
@@ -87,9 +88,11 @@ export default function PurchasesSheet({
   onClose: () => void;
 }) {
   const { t, lang } = useTranslation();
+  const copy = careerCopy(lang);
   const closeRef = useRef<HTMLButtonElement>(null);
   const sheetRef = useRef<HTMLElement>(null);
-  const { appearance, setShellTheme, setHomeInteriorStyle } = useGameStore();
+  const { appearance, setShellTheme, setHomeInteriorStyle, openPurchases } =
+    useGameStore();
   const premiumOwned = hasPremiumEntitlement(game);
   const entries = (Object.keys(storeCopy) as MonetizationProductId[]).map(
     (productId) => {
@@ -130,7 +133,7 @@ export default function PurchasesSheet({
     "tradeup_premium_lifetime",
   ];
   const mainPacks = mainPackIds.flatMap((id) =>
-    availablePacks.filter((entry) => entry.productId === id),
+    entries.filter((entry) => entry.productId === id),
   );
   const cosmeticPacks = availablePacks.filter(
     (entry) => !mainPackIds.includes(entry.productId),
@@ -143,7 +146,10 @@ export default function PurchasesSheet({
     : noAdsOwned
       ? t("store.noAdsActive")
       : t("store.packsActive");
-  const renderAvailablePack = (entry: (typeof entries)[number], main = false) => (
+  const renderAvailablePack = (
+    entry: (typeof entries)[number],
+    main = false,
+  ) => (
     <article
       key={entry.productId}
       data-product-id={entry.productId}
@@ -162,11 +168,21 @@ export default function PurchasesSheet({
           </small>
         ) : null}
         <strong>{entry.copy.title || entry.metadata?.title}</strong>
-        <p>{main
-          ? t(entry.productId === "tradeup_premium_lifetime" ? "store.premiumSummary" : "store.noAdsSummary")
-          : entry.copy.detail}</p>
+        <p>
+          {main
+            ? t(
+                entry.productId === "tradeup_premium_lifetime"
+                  ? "store.premiumSummary"
+                  : "store.noAdsSummary",
+              )
+            : entry.copy.detail}
+        </p>
       </div>
-      {entry.pending ? (
+      {entry.owned || entry.includedWithPremium ? (
+        <span className="entitlement-state purchase-item-status">
+          {entry.owned ? t("store.owned") : t("store.includedWithPremium")}
+        </span>
+      ) : entry.pending ? (
         <span className="entitlement-state purchase-item-status">
           {t("store.pending")}
         </span>
@@ -213,14 +229,21 @@ export default function PurchasesSheet({
             </div>
           </div>
           {openPacks.length > 0 ? (
-            <section className="purchase-status" aria-label={t("store.openPacks")}>
+            <section
+              className="purchase-status"
+              aria-label={t("store.openPacks")}
+            >
               <div className="purchase-status__headline">
-                <span className="purchase-status__mark" aria-hidden="true">✓</span>
+                <span className="purchase-status__mark" aria-hidden="true">
+                  ✓
+                </span>
                 <div>
                   <small>{t("store.permanentPacks")}</small>
                   <strong>{activePackLabel}</strong>
                 </div>
-                <span className="purchase-status__count">{openPacks.length}/{entries.length}</span>
+                <span className="purchase-status__count">
+                  {openPacks.length}/{entries.length}
+                </span>
               </div>
               <details className="owned-purchases">
                 <summary>
@@ -244,8 +267,11 @@ export default function PurchasesSheet({
               </details>
             </section>
           ) : null}
-          {availablePacks.length > 0 ? (
-            <section className="purchase-panel" aria-label={t("store.permanentPacks")}>
+          {mainPacks.length > 0 ? (
+            <section
+              className="purchase-panel"
+              aria-label={t("store.permanentPacks")}
+            >
               <div className="purchase-panel-heading">
                 <div>
                   <strong>{t("store.permanentPacks")}</strong>
@@ -255,6 +281,24 @@ export default function PurchasesSheet({
               {mainPacks.length > 0 ? (
                 <div className="purchase-list purchase-list--main">
                   {mainPacks.map((entry) => renderAvailablePack(entry, true))}
+                </div>
+              ) : null}
+              {Capacitor.isNativePlatform() &&
+              availablePacks.some(
+                (entry) =>
+                  !entry.pending &&
+                  (!entry.metadata?.available ||
+                    !entry.metadata.localizedPrice),
+              ) ? (
+                <div className="store-price-retry" role="status">
+                  <p>{copy.pricesFailed}</p>
+                  <button
+                    className="secondary"
+                    disabled={monetizationBusy}
+                    onClick={() => void openPurchases()}
+                  >
+                    {copy.retryPrices}
+                  </button>
                 </div>
               ) : null}
               {cosmeticPacks.length > 0 ? (
@@ -277,8 +321,8 @@ export default function PurchasesSheet({
             aria-label={t("store.appearance")}
           >
             <h3>{t("store.appearance")}</h3>
-            <div className="cosmetic-picker" aria-label="Arayüz teması">
-              <strong>Arayüz teması</strong>
+            <details className="cosmetic-picker" aria-label={copy.themes}>
+              <summary>{copy.themes}</summary>
               <div className="cosmetic-picker__choices">
                 {themeChoices.map((choice) => {
                   const unlocked = canUseShellTheme(
@@ -305,14 +349,14 @@ export default function PurchasesSheet({
                       onClick={() => setShellTheme(choice.id)}
                     >
                       {choice.label}
-                      {unlocked ? "" : " · Kilitli"}
+                      {unlocked ? "" : ` · ${copy.locked}`}
                     </button>
                   );
                 })}
               </div>
-            </div>
-            <div className="cosmetic-picker" aria-label="Ev iç mekân stili">
-              <strong>Ev iç mekân stili</strong>
+            </details>
+            <details className="cosmetic-picker" aria-label={copy.interiors}>
+              <summary>{copy.interiors}</summary>
               <div className="cosmetic-picker__choices">
                 {homeStyleChoices.map((choice) => {
                   const unlocked = canUseHomeInteriorStyle(
@@ -342,15 +386,13 @@ export default function PurchasesSheet({
                       onClick={() => setHomeInteriorStyle(choice.id)}
                     >
                       {choice.label}
-                      {unlocked ? "" : " · Kilitli"}
+                      {unlocked ? "" : ` · ${copy.locked}`}
                     </button>
                   );
                 })}
               </div>
-              {!game.home.purchased ? (
-                <small>Ek stiller, ilk ev satın alındığında seçilebilir.</small>
-              ) : null}
-            </div>
+              {!game.home.purchased ? <small>{copy.interiorHint}</small> : null}
+            </details>
           </section>
           <div className="purchase-utilities">
             <p>{t("store.shortNote")}</p>
@@ -363,7 +405,10 @@ export default function PurchasesSheet({
                 {t("store.restore")}
               </button>
               {getMonetizationAdapters().consent.available !== false ? (
-                <button className="text-button" onClick={() => void showPrivacyOptions()}>
+                <button
+                  className="text-button"
+                  onClick={() => void showPrivacyOptions()}
+                >
                   {t("store.privacy")}
                 </button>
               ) : null}

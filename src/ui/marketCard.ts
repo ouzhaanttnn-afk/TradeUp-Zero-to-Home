@@ -4,6 +4,21 @@ import { getLanguage, type Language } from "../i18n";
 export const ALL_MARKET_CATEGORIES = "ALL";
 export type MarketSort = "MARKET" | "PRICE_ASC" | "PRICE_DESC";
 
+const compactRiskLabels: Record<
+  Language,
+  Record<"low" | "medium" | "high" | "critical", string>
+> = {
+  tr: { low: "Sakin", medium: "Talep", high: "İlgi ↑", critical: "Teklif" },
+  en: { low: "Calm", medium: "Demand", high: "Rising", critical: "Offer" },
+  de: { low: "Ruhig", medium: "Gefragt", high: "Steigt", critical: "Gebot" },
+  es: { low: "Calma", medium: "Demanda", high: "Sube", critical: "Oferta" },
+};
+
+export const compactMarketRisk = (
+  level: keyof typeof compactRiskLabels.tr,
+  lang: Language,
+) => compactRiskLabels[lang][level];
+
 export function listingAgeLabel(
   createdAtGameMin: number,
   gameTimeMin: number,

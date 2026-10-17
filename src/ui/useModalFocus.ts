@@ -12,10 +12,29 @@ const focusableSelector = [
 
 const visibleFocusableElements = (container: HTMLElement) =>
   [...container.querySelectorAll<HTMLElement>(focusableSelector)].filter(
-    (element) =>
-      !element.hidden &&
-      element.getAttribute("aria-hidden") !== "true" &&
-      element.getClientRects().length > 0,
+    (element) => {
+      if (
+        element.hidden ||
+        element.getAttribute("aria-hidden") === "true" ||
+        element.getClientRects().length === 0
+      )
+        return false;
+      // Closed native details can still report descendant rectangles. Only their
+      // direct summary belongs to the tab order; nested hidden controls do not.
+      for (
+        let ancestor = element.parentElement;
+        ancestor && ancestor !== container;
+        ancestor = ancestor.parentElement
+      ) {
+        if (
+          ancestor.tagName === "DETAILS" &&
+          !ancestor.hasAttribute("open") &&
+          !ancestor.querySelector(":scope > summary")?.contains(element)
+        )
+          return false;
+      }
+      return true;
+    },
   );
 
 export function useModalFocus(
@@ -40,7 +59,12 @@ export function useModalFocus(
     const handleKeyDown = (event: KeyboardEvent) => {
       // A nested sheet owns Escape and Tab until it closes. Keep the parent
       // mounted so its scroll lock and original focus restoration survive.
-      if (containerRef.current?.querySelector('[role="dialog"][aria-modal="true"]')) return;
+      if (
+        containerRef.current?.querySelector(
+          '[role="dialog"][aria-modal="true"]',
+        )
+      )
+        return;
       if (event.key === "Escape") {
         event.preventDefault();
         closeRef.current();
@@ -55,7 +79,10 @@ export function useModalFocus(
       const first = focusable[0];
       const last = focusable.at(-1)!;
       const current = document.activeElement;
-      if (event.shiftKey && (current === first || !containerRef.current.contains(current))) {
+      if (
+        event.shiftKey &&
+        (current === first || !containerRef.current.contains(current))
+      ) {
         event.preventDefault();
         last.focus();
       } else if (!event.shiftKey && current === last) {

@@ -3,7 +3,7 @@ import { completeFirstLaunch } from "./helpers";
 import { initialState, validateState } from "../src/game";
 
 for (const width of [320, 430]) {
-  test(`nine market visuals fit in a 3 by 3 viewport at ${width}px`, async ({
+  test(`market retains three columns with readable titles and complete art at ${width}px`, async ({
     page,
   }, testInfo) => {
     await page.setViewportSize({ width, height: 844 });
@@ -62,12 +62,10 @@ for (const width of [320, 430]) {
     );
     expect(new Set(boxes.map((box) => box.left)).size).toBe(3);
     expect(new Set(boxes.map((box) => box.top)).size).toBe(3);
-    const navTop = await page
-      .locator("nav")
-      .evaluate((nav) => nav.getBoundingClientRect().top);
-    expect(Math.max(...boxes.map((box) => box.bottom))).toBeLessThanOrEqual(
-      navTop,
-    );
+    // Readability wins over forcing all nine cards above the fold (1.2 K02).
+    await expect(cards.first().locator("h3")).toHaveCSS("font-size", "12px");
+    await expect(cards.first().locator(".market-price-row > strong")).toHaveCSS("font-size", "15px");
+    await expect(cards.first().locator(".product-art")).toHaveCSS("aspect-ratio", "4 / 3");
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth),
     ).toBe(width);
@@ -91,7 +89,15 @@ for (const width of [320, 430]) {
       .first()
       .locator(".product-art")
       .boundingBox();
-    expect(firstVisual?.height).toBeGreaterThanOrEqual(68);
+    expect(firstVisual).not.toBeNull();
+    expect(firstVisual!.width / firstVisual!.height).toBeCloseTo(4 / 3, 1);
+    const signalRail = await cards.first().locator(".market-badges").evaluate((rail) => {
+      const condition = rail.querySelector(".market-condition-signal")!.getBoundingClientRect();
+      const heat = rail.querySelector(".market-heat")?.getBoundingClientRect();
+      return { conditionLeft: condition.left, heatRight: heat?.right };
+    });
+    if (signalRail.heatRight !== undefined)
+      expect(signalRail.heatRight).toBeLessThanOrEqual(signalRail.conditionLeft);
     const firstSignals = await cards
       .first()
       .locator(".market-condition-signal")
@@ -128,7 +134,7 @@ test("market refresh turns the brand arrow once and reduced motion keeps it stil
   await refresh.click();
   await expect(arrow).toHaveAttribute("data-scan-cycle", "1");
   await expect(arrow).toHaveCSS("animation-name", "brand-scan-turn");
-  await expect(arrow).toHaveCSS("animation-duration", "0.9s");
+  await expect(arrow).toHaveCSS("animation-duration", "0.6s");
   await refresh.click();
   await expect(arrow).toHaveAttribute("data-scan-cycle", "2");
   await expect.poll(() => arrow.evaluate((element) => getComputedStyle(element).transform)).toBe("none");

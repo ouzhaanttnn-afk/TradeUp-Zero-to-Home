@@ -64,7 +64,7 @@ import {
   syncConsentState,
 } from "../domain/monetization";
 import { shouldShowTradeInterstitial } from "../domain/tradeInterstitial";
-import { isAnimatedAvatar, ownsAnimatedAvatars } from "../domain/profile";
+import { isAnimatedAvatar, normalizeProfileName, ownsAnimatedAvatars } from "../domain/profile";
 import { homeOptionById, isTopTierHome } from "../content/homes";
 import type {
   AvatarId,
@@ -183,6 +183,7 @@ type Store = {
   pause: () => Promise<void>;
   resume: () => Promise<void>;
   flush: () => Promise<void>;
+  confirmHomeMemorySaved: () => Promise<boolean>;
   scan: () => void;
   refreshMarketScanCredits: () => void;
   tick: () => void;
@@ -496,6 +497,17 @@ export const useGameStore = create<Store>((set, get) => ({
       systemTimeProvider.nowWallMs(),
     );
     await enqueueSave({ ...state, lastWallClockMs: wallClockMs }, wallClockMs);
+  },
+  confirmHomeMemorySaved: async () => {
+    const summary = get().game.firstHomeSummary;
+    const careerId = get().game.careerId;
+    if (persistenceSuspended || !summary) return false;
+    try {
+      await get().flush();
+      return get().game.careerId === careerId && get().game.firstHomeSummary === summary;
+    } catch {
+      return false;
+    }
   },
   scan: () => {
     recordReplayCommand(get().game, "SCAN_MARKET");
@@ -1398,9 +1410,9 @@ export const useGameStore = create<Store>((set, get) => ({
     });
   },
   setProfileName: (displayName) => {
-    const normalized = displayName.trim().replace(/\s+/g, " ").slice(0, 20);
+    const normalized = normalizeProfileName(displayName);
     if (!normalized) {
-      set({ notice: "Oyuncu adı boş bırakılamaz." });
+      set({ notice: t("notice.profileNameInvalid") });
       return;
     }
     const game = get().game;
@@ -1429,7 +1441,7 @@ export const useGameStore = create<Store>((set, get) => ({
     });
   },
   completeProfileOnboarding: (displayName, avatarId) => {
-    const normalized = displayName.trim().replace(/\s+/g, " ").slice(0, 20);
+    const normalized = normalizeProfileName(displayName);
     if (!normalized) {
       set({ notice: "Oyuncu adı boş bırakılamaz." });
       return;
