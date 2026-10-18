@@ -124,6 +124,18 @@ Apple'ın erişilebilirlik rehberi ölçeklenen yazı, kontrast ve azaltılmış
 
 Yenileme ödülü/faz kapasitesi ve geçiş reklamı davranışı bu paketle yeniden tasarlanmaz. Başarısız reklam ödül vermez, no-fill oynanışı kilitlemez. Bildirim alanı standartta iki satırlık sabit alan taşır; normal oyun mesajı bu alana sığmazsa kısaltılır. Büyük metinde alan ayar değişiminde büyüyebilir, her yeni bildirimde yüksekliği değişmez. Tam metin ayrıntı olarak açılabilir.
 
+### 18 Ekim 2026 onaylı ek kapsam — reklam açılış gecikmesi
+
+Kullanıcı, reklamın yavaş açılmasının büyük güncelleme içinde ele alınmasını istedi. Bu ek yalnız performans ve yükleme sunumudur; yeni reklam yerleşimi, sıklık, ödül, kapasite veya satın alma hakkı değildir. Henüz uygulanmadı; TestFlight 1.2.0 (47) bu düzeltmeyi içermez.
+
+- UMP reklam isteğine izin verdiğini doğrulamadan ön yükleme yapılmaz. İzin geri alınırsa hazırlanmış reklam gösterilemez; ATT/IDFA veya yeni kişiselleştirme eklenmez.
+- Mevcut SDK ile tek ödüllü reklam önceden hazırlanır; öncelik MARKET_SCOUT'tur. Diğer yerleşimin kimliğiyle yanlış reklam/ödül eşleşmesi ve eşzamanlı hazırlama engellenir. Gösterilmiş veya süresi dolmuş reklam yeniden kullanılmaz; hazır reklam en geç bir saatte geçersizleşir.
+- Gösterim yalnız oyuncunun açık dokunuşuyla başlar. Hazır reklam varsa yeniden indirmek yerine kullanılır; yoksa aynı kompakt alanda anlaşılır yükleme durumu ve sınırlı bekleme sunulur. Başarısızlık oyun akışını kilitlemez; sınırsız yeniden istek döngüsü kurulmaz.
+- Ön yükleme, reklamı açma veya erken kapatma ödül değildir. +25 yalnız doğrulanmış kazanım callback'iyle bir kez uygulanır; mevcut kapasite/doğal dolum, Premium/Reklamsız bypass ve ticaret başına geçiş reklamı kuralları korunur.
+- Geçiş reklamında da hazırlık/gösterim ayrımı ve mevcut 30 ticaret kuralı doğrulanır; yeni otomatik gösterim eklenmez. Reklamlar arası native slot/işlem çakışması engellenir.
+- Kabul: test reklamlarıyla soğuk/sıcak açılış, yavaş ağ/offline/no-fill, izin değişimi, uygulamaya dönüş, çift dokunuş, erken kapatma, tekrar callback, farklı yerleşime geçiş ve ad-free sahipliği. Yerel/test ölçümünde izin, yükleme ve tık→gösterim süreleri ayrılır; yeni üretim Analytics verisi eklenmez. Gerçek cihaz kanıtı olmadan gecikme hedefi sağlandı denmez.
+- 17 Ekim'de AdMob'da TradeUp'a özel Türkçe/İngilizce Avrupa izin mesajı yayımlandı ve gizlilik URL'si eklendi. Bu yapılandırma kod ön yüklemesi veya cihazda reklam hızı testi değildir.
+
 ## 5. Muhasebe ve sayaç sözlüğü
 
 - **Piyasa ticareti:** başlangıç defteri hariç, piyasadan alınmış varlığın tamamlanmış satışı. Hızlı ve zararına satış dahil.
@@ -382,6 +394,7 @@ Bu sürümde yeni üretim telemetri parametresi eklenmez. Gönüllü pilotta cih
 | P01 | Semantik tema, tipografi, kart/rozet, modal ve safe-area | App.css, theme-surfaces.css, mevcut UI; yeni UI framework yok | Aynı save/tema/cihaz önce-sonra görüntüsü |
 | P02 | Journal tabanlı kişisel kayıtlar, ilk ev summary | domain/economy/meta, models, migrations, persistence | Muhasebe ve migration fixture'ları |
 | P03 | Final/profil/vitrin hiyerarşisi | HomeFinale, SettingsPanel, JourneyPanel, AvatarPortrait | Focus/ölçek/entitlement testleri |
+| P03A | Reklam açılış gecikmesi: izin sonrası tek ön yükleme, kompakt yükleme durumu | Mevcut AdMob/UMP ve ödül callback altyapısı; yeni SDK/yerleşim yok | Test reklamıyla fiziksel cihaz süreleri ve izin/ödül/slot regresyonu |
 | P04 | Yerel paylaşım PNG ve native/web fallback | Yeni tek paylaşım hizmeti; native Share/Filesystem yalnız burada | Fiziksel iOS paylaş/iptal/offline |
 | P05 | QA, pilot, gerçek mağaza/editorial çekim | Mevcut test/build araçları | 1.2 kabul raporu; yalnız ardından release |
 | P06 | 1.3 iki yuva, outbox ve sözleşme fixture'ları | Persistence ve saf domain; log aynı transaction | Kesinti/fork/geri dönüş testleri |

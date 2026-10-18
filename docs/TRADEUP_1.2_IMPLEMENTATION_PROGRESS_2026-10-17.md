@@ -41,6 +41,7 @@ Bu dosya yapılmış işi izler; tasarımın yerine geçmez. Kapsam: `TRADEUP_1.
 
 ## Henüz tamamlanmayan kabul kapıları
 
+- 18 Ekim kapsam eki / P03A: reklamın izin sonrası önceden hazırlanması, kompakt yükleme durumu ve fiziksel cihaz gecikme ölçümü henüz uygulanmadı. Kullanıcı bunu 1.2 büyük güncellemesine aldı; ayrı acil build istenmedi. 17 Ekim'deki AdMob izin mesajı/gizlilik URL düzeltmesi sunucu yapılandırmasıdır; ön yükleme kodu değildir. 1.2.0 (47) TestFlight betası bu eki içermez.
 - P04: 1080×1350 PNG kartı, isim gizlilik seçimi, önizleme, web indirme/paylaşım ve native Share/Filesystem cache temizliği henüz uygulanmadı. Çalışmayan paylaş düğmesi gösterilmez.
 - P05: tam release regresyonu, 375 px ve %200 metin/kontrast matrisi, fiziksel iPhone/iPad ve VoiceOver, gerçek StoreKit/geri yükleme kontrolü, gerçek build'den mağaza görselleri ve editoryal paket. Tarayıcı testleri fiziksel cihaz testi diye sunulmaz.
 - 1.3 P06–P09: ikinci kariyer zarfı, komut/kanıt kuyruğu, Game Center/App Attest, sunucu doğrulama, global liste ve silme/operasyon işleri uygulanmadı. Bulut açılmadı ve yeni ücretli kaynak kurulmadı. Yerel rekorlar geriye dönük global doğrulanmışa çevrilmez.
