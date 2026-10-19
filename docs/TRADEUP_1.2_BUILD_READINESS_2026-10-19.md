@@ -2,6 +2,8 @@
 
 Dal: `codex/first-home-polish`. Kullanıcı önerileri ve Game Center barındırmalı Top 100 kurulumu kapsamında. Kullanıcı 19 Ekim'de yalnız bu dalı pushlama ve ücretsiz kotada tek IPA-only Codemagic build onayı verdi; metin seçimi düzeltmesinden sonra devam etmeyi yeniden onayladı. Main, mevcut App Review ve nomination korunur. Merge, TestFlight/App Store upload, ücretli build veya yayın yetkisi yoktur.
 
+Güncel teslim onayı: kullanıcı son olarak `Teste gönder` diyerek yalnız TestFlight yüklemesini onayladı. Bu teslim için önceki no-upload sınırı kalktı; main merge, App Review ve mağaza yayını hâlâ yasak. Hedef 1.2.0 (48), Apple'daki son build 47 olarak tekrar okundu. Codemagic'te `tradeup_game_center_distribution_20261019` profilinin mevcut `tradeup_distribution` sertifikasıyla eşleştiği doğrulandı. TestFlight workflow'u aynı Game Center imza/paket kontrollerini yüklemeden önce çalıştırır; yalnız mevcut iç `Betatest` grubuna erişim hazırlanır, yeni davet veya halka açık link yoktur.
+
 ## Uygulananlar
 
 - Mevcut evler Pazar/Emlak'ta; Tümü'nde en fazla bir ev. Fiyat, keşif süresi, araştırma ve kanonik satın alma muhasebesi değişmedi. Yolculuk satın alma ekranı yerine Pazara yönlendirir.
