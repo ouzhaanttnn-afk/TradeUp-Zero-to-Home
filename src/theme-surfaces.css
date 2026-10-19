@@ -930,3 +930,16 @@
 .market-event-dialog h2 { padding-right: 44px; font-size: calc(20px + var(--text-size-boost)); }
 .market-event-dialog p { color: var(--theme-text); line-height: 1.5; font-size: calc(15px + var(--text-size-boost)); }
 .app-shell.large-text .market-event--compact b { white-space: normal; }
+#root {
+  /* Game UI is not a document: prevent iOS long-press text selection. */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Keep native selection, copy/paste and editing in player input fields. */
+#root :is(input, textarea, [contenteditable="true"], [contenteditable="plaintext-only"]) {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}

@@ -21,6 +21,7 @@ Dal: `codex/first-home-polish`. Kullanıcı önerileri ve Game Center barındır
 
 ## Test kanıtı
 
+- Son kullanıcı ekran görüntüsündeki uzun basma/metin seçimi için oyun kökünde `user-select: none` ve iOS `-webkit-touch-callout: none` eklendi; input/textarea/düzenlenebilir alanlar seçilebilir kalır. Ek paket veya dokunma olayını engelleyen JavaScript yok. 512 test, lint/TypeScript ve üretim build geçti; tarayıcı regresyonunda pazar/detay metnini sürükleyerek seçememe + profil adını seçme/düzenleme/kaydetme geçti. İlk test, başlangıç defteri teklifi kabul edilmeden pazar kartı beklediği için başarısızdı; gerçek ilk satış akışı eklenerek 1/1 geçti. Fiziksel iOS uzun basma son kontrolü henüz yapılmadı. Kullanıcının `dur` talebi üzerine push/IPA build başlatılmadı.
 - Son tam tur: **79 dosya / 512 birim testi geçti**. Journal/100. ticaret/zarar, yalnız mevcut evin servete dahil olması, yerel veri gizliliği, sandbox/eksik kayıt ve native payload sınırı; ön yükleme/dedup/son kullanım/izin iptali/yanlış placement/no-fill/ad-free regresyonu kapsanır.
 - `pnpm lint`, `pnpm exec tsc -b --pretty false`, `pnpm build` geçti. `node scripts/check-native-ad-privacy.mjs` geçti; ATT/IDFA eklenmedi, UMP-before-ads ve ad-ID'siz Analytics korunur.
 - Tarayıcı: ilk 8 senaryo (ilk ev satın alma-final-paylaşım PNG-indirme-kayıt-yeniden açma, pazar 320/430 ve yenileme/reklam düğmesi 320/390/430) geçti. Modal portal düzeltmesinden sonra ilk ev akışı 1/1 yeniden geçti.
