@@ -9,6 +9,8 @@
 
 ### Approved First Home patch exception (2026-10-17)
 
+2026-10-19 release authorization: the user explicitly approved pushing only `codex/first-home-polish` and one signed IPA-only Codemagic build within the existing free quota. No main merge, Apple/TestFlight upload, App Review change, paid build or publication is authorized by this approval.
+
 2026-10-18 revision: the user approved `docs/TRADEUP_GAME_CENTER_PLAN_2026-10-18.md`: optional Game Center-hosted leaderboards replace the custom cloud/verified-career design; existing home offers move into Market. This revision takes precedence where it conflicts with the earlier 1.2/1.3 boundary. No paid cloud, reset, economic coefficient change, push, merge, publication or Apple submission is authorized. Do not describe client-reported Game Center scores as server-verified.
 
 The user explicitly approved implementing `docs/TRADEUP_1.2_IMPLEMENTATION_SPEC_2026-10-16.md` and waived the old scope freeze for that plan. Within this patch, the specification takes precedence for UI, local career records, first-home memories and the separately staged optional leaderboard. Its 1.2/1.3 delivery boundary is binding: no live global service, paid cloud setup, merge, push, deployment or Apple submission is authorized by implementation approval alone. Keep the existing economy, ad rules, IAP ownership and saves intact. Other work still follows GDD v2.2.

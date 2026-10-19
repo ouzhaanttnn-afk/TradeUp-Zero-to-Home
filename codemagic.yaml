@@ -14,8 +14,10 @@ workflows:
       node: "24"
       xcode: "26.6"
       ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.tradeup.zerotohome
+        provisioning_profiles:
+          - tradeup_game_center_distribution_20261019
+        certificates:
+          - tradeup_distribution
       vars:
         APP_STORE_APPLE_ID: "6811362281"
         TRADEUP_IOS_BUILD_NUMBER: "${{ inputs.build_number }}"
@@ -50,10 +52,16 @@ workflows:
             --archive-flags="-destination generic/platform=iOS CURRENT_PROJECT_VERSION=$TRADEUP_IOS_BUILD_NUMBER"
           ipa=$(find "$CM_BUILD_DIR/build/ios/ipa" -maxdepth 1 -name '*.ipa' -print -quit)
           test -n "$ipa"
-          python3 scripts/verify-ios-artifact.py "$ipa" --build "$TRADEUP_IOS_BUILD_NUMBER" --version 1.2.0 --ads production > "$CM_BUILD_DIR/build/ios/ipa/verification.json"
+          archive=$(find "$CM_BUILD_DIR/build/ios/xcarchive" -maxdepth 1 -name '*.xcarchive' -print -quit)
+          test -n "$archive"
+          signed_app="$archive/Products/Applications/App.app"
+          codesign --verify --deep --strict "$signed_app"
+          codesign -d --entitlements :- "$signed_app" > "$CM_BUILD_DIR/build/ios/ipa/signed-entitlements.plist"
+          python3 scripts/verify-ios-artifact.py "$ipa" --build "$TRADEUP_IOS_BUILD_NUMBER" --version 1.2.0 --ads production --signed-entitlements "$CM_BUILD_DIR/build/ios/ipa/signed-entitlements.plist" > "$CM_BUILD_DIR/build/ios/ipa/verification.json"
     artifacts:
       - build/ios/ipa/*.ipa
       - build/ios/ipa/verification.json
+      - build/ios/ipa/signed-entitlements.plist
       - /tmp/xcodebuild_logs/*.log
     # No publishing block: no Apple upload, TestFlight submission, or release.
   tradeup-ios-testflight:

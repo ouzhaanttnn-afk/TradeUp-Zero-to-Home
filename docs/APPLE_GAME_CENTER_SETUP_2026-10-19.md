@@ -20,7 +20,7 @@ Her üç listede `tr` ve `en-US` başlık/açıklama oluşturuldu (6 localizatio
 
 ## Henüz yapılmadı — release kapıları
 
-1. Yeni Game Center entitlement'ını içeren provisioning profile hazırlanması/seçilmesi. Eski profile güvenerek imzalı build hazır denmez. Sertifika silinmedi/iptal edilmedi; başka app profile'ına dokunulmadı.
+1. Game Center profili hazır: `K3833B8S48`, UUID `2942a96e-c4dd-4cc9-9e61-99bc95d8d594`, `TradeUp Game Center Distribution 2026-10-19`, ACTIVE; mevcut Apple Distribution sertifikası `VXNHKF6M5M`, son tarih 12 Eylül 2027. İlk hazırlanan `AF458V58VD` iOS Distribution sertifikasına bağlıydı ve Codemagic'te eşleşmedi; kullanılmaz. Hiçbir sertifika/profil silinmedi veya iptal edilmedi. Codemagic kitaplığı ve native imza kontrolü build öncesi/sonrası doğrulanır.
 2. macOS/Xcode üzerinde Swift derleme ve imzalı iOS build; Windows static test native derleme değildir.
 3. Fiziksel cihaz ve sandbox Game Center giriş/iptal/hesap değiştirme, skor gönderme ve global ilk 100 + kendi sıra testi. Gerçek/sahte üretim skoru oluşturulmadı.
 4. Yeni sürüm Game Center bağlantısı, gereken leaderboard metadata/görsel/review adımları ve App Privacy kontrolü. Bu tur App Review'a gönderilmedi veya yayına alınmadı.

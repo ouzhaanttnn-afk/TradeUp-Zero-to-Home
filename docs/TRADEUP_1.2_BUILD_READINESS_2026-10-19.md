@@ -1,6 +1,6 @@
 # TradeUp 1.2 — 19 Ekim uygulama ve doğrulama
 
-Dal: `codex/first-home-polish`. Kullanıcı önerileri ve Game Center barındırmalı Top 100 kurulumu kapsamında. Main, mevcut App Review ve nomination korunur. Push, merge, TestFlight/App Store upload, ücretli build veya bulut kurulumu yapılmadı.
+Dal: `codex/first-home-polish`. Kullanıcı önerileri ve Game Center barındırmalı Top 100 kurulumu kapsamında. Kullanıcı 19 Ekim'de yalnız bu dalı pushlama ve ücretsiz kotada tek IPA-only Codemagic build onayı verdi; metin seçimi düzeltmesinden sonra devam etmeyi yeniden onayladı. Main, mevcut App Review ve nomination korunur. Merge, TestFlight/App Store upload, ücretli build veya yayın yetkisi yoktur.
 
 ## Uygulananlar
 
@@ -32,7 +32,7 @@ Web çıktı: `C:\Users\Gaming\Desktop\TRADEUP\dist`. Bu imzalı IPA değildir. 
 
 ## Yayından önce kalanlar
 
-1. Game Center capability'li provisioning profile + macOS/Xcode native derleme/imza. Windows static Swift wiring testi native derleme veya çalışma kanıtı değildir.
+1. Game Center capability'li ACTIVE profil hazır; Codemagic'te eşleşen referans `tradeup_game_center_distribution_20261019` kullanılacak. IPA-only workflow açık profil/sertifika seçer; `codesign --verify --deep --strict`, dump edilmiş Game Center entitlement ve IPA'daki profil/team/app/expiry kontrolleri geçmeden başarılı teslim sayılmaz. Verifier için 7 sentetik regresyon testi geçti; bunlar gerçek imza kanıtı değildir. macOS/Xcode derlemesi ve gerçek paket sonucu ayrıca kaydedilecek.
 2. Fiziksel iPhone/iPad Game Center sandbox giriş/iptal/hesap değişimi, gerçek top 100/kendi sıra ve skor gönderimi. Bu tur test/üretim skoru gönderilmedi.
 3. Fiziksel cihazda test reklamlarıyla soğuk/sıcak açılış gecikmesi ve native paylaş/iptal. Gelir üreten test/tıklama yapılmadı; gecikme süresi ölçülmüş gibi raporlanmaz.
 4. %200 metin/VoiceOver/kontrast tam release matrisi, StoreKit restore, son build'e ait gerçek iPhone/iPad mağaza çekimleri. Büyük yazı testi bu tam erişilebilirlik değerlendirmesinin yerine geçmez.
