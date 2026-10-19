@@ -11,6 +11,8 @@
 
 2026-10-19 updated delivery authorization: the user explicitly requested `Teste gönder` after confirming TestFlight-only scope. The feature branch may be pushed and one free-quota signed build uploaded to TestFlight, with existing test access prepared. No App Review submission, main merge, public release or paid build is authorized. This supersedes the earlier IPA-only/no-upload restriction for this delivery.
 
+After Codemagic build `6ad629597550aed8109029d2` stopped in the old configuration test before archive/upload, the user explicitly approved one additional free-quota TestFlight build (`Evet, düzelt ve bir kez daha gönder`). No further paid/repeated builds are authorized by this retry approval.
+
 2026-10-19 release authorization: the user explicitly approved pushing only `codex/first-home-polish` and one signed IPA-only Codemagic build within the existing free quota. No main merge, Apple/TestFlight upload, App Review change, paid build or publication is authorized by this approval.
 
 2026-10-18 revision: the user approved `docs/TRADEUP_GAME_CENTER_PLAN_2026-10-18.md`: optional Game Center-hosted leaderboards replace the custom cloud/verified-career design; existing home offers move into Market. This revision takes precedence where it conflicts with the earlier 1.2/1.3 boundary. No paid cloud, reset, economic coefficient change, push, merge, publication or Apple submission is authorized. Do not describe client-reported Game Center scores as server-verified.
