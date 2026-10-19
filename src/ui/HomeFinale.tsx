@@ -1,4 +1,13 @@
-import { useRef, type CSSProperties, type RefObject } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type RefObject,
+} from "react";
+import { createHomeCard, shareHomeCard } from "./homeShare";
+import { useGameStore } from "../stores/gameStore";
+import "./firstHome.css";
 import { money } from "../game";
 import { Icon } from "./Icon";
 import { useModalFocus } from "./useModalFocus";
@@ -43,6 +52,50 @@ export default function HomeFinale({
 }) {
   const { t, lang } = useTranslation();
   const copy = careerCopy(lang);
+  const [includeName, setIncludeName] = useState(false);
+  const [card, setCard] = useState<{ blob: Blob; url: string } | null>(null);
+  const [sharing, setSharing] = useState(false);
+  const [shareMessage, setShareMessage] = useState("");
+  const shareLock = useRef(false);
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+  useEffect(
+    () => () => {
+      if (card) URL.revokeObjectURL(card.url);
+    },
+    [card],
+  );
+  const preview = async () => {
+    if (shareLock.current) return;
+    shareLock.current = true;
+    setSharing(true);
+    setShareMessage("");
+    try {
+      const profile = useGameStore.getState().game.profile;
+      const blob = await createHomeCard(
+        summary,
+        lang,
+        profile.avatarId,
+        includeName ? profile.displayName : undefined,
+      );
+      if (mounted.current) setCard({ blob, url: URL.createObjectURL(blob) });
+    } catch {
+      if (mounted.current)
+        setShareMessage(
+          lang === "tr"
+            ? "Görsel hazırlanamadı. Yeniden deneyebilirsin."
+            : "Could not prepare the image. Please retry.",
+        );
+    } finally {
+      shareLock.current = false;
+      if (mounted.current) setSharing(false);
+    }
+  };
   const panelRef = useRef<HTMLElement>(null);
   const home = homeOptionById(summary.homeId);
   const memories = [summary.firstProfitableSale, summary.bestSale].filter(
@@ -141,6 +194,81 @@ export default function HomeFinale({
       <button ref={buttonRef} onClick={onClose}>
         {t("finale.continue")}
       </button>
+      <div className="home-share-controls">
+        <label>
+          <input
+            type="checkbox"
+            checked={includeName}
+            disabled={sharing}
+            onChange={(event) => {
+              setIncludeName(event.target.checked);
+              setCard(null);
+            }}
+          />
+          {lang === "tr" ? "İsmimi göster" : "Include my name"}
+        </label>
+        <button
+          className="secondary"
+          disabled={sharing}
+          onClick={() => void preview()}
+        >
+          {sharing
+            ? lang === "tr"
+              ? "Hazırlanıyor…"
+              : "Preparing…"
+            : lang === "tr"
+              ? "Başarı kartımı hazırla"
+              : "Preview my achievement card"}
+        </button>
+        {card ? (
+          <>
+            <img
+              className="home-share-preview"
+              src={card.url}
+              alt={
+                lang === "tr"
+                  ? "Paylaşılacak ilk ev başarı kartı"
+                  : "First-home achievement card preview"
+              }
+            />
+            <button
+              disabled={sharing}
+              onClick={async () => {
+                if (shareLock.current) return;
+                shareLock.current = true;
+                setSharing(true);
+                try {
+                  const result = await shareHomeCard(card.blob);
+                  if (mounted.current)
+                    setShareMessage(
+                      result === "DOWNLOAD"
+                        ? lang === "tr"
+                          ? "Aşağıdaki bağlantıdan görseli indirebilirsin."
+                          : "Download the image using the link below."
+                        : "",
+                    );
+                } catch {
+                  if (mounted.current)
+                    setShareMessage(
+                      lang === "tr"
+                        ? "Paylaşım açılamadı; görseli indirebilirsin."
+                        : "Sharing unavailable; you can download the image.",
+                    );
+                } finally {
+                  shareLock.current = false;
+                  if (mounted.current) setSharing(false);
+                }
+              }}
+            >
+              {lang === "tr" ? "Kartımı paylaş" : "Share my card"}
+            </button>
+            <a href={card.url} download="tradeup-ilk-evim.png">
+              {lang === "tr" ? "Görseli indir" : "Download image"}
+            </a>
+          </>
+        ) : null}
+        <p role="status">{shareMessage}</p>
+      </div>
     </section>
   );
 }

@@ -129,6 +129,55 @@ export const createAdMobAdapters = (
   let showingInterstitial = false;
   let showingReward = false;
   let consentRefresh: Promise<ConsentSnapshot> | undefined;
+  let consentGeneration = 0;
+  let prepared:
+    | { placementId: RewardPlacementId; at: number; generation: number }
+    | undefined;
+  let preparing: Promise<void> | undefined;
+  const invalidateReward = () => {
+    consentGeneration++;
+    prepared = undefined;
+  };
+  const now = () => Date.now();
+  const isPrepared = (placementId: RewardPlacementId) =>
+    prepared?.placementId === placementId &&
+    prepared.generation === consentGeneration &&
+    now() >= prepared.at &&
+    now() - prepared.at < 3_600_000;
+
+  const prepareReward = async (placementId: RewardPlacementId) => {
+    if (!available || !platform || !canRequestAds || showingInterstitial)
+      throw new Error("ADS_UNAVAILABLE");
+    // The SDK owns one rewarded slot. Do not race two placements, even if a
+    // caller timed out while the native load is still finishing.
+    while (preparing) await preparing;
+    if (!canRequestAds) throw new Error("CONSENT_CHANGED");
+    if (isPrepared(placementId)) return;
+    const adId = resolveRewardedAdId(
+      placementId,
+      platform,
+      productionEnabled,
+      testEnabled,
+    );
+    if (!adId) throw new Error("ADS_UNAVAILABLE");
+    const generation = consentGeneration;
+    prepared = undefined;
+    const job = (async () => {
+      await port.prepareRewardVideoAd({
+        adId,
+        isTesting: !productionEnabled,
+        npa: true,
+      });
+      if (canRequestAds && consentGeneration === generation)
+        prepared = { placementId, at: now(), generation };
+    })();
+    preparing = job;
+    try {
+      await job;
+    } finally {
+      if (preparing === job) preparing = undefined;
+    }
+  };
 
   const initialize = () => {
     initialized ??= port
@@ -158,6 +207,7 @@ export const createAdMobAdapters = (
       info.status === AdmobConsentStatus.REQUIRED &&
       info.isConsentFormAvailable
     ) {
+      invalidateReward();
       info = await port.showConsentForm();
     }
     const allowed =
@@ -166,6 +216,7 @@ export const createAdMobAdapters = (
         info.status === AdmobConsentStatus.OBTAINED);
     if (allowed) await initialize();
     canRequestAds = allowed;
+    if (!allowed) invalidateReward();
     return consentSnapshot({ ...info, canRequestAds });
   };
 
@@ -173,20 +224,36 @@ export const createAdMobAdapters = (
     consent: {
       available,
       refresh() {
-        consentRefresh ??= refreshConsent().finally(() => {
-          consentRefresh = undefined;
-        });
+        consentRefresh ??= refreshConsent()
+          .catch((error: unknown) => {
+            canRequestAds = false;
+            invalidateReward();
+            throw error;
+          })
+          .finally(() => {
+            consentRefresh = undefined;
+          });
         return consentRefresh;
       },
       async openPrivacyOptions() {
         if (!available) throw new Error("PRIVACY_OPTIONS_UNAVAILABLE");
         await consentRefresh;
         canRequestAds = false;
+        invalidateReward();
         await port.showPrivacyOptionsForm();
         await refreshConsent();
       },
     },
     rewarded: {
+      async preload(placementId) {
+        if (showingReward || showingInterstitial) return false;
+        try {
+          await prepareReward(placementId);
+          return isPrepared(placementId);
+        } catch {
+          return false;
+        }
+      },
       async show(placementId) {
         if (
           !available ||
@@ -243,12 +310,11 @@ export const createAdMobAdapters = (
         );
         try {
           void (async () => {
-            await port.prepareRewardVideoAd({
-              adId,
-              isTesting: !productionEnabled,
-              npa: true,
-            });
-            if (settled) return;
+            await prepareReward(placementId);
+            if (settled || !canRequestAds || !isPrepared(placementId)) {
+              settle({ status: "FAILED", reason: "PROVIDER" });
+              return;
+            }
             // iOS leaves the show promise pending when an unearned ad is closed.
             // Native events therefore settle an operation-owned result instead.
             await addListener(
@@ -269,6 +335,11 @@ export const createAdMobAdapters = (
               }),
             );
             if (settled) return;
+            if (!canRequestAds || !isPrepared(placementId)) {
+              settle({ status: "FAILED", reason: "PROVIDER" });
+              return;
+            }
+            prepared = undefined; // A displayed slot is consumed, even on cancel.
             const reward = await port.showRewardVideoAd({ adId });
             // Resolution is the SDK's userDidEarnReward callback, not merely show.
             settle(
@@ -298,7 +369,8 @@ export const createAdMobAdapters = (
         !platform ||
         !canRequestAds ||
         showingInterstitial ||
-        showingReward
+        showingReward ||
+        preparing
       )
         return false;
       const adId = resolveTradeInterstitialId(

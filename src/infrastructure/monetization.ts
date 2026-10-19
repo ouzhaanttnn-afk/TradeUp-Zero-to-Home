@@ -52,6 +52,7 @@ export type RewardedAdResult =
   | { status: "FAILED"; reason: "NO_FILL" | "NETWORK" | "PROVIDER" };
 
 export interface RewardedAdAdapter {
+  preload?(placementId: RewardPlacementId): Promise<boolean>;
   show(placementId: RewardPlacementId): Promise<RewardedAdResult>;
 }
 

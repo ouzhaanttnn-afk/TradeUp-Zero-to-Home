@@ -15,7 +15,7 @@ import {
   nextLadderHome,
 } from "../content/homes";
 import { Icon } from "./Icon";
-import { homeAssets } from "./homeAssets";
+import HomeMarket from "./HomeMarket";
 import {
   careerEventPresentation,
   completedSalesPresentation,
@@ -33,14 +33,14 @@ import { careerCopy } from "./careerPresentation";
 export default function JourneyPanel({
   game,
   homeProgress,
-  onBuyHome,
+  onOpenHomeMarket,
   onOpenPortfolio,
   onOpenHomeMemory,
   homeMemoryStatus,
 }: {
   game: GameState;
   homeProgress: number;
-  onBuyHome: (homeId: string) => void;
+  onOpenHomeMarket: () => void;
   onOpenPortfolio: () => void;
   onOpenHomeMemory: () => void;
   homeMemoryStatus: "IDLE" | "SAVING" | "FAILED";
@@ -102,6 +102,7 @@ export default function JourneyPanel({
           <h2>{t("journey.title")}</h2>
         </div>
       </div>
+      {game.home.purchased ? <HomeMarket game={game} mode="owned" /> : null}
       {game.home.unlocked ? (
         <section className="home-card home-card-primary">
           <div className="home-silhouette" aria-hidden="true">
@@ -175,39 +176,7 @@ export default function JourneyPanel({
                     <b>{t("journey.allHomeOptionsFound")}</b>
                   )}
                 </div>
-                {upgradeOptions.length ? (
-                  <div className="home-market-list" aria-label={t("journey.homeOptions")}>
-                    {upgradeOptions.map((home) => {
-                      const localized = localizeHome(
-                        home.id,
-                        home.name,
-                        home.location,
-                        home.summary,
-                        lang,
-                      );
-                      return (
-                        <article className="home-option-card" key={home.id}>
-                          <img src={homeAssets[home.assetKey]} alt="" />
-                          <div>
-                            <small>{localized.location}</small>
-                            <h4>{localized.name}</h4>
-                            <p>{localized.summary}</p>
-                            <strong>{money(home.priceMinor, lang)}</strong>
-                            {game.cashMinor >= home.priceMinor ? (
-                              <button onClick={() => onBuyHome(home.id)}>
-                                {t("journey.chooseHome")}
-                              </button>
-                            ) : (
-                              <span className="home-option-shortfall">
-                                {money(home.priceMinor - game.cashMinor, lang)} {t("journey.shortfall")}
-                              </span>
-                            )}
-                          </div>
-                        </article>
-                      );
-                    })}
-                  </div>
-                ) : null}
+                {upgradeOptions.length ? <button onClick={onOpenHomeMarket}>{lang === "tr" ? "Pazar'da evleri incele" : "View homes in the market"}</button> : null}
               </div>
             ) : null}
             {showCashPlan ? (

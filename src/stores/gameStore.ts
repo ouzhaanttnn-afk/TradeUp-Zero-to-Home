@@ -1651,6 +1651,7 @@ export const useGameStore = create<Store>((set, get) => ({
               ? "Bu hızlandırma şu anda uygun değil."
               : "Video yüklenemedi; hak ve limit kullanılmadı.",
     });
+    if (!hasAdFreeEntitlement(next)) void adapters.rewarded.preload?.("MARKET_SCOUT").catch(() => {});
   },
   dismissCoach: () => {
     const game = get().game;

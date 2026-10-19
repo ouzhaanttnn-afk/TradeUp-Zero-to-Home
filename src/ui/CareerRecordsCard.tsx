@@ -1,9 +1,11 @@
-import { useMemo } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
+import { gameCenterAvailable } from "../infrastructure/gameCenter";
 import { careerRecords } from "../domain/careerRecords";
 import type { GameState } from "../domain/models";
 import { money } from "../game";
 import { useTranslation } from "../i18n";
 import { careerCopy } from "./careerPresentation";
+const GameCenterPanel = lazy(() => import("./GameCenterPanel"));
 
 export default function CareerRecordsCard({
   game,
@@ -16,6 +18,7 @@ export default function CareerRecordsCard({
 }) {
   const { lang } = useTranslation();
   const copy = careerCopy(lang);
+  const [globalOpen, setGlobalOpen] = useState(false);
   const records = useMemo(
     () =>
       careerRecords({
@@ -77,6 +80,22 @@ export default function CareerRecordsCard({
         {!records.complete ? <p>{copy.noRecords}</p> : null}
         <p>{copy.local}</p>
       </details>
+      {gameCenterAvailable() ? (
+        <details onToggle={(event) => setGlobalOpen(event.currentTarget.open)}>
+          <summary>Game Center · Top 100</summary>
+          {globalOpen ? (
+            <Suspense
+              fallback={
+                <p role="status">
+                  {lang === "tr" ? "Yükleniyor…" : "Loading…"}
+                </p>
+              }
+            >
+              <GameCenterPanel />
+            </Suspense>
+          ) : null}
+        </details>
+      ) : null}
     </section>
   );
 }

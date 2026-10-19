@@ -1,5 +1,7 @@
 # TradeUp — İlk Evim: uygulama öncesi şartname
 
+> 18 Ekim revizyonu: Kullanıcı Game Center barındırmalı Top 100 ve evlerin Pazar'a taşınmasını onayladı. Çakışan sunucu/ikinci kariyer ve sürüm sınırları için `TRADEUP_GAME_CENTER_PLAN_2026-10-18.md` önceliklidir. Bu revizyon yayın yetkisi değildir.
+
 Karar sürümü 1 · 16 Ekim 2026 · Yalnız tasarım ve dokümantasyon
 
 ## 0. Belgenin yetkisi ve nasıl kullanılacağı

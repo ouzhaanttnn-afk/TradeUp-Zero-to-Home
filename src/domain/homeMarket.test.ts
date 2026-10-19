@@ -3,12 +3,23 @@ import {
   availableHomeOptions,
   HOME_OPTIONS,
   nextHomeResult,
+  marketHomeOptions,
 } from "../content/homes";
 import { HOME_GOAL_MINOR, initialState } from "../game";
 import { purchaseHome, reconcileJournal } from "./economy";
 import { advanceWorldTo } from "./world";
 
 describe("home search market", () => {
+  it("keeps discovered homes independent of market refresh and excludes owned/lower homes", () => {
+    const state = initialState(0);
+    state.home = { ...state.home, unlocked: true, searchStartedAtGameMin: 0 };
+    state.gameTimeMin = 450;
+    expect(marketHomeOptions(state)).toHaveLength(5);
+    state.marketCycle += 20; state.listings = [];
+    expect(marketHomeOptions(state)).toHaveLength(5);
+    state.home = { ...state.home, purchased: true, purchasedHomeId: "terrace_duplex" };
+    expect(marketHomeOptions(state).map((home) => home.id)).toEqual(["stone_courtyard", "coastal_villa"]);
+  });
   it("starts only at the goal and reveals five homes over deterministic game time", () => {
     const below = initialState(0, "SANDBOX");
     below.home = { ...below.home, unlocked: true };

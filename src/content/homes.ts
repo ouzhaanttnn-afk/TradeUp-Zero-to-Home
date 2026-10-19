@@ -76,6 +76,12 @@ export const availableHomeOptions = (home: HomeState, gameTimeMin: number) => {
     : HOME_OPTIONS.filter((option) => elapsed >= option.revealOffsetMin);
 };
 
+export const marketHomeOptions = (state: Pick<GameState, "home" | "gameTimeMin">) => {
+  if (!state.home.unlocked) return [];
+  const ownedPrice = homeOptionById(state.home.purchasedHomeId)?.priceMinor ?? -1;
+  return availableHomeOptions(state.home, state.gameTimeMin).filter((home) => home.priceMinor > ownedPrice);
+};
+
 export const nextHomeResult = (home: HomeState, gameTimeMin: number) => {
   const elapsed = homeSearchElapsedMin(home, gameTimeMin);
   return HOME_OPTIONS.find((option) => elapsed < option.revealOffsetMin);

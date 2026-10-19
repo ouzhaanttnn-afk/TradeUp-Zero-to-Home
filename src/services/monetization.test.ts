@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { initialState } from "../game";
 import { advanceWorldTo } from "../domain/world";
 import { applyRewardedResult } from "../domain/monetization";
@@ -41,6 +41,29 @@ const unlockedState = () => {
 };
 
 describe("monetization application service", () => {
+  it("preloads scout only after consent and current verified ad-free ownership checks", async () => {
+    const state = initialState(0);
+    const preload = vi.fn().mockResolvedValue(true);
+    const adapters = {
+      billing: createSandboxBillingAdapter({ products: [product] }),
+      consent: createSandboxConsentAdapter({ canRequestAds: true, adPersonalizationAllowed: false }),
+      rewarded: { ...createSandboxRewardedAdAdapter([]), preload },
+    };
+    await refreshMonetization(state, adapters);
+    expect(preload).toHaveBeenCalledWith("MARKET_SCOUT");
+    preload.mockClear();
+    for (const [productId, entitlementId] of [
+      ["tradeup_premium_lifetime", "premium_lifetime"],
+      ["tradeup_no_ads_lifetime", "no_ads_lifetime"],
+    ] as const) {
+      const owned = structuredClone(state);
+      owned.monetization.entitlements.push({ productId, entitlementId, platform: "ios", status: "OWNED" });
+      await refreshMonetization(owned, adapters);
+      expect(preload).not.toHaveBeenCalled();
+    }
+    await refreshMonetization(state, { ...adapters, consent: createSandboxConsentAdapter({ canRequestAds: false, adPersonalizationAllowed: false }) });
+    expect(preload).not.toHaveBeenCalled();
+  });
   it("revokes an iOS entitlement missing from the current verified StoreKit snapshot", async () => {
     const state = initialState(0, "SANDBOX");
     state.monetization.entitlements = [

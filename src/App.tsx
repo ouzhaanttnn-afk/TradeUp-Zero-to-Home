@@ -117,6 +117,7 @@ const loadRadarPanel = () => import("./ui/RadarPanel");
 const loadPurchasesSheet = () => import("./ui/PurchasesSheet");
 const SettingsPanel = lazy(loadSettingsPanel);
 const HomeFinale = lazy(() => import("./ui/HomeFinale"));
+const HomeMarket = lazy(() => import("./ui/HomeMarket"));
 const FollowPanel = lazy(loadFollowPanel);
 const JourneyPanel = lazy(loadJourneyPanel);
 const RadarPanel = lazy(loadRadarPanel);
@@ -412,6 +413,7 @@ export default function App() {
     [marketListings],
   );
   const activeMarketCategory =
+    marketCategory === "EMLAK" ||
     marketCategory === ALL_MARKET_CATEGORIES ||
     marketCategoryOptions.includes(marketCategory)
       ? marketCategory
@@ -1288,7 +1290,7 @@ export default function App() {
             {!ftueActive && marketEvent ? (
               <MarketEventCard event={marketEvent} />
             ) : null}
-            {!ftueActive && marketCategoryOptions.length > 1 ? (
+            {!ftueActive && (marketCategoryOptions.length > 1 || game.home.unlocked) ? (
               <div
                 className="chips market-filters"
                 role="group"
@@ -1305,6 +1307,7 @@ export default function App() {
                 >
                   {t("market.all")}
                 </button>
+                {game.home.unlocked ? <button className={activeMarketCategory === "EMLAK" ? "active" : ""} aria-pressed={activeMarketCategory === "EMLAK"} onClick={() => setMarketCategory("EMLAK")}>{lang === "tr" ? "Emlak" : "Real Estate"}</button> : null}
                 {marketCategoryOptions.map((category) => (
                   <button
                     className={
@@ -1320,6 +1323,12 @@ export default function App() {
               </div>
             ) : null}
             <div className="feed market-grid">
+              {!ftueActive && (activeMarketCategory === "EMLAK" || activeMarketCategory === ALL_MARKET_CATEGORIES) ? <Suspense fallback={null}><HomeMarket game={game} mode={activeMarketCategory === "EMLAK" ? "all" : "featured"} onBuy={(id) => {
+                const first = !useGameStore.getState().game.home.purchasedHomeId;
+                const bought = buyHome(id);
+                if (bought && first) void openHomeMemory();
+                return bought;
+              }} /></Suspense> : null}
               {startingOffer ? (
                 <article className="starting-sale">
                   <img
@@ -1347,7 +1356,7 @@ export default function App() {
                 </article>
               ) : null}
               <Suspense fallback={<p role="status">{t("common.listingsLoading")}</p>}>
-                {visibleMarketListings.map((item, index) => {
+                {(activeMarketCategory === "EMLAK" ? [] : visibleMarketListings).map((item, index) => {
                   const categoryLevel = categoryExpertiseLevel(
                     game,
                     item.instance.family.category,
@@ -1389,6 +1398,7 @@ export default function App() {
         ) : null}
         {tab === "portfolio" ? (
           <>
+            {game.home.purchased ? <button className="secondary" onClick={() => navigate("journey")}>{lang === "tr" ? "Evim" : "My home"} ↗</button> : null}
             <div className="section-title portfolio-title">
               <div>
                 <small>{t("portfolio.heading")}</small>
@@ -1867,10 +1877,7 @@ export default function App() {
               <JourneyPanel
                 game={game}
                 homeProgress={homeProgress}
-                onBuyHome={(homeId) => {
-                  const wasFirstHome = !game.home.purchasedHomeId;
-                  if (buyHome(homeId) && wasFirstHome) void openHomeMemory();
-                }}
+                onOpenHomeMarket={() => { setMarketCategory("EMLAK"); navigate("market"); }}
                 onOpenHomeMemory={() => void openHomeMemory()}
                 homeMemoryStatus={homeMemoryStatus}
                 onOpenPortfolio={() => navigate("portfolio")}

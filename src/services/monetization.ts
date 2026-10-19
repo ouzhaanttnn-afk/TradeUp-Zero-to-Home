@@ -5,6 +5,7 @@ import {
   requestMonetizedAction,
   syncConsentState,
   syncVerifiedEntitlement,
+  hasAdFreeEntitlement,
 } from "../domain/monetization";
 import type {
   GameState,
@@ -154,6 +155,10 @@ export const refreshMonetization = async (
   }
   const metadata =
     products.status === "fulfilled" ? validMetadata(products.value) : [];
+  // Never block hydration/billing on an ad load. Eligibility and UMP are checked
+  // again on tap; preloading alone cannot grant a reward or present an ad.
+  if (consent.status === "fulfilled" && consent.value.canRequestAds && !hasAdFreeEntitlement(next))
+    void adapters.rewarded.preload?.("MARKET_SCOUT").catch(() => {});
   return {
     state: next,
     products: metadata,

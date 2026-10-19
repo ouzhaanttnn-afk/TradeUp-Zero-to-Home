@@ -77,14 +77,24 @@ test("wealth atmosphere culminates in an accessible home purchase finale", async
   );
   await page.getByRole("button", { name: "Yolculuk", exact: true }).click();
   await expect(page.getByText("2 ev bulundu")).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Bahçeli Başlangıç Evi" }),
-  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Bu evi seç" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Pazar'da evleri incele" }).click();
+  await expect(page.getByRole("button", { name: "Emlak", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator(".home-market-tile")).toHaveCount(2);
+  await page.locator(".home-market-tile").first().getByRole("button").click();
+  const detail = page.getByRole("dialog", { name: "Bahçeli Başlangıç Evi" });
+  await expect(detail).toBeVisible();
+  await expect(detail.getByRole("heading", { name: "Bahçeli Başlangıç Evi" })).toBeInViewport();
+  expect(await detail.evaluate((dialog) => {
+    const heading = dialog.querySelector("h2")!;
+    const box = heading.getBoundingClientRect();
+    return dialog.contains(document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2));
+  })).toBe(true);
   await page.screenshot({
     path: testInfo.outputPath("home-market-390.png"),
     animations: "disabled",
   });
-  await page.getByRole("button", { name: "Bu evi seç" }).first().click();
+  await detail.getByRole("button", { name: /Onayla ve evi satın al/ }).click();
 
   const finale = page.getByRole("dialog", { name: "İlk evin senin." });
   await expect(finale).toBeVisible();
@@ -119,6 +129,13 @@ test("wealth atmosphere culminates in an accessible home purchase finale", async
     390,
   );
   await page.waitForTimeout(3_300);
+  await expect(finale.getByRole("checkbox", { name: "İsmimi göster" })).not.toBeChecked();
+  await finale.getByRole("button", { name: "Başarı kartımı hazırla" }).click();
+  await expect(finale.getByAltText("Paylaşılacak ilk ev başarı kartı")).toBeVisible();
+  expect(await finale.getByAltText("Paylaşılacak ilk ev başarı kartı").evaluate((image: HTMLImageElement) => ({ width: image.naturalWidth, height: image.naturalHeight }))).toEqual({ width: 1080, height: 1350 });
+  const download = page.waitForEvent("download");
+  await finale.getByRole("link", { name: "Görseli indir" }).click();
+  expect((await download).suggestedFilename()).toBe("tradeup-ilk-evim.png");
   await page.screenshot({
     path: testInfo.outputPath("home-finale-390.png"),
     animations: "disabled",
@@ -126,6 +143,12 @@ test("wealth atmosphere culminates in an accessible home purchase finale", async
   await finale.getByRole("button", { name: "Yolculuğa devam et" }).click();
   await page.reload();
   await page.getByRole("button", { name: "Yolculuk", exact: true }).click();
+  await expect(page.locator(".home-market-tile--owned")).toContainText("Bahçeli Başlangıç Evi");
+  await page.locator(".home-market-tile--owned button").click();
+  const ownedDetail = page.getByRole("dialog", { name: "Bahçeli Başlangıç Evi" });
+  await expect(ownedDetail).toContainText("Bu ev senin.");
+  await expect(ownedDetail.getByRole("button", { name: /Onayla/ })).toHaveCount(0);
+  await ownedDetail.getByRole("button", { name: "Kapat", exact: true }).click();
   await page.locator(".career-records-disclosure summary").click();
   await expect(page.locator(".career-records-disclosure")).toContainText(
     "1 ticaret",

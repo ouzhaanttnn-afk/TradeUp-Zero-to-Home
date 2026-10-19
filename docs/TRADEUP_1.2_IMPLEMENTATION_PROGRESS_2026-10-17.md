@@ -1,5 +1,7 @@
 # İlk Evim — uygulama ilerlemesi
 
+> **19 Ekim güncellemesi:** Aşağıdaki 17 Ekim durumu tarihsel kayıttır. Reklam ön yükleme, ilk ev paylaşımı, Pazar/Emlak ve Game Center kodu artık uygulanmıştır; güncel doğrulama ve kalan native kapılar `TRADEUP_1.2_BUILD_READINESS_2026-10-19.md` içindedir. Sunuculu 1.3 planı kullanıcı isteğiyle `TRADEUP_GAME_CENTER_PLAN_2026-10-18.md` tarafından değiştirilmiştir. Yeni Apple başvurusu veya yayın yapılmadı.
+
 17 Ekim 2026 · Dal: `codex/first-home-polish`
 
 Bu dosya yapılmış işi izler; tasarımın yerine geçmez. Kapsam: `TRADEUP_1.2_IMPLEMENTATION_SPEC_2026-10-16.md`. Main, mevcut Apple incelemesi, reklam kuralları ve satın alma ürünleri değiştirilmedi.
