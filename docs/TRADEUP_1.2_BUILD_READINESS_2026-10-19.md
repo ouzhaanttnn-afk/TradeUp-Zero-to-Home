@@ -4,6 +4,17 @@ Dal: `codex/first-home-polish`. Kullanıcı önerileri ve Game Center barındır
 
 Güncel teslim onayı: kullanıcı son olarak `Teste gönder` diyerek yalnız TestFlight yüklemesini onayladı. Bu teslim için önceki no-upload sınırı kalktı; main merge, App Review ve mağaza yayını hâlâ yasak. Hedef 1.2.0 (48), Apple'daki son build 47 olarak tekrar okundu. Codemagic'te `tradeup_game_center_distribution_20261019` profilinin mevcut `tradeup_distribution` sertifikasıyla eşleştiği doğrulandı. TestFlight workflow'u aynı Game Center imza/paket kontrollerini yüklemeden önce çalıştırır; yalnız mevcut iç `Betatest` grubuna erişim hazırlanır, yeni davet veya halka açık link yoktur.
 
+## Tamamlanan TestFlight teslimi
+
+19 Ekim 2026: **1.2.0 (48)** Apple'da `VALID`, iç test durumu `IN_BETA_TESTING`. App Store Connect build kimliği `e99c28b5-6fb2-445e-ad64-9f66db33b8a4`. Mevcut iç `Betatest` grubu (`184db05f-f055-434c-969d-97bdffadd54d`, 3 testçi) bu build'e otomatik erişti; `GET /betaGroups/{id}/builds` ile 48 doğrulandı ve UI'da Build 48 / Betatest / 3 görüldü. Grup veya yeni davet oluşturulmadı. `GET /builds/{id}/betaGroups` ilişkisi GET_RELATED desteklemediği için 403 verdi; izin yükseltmeden, resmi ters ilişki okuması kullanıldı.
+
+- [Başarılı Codemagic build 7](https://codemagic.io/app/6ac0a97ff49075906ade5690/build/6ad6517e7550aed8109037e7), kaynak `eeb008ad914a8eb6f71deeada8c9c4df2aad795c`, yalnız `codex/first-home-polish`.
+- Native archive/export, `codesign --verify --deep --strict`, signed Game Center entitlement / IPA profil doğrulaması geçti. IPA bulut artifact'ı `App.ipa`, 22.00 MB. Altool `UPLOAD SUCCEEDED with no errors` dedi; delivery UUID yukarıdaki build kimliğiyle aynı. Yerel imzalı IPA indirilmedi; yerel `dist` web çıktısı IPA diye sunulmaz.
+- Türkçe TestFlight test notları oluşturuldu: `4945c732-5971-4251-85dd-673df63f3f7f`. Emlak/Evim, isteğe bağlı üç Game Center listesi, ilk ev paylaşımı, metin seçimi ve kayıt devamı testleri anlatılır.
+- TestFlight iOS liste ekranındaki `Ready to Submit` metni dış beta inceleme seçeneğidir; API iç test durumu `IN_BETA_TESTING` ve mevcut 3 testçi erişimi doğrulandı. Dış Beta Review / App Review gönderilmedi, mağazada yayınlanmadı. Mevcut 1.1.2 mağaza sürümü ve nomination korunur.
+- Başarılı yükleme ekran kanıtı: ignored `release-artifacts/testflight-48-upload-succeeded-2026-10-19.png`. Apple sayfası screenshot çağrısı zaman aşımına uğradı; Apple erişimi API + canlı DOM ile doğrulandı, olmayan ekran görüntüsü kanıtı iddia edilmez.
+- Tek ek build, kullanıcının açık onayıyla mevcut ücretsiz M2 kotasında çalıştı; ücretli abonelik/servis açılmadı. Main uzak SHA `142caa35a3e4483303f4fcfbb82fd47bc7a4783e` olarak korundu. Fiziksel cihaz Game Center/paylaşım/reklam testleri hâlâ testçinin yapacağı çalışma zamanı kapılarıdır.
+
 ## Uygulananlar
 
 - Mevcut evler Pazar/Emlak'ta; Tümü'nde en fazla bir ev. Fiyat, keşif süresi, araştırma ve kanonik satın alma muhasebesi değişmedi. Yolculuk satın alma ekranı yerine Pazara yönlendirir.
@@ -35,7 +46,7 @@ Web çıktı: `C:\Users\Gaming\Desktop\TRADEUP\dist`. Bu imzalı IPA değildir. 
 
 ## Yayından önce kalanlar
 
-1. Game Center capability'li ACTIVE profil hazır; Codemagic'te eşleşen referans `tradeup_game_center_distribution_20261019` kullanılacak. IPA-only workflow açık profil/sertifika seçer; `codesign --verify --deep --strict`, dump edilmiş Game Center entitlement ve IPA'daki profil/team/app/expiry kontrolleri geçmeden başarılı teslim sayılmaz. Verifier için 7 sentetik regresyon testi geçti; bunlar gerçek imza kanıtı değildir. macOS/Xcode derlemesi ve gerçek paket sonucu ayrıca kaydedilecek.
+1. Native imza/derleme kapısı TestFlight 48 ile geçti; fiziksel cihaz çalışma zamanı doğrulaması bunun yerine geçmez.
 2. Fiziksel iPhone/iPad Game Center sandbox giriş/iptal/hesap değişimi, gerçek top 100/kendi sıra ve skor gönderimi. Bu tur test/üretim skoru gönderilmedi.
 3. Fiziksel cihazda test reklamlarıyla soğuk/sıcak açılış gecikmesi ve native paylaş/iptal. Gelir üreten test/tıklama yapılmadı; gecikme süresi ölçülmüş gibi raporlanmaz.
 4. %200 metin/VoiceOver/kontrast tam release matrisi, StoreKit restore, son build'e ait gerçek iPhone/iPad mağaza çekimleri. Büyük yazı testi bu tam erişilebilirlik değerlendirmesinin yerine geçmez.
