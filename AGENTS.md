@@ -9,6 +9,8 @@
 
 ### Approved First Home patch exception (2026-10-17)
 
+2026-10-21 delivery authorization: the user explicitly requested submitting the latest TestFlight build to App Review while preserving the nomination. App Review submission of 1.2.0 (48) and its three Game Center leaderboards is authorized; App Store publication remains manual and no main merge is authorized. The user separately approved updating only the live privacy page for Game Center and local sharing, preserving the web game and main.
+
 2026-10-19 updated delivery authorization: the user explicitly requested `Teste gönder` after confirming TestFlight-only scope. The feature branch may be pushed and one free-quota signed build uploaded to TestFlight, with existing test access prepared. No App Review submission, main merge, public release or paid build is authorized. This supersedes the earlier IPA-only/no-upload restriction for this delivery.
 
 After Codemagic build `6ad629597550aed8109029d2` stopped in the old configuration test before archive/upload, the user explicitly approved one additional free-quota TestFlight build (`Evet, düzelt ve bir kez daha gönder`). No further paid/repeated builds are authorized by this retry approval.
