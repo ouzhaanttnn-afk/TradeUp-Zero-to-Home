@@ -23,7 +23,26 @@ diff --git a/ios/Sources/AdMobPlugin/AdMobPlugin.swift b/ios/Sources/AdMobPlugin
          MobileAds.shared.start(completionHandler: nil)
          call.resolve([:])
      }
-@@ -237,6 +239,8 @@ public class AdMobPlugin: CAPPlugin, CAPBridgedPlugin {
+@@ -88,9 +90,15 @@ public class AdMobPlugin: CAPPlugin, CAPBridgedPlugin {
+     @objc func requestTrackingAuthorization(_ call: CAPPluginCall) {
+         if #available(iOS 14, *) {
+             #if canImport(AppTrackingTransparency)
+-            ATTrackingManager.requestTrackingAuthorization(completionHandler: { _ in
+-                call.resolve([:])
+-            })
++            DispatchQueue.main.async {
++                guard UIApplication.shared.applicationState == .active else {
++                    call.reject("ATT_REQUIRES_ACTIVE_APP")
++                    return
++                }
++                ATTrackingManager.requestTrackingAuthorization(completionHandler: { _ in
++                    call.resolve([:])
++                })
++            }
+             #else
+             call.resolve([:])
+             #endif
+@@ -237,6 +245,8 @@ public class AdMobPlugin: CAPPlugin, CAPBridgedPlugin {
       * https://support.google.com/admob/answer/10113005?hl=en
       */
      @objc func requestConsentInfo(_ call: CAPPluginCall) {

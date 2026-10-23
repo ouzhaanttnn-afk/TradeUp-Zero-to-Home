@@ -53,13 +53,8 @@ describe("iOS release device contract", () => {
       );
       expect(strings).toMatch(/"NSUserTrackingUsageDescription" = "[^"]+";/);
     }
-    for (const symbol of [
-      "requestTrackingAuthorization",
-      "ATTrackingManager",
-    ])
-      for (const source of [adapter, appDelegate]) {
-        expect(source).not.toContain(symbol);
-      }
+    expect(appDelegate).not.toContain("requestTrackingAuthorization");
+    expect(adapter).not.toContain("ATTrackingManager");
     expect(appDelegate).not.toContain("AppTrackingTransparency");
     expect(spmPackage).toContain('traits: ["AnalyticsWithoutAdIdSupport"]');
     // Ads stay possible without tracking: consent-gated, non-personalized.

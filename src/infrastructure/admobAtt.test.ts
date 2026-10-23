@@ -15,7 +15,7 @@ const fixture = () => ({
     canRequestAds: true,
   }),
   showPrivacyOptionsForm: vi.fn().mockResolvedValue(undefined),
-  requestTrackingAuthorization: vi.fn(),
+  requestTrackingAuthorization: vi.fn().mockResolvedValue(undefined),
   prepareRewardVideoAd: vi.fn().mockResolvedValue({}),
   showRewardVideoAd: vi.fn().mockResolvedValue({ amount: 1, type: "test" }),
   prepareInterstitial: vi.fn().mockResolvedValue({}),
@@ -23,7 +23,7 @@ const fixture = () => ({
   addListener: vi.fn().mockResolvedValue({ remove: vi.fn() }),
 });
 
-describe("UMP-managed IDFA/ATT consent", () => {
+describe("UMP before IDFA/ATT consent", () => {
   it.each(["NOT_REQUIRED", "OBTAINED"])(
     "presents an available IDFA form even when GDPR is %s",
     async (status) => {
@@ -197,5 +197,106 @@ describe("UMP-managed IDFA/ATT consent", () => {
         npa: true,
       }),
     );
+  });
+
+  it.each(["authorized", "denied", "restricted"])(
+    "locally requests undetermined ATT after UMP, then permits eligible NPA ads (%s)",
+    async (status) => {
+      const port = fixture();
+      port.requestConsentInfo.mockResolvedValue({
+        status: "NOT_REQUIRED",
+        canRequestAds: true,
+        isConsentFormAvailable: false,
+      });
+      port.trackingAuthorizationStatus
+        .mockResolvedValueOnce({ status: "notDetermined" })
+        .mockResolvedValue({ status });
+      const ads = createAdMobAdapters(port as never, {
+        platform: "ios",
+        testEnabled: true,
+      });
+      expect((await ads.consent.refresh()).canRequestAds).toBe(true);
+      expect(port.showConsentForm).not.toHaveBeenCalled();
+      expect(port.requestTrackingAuthorization).toHaveBeenCalledOnce();
+      expect(port.requestConsentInfo.mock.invocationCallOrder[0]).toBeLessThan(
+        port.requestTrackingAuthorization.mock.invocationCallOrder[0],
+      );
+      expect(
+        port.requestTrackingAuthorization.mock.invocationCallOrder[0],
+      ).toBeLessThan(port.initialize.mock.invocationCallOrder[0]);
+      expect((await ads.rewarded.show("MARKET_SCOUT")).status).toBe(
+        "USER_EARNED",
+      );
+      await ads.consent.refresh();
+      expect(port.requestTrackingAuthorization).toHaveBeenCalledOnce();
+    },
+  );
+
+  it("holds all ad loading until the local Apple request finishes and deduplicates it", async () => {
+    const port = fixture();
+    port.trackingAuthorizationStatus.mockResolvedValue({
+      status: "notDetermined",
+    });
+    let finish!: () => void;
+    port.requestTrackingAuthorization.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          finish = resolve;
+        }),
+    );
+    const ads = createAdMobAdapters(port as never, {
+      platform: "ios",
+      testEnabled: true,
+    });
+    const first = ads.consent.refresh();
+    const second = ads.consent.refresh();
+    await vi.waitFor(() =>
+      expect(port.requestTrackingAuthorization).toHaveBeenCalledOnce(),
+    );
+    expect(port.showConsentForm.mock.invocationCallOrder[0]).toBeLessThan(
+      port.requestTrackingAuthorization.mock.invocationCallOrder[0],
+    );
+    expect(port.initialize).not.toHaveBeenCalled();
+    expect(await ads.rewarded.preload!("MARKET_SCOUT")).toBe(false);
+    expect(await ads.showTradeInterstitial()).toBe(false);
+    port.trackingAuthorizationStatus.mockResolvedValue({ status: "denied" });
+    finish();
+    await Promise.all([first, second]);
+    expect(port.initialize).toHaveBeenCalledOnce();
+  });
+
+  it("does not ask ATT or start Mobile Ads when UMP disallows ads", async () => {
+    const port = fixture();
+    port.trackingAuthorizationStatus.mockResolvedValue({
+      status: "notDetermined",
+    });
+    port.showConsentForm.mockResolvedValue({
+      status: "OBTAINED",
+      canRequestAds: false,
+    });
+    const ads = createAdMobAdapters(port as never, {
+      platform: "ios",
+      testEnabled: true,
+    });
+    expect((await ads.consent.refresh()).canRequestAds).toBe(false);
+    expect(port.requestTrackingAuthorization).not.toHaveBeenCalled();
+    expect(port.initialize).not.toHaveBeenCalled();
+  });
+
+  it("does not initialize ads when Apple leaves the request undetermined; later refresh can retry", async () => {
+    const port = fixture();
+    port.trackingAuthorizationStatus.mockResolvedValue({
+      status: "notDetermined",
+    });
+    const ads = createAdMobAdapters(port as never, {
+      platform: "ios",
+      testEnabled: true,
+    });
+    await expect(ads.consent.refresh()).rejects.toThrow(
+      "TRACKING_REQUEST_NOT_COMPLETED",
+    );
+    expect(port.initialize).not.toHaveBeenCalled();
+    port.trackingAuthorizationStatus.mockResolvedValue({ status: "denied" });
+    expect((await ads.consent.refresh()).canRequestAds).toBe(true);
   });
 });

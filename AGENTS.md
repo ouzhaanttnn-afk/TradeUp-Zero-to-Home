@@ -9,6 +9,14 @@
 
 ### Approved First Home patch exception (2026-10-17)
 
+2026-10-23 TestFlight delivery authorization: the user requested completing the
+remaining privacy work and uploading the corrected build to TestFlight. The
+feature branch may be pushed and one existing-free-quota signed TestFlight job
+run. Preserve main, nomination, manual public release and the App Review record.
+Use a consent-gated local ATT fallback so a remote IDFA message need not affect
+older ATT-free versions. Privacy-page-only publication and accurate privacy
+declaration preparation are in scope; no paid build or new reviewer claims.
+
 2026-10-23 privacy correction authorization: the user approved adapting Mihenk's
 UMP-managed IDFA/ATT flow after the 1.2.0 (48) Guideline 5.1.2(i) rejection.
 This supersedes the old ATT-free implementation, not the ad placements, NPA

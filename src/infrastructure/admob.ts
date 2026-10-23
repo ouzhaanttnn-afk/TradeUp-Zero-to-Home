@@ -74,8 +74,8 @@ export const classifyAdMobFailure = (
   return "PROVIDER";
 };
 
-// UMP owns GDPR + IDFA/ATT presentation. Never request ATT independently of
-// the regional consent choices. Ads remain non-personalized even after ATT.
+// Regional UMP consent precedes ATT and all ad loading. A local ATT fallback
+// avoids enabling a remote IDFA message for older, ATT-free app versions.
 type AdMobPort = Pick<
   typeof AdMob,
   | "initialize"
@@ -83,6 +83,7 @@ type AdMobPort = Pick<
   | "showConsentForm"
   | "showPrivacyOptionsForm"
   | "trackingAuthorizationStatus"
+  | "requestTrackingAuthorization"
   | "prepareRewardVideoAd"
   | "showRewardVideoAd"
   | "prepareInterstitial"
@@ -239,6 +240,14 @@ export const createAdMobAdapters = (
       info.canRequestAds &&
       (info.status === AdmobConsentStatus.NOT_REQUIRED ||
         info.status === AdmobConsentStatus.OBTAINED);
+    // A published UMP IDFA message may already have resolved ATT. Ask only
+    // while undetermined, and only after UMP permits an eligible ad request.
+    // ATT permission never overrides UMP purposes or enables personalization.
+    if (allowed && platform === "ios" && trackingStatus === "notDetermined") {
+      await port.requestTrackingAuthorization();
+      if ((await refreshTrackingStatus()) === "notDetermined")
+        throw new Error("TRACKING_REQUEST_NOT_COMPLETED");
+    }
     if (allowed) await initialize();
     canRequestAds = allowed;
     if (!allowed) invalidateReward();

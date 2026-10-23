@@ -56,8 +56,7 @@ describe("AdMob production safety", () => {
   });
 });
 
-// UMP owns ATT presentation and regional consent sequencing. A separate JS
-// prompt must not duplicate/bypass UMP or block ads merely because ATT is denied.
+// An existing ATT decision must never be prompted again or block eligible NPA ads.
 const attTripwires = () => ({
   trackingAuthorizationStatus: vi.fn().mockResolvedValue({ status: "denied" }),
   requestTrackingAuthorization: vi.fn(() => {
