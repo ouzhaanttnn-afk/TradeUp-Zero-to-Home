@@ -77,9 +77,13 @@ kontrolleri yeni açık izin sözleşmesini denetleyecek şekilde güncellendi.
   bu çalışmada kimlik veya gelir ayarı değişmedi.
 - Yeni yerel ATT yolu uzaktaki IDFA mesajının yayınına bağlı değildir. Fiziksel
   cihaz kontrolü olmadan Apple'a "cihazda doğrulandı" yazma.
-- Yerel privacy.html yeni akışı açıklıyor; ayrı canlı-kaynak worktree'sinde
-  yalnız bu dosyanın yayını hazırlanır. E-posta `nostoscomp@gmail.com` korunur.
-  Yayın ve build teslim sonuçları aşağıya gerçek kanıtlarıyla eklenecektir.
+- Gizlilik sayfası mevcut canlı commit `bb16682` üzerine yalnız
+  `public/privacy.html` değiştirilerek yayımlandı. Yeni kaynak `da013d8`, dal
+  `codex/legal-privacy-att-2026-10-23`; diğer tüm kaynak dosyaları birebir aynı.
+  Production deployment `dpl_7pkRkjEvk8yaohpm4uUBodZpiodr`, READY, 17 saniye.
+  `https://trade-up-zero-to-home.vercel.app/privacy.html` HTTP 200; 23 Ekim tarihi,
+  yerel ATT sırası ve `nostoscomp@gmail.com` doğrulandı; eski ATT istemez iddiası yok.
+  Main, web oyunu kaynakları ve diğer uygulamalar değiştirilmedi.
 - App Store Connect App Privacy bu tur değiştirilmedi. Mevcut yedi veri türünü
   koruyarak SDK privacy manifest/raporu ve gerçek akışla tekrar değerlendir:
   Device ID (izinli IDFA), Advertising Data ve Product Interaction'ın üçüncü taraf
@@ -92,6 +96,30 @@ kontrolleri yeni açık izin sözleşmesini denetleyecek şekilde güncellendi.
   TestFlight numarasından büyük olmasını zorunlu tutar. Son bilinen build 48'dir.
 
 ## Fiziksel cihaz kabul testi
+
+### Canlı Apple beyanı kontrolü — 23 Ekim
+
+App Privacy ekranı yeniden okundu: yayımlanmış etiket 7 tür içeriyor ve
+"Data Used to Track You" bölümü yok. Privacy Policy URL doğru adreste.
+Mevcut App Review kaydı hâlâ build 48 ve manuel yayın durumunda; değiştirilmedi.
+
+Yeni build için beyan eşleştirmesi:
+
+| Veri türü | Mevcut bağlantı | Yeni build kontrolü |
+| --- | --- | --- |
+| Device ID | Kimliğe bağlı; reklam/analitik | ATT izinli IDFA'nın üçüncü taraf reklam ölçümünde kullanımını tracking olarak beyan et. |
+| Advertising Data | Kimliğe bağlı; reklam/analitik | SDK raporuyla IDFA'ya bağlanan gösterim/etkileşim ölçümünün tracking kapsamını doğrula. |
+| Product Interaction | Kimliğe bağlı; reklam/analitik/işlev | AdMob etkileşimleri ile ayrı opt-in, ad-ID'siz Firebase olaylarını ayır; reklam ölçümündeki çapraz-uygulama bağını doğrula. |
+| Coarse Location | Kimliğe bağlı; reklam/analitik/işlev | IP kaynaklı yaklaşık konum; izinli ölçümle ilişkilendirme varsa tracking beyanına dahil et. GPS izni eklenmedi. |
+| Crash Data | Kimliğe bağlı değil; analitik | Non-user crash log sözleşmesini koru; IDFA var diye otomatik tracking işaretleme. |
+| Performance Data | Kimliğe bağlı değil; reklam/analitik/işlev | Google'ın user-associated performance tanımını archive privacy raporuyla karşılaştır; gerekirse linked yanıtını düzelt. |
+| Other Diagnostic Data | Kimliğe bağlı değil; reklam/analitik | Teknik teşhis kapsamını SDK raporuyla doğrula. |
+
+Bu tablo yayınlanmış yeni etiket değildir. Google'ın genel SDK kılavuzu tek başına
+tüm veri türlerinin tracking cevabını belirlemez. İmzalı paket/cihaz raporunu
+görmeden tüm türleri topluca tracking veya no-collection olarak değiştirme.
+App Review'a yeniden gönderimden önce bu eşleştirmeyi tamamla; TestFlight
+yüklemesi App Review'un tamamlandığı anlamına gelmez.
 
 Testler geliştirici/test cihazında yalnız Google test reklam kimlikleriyle yapılır;
 gerçek reklam geliri veya geçerli reklama tıklama oluşturulmaz. Kullanıcının
@@ -130,6 +158,41 @@ Attach a physical-device recording and exact tested build/device/OS/region resul
 before using these notes. Do not assert these runtime checks already happened.
 
 ## Yerel doğrulama ve çıktı
+
+### 23 Ekim TestFlight teslimi
+
+- Kaynak commit `16ecb58a7058c51f13221b2f2d7b3b99649ad142` feature dalına pushlandı.
+- Apple TestFlight ekranında en yeni numara 48 olarak yeniden doğrulandı;
+  tek ücretsiz Codemagic işi 49 girdisiyle 22:17 GMT+3'te başlatıldı.
+- İş `6adbb2b04a72334e32e48176`, workflow `tradeup-ios-testflight`, Mac mini M2.
+  Kota ekranı 304 / 500 ücretsiz macOS dakikası gösterdi; abonelik açılmadı.
+- İş URL: https://codemagic.io/app/6ac0a97ff49075906ade5690/build/6adbb2b04a72334e32e48176
+- İş **FINISHED**, süre **4m 22s**; release-source test/lint/build, native privacy,
+  gerçek archive codesign ve IPA verifier kapılarının tümü geçti.
+- Apple uploader sonucu **UPLOAD SUCCEEDED with no errors**, 22:21 GMT+3;
+  Delivery UUID `4837f3e7-a224-405a-a87b-4cbb683aa020`. TestFlight Build Uploads
+  ekranında **1.2.0 (49), Processing** olarak görüldü.
+- İmzalı paket Codemagic Artifacts bölümünde `App.ipa` (**22.00 MB**);
+  sunucu yolu `/Users/builder/clone/build/ios/ipa/App.ipa`. Aynı işin
+  `TradeUp-Zero-to-Home_8_artifacts.zip` çıktısı verifier ve entitlement raporlarını
+  içerir. Chrome yerel IPA indirmesini `ERR_BLOCKED_BY_CLIENT` ile engelledi;
+  güvenlik koruması değiştirilmedi, yerel dosya/ikinci doğrulama varmış gibi sunulmaz.
+- Apple işleme tamamlandı. **1.2.0 (49)** build detayında **Betatest / Internal / 3**
+  erişimi doğrulandı; yeni tester/grup eklenmedi. İlk listedeki "Ready to Submit"
+  dış Beta Review durumudur; mevcut internal grup bu build'e erişebiliyor.
+- "What to Test" Türkçe izin, ret, yeniden açılış, +25/cancel, eski kayıt/IAP ve
+  ayrı Firebase tercih kontrolüyle kaydedildi; Save yeniden disabled oldu.
+- TestFlight: https://appstoreconnect.apple.com/apps/6811362281/testflight/ios/4837f3e7-a224-405a-a87b-4cbb683aa020
+- TestFlight erişim/not kanıtı:
+  `C:/Users/Gaming/Documents/Codex/2026-10-13/files-mentioned-by-the-user-codex/output/tradeup-att-2026-10-23/testflight-49-ready.jpg`.
+- Canlı destek ve app-ads.txt ayrıca HTTP 200; destek e-postası
+  `nostoscomp@gmail.com`, yayıncı `pub-4229088811556918` doğrulandı. Bu iki
+  dosya bu tur değiştirilmedi. AdMob mesaj taslağı kapalı; fiziksel cihaz ATT
+  kontrolü ve yeni sürüm App Privacy eşleştirmesi inceleme öncesi kabul kapılarıdır.
+- Apple yükleme kanıtı:
+  `C:/Users/Gaming/Documents/Codex/2026-10-13/files-mentioned-by-the-user-codex/output/tradeup-att-2026-10-23/testflight-upload-succeeded-49.jpg`.
+- Canlı gizlilik yayın kanıtı:
+  `C:/Users/Gaming/Documents/Codex/2026-10-13/files-mentioned-by-the-user-codex/output/tradeup-att-2026-10-23/privacy-live-20261023.jpg`.
 
 - Son unit/integration turunda **80 dosya / 530 test** geçti. Lint,
   TypeScript ve production Vite build geçti. Ekonomi/journal ve native-adapter
