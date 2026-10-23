@@ -24,7 +24,7 @@ with zipfile.ZipFile(args.ipa) as archive:
     assert info["CFBundleIdentifier"] == "com.tradeup.zerotohome"
     assert info["CFBundleShortVersionString"] == args.version
     assert str(info["CFBundleVersion"]) == args.build
-    assert "NSUserTrackingUsageDescription" not in info
+    assert isinstance(info.get("NSUserTrackingUsageDescription"), str) and info["NSUserTrackingUsageDescription"].strip(), "Missing ATT purpose string"
     assert info["FIREBASE_ANALYTICS_COLLECTION_ENABLED"] is False
     for key in ["GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED", "GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_STORAGE", "GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_USER_DATA", "GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS"]:
         assert info[key] is False, key

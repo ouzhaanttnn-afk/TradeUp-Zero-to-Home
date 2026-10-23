@@ -56,12 +56,10 @@ describe("AdMob production safety", () => {
   });
 });
 
-// ATT was removed from TradeUp. These legacy plugin methods throw so any
-// accidental reintroduction of an ATT/IDFA gate fails the ad flow tests.
+// UMP owns ATT presentation and regional consent sequencing. A separate JS
+// prompt must not duplicate/bypass UMP or block ads merely because ATT is denied.
 const attTripwires = () => ({
-  trackingAuthorizationStatus: vi.fn(() => {
-    throw new Error("ATT_MUST_NOT_BE_QUERIED");
-  }),
+  trackingAuthorizationStatus: vi.fn().mockResolvedValue({ status: "denied" }),
   requestTrackingAuthorization: vi.fn(() => {
     throw new Error("ATT_MUST_NOT_BE_REQUESTED");
   }),
@@ -134,7 +132,7 @@ describe("AdMob native adapters", () => {
     expect(port.initialize).not.toHaveBeenCalled();
   });
 
-  it("keeps UMP as the only gate: no ad before refresh, form when required", async () => {
+  it("waits for the UMP-owned GDPR/ATT flow before any ad request", async () => {
     const port = {
       initialize: vi.fn().mockResolvedValue(undefined),
       requestConsentInfo: vi.fn().mockResolvedValue({
@@ -183,7 +181,7 @@ describe("AdMob native adapters", () => {
       "USER_EARNED",
     );
     expect(await adapters.showTradeInterstitial()).toBe(true);
-    expect(port.trackingAuthorizationStatus).not.toHaveBeenCalled();
+    expect(port.trackingAuthorizationStatus).toHaveBeenCalled();
     expect(port.requestTrackingAuthorization).not.toHaveBeenCalled();
   });
 
@@ -215,7 +213,7 @@ describe("AdMob native adapters", () => {
       isTesting: true,
       npa: true,
     });
-    expect(port.trackingAuthorizationStatus).not.toHaveBeenCalled();
+    expect(port.trackingAuthorizationStatus).toHaveBeenCalled();
     expect(port.requestTrackingAuthorization).not.toHaveBeenCalled();
     expect(port.showInterstitial).toHaveBeenCalledOnce();
   });
@@ -246,7 +244,7 @@ describe("AdMob native adapters", () => {
     expect(port.prepareRewardVideoAd).toHaveBeenCalledWith(
       expect.objectContaining({ isTesting: true, npa: true }),
     );
-    expect(port.trackingAuthorizationStatus).not.toHaveBeenCalled();
+    expect(port.trackingAuthorizationStatus).toHaveBeenCalled();
     expect(port.requestTrackingAuthorization).not.toHaveBeenCalled();
   });
 
@@ -282,7 +280,7 @@ describe("AdMob native adapters", () => {
       isTesting: false,
       npa: true,
     });
-    expect(port.trackingAuthorizationStatus).not.toHaveBeenCalled();
+    expect(port.trackingAuthorizationStatus).toHaveBeenCalled();
     expect(port.requestTrackingAuthorization).not.toHaveBeenCalled();
   });
 

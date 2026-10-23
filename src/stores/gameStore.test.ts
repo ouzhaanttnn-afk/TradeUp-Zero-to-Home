@@ -48,6 +48,7 @@ describe("explicit scout consent retry", () => {
       // Only the native boundary is mocked: store, UMP adapter, rewarded
       // adapter and the domain reward transaction all run together. No ad traffic.
       const port = {
+        trackingAuthorizationStatus: vi.fn().mockResolvedValue({ status: "denied" }),
         requestConsentInfo: vi.fn().mockResolvedValue({
           status: "NOT_REQUIRED", canRequestAds: true,
         }),
@@ -81,6 +82,7 @@ describe("explicit scout consent retry", () => {
       try {
         await useGameStore.getState().claimReward("MARKET_SCOUT");
         expect(port.requestConsentInfo).toHaveBeenCalledOnce();
+        expect(port.trackingAuthorizationStatus).toHaveBeenCalledOnce();
         expect(port.initialize).toHaveBeenCalledOnce();
         expect(port.prepareRewardVideoAd).toHaveBeenCalledWith({
           adId: "ca-app-pub-4229088811556918/4710266110",

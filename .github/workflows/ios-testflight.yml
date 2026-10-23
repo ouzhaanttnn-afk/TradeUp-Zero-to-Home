@@ -112,11 +112,8 @@ jobs:
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP_PLIST")" = "$EXPECTED_MARKETING_VERSION"
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP_PLIST")" = "$TRADEUP_IOS_BUILD_NUMBER"
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP_PLIST")" = "$APP_BUNDLE_ID"
-          if /usr/libexec/PlistBuddy -c 'Print :NSUserTrackingUsageDescription' "$APP_PLIST" >/dev/null 2>&1; then
-            echo "Archived Info.plist declares App Tracking Transparency" >&2
-            exit 1
-          fi
-          echo "Archive: $APP_BUNDLE_ID $EXPECTED_MARKETING_VERSION ($TRADEUP_IOS_BUILD_NUMBER), no NSUserTrackingUsageDescription"
+          test -n "$(/usr/libexec/PlistBuddy -c 'Print :NSUserTrackingUsageDescription' "$APP_PLIST")"
+          echo "Archive: $APP_BUNDLE_ID $EXPECTED_MARKETING_VERSION ($TRADEUP_IOS_BUILD_NUMBER), UMP-managed ATT supported"
 
       - name: Export signed IPA
         run: |
@@ -159,10 +156,7 @@ jobs:
           IPA_PLIST="$RUNNER_TEMP/ipa-Info.plist"
           unzip -p "$IPA_PATH" 'Payload/App.app/Info.plist' > "$IPA_PLIST"
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$IPA_PLIST")" = "$TRADEUP_IOS_BUILD_NUMBER"
-          if /usr/libexec/PlistBuddy -c 'Print :NSUserTrackingUsageDescription' "$IPA_PLIST" >/dev/null 2>&1; then
-            echo "Signed IPA declares App Tracking Transparency" >&2
-            exit 1
-          fi
+          test -n "$(/usr/libexec/PlistBuddy -c 'Print :NSUserTrackingUsageDescription' "$IPA_PLIST")"
           shasum -a 256 "$IPA_PATH"
           xcrun altool --validate-app --type ios --file "$IPA_PATH" \
             --apiKey "$APP_STORE_CONNECT_KEY_ID" \

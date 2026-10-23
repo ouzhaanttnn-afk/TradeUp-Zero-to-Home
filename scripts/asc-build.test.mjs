@@ -56,7 +56,7 @@ describe("App Store Connect build guard", () => {
     ).toBe(true);
   });
 
-  it("keeps the GitHub iOS release on an unused build without ATT", () => {
+  it("requires an unused build number and UMP-managed ATT support", () => {
     const workflow = readFileSync(
       new URL("../.github/workflows/ios-testflight.yml", import.meta.url),
       "utf8",

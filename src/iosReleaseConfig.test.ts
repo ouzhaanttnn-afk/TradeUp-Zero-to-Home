@@ -18,7 +18,7 @@ describe("iOS release device contract", () => {
     expect(info).not.toContain("UISupportedInterfaceOrientations~ipad");
   });
 
-  it("never declares App Tracking Transparency (1.1.0 build 42 rejection)", () => {
+  it("supports UMP-managed ATT without separate prompts or analytic ad identifiers", () => {
     const info = readFileSync(
       new URL("../ios/App/App/Info.plist", import.meta.url),
       "utf8",
@@ -36,10 +36,25 @@ describe("iOS release device contract", () => {
       "utf8",
     );
 
-    expect(info).not.toContain("NSUserTrackingUsageDescription");
+    expect(info).toContain("NSUserTrackingUsageDescription");
+    const project = readFileSync(
+      new URL("../ios/App/App.xcodeproj/project.pbxproj", import.meta.url),
+      "utf8",
+    );
+    expect(project).toContain("InfoPlist.strings in Resources");
+    for (const language of ["tr", "en"]) {
+      expect(project).toContain(`${language}.lproj/InfoPlist.strings`);
+      const strings = readFileSync(
+        new URL(
+          `../ios/App/App/${language}.lproj/InfoPlist.strings`,
+          import.meta.url,
+        ),
+        "utf8",
+      );
+      expect(strings).toMatch(/"NSUserTrackingUsageDescription" = "[^"]+";/);
+    }
     for (const symbol of [
       "requestTrackingAuthorization",
-      "trackingAuthorizationStatus",
       "ATTrackingManager",
     ])
       for (const source of [adapter, appDelegate]) {

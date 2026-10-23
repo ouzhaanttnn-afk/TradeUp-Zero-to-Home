@@ -28,6 +28,8 @@
 	<false/>
 	<key>GADDelayAppMeasurementInit</key>
 	<true/>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>İzninizle reklam kimliğiniz, uygulamalar ve web siteleri arasında reklam performansını ölçmek için kullanılabilir. İzin vermeseniz de oyunu oynayabilir ve uygun reklamları izleyebilirsiniz.</string>
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-4229088811556918~1245306004</string>
 	<key>FIREBASE_ANALYTICS_COLLECTION_ENABLED</key>

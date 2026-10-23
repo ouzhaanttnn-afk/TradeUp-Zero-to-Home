@@ -9,6 +9,15 @@
 
 ### Approved First Home patch exception (2026-10-17)
 
+2026-10-23 privacy correction authorization: the user approved adapting Mihenk's
+UMP-managed IDFA/ATT flow after the 1.2.0 (48) Guideline 5.1.2(i) rejection.
+This supersedes the old ATT-free implementation, not the ad placements, NPA
+requests, +25 rewards, IAP entitlements or optional ad-ID-free analytics.
+Regional UMP decisions must precede Mobile Ads initialization; an ATT refusal
+must not block gameplay or reward eligibility. Code/test/local policy changes
+are authorized; no new Apple upload/submission, main merge, public deployment,
+paid build or nomination change is authorized by this approval.
+
 2026-10-21 delivery authorization: the user explicitly requested submitting the latest TestFlight build to App Review while preserving the nomination. App Review submission of 1.2.0 (48) and its three Game Center leaderboards is authorized; App Store publication remains manual and no main merge is authorized. The user separately approved updating only the live privacy page for Game Center and local sharing, preserving the web game and main.
 
 2026-10-19 updated delivery authorization: the user explicitly requested `Teste gönder` after confirming TestFlight-only scope. The feature branch may be pushed and one free-quota signed build uploaded to TestFlight, with existing test access prepared. No App Review submission, main merge, public release or paid build is authorized. This supersedes the earlier IPA-only/no-upload restriction for this delivery.

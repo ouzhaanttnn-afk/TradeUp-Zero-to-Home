@@ -1,5 +1,19 @@
 # TradeUp iOS Release Readiness
 
+## 23 Ekim 2026 — 1.2.0 (48) gizlilik reddi / UMP + ATT düzeltmesi
+
+Apple'ın 5.1.2(i) reddi, GDPR ekranının takip anlatmasına karşın ATT izninin
+bulunmamasıyla ilgilidir. Kullanıcı Mihenk'teki UMP-managed IDFA/ATT yaklaşımına
+geçişi onayladı. Aşağıdaki eski ATT'siz mimari kayıtları bu düzeltme için geçerli
+değildir. Kaynak kodu, native patch ve arşiv kontrolleri ATT desteğiyle güncellendi;
+reklamlar NPA kalır, analitik IDFA'sız ve isteğe bağlı kalır.
+
+**Henüz yeniden gönderime hazır sayılmaz:** yeni imzalı paket/gerçek cihaz kanıtı,
+TradeUp'a özel yayımlanmış IDFA mesajı, eski sürüm uyumluluğu ve güncel App Privacy
+beyanı birlikte doğrulanmalıdır. Bu çalışma yeni Apple yüklemesi, inceleme
+gönderimi, web yayını veya main merge yetkisi içermez.
+Güncel çalışma kaydı: [UMP/ATT düzeltmesi](PRIVACY_ATT_FIX_2026-10-23.md).
+
 ## 16 Ekim 2026 — 1.1.2 (46) App Review'a gönderildi
 
 Kullanıcının açık talebiyle kompakt ödüllü yenileme düzeltmesi ayrı daldan,

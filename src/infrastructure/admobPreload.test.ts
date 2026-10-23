@@ -4,6 +4,7 @@ import { createAdMobAdapters, resolveRewardedAdId } from "./admob";
 const fixture = () => {
   const port = {
     initialize: vi.fn().mockResolvedValue(undefined),
+    trackingAuthorizationStatus: vi.fn().mockResolvedValue({ status: "denied" }),
     requestConsentInfo: vi
       .fn()
       .mockResolvedValue({ status: "NOT_REQUIRED", canRequestAds: true }),

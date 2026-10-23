@@ -74,13 +74,15 @@ export const classifyAdMobFailure = (
   return "PROVIDER";
 };
 
-// TradeUp does not track: no ATT/IDFA request, and every ad request is npa.
+// UMP owns GDPR + IDFA/ATT presentation. Never request ATT independently of
+// the regional consent choices. Ads remain non-personalized even after ATT.
 type AdMobPort = Pick<
   typeof AdMob,
   | "initialize"
   | "requestConsentInfo"
   | "showConsentForm"
   | "showPrivacyOptionsForm"
+  | "trackingAuthorizationStatus"
   | "prepareRewardVideoAd"
   | "showRewardVideoAd"
   | "prepareInterstitial"
@@ -130,6 +132,10 @@ export const createAdMobAdapters = (
   let showingReward = false;
   let consentRefresh: Promise<ConsentSnapshot> | undefined;
   let consentGeneration = 0;
+  type TrackingStatus = Awaited<
+    ReturnType<AdMobPort["trackingAuthorizationStatus"]>
+  >["status"];
+  let trackingStatus: TrackingStatus | undefined;
   let prepared:
     | { placementId: RewardPlacementId; at: number; generation: number }
     | undefined;
@@ -137,6 +143,19 @@ export const createAdMobAdapters = (
   const invalidateReward = () => {
     consentGeneration++;
     prepared = undefined;
+  };
+  const refreshTrackingStatus = async () => {
+    if (platform !== "ios") return undefined;
+    const { status } = await port.trackingAuthorizationStatus();
+    if (
+      !["authorized", "denied", "restricted", "notDetermined"].includes(status)
+    )
+      throw new Error("TRACKING_STATUS_UNAVAILABLE");
+    // A Settings change must not reuse a creative loaded under an old choice.
+    if (trackingStatus !== undefined && trackingStatus !== status)
+      invalidateReward();
+    trackingStatus = status;
+    return status;
   };
   const now = () => Date.now();
   const isPrepared = (placementId: RewardPlacementId) =>
@@ -203,12 +222,18 @@ export const createAdMobAdapters = (
     let info = await port.requestConsentInfo({
       tagForUnderAgeOfConsent: false,
     });
-    if (
-      info.status === AdmobConsentStatus.REQUIRED &&
-      info.isConsentFormAvailable
-    ) {
-      invalidateReward();
+    const tracking = await refreshTrackingStatus();
+    // An IDFA message can be available even where GDPR is NOT_REQUIRED, or
+    // after existing GDPR consent. Native loadAndPresentIfRequired handles
+    // both messages and resolves only after their presentation ends.
+    if (info.isConsentFormAvailable) {
+      if (
+        info.status === AdmobConsentStatus.REQUIRED ||
+        tracking === "notDetermined"
+      )
+        invalidateReward();
       info = await port.showConsentForm();
+      await refreshTrackingStatus();
     }
     const allowed =
       info.canRequestAds &&

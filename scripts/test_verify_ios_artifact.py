@@ -32,12 +32,14 @@ class ArtifactVerificationTests(unittest.TestCase):
             "Name": "Synthetic fixture - not a real signature",
         }
 
-    def run_verifier(self, ads=None):
+    def run_verifier(self, ads=None, att_description="Test ATT purpose"):
         info = {
             "CFBundleIdentifier": "com.tradeup.zerotohome",
             "CFBundleShortVersionString": "1.2.0",
             "CFBundleVersion": "48",
         }
+        if att_description is not None:
+            info["NSUserTrackingUsageDescription"] = att_description
         for key in ["FIREBASE_ANALYTICS_COLLECTION_ENABLED", "GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED",
                     "GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_STORAGE", "GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_USER_DATA",
                     "GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS"]:
@@ -64,6 +66,13 @@ class ArtifactVerificationTests(unittest.TestCase):
         result = self.run_verifier()
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("Missing signed Game Center", result.stderr)
+
+    def test_missing_or_empty_att_purpose_rejected(self):
+        for purpose in [None, "", "   "]:
+            with self.subTest(purpose=purpose):
+                result = self.run_verifier(att_description=purpose)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("Missing ATT purpose string", result.stderr)
 
     def test_profile_must_allow_game_center(self):
         self.profile["Entitlements"].pop("com.apple.developer.game-center")

@@ -8,11 +8,30 @@ export function assertNativeAdPrivacy(root = process.cwd()) {
   );
   const info = text("ios/App/App/Info.plist");
   const spm = text("ios/App/CapApp-SPM/Package.swift");
+  const adPackage = text(
+    "node_modules/@capacitor-community/admob/Package.swift",
+  );
   if (
-    /import AppTrackingTransparency|ATTrackingManager/.test(plugin) ||
-    info.includes("NSUserTrackingUsageDescription")
+    !plugin.includes("import AppTrackingTransparency") ||
+    !plugin.includes("ATTrackingManager.requestTrackingAuthorization") ||
+    !adPackage.includes('.linkedFramework("AppTrackingTransparency")')
   )
-    throw new Error("ATT has reappeared in TradeUp's native source.");
+    throw new Error(
+      "Native ATT support is missing from the installed AdMob package.",
+    );
+  if (
+    !/<key>NSUserTrackingUsageDescription<\/key>\s*<string>[^<]+<\/string>/.test(
+      info,
+    )
+  )
+    throw new Error("The ATT purpose string is missing.");
+  for (const language of ["tr", "en"])
+    if (
+      !text(`ios/App/App/${language}.lproj/InfoPlist.strings`).includes(
+        '"NSUserTrackingUsageDescription"',
+      )
+    )
+      throw new Error(`Missing ${language} ATT localization.`);
   for (const setting of [
     "setPublisherFirstPartyIDEnabled(false)",
     "publisherPrivacyPersonalizationState = .disabled",
@@ -40,6 +59,6 @@ export function assertNativeAdPrivacy(root = process.cwd()) {
 if (process.argv[1]?.endsWith("check-native-ad-privacy.mjs")) {
   assertNativeAdPrivacy();
   console.log(
-    "Native ATT-free/UMP-before-ads and analytics privacy checks passed.",
+    "Native UMP/ATT support, non-personalized ads and analytics privacy checks passed.",
   );
 }
